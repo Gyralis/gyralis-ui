@@ -52,6 +52,15 @@ export const turboIntegrations = {
     imgDark: "/integrations/erc1155-icon.png",
     category: "protocols",
   },
+  diamondDeployment: {
+    name: "Diamond Deployment",
+    href: "/integration/diamond-deployment", 
+    url: "https://eips.ethereum.org/EIPS/eip-2535",
+    description: "Deploy and manage EIP-2535 Diamond pattern contracts with real-time updates",
+    imgLight: "/integrations/diamond-light.svg",
+    imgDark: "/integrations/diamond-dark.svg", 
+    category: "protocols",
+  },
   etherscan: {
     name: "Etherscan",
     href: "/integration/etherscan",
