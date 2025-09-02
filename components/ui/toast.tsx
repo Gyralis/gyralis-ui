@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva, type VariantProps } from "lib/utils/cva"
 import { LuX } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
