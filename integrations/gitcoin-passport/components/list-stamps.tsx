@@ -1,4 +1,3 @@
-import moment from "moment"
 import { BiInfoCircle } from "react-icons/bi"
 import { FiRefreshCcw } from "react-icons/fi"
 
@@ -35,6 +34,22 @@ export const ListStamps = () => {
     isLoading: addressStampsLoading,
     refetch: addressStampsRefetch,
   } = useGetAddressStamps()
+
+  function formatScoreTimestamp(timestamp: number | string): string {
+    const date = new Date(Number(timestamp))
+
+    const hours = String(date.getHours()).padStart(2, "0")
+    const minutes = String(date.getMinutes()).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const month = months[date.getMonth()]
+    const year = date.getFullYear()
+
+    return `${hours}:${minutes} ${day} ${month} ${year}`
+  }
+
 
   return (
     <div>
@@ -103,9 +118,7 @@ export const ListStamps = () => {
                 </span>
                 <span>
                   {scoreData ? (
-                    moment(scoreData.last_score_timestamp).format(
-                      "HH:mm DD MMM YYYY"
-                    )
+                    formatScoreTimestamp(scoreData.last_score_timestamp)
                   ) : (
                     <Skeleton className="h-6 w-[50px]" />
                   )}

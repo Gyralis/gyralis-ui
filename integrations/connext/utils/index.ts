@@ -1,14 +1,26 @@
-import moment from "moment"
 import { parseUnits } from "viem"
 
 import { Asset, Chain } from "./types"
 
 export function formatTimestamp(timestamp: number): string {
-  const formattedTimestamp = moment(timestamp * 1000).format(
-    "MMM D, YYYY h:mm:ss A"
-  )
-  return formattedTimestamp
+  const date = new Date(timestamp * 1000)
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+  const month = months[date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+
+  let hours = date.getHours()
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+  const seconds = String(date.getSeconds()).padStart(2, "0")
+  const ampm = hours >= 12 ? "PM" : "AM"
+  hours = hours % 12 || 12
+
+  return `${month} ${day}, ${year} ${hours}:${minutes}:${seconds} ${ampm}`
 }
+
 
 export function findChain(
   chains: Chain[],

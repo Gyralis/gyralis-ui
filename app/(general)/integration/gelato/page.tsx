@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { turboIntegrations } from "@/data/turbo-integrations"
-import { isAutomateSupported } from "@gelatonetwork/automate-sdk"
 import { LuBook } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
