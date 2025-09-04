@@ -21,11 +21,12 @@ export default function RootProvider({ children }: RootProviderProps) {
       enableSystem
       disableTransitionOnChange
     >
-      <RWBProvider>
-        <RainbowKit>
-          <HandleWalletEvents>{children}</HandleWalletEvents>
-        </RainbowKit>
-      </RWBProvider>
+      {/* <RWBProvider> */}
+      <RainbowKit>
+        {children}
+        {/* <HandleWalletEvents></HandleWalletEvents> */}
+      </RainbowKit>
+      {/* </RWBProvider> */}
     </ThemeProvider>
   ) : null
 }

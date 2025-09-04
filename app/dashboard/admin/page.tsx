@@ -2,15 +2,18 @@
 
 import { useGetAppUsers } from "@/lib/hooks/app/use-get-app-users"
 import { useUser } from "@/lib/hooks/use-user"
-import AppUsersTable from "@/components/app/app-users-table"
-import { ButtonSIWELogin } from "@/integrations/siwe/components/button-siwe-login"
-import { IsSignedIn } from "@/integrations/siwe/components/is-signed-in"
-import { IsSignedOut } from "@/integrations/siwe/components/is-signed-out"
+
+// import AppUsersTable from "@/components/app/app-users-table"
+
+// import { ButtonSIWELogin } from "@/integrations/siwe/components/button-siwe-login"
+// import { IsSignedIn } from "@/integrations/siwe/components/is-signed-in"
+// import { IsSignedOut } from "@/integrations/siwe/components/is-signed-out"
 
 export default function PageDashboardTransactions() {
   return (
     <section className="p-10">
-      <div className="flex items-center justify-between">
+      <RenderUserTable />
+      {/* <div className="flex items-center justify-between">
         <h3 className="text-4xl font-normal">Application Users</h3>
         <IsSignedOut>
           <div className="flex items-center gap-x-5 text-center">
@@ -23,8 +26,8 @@ export default function PageDashboardTransactions() {
       </div>
       <hr className="my-5 opacity-50" />
       <IsSignedIn>
-        <RenderUserTable />
-      </IsSignedIn>
+       
+      </IsSignedIn> */}
     </section>
   )
 }
@@ -37,7 +40,8 @@ const RenderUserTable = () => {
   return (
     <div>
       {!isLoading && (
-        <AppUsersTable className="w-full flex-1" data={data?.users} />
+        <h4>table</h4>
+        // <AppUsersTable className="w-full flex-1" data={data?.users} />
       )}
     </div>
   )

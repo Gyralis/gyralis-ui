@@ -72,7 +72,7 @@ export const StampCard = ({
               alt={stamp.id}
             />
           ) : (
-            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="size-12 rounded-full" />
           )}
         </div>
         <CardTitle className="mt-2">

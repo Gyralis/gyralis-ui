@@ -21,9 +21,10 @@ import { IsWalletDisconnected } from "@/components/shared/is-wallet-disconnected
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 import TransactionsTable from "@/integrations/etherscan/components/transactions-table"
 import { useEtherscanAccountTransactions } from "@/integrations/etherscan/hooks/use-etherscan-account-transactions"
-import { ButtonSIWELogin } from "@/integrations/siwe/components/button-siwe-login"
-import { IsSignedIn } from "@/integrations/siwe/components/is-signed-in"
-import { IsSignedOut } from "@/integrations/siwe/components/is-signed-out"
+
+// import { ButtonSIWELogin } from "@/integrations/siwe/components/button-siwe-login"
+// import { IsSignedIn } from "@/integrations/siwe/components/is-signed-in"
+// import { IsSignedOut } from "@/integrations/siwe/components/is-signed-out"
 
 export default function EtherscanPage() {
   const { chain } = useAccount()
@@ -53,13 +54,13 @@ export default function EtherscanPage() {
             rel="noreferrer noopener"
             className={cn(buttonVariants({ variant: "outline" }))}
           >
-            <LuBook className="mr-2 h-4 w-4" />
+            <LuBook className="mr-2 size-4" />
             Documentation
           </Link>
         </PageHeaderCTA>
       </PageHeader>
       <PageSection>
-        <IsWalletConnected>
+        {/* <IsWalletConnected>
           <IsSignedIn>
             <div className="w-full">
               {!isLoading && (
@@ -86,7 +87,7 @@ export default function EtherscanPage() {
         </IsWalletConnected>
         <IsWalletDisconnected>
           <WalletConnect className="mx-auto inline-block" />
-        </IsWalletDisconnected>
+        </IsWalletDisconnected> */}
       </PageSection>
     </div>
   )

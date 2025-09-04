@@ -34,7 +34,7 @@ function getStatusIcon(status: string, error_status: string) {
     return (
       <div className="flex flex-col items-center justify-center">
         <IoWarning
-          className="3xl:w-10 3xl:h-10 text-red-500 dark:text-red-400"
+          className="3xl:size-10 text-red-500 dark:text-red-400"
           size={32}
         />
         <span className="text-xs font-bold text-red-500">{error_status}</span>
@@ -43,7 +43,7 @@ function getStatusIcon(status: string, error_status: string) {
   } else if (pending) {
     return (
       <BsInfoCircle
-        className="3xl:w-10 3xl:h-10 text-blue-500 dark:text-blue-400"
+        className="3xl:size-10 text-blue-500 dark:text-blue-400"
         size={26}
       />
     )
@@ -51,7 +51,7 @@ function getStatusIcon(status: string, error_status: string) {
 
   return (
     <HiOutlineCheckCircle
-      className="3xl:w-10 3xl:h-10 text-green-500 dark:text-green-400"
+      className="3xl:size-10 text-green-500 dark:text-green-400"
       size={32}
     />
   )
@@ -84,7 +84,7 @@ export function Transfer({ isMainnet, transfer }: TransferProps) {
           <div className="flex items-center space-x-1.5">
             <Image
               alt={`${originChain?.name || "Chain"} logo`}
-              className="3xl:w-6 3xl:h-6 rounded-full"
+              className="3xl:size-6 rounded-full"
               height={20}
               src={
                 originChain?.image ||
@@ -99,7 +99,7 @@ export function Transfer({ isMainnet, transfer }: TransferProps) {
           <div className="flex items-center justify-end space-x-1.5">
             <Image
               alt={`${destinationChain?.name || "Chain"} logo`}
-              className="3xl:w-6 3xl:h-6 rounded-full"
+              className="3xl:size-6 rounded-full"
               height={20}
               src={
                 destinationChain?.image ||
@@ -123,7 +123,7 @@ export function Transfer({ isMainnet, transfer }: TransferProps) {
             <div className="flex items-center justify-start space-x-1">
               <Image
                 alt={`${originAsset?.name || ""}`}
-                className="3xl:w-5 3xl:h-5 rounded-full"
+                className="3xl:size-5 rounded-full"
                 height={16}
                 src={
                   originAsset?.image ||
@@ -160,7 +160,7 @@ export function Transfer({ isMainnet, transfer }: TransferProps) {
             <div className="flex items-center justify-center space-x-1">
               <Image
                 alt={`${destinationAsset?.name || ""}`}
-                className="3xl:w-5 3xl:h-5 rounded-full"
+                className="3xl:size-5 rounded-full"
                 height={16}
                 src={
                   destinationAsset?.image ||
@@ -192,7 +192,7 @@ export function Transfer({ isMainnet, transfer }: TransferProps) {
           >
             <span>See more on explorer</span>
             <TiArrowRight
-              className="3xl:w-5 3xl:h-5 mt-0.5 -rotate-45"
+              className="3xl:size-5 mt-0.5 -rotate-45"
               size={16}
             />
           </LinkComponent>

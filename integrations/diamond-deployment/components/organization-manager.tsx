@@ -80,7 +80,7 @@ export function OrganizationManager({ className, onOrganizationSelect }: Organiz
       )}
     >
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-base">
               {org.metadata?.name || 'Unnamed Organization'}
@@ -294,7 +294,7 @@ export function OrganizationManager({ className, onOrganizationSelect }: Organiz
     <div className={className}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
             <h2 className="text-2xl font-bold">🏢 Organizations</h2>
             <p className="text-muted-foreground">
@@ -348,7 +348,7 @@ export function OrganizationManager({ className, onOrganizationSelect }: Organiz
 
         {/* Organizations List */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
               Organizations ({organization.organizations.length})
             </h3>
@@ -371,8 +371,8 @@ export function OrganizationManager({ className, onOrganizationSelect }: Organiz
           {/* Empty State */}
           {!organization.loading && organization.organizations.length === 0 && (
             <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-muted-foreground mb-4">
+              <CardContent className="py-8 text-center">
+                <p className="mb-4 text-muted-foreground">
                   No organizations found. Create your first organization to get started.
                 </p>
                 <Button onClick={() => setCreateDialogOpen(true)}>

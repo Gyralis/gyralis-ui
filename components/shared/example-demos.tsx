@@ -165,7 +165,7 @@ const demos = [
       <div className="min-w-[220px] text-center">
         <img
           alt={`Token USDC icon`}
-          className="mx-auto h-12 w-12 rounded-full border-2 border-white shadow-md"
+          className="mx-auto size-12 rounded-full border-2 border-white shadow-md"
           src={`https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png`}
         />
         <h3 className="mt-4 text-2xl font-normal">

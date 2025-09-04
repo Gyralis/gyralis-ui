@@ -29,7 +29,6 @@ export const erc20Abi = [
     name: 'Transfer',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'owner', type: 'address' },
@@ -37,9 +36,9 @@ export const erc20Abi = [
     ],
     name: 'allowance',
     outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'spender', type: 'address' },
@@ -47,44 +46,44 @@ export const erc20Abi = [
     ],
     name: 'approve',
     outputs: [{ type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'account', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'decimals',
     outputs: [{ type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'name',
     outputs: [{ type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'symbol',
     outputs: [{ type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'totalSupply',
     outputs: [{ type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'recipient', type: 'address' },
@@ -92,9 +91,9 @@ export const erc20Abi = [
     ],
     name: 'transfer',
     outputs: [{ type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'sender', type: 'address' },
@@ -103,6 +102,7 @@ export const erc20Abi = [
     ],
     name: 'transferFrom',
     outputs: [{ type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
 ] as const
 

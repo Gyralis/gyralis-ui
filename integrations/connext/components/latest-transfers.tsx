@@ -42,11 +42,11 @@ export function LatestTransfers({ isMainnet }: LatestTransfersProps) {
         </span>
         {collapse ? (
           <BiChevronDown
-            className="3xl:w-6 3xl:h-6 text-foreground"
+            className="3xl:size-6 text-foreground"
             size={18}
           />
         ) : (
-          <BiChevronUp className="3xl:w-6 3xl:h-6 text-foreground" size={18} />
+          <BiChevronUp className="3xl:size-6 text-foreground" size={18} />
         )}
       </button>
       {!collapse && (
@@ -62,7 +62,7 @@ export function LatestTransfers({ isMainnet }: LatestTransfersProps) {
             >
               <span className="font-medium">See more</span>
               <TiArrowRight
-                className="3xl:w-6 3xl:h-6 mt-0.5 -rotate-45"
+                className="3xl:size-6 mt-0.5 -rotate-45"
                 size={18}
               />
             </LinkComponent>

@@ -132,7 +132,7 @@ export const ListStamps = () => {
         <h3 className="font-semibold">All Stamps</h3>
         {!addressStampsLoading && (
           <span
-            className="ml-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 hover:dark:bg-neutral-900"
+            className="ml-2 flex size-7 cursor-pointer items-center justify-center rounded-md bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 hover:dark:bg-neutral-900"
             onClick={() => addressStampsRefetch()}
           >
             <FiRefreshCcw className="text-neutral-600 dark:text-neutral-100" />

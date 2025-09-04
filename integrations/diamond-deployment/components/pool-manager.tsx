@@ -62,7 +62,7 @@ export function PoolManager({ className, selectedOrganization }: PoolManagerProp
   if (!selectedOrganization) {
     return (
       <Card className={className}>
-        <CardContent className="flex items-center justify-center h-32">
+        <CardContent className="flex h-32 items-center justify-center">
           <p className="text-muted-foreground">
             Selecciona una organización para ver sus pools
           </p>
@@ -114,7 +114,7 @@ export function PoolManager({ className, selectedOrganization }: PoolManagerProp
           ) : (
             <div className="space-y-3">
               {pool.pools.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
+                <p className="py-8 text-center text-muted-foreground">
                   No hay pools para esta organización
                 </p>
               ) : (

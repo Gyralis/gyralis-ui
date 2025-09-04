@@ -12,7 +12,7 @@ export default function PageIntegration() {
         <ListStamps />
       </IsWalletConnected>
       <IsWalletDisconnected>
-        <div className="flex h-full w-full flex-col items-center justify-center space-y-4">
+        <div className="flex size-full flex-col items-center justify-center space-y-4">
           <div>You must connect your wallet to be able to see this page</div>
           <WalletConnect className="mx-auto inline-block" />
         </div>

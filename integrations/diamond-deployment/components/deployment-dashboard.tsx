@@ -49,11 +49,11 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
   // Connection status indicator
   const ConnectionStatus = () => (
     <div className="flex items-center gap-2">
-      <div className={`w-2 h-2 rounded-full ${backend.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+      <div className={`size-2 rounded-full ${backend.connected ? 'bg-green-500' : 'bg-red-500'}`} />
       <span className="text-sm">
         Backend: {backend.connected ? 'Connected' : 'Disconnected'}
       </span>
-      <div className={`w-2 h-2 rounded-full ${webSocket.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+      <div className={`size-2 rounded-full ${webSocket.connected ? 'bg-green-500' : 'bg-red-500'}`} />
       <span className="text-sm">
         WebSocket: {webSocket.connected ? 'Connected' : 'Disconnected'}
       </span>
@@ -91,7 +91,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
           )}
           
           {deployment.deploymentId && (
-            <div className="text-xs font-mono bg-muted p-2 rounded">
+            <div className="rounded bg-muted p-2 font-mono text-xs">
               Deployment ID: {deployment.deploymentId}
             </div>
           )}
@@ -110,7 +110,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
       <Alert variant="destructive" className="mb-4">
         <AlertTitle>Errors</AlertTitle>
         <AlertDescription>
-          <ul className="list-disc list-inside space-y-1">
+          <ul className="list-inside list-disc space-y-1">
             {errors.map((error, index) => (
               <li key={index}>{error}</li>
             ))}
@@ -140,7 +140,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
 
           {discovery.discovery && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold">{discovery.discovery.summary.totalFacets}</div>
                   <div className="text-sm text-muted-foreground">Total Facets</div>
@@ -164,7 +164,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
                 <div className="grid gap-2">
                   {discovery.discovery.facets.map((facet) => (
                     <Card key={facet.name} className="p-3">
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium">{facet.name}</div>
                           <div className="text-sm text-muted-foreground">
@@ -257,7 +257,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
           <div className="grid gap-2">
             {Object.entries(backend.networks).map(([name, network]) => (
               <Card key={name} className="p-3">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">{network.name}</div>
                     <div className="text-sm text-muted-foreground">
@@ -296,7 +296,7 @@ export function DeploymentDashboard({ className }: DeploymentDashboardProps) {
     <div className={className}>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold">💎 Diamond Deployment</h1>
             <p className="text-muted-foreground">

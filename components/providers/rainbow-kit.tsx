@@ -30,14 +30,17 @@ const queryClient = new QueryClient()
 export function RainbowKit({ children }: { children: ReactNode }) {
   const [colorMode] = useColorMode()
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={colorMode == "dark" ? darkTheme() : lightTheme()}
-        >
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider
+            initialChain={1}
+            theme={colorMode == "dark" ? darkTheme() : lightTheme()}
+          >
+            {children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </>
   )
 }
