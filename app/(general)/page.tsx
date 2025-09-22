@@ -17,7 +17,7 @@ import { ExampleDemos } from "@/components/shared/example-demos"
 
 export default function HomePage() {
   return (
-    <h4>Say Hello</h4>
+    <h4 className="bg-accent text-primary-foreground">Say Hello</h4>
     // <div className="container relative mt-20 px-0">
     //   <PageHeader className="pb-8">
     //     <Image

@@ -13,7 +13,7 @@
     --foreground: 0 0% 3.9%;
 
     /* <Card /> */
-    --card: 0 0% 98%;
+    --card: 216, 33%, 97%;
     --card-foreground: 0 0% 3.9%;
 
     /* <Dropdown />, <HoverCard />, <Popover /> */
@@ -21,11 +21,11 @@
     --popover-foreground: 0 0% 3.9%;
 
     /* Primary colors for <Button /> and <CTA /> */
-    --primary: 0 0% 9%;
+    --primary: 150, 81%, 51%;
     --primary-foreground: 0 0% 98%;
 
     /* Secondary colors for <Button /> and <CTA /> */
-    --secondary: 0 0% 96.1%;
+    --secondary: 262, 100%, 65%;
     --secondary-foreground: 0 0% 9%;
 
     /* <TabsList />, <Skeleton /> and <Switch /> */
@@ -48,19 +48,19 @@
   }
 
   .dark {
-    --background: 0 0% 7.5%;
+    --background: 222, 36%, 11%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 3.9%;
+    --card: 216, 33%, 97%;
     --card-foreground: 0 0% 98%;
 
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
+    --primary: 150, 81%, 51%;
     --primary-foreground: 0 0% 9%;
 
-    --secondary: 0 0% 14.9%;
+    --secondary:  262, 100%, 65%;
     --secondary-foreground: 0 0% 98%;
 
     --muted: 0 0% 14.9%;
