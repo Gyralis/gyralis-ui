@@ -16,13 +16,13 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="w-9 px-0">
+        <Button variant="ghost" className="w-9 bg-background px-0">
           <LuSun className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <LuMoon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-background">
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <LuSun className="mr-2 size-4" />
           Light
