@@ -59,6 +59,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        baloo: ["var(--font-balooo)", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
