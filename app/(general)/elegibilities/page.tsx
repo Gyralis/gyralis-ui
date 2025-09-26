@@ -9,6 +9,9 @@ import {
   LuSun,
 } from "react-icons/lu"
 
+import Modal from "@/components/ui/modal"
+import { LinkComponent } from "@/components/shared/link-component"
+
 const eligibilityRequirements = [
   {
     id: 1,
@@ -196,13 +199,66 @@ export default function ElegibilityPage() {
           </div>
         </div>
 
-        {/* {selectedEligibility && (
-          <EligibilityModal
+        {selectedEligibility && (
+          <Modal
             isOpen={!!selectedEligibility}
             onClose={() => setSelectedEligibility(null)}
-            eligibility={selectedEligibility}
-          />
-        )} */}
+            title={selectedEligibility.name}
+            size="md"
+          >
+            <div className="space-y-6">
+              <div>
+                <img
+                  src={selectedEligibility.imageUrl || "/placeholder.svg"}
+                  alt={selectedEligibility.name}
+                  className="h-24 w-full rounded-2xl border border-gray-200 object-cover shadow-lg sm:h-32"
+                />
+              </div>
+
+              <div>
+                <p className="font-body text-sm leading-relaxed text-[#0A0A0A] opacity-70 sm:text-base">
+                  {selectedEligibility.description}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-heading mb-4 text-lg font-bold text-[#0A0A0A]">
+                  How to become eligible:
+                </h3>
+                <div className="space-y-3">
+                  {selectedEligibility.steps.map((step, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="font-heading flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#1CE783] text-xs font-bold text-white shadow-lg">
+                        {index + 1}
+                      </div>
+                      <p className="font-body flex-1 text-sm leading-relaxed text-[#0A0A0A]">
+                        {step}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center space-x-2">
+                  <LuShield className="h-5 w-5 text-[#8C4BFF]" />
+                  <span className="font-body text-sm text-[#0A0A0A] opacity-70">
+                    Complete steps to unlock
+                  </span>
+                </div>
+                <a
+                  href={selectedEligibility.protocolUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tamagotchi-button font-body inline-flex min-h-[44px] w-full items-center justify-center space-x-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary/90 hover:shadow-xl sm:w-auto"
+                >
+                  <span>Visit Protocol</span>
+                  <LinkComponent className="h-4 w-4" href={""} isExternal />
+                </a>
+              </div>
+            </div>
+          </Modal>
+        )}
       </div>
     </div>
   )
