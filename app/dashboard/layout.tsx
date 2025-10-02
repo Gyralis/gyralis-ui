@@ -19,7 +19,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <SiteHeader />
       <div className="container flex-1 items-start md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
         <aside className="fixed top-20 z-30 -ml-2 hidden h-[calc(100vh-5rem)] w-full shrink-0 justify-between overflow-y-auto border-r md:sticky md:flex md:flex-col">
-          <ScrollArea className="py-6 pr-6 lg:py-8">
+          <ScrollArea className="border-2 border-red-500 py-6 pr-6 lg:py-8">
             <h3 className="text-lg font-normal">User</h3>
             <SidebarNav items={menuDashboard} />
             <hr className="my-6 border-t border-muted" />

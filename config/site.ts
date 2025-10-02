@@ -18,17 +18,17 @@ interface SiteConfig {
 export const SITE_CANONICAL = "https://turboeth.xyz"
 
 export const siteConfig: SiteConfig = {
-  name: "TurboETH",
-  title: "TurboETH - Web3 App Template",
+  name: "Gyralis",
+  title: "",
   emoji: "⚡",
   description:
-    "Start building full-stack Web3 applications in minutes with TurboETH.",
+    "Gyralis is for DAOs and Web3 projects that want to build trust and incentivize real participation",
   localeDefault: "en",
   links: {
-    docs: "https://docs.turboeth.xyz/overview",
-    discord: "https://discord.gg/U4jy7Xfh76",
-    twitter: "https://twitter.com/district_labs",
-    github: "https://github.com/turbo-eth/template-web3-app",
+    docs: "",
+    discord: "",
+    twitter: "https://x.com/",
+    github: "https://github.com/",
   },
 }
 
