@@ -1,21 +1,58 @@
+"use client"
+
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import { FaDiscord, FaGithub } from "react-icons/fa"
 import { LuBook } from "react-icons/lu"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   PageHeader,
   PageHeaderCTA,
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/layout/page-header"
+import LoopCard from "@/components/loops/loop-card"
+import { SearchWithTags } from "@/components/search"
 import { CopyButton } from "@/components/shared/copy-button"
-import { ExampleDemos } from "@/components/shared/example-demos"
 
 export default function HomePage() {
+  const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
+
+  const [search, setSearch] = useState("")
+  const [activeTag, setActiveTag] = useState<string | null>(null)
+
+  const tags = Array.from(new Set(LoopCardsData.map((loop) => loop.chainName)))
+
+  const filteredCards = LoopCardsData.filter((card) => {
+    const matchesSearch =
+      card.title.toLowerCase().includes(search.toLowerCase()) ||
+      card.by.toLowerCase().includes(search.toLowerCase()) ||
+      card.description.toLowerCase().includes(search.toLowerCase())
+    const matchesTag = activeTag ? card.chainName === activeTag : true
+    return matchesSearch && matchesTag
+  })
+
+  // Handler to update card balances
+  const handleBalanceUpdate = (
+    cardId: number,
+    newBalance: number,
+    newBalanceString: string
+  ) => {
+    setCards((prev) =>
+      prev.map((card) =>
+        card.id === cardId
+          ? { ...card, balanceNumeric: newBalance, balance: newBalanceString }
+          : card
+      )
+    )
+  }
+
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
@@ -27,7 +64,8 @@ export default function HomePage() {
           <div className="floating absolute bottom-40 right-10 h-10 w-10 rounded-full bg-pink-300 opacity-60"></div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 py-16">
+        {/* loop-page-header */}
+        <div className="border2 mx-auto max-w-6xl px-4 py-16">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Left side - Text content */}
             <div className="space-y-8">
@@ -107,40 +145,27 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        {/* <div className="tamagotchi-card p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="Search loops..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none font-body"
-            />
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as "All" | "Super" | "Normal")}
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none font-body"
-            >
-              <option value="All">All Types</option>
-              <option value="Super">Super Loops</option>
-              <option value="Normal">Normal Loops</option>
-            </select>
+        <div className="mx-auto max-w-6xl px-4 py-8">
+          {/* search */}
+          <SearchWithTags
+            tags={tags}
+            value={""}
+            onChange={function (v: string): void {
+              throw new Error("Function not implemented.")
+            }}
+          />
+          {/* loops */}
+          <div className="">
+            {filteredCards.map((card) => (
+              <LoopCard
+                key={card.id}
+                card={card}
+                onBalanceUpdate={handleBalanceUpdate}
+              />
+            ))}
           </div>
-        </div> */}
-
-        {/* Loop cards */}
-        {/* <div className="grid gap-6">
-          {filteredLoopCards.length > 0 ? (
-            filteredLoopCards.map((card) => <LoopCard key={card.id} card={card} onBalanceUpdate={updateLoopBalance} />)
-          ) : (
-            <div className="text-center py-12">
-              <p className="font-body text-xl text-gray-500">No loops found matching your criteria.</p>
-            </div>
-          )}
-        </div> */}
+        </div>
       </div>
     </div>
   )
