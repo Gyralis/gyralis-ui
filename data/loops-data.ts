@@ -25,7 +25,7 @@ export const LoopCardsData: LoopCardData[] = [
   {
     id: 1,
     title: "Title",
-    by: "1HIVE",
+    by: "1Hive",
     description: "loop and/or organization description",
     balance: "100 HNY",
     periodLength: "24 hours",
@@ -81,7 +81,7 @@ export const LoopCardsData: LoopCardData[] = [
   {
     id: 3,
     title: "Community Fund",
-    by: "Aragon",
+    by: "BlockScout",
     description: "Funding initiatives for community growth and development.",
     balance: "250 ETH",
     periodLength: "30 days",
@@ -103,7 +103,7 @@ export const LoopCardsData: LoopCardData[] = [
   {
     id: 4,
     title: "Grants Program",
-    by: "MolochDAO",
+    by: "BrightId",
     description:
       "Supporting public goods and open-source development. This is much longer description to see how it look like so dont worry, be happy",
     balance: "75 GNO",
@@ -124,32 +124,5 @@ export const LoopCardsData: LoopCardData[] = [
     claimAmount: "6 GNO",
     balanceNumeric: 75,
     currency: "GNO",
-  },
-  {
-    id: 5,
-    title: "Brighid Fund",
-    by: "Brighid",
-    description:
-      "Supporting innovative DeFi projects and community-driven initiatives through decentralized funding.",
-    balance: "180 BRIGHT",
-    periodLength: "12 hours",
-    periodDistribution: "12%",
-    nextDistributionIn: "03h 22min 15s",
-    shieldScore: "Aura Score 30",
-    eligibility: "Brighid ecosystem participant",
-    chainBadgeColor: "bg-pink-500",
-    registeredAddresses: [
-      { address: "0xaaa...111", claimed: true },
-      { address: "0xbbb...222", claimed: false },
-      { address: "0xccc...333", claimed: true },
-      { address: "0xddd...444", claimed: false },
-      { address: "0xeee...555", claimed: true },
-    ],
-    super: false,
-    chainId: 10,
-    chainName: "Optimism",
-    claimAmount: "21.6 BRIGHT",
-    balanceNumeric: 180,
-    currency: "BRIGHT",
   },
 ]

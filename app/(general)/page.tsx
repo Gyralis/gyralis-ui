@@ -24,17 +24,23 @@ import { CopyButton } from "@/components/shared/copy-button"
 export default function HomePage() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
 
-  const [search, setSearch] = useState("")
+  const [searchQuery, setSearch] = useState("")
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [selectedCommunity, setSelectedCommunity] = useState("All")
 
-  const tags = Array.from(new Set(LoopCardsData.map((loop) => loop.chainName)))
+  const tags = Array.from(new Set(LoopCardsData.map((loop) => loop.by)))
 
-  const filteredCards = LoopCardsData.filter((card) => {
+  const filteredLoopCards = LoopCardsData.filter((card) => {
     const matchesSearch =
-      card.title.toLowerCase().includes(search.toLowerCase()) ||
-      card.by.toLowerCase().includes(search.toLowerCase()) ||
-      card.description.toLowerCase().includes(search.toLowerCase())
-    const matchesTag = activeTag ? card.chainName === activeTag : true
+      !searchQuery ||
+      card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      card.by.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesTag =
+      activeTag === null || // "All" selected
+      card.by.toLowerCase() === activeTag.toLowerCase() // exact match with tag
+
     return matchesSearch && matchesTag
   })
 
@@ -146,18 +152,21 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mx-auto max-w-6xl overflow-visible px-4 py-8">
           {/* search */}
-          <SearchWithTags
-            tags={tags}
-            value={""}
-            onChange={function (v: string): void {
-              throw new Error("Function not implemented.")
-            }}
-          />
+          <div className="z-50">
+            <SearchWithTags
+              value={searchQuery}
+              onChange={setSearch}
+              activeTag={activeTag} // <-- this should control your tag filter
+              onTagChange={setActiveTag} // <-- updates activeTag
+              tags={tags}
+            />
+          </div>
+
           {/* loops */}
-          <div className="">
-            {filteredCards.map((card) => (
+          <div className="grid gap-6">
+            {filteredLoopCards.map((card) => (
               <LoopCard
                 key={card.id}
                 card={card}

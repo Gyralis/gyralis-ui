@@ -214,7 +214,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
   }, [isConnected, status.hasClaimed, status.isClaiming])
 
   return (
-    <div className="tamagotchi-card font-body relative overflow-hidden p-6 md:p-8">
+    <div className="tamagotchi-card font-body relative p-6 md:p-8">
       <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
         {/* Left */}
         <div className="col-span-1 flex flex-col justify-between lg:pr-6">
