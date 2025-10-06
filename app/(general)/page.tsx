@@ -8,6 +8,7 @@ import { FaDiscord, FaGithub } from "react-icons/fa"
 import { LuBook } from "react-icons/lu"
 
 import { siteConfig } from "@/config/site"
+import { useLoopSettings } from "@/lib/hooks/app/use-loop-settings"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,6 +45,9 @@ export default function HomePage() {
     return matchesSearch && matchesTag
   })
 
+  const { readContractData, isLoading } = useLoopSettings()
+
+  console.log("contract:", readContractData)
   // Handler to update card balances
   const handleBalanceUpdate = (
     cardId: number,

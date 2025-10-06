@@ -1,7 +1,10 @@
+import { Address } from "viem"
+
 export interface LoopCardData {
   id: number
   title: string
   by: string
+  address?: Address
   description: string
   balance: string
   periodLength: string
@@ -26,6 +29,7 @@ export const LoopCardsData: LoopCardData[] = [
     id: 1,
     title: "Title",
     by: "1Hive",
+    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
     description: "loop and/or organization description",
     balance: "100 HNY",
     periodLength: "24 hours",
