@@ -44,7 +44,7 @@
     --input: 0 0% 89.8%; /* Border color for inputs. <Input />, <Select /> and <Textarea /> */
     --ring: 0 0% 3.9%; /* For focus ring */
 
-    --radius: 0.5rem; /* Border radius for <Card />, <Input />, <Button />...etc */
+    --radius: 1.5rem; /* Border radius for <Card />, <Input />, <Button />...etc */
   }
 
   .dark {
@@ -107,8 +107,9 @@
     0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  
+  overflow: hidden;
   color: hsl(var(--card-foreground));
+
   /* Generous padding for tactile feel */
   padding: 2rem;
 }
@@ -127,10 +128,12 @@
     hsl(5, 100%,69% ));
   opacity: 0;
   transition: opacity 0.3s ease;
+  
 }
 
 .tamagotchi-card:hover {
   transform: translateY(-4px);
+  cursor: pointer;
   /* Enhanced neumorphic hover with subtle glow */
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
@@ -143,6 +146,8 @@
 
 .tamagotchi-card:hover::before {
   opacity: 1;
+
+
 }
 
 .border2{

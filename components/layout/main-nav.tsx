@@ -2,6 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   integrationCategories,
   turboIntegrations,
@@ -46,6 +47,14 @@ export function MainNav() {
 }
 
 function MainNavMenu() {
+  const pathname = usePathname()
+
+  const links = [
+    { href: "/", label: "Loops" },
+    { href: "/elegibilities", label: "Elegibilities" },
+    { href: "/leaderboards", label: "Leaderboards" },
+  ]
+
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -54,11 +63,8 @@ function MainNavMenu() {
           <NavigationMenuContent className="max-h-[768px] overflow-y-scroll">
             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[768px] lg:grid-cols-3">
               {integrationCategories.map((category) => (
-                <>
-                  <h4
-                    key={category}
-                    className="text-lg font-medium leading-none md:col-span-2 lg:col-span-3"
-                  >
+                <React.Fragment key={category}>
+                  <h4 className="text-lg font-medium leading-none md:col-span-2 lg:col-span-3">
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </h4>
                   <Separator className="md:col-span-2 lg:col-span-3" />
@@ -74,18 +80,31 @@ function MainNavMenu() {
                         darkImage={imgLight}
                       />
                     ))}
-                </>
+                </React.Fragment>
               ))}
             </ul>
           </NavigationMenuContent>
         </NavigationMenuItem>
-        <NavigationMenuItem>
-          <LinkComponent href="https://docs.turboeth.xyz/overview">
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <span>Documentation</span>
-            </NavigationMenuLink>
-          </LinkComponent>
-        </NavigationMenuItem>
+
+        {/* Simple links */}
+        {links.map(({ href, label }) => {
+          const isActive = pathname === href
+          return (
+            <NavigationMenuItem key={href}>
+              <LinkComponent href={href}>
+                <NavigationMenuLink
+                  className={`${navigationMenuTriggerStyle()} ${
+                    isActive
+                      ? "border-b-2 border-primary font-semibold text-primary"
+                      : "text-foreground"
+                  }`}
+                >
+                  {label}
+                </NavigationMenuLink>
+              </LinkComponent>
+            </NavigationMenuItem>
+          )
+        })}
       </NavigationMenuList>
     </NavigationMenu>
   )
