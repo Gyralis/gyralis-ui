@@ -167,13 +167,13 @@ export default function HomePage() {
               tags={tags}
             />
           </div>
-
           {/* loops */}
+
           <div className="grid gap-6">
-            {filteredLoopCards.map((card) => (
+            {filteredLoopCards.map((loop) => (
               <LoopCard
-                key={card.id}
-                card={card}
+                key={loop.id}
+                loop={loop}
                 onBalanceUpdate={handleBalanceUpdate}
               />
             ))}

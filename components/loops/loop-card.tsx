@@ -7,7 +7,7 @@ import { useWallet } from "@/lib/hooks/web3/use-wallet"
 import { Button } from "@/components/ui/button"
 
 interface LoopCardProps {
-  card: LoopCardData
+  loop: LoopCardData
   onBalanceUpdate: (
     cardId: number,
     newBalance: number,
@@ -97,7 +97,7 @@ const ChainIcon = ({
   )
 }
 
-const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
+const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   const [status, setStatus] = useState({
     message: null as string | null,
     type: null as "success" | "error" | null,
@@ -112,7 +112,8 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
   const { isConnected, currentChainId, connectWallet, switchChain } =
     useWallet()
 
-  const isCorrectChain = currentChainId === card.chainId
+  const isCorrectChain = currentChainId === loop.chainId
+
   const canClaim = isConnected && isCorrectChain && !status.hasClaimed
 
   const simulateApiCall = async (successRate: number, delay = 500) =>
@@ -217,30 +218,30 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
     <div className="tamagotchi-card font-body relative p-6 md:p-8">
       <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
         {/* Left */}
-        <div className="col-span-1 flex flex-col justify-between lg:pr-6">
+        <div className="border2 col-span-1 flex flex-col justify-between lg:pr-6">
           <div>
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <ChainIcon
-                  chainId={card.chainId}
+                  chainId={loop.chainId}
                   className="h-7 w-7 flex-shrink-0"
                 />
                 <h3 className="font-heading text-xl text-foreground md:text-2xl">
-                  {card.title}
+                  {loop.title}
                 </h3>
               </div>
               <span
                 className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg ${
-                  card.super
+                  loop.super
                     ? "bg-gradient-to-r from-orange-400 to-pink-400 text-white"
                     : "bg-gradient-to-r from-blue-400 to-teal-400 text-white"
                 }`}
               >
-                {card.super ? "SUPER LOOP" : "LOOP"}
+                {loop.super ? "SUPER LOOP" : "LOOP"}
               </span>
             </div>
             <p className="mb-6 text-base leading-relaxed text-muted-foreground md:text-lg">
-              {card.description}
+              {loop.description}
             </p>
           </div>
         </div>
@@ -252,7 +253,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
               Balance
             </p>
             <p className="font-heading mb-4 whitespace-nowrap text-4xl font-bold text-primary md:text-5xl">
-              {card.balance}
+              {loop.balance}
             </p>
           </div>
         </div>
@@ -267,7 +268,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
                   Period Length
                 </p>
                 <p className="font-heading text-lg font-bold text-foreground md:text-xl">
-                  {card.periodLength}
+                  {loop.periodLength}
                 </p>
               </div>
               <div className="cursor-pointer rounded-xl bg-card p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)]">
@@ -275,7 +276,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
                   Distribution
                 </p>
                 <p className="font-heading text-lg font-bold text-foreground md:text-xl">
-                  {card.super ? "∞" : card.periodDistribution}
+                  {loop.super ? "∞" : loop.periodDistribution}
                 </p>
               </div>
             </div>
@@ -286,7 +287,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ card, onBalanceUpdate }) => {
               </p>
               <div className="flex items-center justify-between">
                 <p className="font-heading text-2xl font-bold text-primary md:text-3xl">
-                  {card.nextDistributionIn}
+                  {loop.nextDistributionIn}
                 </p>
                 <button
                   onClick={() => setIsAddressesModalOpen(true)}
