@@ -6,6 +6,9 @@ import { LoopCardData } from "@/data/loops-data"
 import { useWallet } from "@/lib/hooks/web3/use-wallet"
 import { Button } from "@/components/ui/button"
 
+import { LoopBalance } from "./loop-balance"
+import { LoopEligibility, LoopShield } from "./loop-elegibility"
+
 interface LoopCardProps {
   loop: LoopCardData
   onBalanceUpdate: (
@@ -247,20 +250,22 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Middle */}
-        <div className="col-span-1 flex flex-col justify-between py-4 lg:px-6 lg:py-0">
+        <div className="border2 col-span-1 flex flex-col justify-between py-4 lg:px-6 lg:py-0">
           <div className="rounded-2xl bg-gradient-to-br from-card/50 to-muted/30 p-4 text-center">
-            <p className="mb-2 text-sm font-medium text-muted-foreground">
-              Balance
-            </p>
-            <p className="font-heading mb-4 whitespace-nowrap text-4xl font-bold text-primary md:text-5xl">
-              {loop.balance}
-            </p>
+            <LoopBalance
+              address={loop.address}
+              token={loop.token}
+              chain={loop.chainId}
+            />
+          </div>
+          <div className="border2 flex flex-col gap-2">
+            <LoopShield shieldScore={loop.shieldScore} />
+            <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>
         </div>
 
-        {/* Right */}
         {/* Right Section (Loop Setting) */}
-        <div className="col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
+        <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
           <div>
             <div className="mb-6 grid grid-cols-2 gap-4">
               <div className="cursor-pointer rounded-xl bg-card p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)]">

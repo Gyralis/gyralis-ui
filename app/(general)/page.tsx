@@ -19,6 +19,7 @@ import {
   PageHeaderHeading,
 } from "@/components/layout/page-header"
 import LoopCard from "@/components/loops/loop-card"
+import { LoopMetadata } from "@/components/loops/loop-metadata"
 import { SearchWithTags } from "@/components/search"
 import { CopyButton } from "@/components/shared/copy-button"
 
@@ -171,11 +172,13 @@ export default function HomePage() {
 
           <div className="grid gap-6">
             {filteredLoopCards.map((loop) => (
-              <LoopCard
-                key={loop.id}
-                loop={loop}
-                onBalanceUpdate={handleBalanceUpdate}
-              />
+              <>
+                <LoopCard
+                  key={loop.id}
+                  loop={loop}
+                  onBalanceUpdate={handleBalanceUpdate}
+                />
+              </>
             ))}
           </div>
         </div>

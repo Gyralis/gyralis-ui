@@ -6,7 +6,7 @@ export interface LoopCardData {
   by: string
   address?: Address
   description: string
-  balance: string
+  token: Address
   periodLength: string
   periodDistribution: string
   nextDistributionIn: string
@@ -31,7 +31,7 @@ export const LoopCardsData: LoopCardData[] = [
     by: "1Hive",
     address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
     description: "loop and/or organization description",
-    balance: "100 HNY",
+    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     periodLength: "24 hours",
     periodDistribution: "10%",
     nextDistributionIn: "02h 10min 25s",
