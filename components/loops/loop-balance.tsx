@@ -9,18 +9,18 @@ import { useBalance } from "wagmi"
 interface LoopBalanceProps {
   address?: Address
   token?: Address
-  chain: number
+  chainId: number
 }
 
 export const LoopBalance: React.FC<LoopBalanceProps> = ({
   address,
   token,
-  chain,
+  chainId,
 }) => {
   const { data, isLoading, isError } = useBalance({
     address: address!,
     token: token,
-    chainId: chain,
+    chainId: chainId,
     // query: { enabled: !!address && !!token },
   })
 

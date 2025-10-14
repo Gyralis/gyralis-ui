@@ -12,15 +12,13 @@ interface LoopDetails {
   currentPeriod: number
 }
 
-export const useLoopSettings = (address?: Address, chain?: number) => {
-  const chainId = useChainId()
-
+export const useLoopSettings = (address: Address, chain: number) => {
   const loopAbi = useMemo(() => {
     return (
-      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
-        ?.abi ?? []
+      deployedContracts?.[chain as keyof typeof deployedContracts]?.loop?.abi ??
+      []
     )
-  }, [chainId])
+  }, [chain])
 
   const {
     data: readContractData,
@@ -28,8 +26,9 @@ export const useLoopSettings = (address?: Address, chain?: number) => {
     isLoading: isLoadingDetails,
   } = useReadContract({
     abi: loopAbi,
-    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
+    address: address,
     functionName: "getLoopDetails",
+    chainId: chain,
   })
 
   const {
@@ -38,8 +37,9 @@ export const useLoopSettings = (address?: Address, chain?: number) => {
     isLoading: isLoadingCurrentPeriod,
   } = useReadContract({
     abi: loopAbi,
-    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
+    address: address,
     functionName: "getCurrentPeriod",
+    chainId: chain,
   })
 
   const [loopDetails, setLoopDetails] = useState<LoopDetails | undefined>(

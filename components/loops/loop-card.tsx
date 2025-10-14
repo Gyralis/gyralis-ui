@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 
 import { LoopBalance } from "./loop-balance"
 import { LoopEligibility, LoopShield } from "./loop-elegibility"
+import { LoopSettings } from "./loop-settings"
 
 interface LoopCardProps {
   loop: LoopCardData
@@ -255,7 +256,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             <LoopBalance
               address={loop.address}
               token={loop.token}
-              chain={loop.chainId}
+              chainId={loop.chainId}
             />
           </div>
           <div className="border2 flex flex-col gap-2">
@@ -266,43 +267,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
         {/* Right Section (Loop Setting) */}
         <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
-          <div>
-            <div className="mb-6 grid grid-cols-2 gap-4">
-              <div className="cursor-pointer rounded-xl bg-card p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)]">
-                <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  Period Length
-                </p>
-                <p className="font-heading text-lg font-bold text-foreground md:text-xl">
-                  {loop.periodLength}
-                </p>
-              </div>
-              <div className="cursor-pointer rounded-xl bg-card p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)]">
-                <p className="mb-1 text-xs font-medium text-muted-foreground">
-                  Distribution
-                </p>
-                <p className="font-heading text-lg font-bold text-foreground md:text-xl">
-                  {loop.super ? "∞" : loop.periodDistribution}
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-6 rounded-xl bg-gradient-to-br from-card/50 to-muted/30 p-4 shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)] md:mb-8">
-              <p className="mb-2 text-sm font-medium text-muted-foreground">
-                Next Distribution in:
-              </p>
-              <div className="flex items-center justify-between">
-                <p className="font-heading text-2xl font-bold text-primary md:text-3xl">
-                  {loop.nextDistributionIn}
-                </p>
-                <button
-                  onClick={() => setIsAddressesModalOpen(true)}
-                  className="tamagotchi-button-secondary"
-                >
-                  Loopers
-                </button>
-              </div>
-            </div>
-          </div>
+          <LoopSettings address={loop.address} chainId={loop.chainId} />
 
           {/* <RenderClaimButton/> */}
         </div>
