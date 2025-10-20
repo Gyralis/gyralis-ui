@@ -1,122 +1,88 @@
 "use client"
 
 import React from "react"
-import clsx from "clsx"
-import { arbitrum, mainnet, optimism, polygon, sepolia } from "viem/chains"
-import { useAccount, useChainId, useSwitchChain } from "wagmi"
-
-type ButtonVariant = "primary" | "secondary" | "ghost"
-type ButtonSize = "sm" | "md" | "lg"
+import type { Chain } from "viem"
+import { useAccount, useChainId, useChains, useSwitchChain } from "wagmi"
 
 type ButtonProps = {
   type?: "button" | "submit" | "reset"
-  variant?: ButtonVariant
-  size?: ButtonSize
-  fullWidth?: boolean
-  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  variant?: "primary" | "secondary"
+  onClick?: React.DOMAttributes<HTMLButtonElement>["onClick"]
   className?: string
   disabled?: boolean
   children?: React.ReactNode
   isLoading?: boolean
   icon?: React.ReactNode
   style?: React.CSSProperties
-  tooltip?: string
   chainId?: number
 }
 
-// Optional map of chain IDs to names
-const chainMap: Record<number, string> = {
-  [mainnet.id]: mainnet.name,
-  [polygon.id]: polygon.name,
-  [optimism.id]: optimism.name,
-  [arbitrum.id]: arbitrum.name,
-  [sepolia.id]: sepolia.name,
-}
+export function Button({
+  onClick,
+  className = "",
+  disabled = false,
+  children,
+  variant = "primary",
+  isLoading = false,
+  icon,
+  type = "button",
+  style,
+  chainId,
+}: ButtonProps) {
+  const { isConnected } = useAccount()
+  const currentChainId = useChainId()
+  const { switchChain } = useSwitchChain()
+  const availableChains = useChains()
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      onClick,
-      className,
-      disabled = false,
-      children,
-      variant = "primary",
-      size = "md",
-      fullWidth = false,
-      isLoading = false,
-      icon,
-      type = "button",
-      style,
-      tooltip,
-      chainId,
-    },
-    ref
-  ) => {
-    const connectedChainId = useChainId()
-    const { switchChainAsync, isPending } = useSwitchChain()
-    const { isConnected } = useAccount()
+  const targetChain: Chain | undefined = chainId
+    ? availableChains.find((c) => c.id === chainId)
+    : undefined
 
-    const isWrongChain = chainId && connectedChainId !== chainId && isConnected
-    const targetChainName = chainId
-      ? chainMap[chainId] ?? `Chain ${chainId}`
-      : undefined
+  const wrongNetwork = chainId != null && currentChainId !== chainId
+  const baseClass =
+    variant === "primary" ? "tamagotchi-button" : "tamagotchi-button-secondary"
 
-    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (isWrongChain && chainId) {
-        try {
-          await switchChainAsync({ chainId })
-        } catch (err) {
-          console.error("Failed to switch chain:", err)
-        }
-      } else {
-        onClick?.(e)
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isConnected) return
+    if (wrongNetwork && targetChain) {
+      try {
+        await switchChain({ chainId: targetChain.id })
+      } catch (err) {
+        console.error("Failed to switch chain:", err)
       }
+      return
     }
-
-    const baseClass =
-      variant === "primary"
-        ? "bg-primary text-white hover:bg-primary/90"
-        : variant === "secondary"
-        ? "bg-secondary text-white hover:bg-secondary/90"
-        : "bg-transparent hover:bg-base-200 text-primary"
-
-    const sizeClass =
-      size === "sm"
-        ? "px-3 py-1 text-sm"
-        : size === "lg"
-        ? "px-6 py-3 text-lg"
-        : "px-4 py-2 text-base"
-
-    const buttonClass = clsx(
-      "rounded-2xl flex items-center justify-center gap-2 transition-all ease-out disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2",
-      baseClass,
-      sizeClass,
-      fullWidth && "w-full",
-      className
-    )
-
-    return (
-      <button
-        ref={ref}
-        type={type}
-        className={buttonClass}
-        onClick={handleClick}
-        disabled={disabled || isLoading || isPending}
-        style={style}
-        aria-disabled={disabled || isLoading || isPending}
-        data-tip={tooltip}
-      >
-        {isLoading || isPending ? (
-          <span className="loading loading-spinner loading-sm text-inherit" />
-        ) : (
-          <>
-            {icon && !isWrongChain && icon}
-            {isWrongChain ? `Switch to ${targetChainName}` : children}
-          </>
-        )}
-      </button>
-    )
+    if (onClick) onClick(e)
   }
-)
 
-Button.displayName = "Button"
+  const buttonLabel = !isConnected
+    ? children
+    : wrongNetwork && targetChain
+    ? `Switch to ${targetChain.name}`
+    : children
+
+  const showTooltip = !isConnected ? "tooltip tooltip-bottom" : ""
+
+  return (
+    <div
+      className={`${showTooltip}`}
+      data-tip={!isConnected ? "Connect wallet" : ""}
+    >
+      <button
+        type={type}
+        className={`${baseClass} flex items-center justify-center gap-2 transition-all ease-out disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        onClick={handleClick}
+        disabled={disabled || isLoading || !isConnected}
+        style={style}
+        aria-disabled={disabled || isLoading || !isConnected ? "true" : "false"}
+        aria-label={typeof buttonLabel === "string" ? buttonLabel : ""}
+      >
+        {isLoading && (
+          <span className="loading loading-spinner loading-sm text-inherit" />
+        )}
+        {icon && !isLoading && icon}
+        {buttonLabel}
+      </button>
+    </div>
+  )
+}

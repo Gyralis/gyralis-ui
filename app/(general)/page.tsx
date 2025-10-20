@@ -10,7 +10,7 @@ import { LuBook } from "react-icons/lu"
 import { siteConfig } from "@/config/site"
 import { useLoopSettings } from "@/lib/hooks/app/use-loop-settings"
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   PageHeader,
@@ -46,9 +46,6 @@ export default function HomePage() {
     return matchesSearch && matchesTag
   })
 
-  const { readContractData, isLoading } = useLoopSettings()
-
-  console.log("contract:", readContractData)
   // Handler to update card balances
   const handleBalanceUpdate = (
     cardId: number,
@@ -93,12 +90,12 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col gap-4 sm:flex-row">
-                <button className="tamagotchi-button px-8 py-4 text-lg">
-                  Feed the Loop
-                </button>
-                <button className="tamagotchi-button-secondary px-8 py-4 text-lg">
-                  See How It Works
-                </button>
+                <Button
+                  chainId={100}
+                  onClick={() => console.log("Button click as primary")}
+                >
+                  Feed the loop
+                </Button>
               </div>
             </div>
 
