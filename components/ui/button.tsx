@@ -1,59 +1,122 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "lib/utils/cva"
+"use client"
 
-import { cn } from "@/lib/utils"
+import React from "react"
+import clsx from "clsx"
+import { arbitrum, mainnet, optimism, polygon, sepolia } from "viem/chains"
+import { useAccount, useChainId, useSwitchChain } from "wagmi"
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline:
-          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        blue: "bg-blue-600 text-white shadow hover:bg-blue-600/90",
-        emerald: "bg-emerald-600 text-white shadow hover:bg-emerald-600/90",
-      },
-      size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
+type ButtonVariant = "primary" | "secondary" | "ghost"
+type ButtonSize = "sm" | "md" | "lg"
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+type ButtonProps = {
+  type?: "button" | "submit" | "reset"
+  variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  className?: string
+  disabled?: boolean
+  children?: React.ReactNode
+  isLoading?: boolean
+  icon?: React.ReactNode
+  style?: React.CSSProperties
+  tooltip?: string
+  chainId?: number
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+// Optional map of chain IDs to names
+const chainMap: Record<number, string> = {
+  [mainnet.id]: mainnet.name,
+  [polygon.id]: polygon.name,
+  [optimism.id]: optimism.name,
+  [arbitrum.id]: arbitrum.name,
+  [sepolia.id]: sepolia.name,
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      onClick,
+      className,
+      disabled = false,
+      children,
+      variant = "primary",
+      size = "md",
+      fullWidth = false,
+      isLoading = false,
+      icon,
+      type = "button",
+      style,
+      tooltip,
+      chainId,
+    },
+    ref
+  ) => {
+    const connectedChainId = useChainId()
+    const { switchChainAsync, isPending } = useSwitchChain()
+    const { isConnected } = useAccount()
+
+    const isWrongChain = chainId && connectedChainId !== chainId && isConnected
+    const targetChainName = chainId
+      ? chainMap[chainId] ?? `Chain ${chainId}`
+      : undefined
+
+    const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (isWrongChain && chainId) {
+        try {
+          await switchChainAsync({ chainId })
+        } catch (err) {
+          console.error("Failed to switch chain:", err)
+        }
+      } else {
+        onClick?.(e)
+      }
+    }
+
+    const baseClass =
+      variant === "primary"
+        ? "bg-primary text-white hover:bg-primary/90"
+        : variant === "secondary"
+        ? "bg-secondary text-white hover:bg-secondary/90"
+        : "bg-transparent hover:bg-base-200 text-primary"
+
+    const sizeClass =
+      size === "sm"
+        ? "px-3 py-1 text-sm"
+        : size === "lg"
+        ? "px-6 py-3 text-lg"
+        : "px-4 py-2 text-base"
+
+    const buttonClass = clsx(
+      "rounded-2xl flex items-center justify-center gap-2 transition-all ease-out disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-offset-2",
+      baseClass,
+      sizeClass,
+      fullWidth && "w-full",
+      className
+    )
+
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <button
         ref={ref}
-        {...props}
-      />
+        type={type}
+        className={buttonClass}
+        onClick={handleClick}
+        disabled={disabled || isLoading || isPending}
+        style={style}
+        aria-disabled={disabled || isLoading || isPending}
+        data-tip={tooltip}
+      >
+        {isLoading || isPending ? (
+          <span className="loading loading-spinner loading-sm text-inherit" />
+        ) : (
+          <>
+            {icon && !isWrongChain && icon}
+            {isWrongChain ? `Switch to ${targetChainName}` : children}
+          </>
+        )}
+      </button>
     )
   }
 )
-Button.displayName = "Button"
 
-export { Button, buttonVariants }
+Button.displayName = "Button"

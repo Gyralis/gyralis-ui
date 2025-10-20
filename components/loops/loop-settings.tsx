@@ -56,7 +56,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
         </div>
       </div>
 
-      <div className="border2 mb-6 rounded-xl bg-gradient-to-br from-card/50 to-muted/30 p-4 shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)] md:mb-8">
+      <div className="mb-6 rounded-xl bg-gradient-to-br from-card/50 to-muted/30 p-4 shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)] md:mb-8">
         <p className="mb-2 text-sm font-medium text-muted-foreground">
           Next Distribution in:
         </p>
@@ -66,12 +66,12 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             <Countdown nextPeriodStart={nextPeriodStart} />
           )}
 
-          <button
+          {/* <button
             onClick={() => setIsAddressesModalOpen(true)}
             className="tamagotchi-button-secondary"
           >
             Loopers
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
@@ -98,7 +98,7 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   const { hours, minutes, seconds } = formatTime2(remaining)
 
   return (
-    <div className="flex justify-center gap-2 sm:gap-4">
+    <div className="border2 flex justify-center gap-2 sm:gap-4">
       <TimeBlock label="Hours" value={hours} />
       <TimeBlock label="Minutes" value={minutes} />
       <TimeBlock label="Seconds" value={seconds} />
@@ -148,7 +148,7 @@ const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
 const TimeBlock = ({ label, value }: { label: string; value: number }) => {
   const display = value != null ? value.toString().padStart(2, "0") : "--"
   return (
-    <div className="w-16 rounded-lg  p-2 text-white sm:w-20 sm:p-3">
+    <div className="border2 w-16  rounded-lg p-2 text-secondary sm:w-20 sm:p-3">
       <div className="text-xl font-bold sm:text-2xl">{display}</div>
       <div className="text-xs text-gray-300">{label}</div>
     </div>
