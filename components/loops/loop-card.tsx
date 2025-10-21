@@ -7,6 +7,7 @@ import { useWallet } from "@/lib/hooks/web3/use-wallet"
 import { Button } from "@/components/ui/button"
 
 import { LoopBalance } from "./loop-balance"
+import { LoopClaim } from "./loop-claim"
 import { LoopEligibility, LoopShield } from "./loop-elegibility"
 import { LoopSettings } from "./loop-settings"
 
@@ -221,7 +222,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   return (
     <div className="tamagotchi-card font-body relative p-6 md:p-8">
       <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
-        {/* Left */}
+        {/* Loop metadata */}
         <div className="border2 col-span-1 flex flex-col justify-between lg:pr-6">
           <div>
             <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -250,7 +251,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           </div>
         </div>
 
-        {/* Middle */}
+        {/* Loop Balance / Shield / Elegibility */}
         <div className="border2 col-span-1 flex flex-col justify-between py-4 lg:px-6 lg:py-0">
           <div className="rounded-2xl bg-gradient-to-br from-card/50 to-muted/30 p-4 text-center">
             <LoopBalance
@@ -265,11 +266,12 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           </div>
         </div>
 
-        {/* Right Section (Loop Setting) */}
+        {/* Loop Setting */}
         <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
           <LoopSettings address={loop.address} chainId={loop.chainId} />
 
-          {/* <RenderClaimButton/> */}
+          {/* <ClaimButton/> */}
+          <LoopClaim address={loop.address} chainId={loop.chainId} />
         </div>
       </div>
     </div>
