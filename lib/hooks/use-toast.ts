@@ -101,6 +101,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
+        //@ts-ignore
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
@@ -145,6 +146,7 @@ function toast({ ...props }: Toast) {
   const update = (props: ToasterToast) =>
     dispatch({
       type: "UPDATE_TOAST",
+      //@ts-ignore
       toast: { ...props, id },
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
@@ -154,7 +156,9 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
+      //@ts-ignore
       open: true,
+      //@ts-ignore
       onOpenChange: (open) => {
         if (!open) dismiss()
       },

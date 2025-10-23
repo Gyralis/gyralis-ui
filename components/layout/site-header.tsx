@@ -5,7 +5,7 @@ import Link from "next/link"
 import useScroll from "@/lib/hooks/use-scroll"
 import { cn } from "@/lib/utils"
 import { MainNav } from "@/components/layout/main-nav"
-import { MobileNav } from "@/components/layout/mobile-nav"
+//import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/shared/mode-toggle"
 
 export function SiteHeader() {
@@ -20,7 +20,7 @@ export function SiteHeader() {
     >
       <div className="container flex h-20 items-center">
         <MainNav />
-        <MobileNav />
+        {/* <MobileNav /> */}
         <div className="hidden flex-1 items-center justify-between space-x-2 md:flex md:justify-end">
           <Link href="/dashboard">Dashboard</Link>
           <ModeToggle />

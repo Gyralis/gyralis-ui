@@ -42,16 +42,15 @@ export function Button({
   const baseClass =
     variant === "primary" ? "tamagotchi-button" : "tamagotchi-button-secondary"
 
-  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isConnected) return
-    if (wrongNetwork && targetChain) {
-      try {
-        await switchChain({ chainId: targetChain.id })
-      } catch (err) {
-        console.error("Failed to switch chain:", err)
-      }
+
+    if (wrongNetwork && targetChain && switchChain) {
+      // Call switchChain without await or .catch()
+      switchChain({ chainId: targetChain.id })
       return
     }
+
     if (onClick) onClick(e)
   }
 
@@ -65,7 +64,7 @@ export function Button({
 
   return (
     <div
-      className={`${showTooltip}`}
+      className={showTooltip}
       data-tip={!isConnected ? "Connect wallet" : ""}
     >
       <button

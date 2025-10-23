@@ -63,7 +63,8 @@ export const LoopCardsData: LoopCardData[] = [
     by: "DAOStack",
     description:
       "A decentralized autonomous organization for collective decision-making.",
-    balance: "500 DAI",
+    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+
     periodLength: "7 days",
     periodDistribution: "5%",
     nextDistributionIn: "05h 30min 10s",
@@ -87,7 +88,8 @@ export const LoopCardsData: LoopCardData[] = [
     title: "Community Fund",
     by: "BlockScout",
     description: "Funding initiatives for community growth and development.",
-    balance: "250 ETH",
+    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+
     periodLength: "30 days",
     periodDistribution: "15%",
     nextDistributionIn: "10h 05min 40s",
@@ -110,8 +112,9 @@ export const LoopCardsData: LoopCardData[] = [
     by: "BrightId",
     description:
       "Supporting public goods and open-source development. This is much longer description to see how it look like so dont worry, be happy",
-    balance: "75 GNO",
     periodLength: "14 days",
+    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+
     periodDistribution: "8%",
     nextDistributionIn: "01h 45min 00s",
     shieldScore: "Kleros Curated",

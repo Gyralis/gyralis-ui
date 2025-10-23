@@ -60,6 +60,8 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
         baloo: ["var(--font-balooo)", ...fontFamily.sans],
+        heading: ["Baloo", "cursive"],
+        body: ["Inter", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
