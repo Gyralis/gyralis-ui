@@ -37,24 +37,20 @@ export const WalletConnectCustom = ({
               if (!connected) {
                 return (
                   <>
-                    <Button variant="default" onClick={openConnectModal}>
-                      {labelConnect}
-                    </Button>
+                    <Button onClick={openConnectModal}>{labelConnect}</Button>
                   </>
                 )
               }
 
               if (chain.unsupported) {
                 return (
-                  <Button variant="destructive" onClick={openChainModal}>
-                    {labelWrongNetwork}
-                  </Button>
+                  <Button onClick={openChainModal}>{labelWrongNetwork}</Button>
                 )
               }
 
               return (
                 <div>
-                  <Button variant="default" onClick={openChainModal}>
+                  <Button onClick={openChainModal}>
                     {chain.hasIcon && (
                       <div
                         style={{

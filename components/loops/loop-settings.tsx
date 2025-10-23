@@ -31,7 +31,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   const nextPeriodStart =
     settings && currentPeriod != null
       ? BigInt(settings.firstPeriodStart) +
-        BigInt(settings.periodLength) * (currentPeriod + 1n)
+        BigInt(settings.periodLength) * (BigInt(currentPeriod) + BigInt(1))
       : undefined
 
   return (

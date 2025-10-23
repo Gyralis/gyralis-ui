@@ -4,7 +4,6 @@ import { LuBook } from "react-icons/lu"
 import Markdown from "react-markdown"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 
 const DevReadme = `
 # Dev guide
@@ -98,7 +97,6 @@ export default function PageIntegration() {
         href="https://docs.passport.gitcoin.co/building-with-passport/getting-access"
         target="_blank"
         rel="noreferrer noopener"
-        className={cn(buttonVariants({ variant: "outline" }))}
       >
         <LuBook className="mr-2 size-4" />
         See the full Documentation

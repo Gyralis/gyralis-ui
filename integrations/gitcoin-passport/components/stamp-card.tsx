@@ -5,7 +5,7 @@ import { FaExternalLinkAlt } from "react-icons/fa"
 import { FiCircle } from "react-icons/fi"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardDescription,
@@ -101,8 +101,7 @@ export const StampCard = ({
         ) : (
           <LinkComponent
             className={cn(
-              "flex w-full flex-row items-center justify-center space-x-2",
-              buttonVariants({ variant: "link" })
+              "flex w-full flex-row items-center justify-center space-x-2"
             )}
             isExternal
             href={"https://passport.gitcoin.co/#/dashboard"}
@@ -116,9 +115,7 @@ export const StampCard = ({
         {stamp ? (
           <Dialog>
             <DialogTrigger className="flex w-full items-center justify-center">
-              <Button variant="outline" size="sm">
-                More details
-              </Button>
+              <Button>More details</Button>
             </DialogTrigger>
             <DialogContent>
               <div className="flex w-full flex-col space-y-4">
@@ -199,9 +196,7 @@ export const StampCard = ({
           </Dialog>
         ) : (
           <Skeleton className="mx-auto">
-            <Button variant="outline" size="sm" className="opacity-0">
-              More details
-            </Button>
+            <Button className="opacity-0">More details</Button>
           </Skeleton>
         )}
       </CardFooter>

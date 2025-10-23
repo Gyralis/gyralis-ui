@@ -18,7 +18,6 @@ export const SubmitPassportButton = ({
         button to get your passport score.
       </div>
       <Button
-        variant="emerald"
         className="w-auto space-x-4"
         onClick={() => {
           submitPassport()

@@ -131,66 +131,66 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
       setTimeout(() => resolve(Math.random() < 0.95), 1500)
     )
 
-  const handleClaimTokens = async () => {
-    if (!canClaim) return
+  // const handleClaimTokens = async () => {
+  //   if (!canClaim) return
 
-    setStatus({
-      ...status,
-      isClaiming: true,
-      message: null,
-      type: null,
-      shieldPassed: false,
-      eligibilityPassed: false,
-    })
+  //   setStatus({
+  //     ...status,
+  //     isClaiming: true,
+  //     message: null,
+  //     type: null,
+  //     shieldPassed: false,
+  //     eligibilityPassed: false,
+  //   })
 
-    const shieldCheck = await simulateApiCall(0.8)
-    if (!shieldCheck)
-      return setStatus({
-        ...status,
-        message: "Error: Shield requirement not met.",
-        type: "error",
-        isClaiming: false,
-      })
+  //   const shieldCheck = await simulateApiCall(0.8)
+  //   if (!shieldCheck)
+  //     return setStatus({
+  //       ...status,
+  //       message: "Error: Shield requirement not met.",
+  //       type: "error",
+  //       isClaiming: false,
+  //     })
 
-    const eligibilityCheck = await simulateApiCall(0.7)
-    if (!eligibilityCheck)
-      return setStatus({
-        ...status,
-        message: "Error: Eligibility not met.",
-        type: "error",
-        isClaiming: false,
-      })
+  //   const eligibilityCheck = await simulateApiCall(0.7)
+  //   if (!eligibilityCheck)
+  //     return setStatus({
+  //       ...status,
+  //       message: "Error: Eligibility not met.",
+  //       type: "error",
+  //       isClaiming: false,
+  //     })
 
-    const walletSign = await simulateWalletSigning()
-    if (!walletSign)
-      return setStatus({
-        ...status,
-        message: "Error: Transaction failed.",
-        type: "error",
-        isClaiming: false,
-      })
+  //   const walletSign = await simulateWalletSigning()
+  //   if (!walletSign)
+  //     return setStatus({
+  //       ...status,
+  //       message: "Error: Transaction failed.",
+  //       type: "error",
+  //       isClaiming: false,
+  //     })
 
-    const claimResult = await simulateApiCall(0.9)
-    if (claimResult) {
-      const claimAmountNumeric = parseFloat(card.claimAmount.split(" ")[0])
-      const newBalance = Math.max(0, card.balanceNumeric - claimAmountNumeric)
-      onBalanceUpdate(card.id, newBalance, `${newBalance} ${card.currency}`)
-      setStatus({
-        ...status,
-        message: `Successfully claimed ${card.claimAmount}!`,
-        type: "success",
-        hasClaimed: true,
-        isClaiming: false,
-      })
-    } else {
-      setStatus({
-        ...status,
-        message: "Error: Failed to claim tokens.",
-        type: "error",
-        isClaiming: false,
-      })
-    }
-  }
+  //   const claimResult = await simulateApiCall(0.9)
+  //   if (claimResult) {
+  //     const claimAmountNumeric = parseFloat(card.claimAmount.split(" ")[0])
+  //     const newBalance = Math.max(0, card.balanceNumeric - claimAmountNumeric)
+  //     onBalanceUpdate(card.id, newBalance, `${newBalance} ${card.currency}`)
+  //     setStatus({
+  //       ...status,
+  //       message: `Successfully claimed ${card.claimAmount}!`,
+  //       type: "success",
+  //       hasClaimed: true,
+  //       isClaiming: false,
+  //     })
+  //   } else {
+  //     setStatus({
+  //       ...status,
+  //       message: "Error: Failed to claim tokens.",
+  //       type: "error",
+  //       isClaiming: false,
+  //     })
+  //   }
+  // }
 
   const RenderClaimButton = useMemo(() => {
     if (!isConnected)
@@ -210,7 +210,6 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
       )
     return (
       <Button
-        onClick={handleClaimTokens}
         disabled={status.isClaiming}
         className="tamagotchi-button w-full py-3 text-lg"
       >
@@ -268,10 +267,10 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
         {/* Loop Setting */}
         <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
-          <LoopSettings address={loop.address} chainId={loop.chainId} />
+          <LoopSettings address={loop.address ?? "0x"} chainId={loop.chainId} />
 
           {/* <ClaimButton/> */}
-          <LoopClaim address={loop.address} chainId={loop.chainId} />
+          <LoopClaim address={loop.address ?? "0x"} chainId={loop.chainId} />
         </div>
       </div>
     </div>

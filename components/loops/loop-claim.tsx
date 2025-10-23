@@ -64,7 +64,6 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({ address, chainId }) => {
         Claim Loggic here
       </Button>
       <ExampleButton />
-      {/* <Toaster /> */}
     </div>
   )
 }

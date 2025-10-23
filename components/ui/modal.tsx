@@ -147,15 +147,8 @@ export const ConfirmModal: React.FC<{
       size="sm"
       footerActions={
         <>
-          <Button variant="outline" onClick={onClose}>
-            {cancelText}
-          </Button>
-          <Button
-            variant={variant === "destructive" ? "destructive" : "default"}
-            onClick={handleConfirm}
-          >
-            {confirmText}
-          </Button>
+          <Button onClick={onClose}>{cancelText}</Button>
+          <Button onClick={handleConfirm}>{confirmText}</Button>
         </>
       }
     >

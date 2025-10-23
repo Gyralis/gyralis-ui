@@ -6,7 +6,6 @@ import { turboIntegrations } from "@/data/turbo-integrations"
 import { LuBook } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 import {
   PageHeader,
   PageHeaderCTA,
@@ -36,7 +35,7 @@ export default function PageIntegration({ children }: { children: ReactNode }) {
           {turboIntegrations.gitcoinPassport.description}
         </PageHeaderDescription>
         <PageHeaderCTA>
-          <Link
+          {/* <Link
             href={turboIntegrations.gitcoinPassport.url}
             target="_blank"
             rel="noreferrer noopener"
@@ -44,7 +43,7 @@ export default function PageIntegration({ children }: { children: ReactNode }) {
           >
             <LuBook className="mr-2 size-4" />
             Documentation
-          </Link>
+          </Link> */}
         </PageHeaderCTA>
       </PageHeader>
       <PageSection className="w-full">
