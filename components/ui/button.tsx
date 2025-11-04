@@ -39,6 +39,7 @@ export function Button({
     : undefined
 
   const wrongNetwork = chainId != null && currentChainId !== chainId
+  
   const baseClass =
     variant === "primary" ? "tamagotchi-button" : "tamagotchi-button-secondary"
 

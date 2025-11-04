@@ -150,6 +150,84 @@
 
 }
 
+/* Enhanced button styling with gradients and animations */
+.tamagotchi-button {
+  background: linear-gradient(135deg, #1ce783 0%, #4ade80 100%);
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: var(--radius);
+  padding: 16px 32px;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Neumorphic button shadows */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 6px 20px
+    rgba(28, 231, 131, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.tamagotchi-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.tamagotchi-button:hover {
+  transform: translateY(-2px);
+  /* Active state with enhanced glow */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 10px 30px rgba(28, 231, 131, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(28, 231, 131, 0.4);
+}
+
+.tamagotchi-button:hover::before {
+  left: 100%;
+}
+
+/* Active and idle state variations */
+.tamagotchi-button.active {
+  background: linear-gradient(135deg, #ff6f61 0%, #ff8a80 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 6px 20px
+    rgba(255, 111, 97, 0.3), 0 0 16px rgba(255, 111, 97, 0.5);
+}
+
+.tamagotchi-button.idle {
+  background: linear-gradient(135deg, #8c4bff 0%, #a855f7 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.1), 0 6px 20px
+    rgba(140, 75, 255, 0.25), 0 0 12px rgba(140, 75, 255, 0.3);
+}
+
+.tamagotchi-button-secondary {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 14px 28px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Neumorphic secondary button */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tamagotchi-button-secondary:hover {
+  background: hsl(var(--muted));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.08), 0 6px 16px
+    rgba(28, 231, 131, 0.2), 0 0 12px rgba(28, 231, 131, 0.25);
+}
+
+
 .border2{
   border: 2px solid black;
 }

@@ -3,10 +3,6 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  integrationCategories,
-  turboIntegrations,
-} from "@/data/turbo-integrations"
 
 import { siteConfig } from "@/config/site"
 import {
@@ -21,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 
+import GyralisLogo from "../../assets/GyralisLogo.svg"
 import { LinkComponent } from "../shared/link-component"
 
 export function MainNav() {
@@ -28,13 +25,14 @@ export function MainNav() {
     <div className="mr-4 hidden md:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
         <LightDarkImage
-          LightImage="/logo-dark.png"
-          DarkImage="/logo-light.png"
-          alt="TurboETH"
+          LightImage={"/gyralis-logo.svg"}
+          DarkImage={"/gyralis-logo.svg"}
+          alt="Gyralis"
           className="rounded-full"
           height={32}
           width={32}
         />
+
         <span className="hidden bg-gradient-to-br from-black to-stone-500 bg-clip-text text-2xl font-bold text-transparent dark:from-stone-100 dark:to-yellow-200 sm:inline-block">
           {siteConfig.name}
         </span>
@@ -58,34 +56,6 @@ function MainNavMenu() {
   return (
     <NavigationMenu>
       <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>Integrations</NavigationMenuTrigger>
-          <NavigationMenuContent className="max-h-[768px] overflow-y-scroll">
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[768px] lg:grid-cols-3">
-              {integrationCategories.map((category) => (
-                <React.Fragment key={category}>
-                  <h4 className="text-lg font-medium leading-none md:col-span-2 lg:col-span-3">
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </h4>
-                  <Separator className="md:col-span-2 lg:col-span-3" />
-                  {Object.values(turboIntegrations)
-                    .filter((integration) => integration.category === category)
-                    .map(({ name, href, description, imgDark, imgLight }) => (
-                      <NavMenuListItem
-                        key={name}
-                        name={name}
-                        href={href}
-                        description={description}
-                        lightImage={imgDark}
-                        darkImage={imgLight}
-                      />
-                    ))}
-                </React.Fragment>
-              ))}
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-
         {/* Simple links */}
         {links.map(({ href, label }) => {
           const isActive = pathname === href
@@ -94,9 +64,7 @@ function MainNavMenu() {
               <LinkComponent href={href}>
                 <NavigationMenuLink
                   className={`${navigationMenuTriggerStyle()} ${
-                    isActive
-                      ? "border-b-2 border-primary font-semibold text-primary"
-                      : "text-foreground"
+                    isActive ? "bg-accent text-primary" : "text-foreground"
                   }`}
                 >
                   {label}
