@@ -48,7 +48,7 @@ function MainNavMenu() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/", label: "Loops" },
+    { href: "/loops", label: "Loops" },
     { href: "/elegibilities", label: "Elegibilities" },
     { href: "/leaderboards", label: "Leaderboards" },
   ]

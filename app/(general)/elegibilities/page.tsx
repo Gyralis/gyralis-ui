@@ -15,10 +15,10 @@ import { LinkComponent } from "@/components/shared/link-component"
 const eligibilityRequirements = [
   {
     id: 1,
-    name: "1hive GardensV2",
+    name: "1Hive - GardensV2",
     description:
       "Be registered as a member in 1hive GardensV2 governance system to participate in decentralized decision making",
-    requirement: "GardensV2 membership",
+    requirement: "1Hive membership",
     status: "active",
     icon: LuLaptop,
     color: "text-yellow-500",
@@ -27,8 +27,8 @@ const eligibilityRequirements = [
       "Visit the 1hive Gardens platform and connect your wallet",
       "Complete membership registration and stake required HNY tokens",
     ],
-    protocolUrl: "https://gardens.1hive.org",
-    imageUrl: "/placeholder.svg?height=200&width=400",
+    protocolUrl: "/gardens-cover.png",
+    imageUrl: "/gardens-logo.svg",
   },
   {
     id: 2,
@@ -106,9 +106,9 @@ export default function ElegibilityPage() {
   >(null)
   return (
     <div className="min-h-screen">
-      <div className="font-body mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-8 font-body">
         <div className="mb-6 md:mb-8">
-          <h1 className="font-heading mb-3 text-2xl font-bold  md:mb-4 md:text-3xl">
+          <h1 className="mb-3 font-heading text-2xl font-bold  md:mb-4 md:text-3xl">
             Eligibility Requirements
           </h1>
           <p className="font-body text-sm opacity-70 md:text-base">
@@ -141,7 +141,7 @@ export default function ElegibilityPage() {
                         {requirement.name}
                       </h3>
                       {requirement.status === "coming-soon" ? (
-                        <span className="font-body flex-shrink-0 rounded-full bg-gray-200 px-3 py-1 text-xs  shadow-sm sm:text-sm">
+                        <span className="flex-shrink-0 rounded-full bg-gray-200 px-3 py-1 font-body text-xs  shadow-sm sm:text-sm">
                           Coming Soon
                         </span>
                       ) : (
@@ -162,14 +162,14 @@ export default function ElegibilityPage() {
                     <span className="font-body text-xs font-medium  sm:text-sm">
                       Requirement:
                     </span>
-                    <span className="font-body rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-600 sm:px-3 sm:text-sm">
+                    <span className="rounded-full bg-blue-50 px-2 py-1 font-body text-xs font-semibold text-blue-600 sm:px-3 sm:text-sm">
                       {requirement.requirement}
                     </span>
                   </div>
                   <button
                     onClick={() => setSelectedEligibility(requirement)}
                     disabled={requirement.status === "coming-soon"}
-                    className="tamagotchi-button-secondary font-body flex min-h-[44px] w-full items-center justify-center px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm"
+                    className="tamagotchi-button-secondary flex min-h-[44px] w-full items-center justify-center px-3 py-2 font-body text-xs disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm"
                   >
                     How to be eligible
                   </button>
@@ -180,10 +180,10 @@ export default function ElegibilityPage() {
         </div>
 
         <div className="tamagotchi-card mt-8 border border-white/20 bg-gradient-to-r from-blue-50/80 to-purple-50/80 p-4 shadow-xl backdrop-blur-sm sm:mt-12 sm:p-6 md:p-8">
-          <h2 className="font-heading mb-4 text-xl font-semibold  sm:mb-6 sm:text-2xl">
+          <h2 className="mb-4 font-heading text-xl font-semibold  sm:mb-6 sm:text-2xl">
             How Eligibility Works
           </h2>
-          <div className="font-body space-y-3 text-sm  opacity-80 sm:space-y-4 sm:text-base">
+          <div className="space-y-3 font-body text-sm  opacity-80 sm:space-y-4 sm:text-base">
             <p>• Each loop may have different eligibility requirements</p>
             <p>
               • Requirements are checked automatically when you attempt to claim
@@ -209,7 +209,7 @@ export default function ElegibilityPage() {
             <div className="space-y-6">
               <div>
                 <img
-                  src={selectedEligibility.imageUrl || "/placeholder.svg"}
+                  src={"/gardens-cover.png"}
                   alt={selectedEligibility.name}
                   className="h-24 w-full rounded-2xl border border-gray-200 object-cover shadow-lg sm:h-32"
                 />
@@ -222,16 +222,16 @@ export default function ElegibilityPage() {
               </div>
 
               <div>
-                <h3 className="font-heading mb-4 text-lg font-bold text-[#0A0A0A]">
+                <h3 className="mb-4 font-heading text-lg font-bold text-[#0A0A0A]">
                   How to become eligible:
                 </h3>
                 <div className="space-y-3">
                   {selectedEligibility.steps.map((step, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="font-heading flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#1CE783] text-xs font-bold text-white shadow-lg">
+                      <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#1CE783] font-heading text-xs font-bold text-white shadow-lg">
                         {index + 1}
                       </div>
-                      <p className="font-body flex-1 text-sm leading-relaxed text-[#0A0A0A]">
+                      <p className="flex-1 font-body text-sm leading-relaxed text-[#0A0A0A]">
                         {step}
                       </p>
                     </div>
@@ -250,7 +250,7 @@ export default function ElegibilityPage() {
                   href={selectedEligibility.protocolUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tamagotchi-button font-body inline-flex min-h-[44px] w-full items-center justify-center space-x-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary/90 hover:shadow-xl sm:w-auto"
+                  className="tamagotchi-button inline-flex min-h-[44px] w-full items-center justify-center space-x-2 rounded-2xl bg-primary px-4 py-3 font-body text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary/90 hover:shadow-xl sm:w-auto"
                 >
                   <span>Visit Protocol</span>
                   <LinkComponent className="h-4 w-4" href={""} isExternal />
