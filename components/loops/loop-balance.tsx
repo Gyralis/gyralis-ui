@@ -6,25 +6,22 @@ import { FaWallet } from "react-icons/fa"
 import { Address, formatUnits } from "viem"
 import { useBalance } from "wagmi"
 
+import { useSuperfluidBalance } from "../../lib/hooks/useSuperFluidBalance"
+
 interface LoopBalanceProps {
   address?: Address
   token?: Address
   chainId: number
+  superToken?: boolean
 }
 
 export const LoopBalance: React.FC<LoopBalanceProps> = ({
   address,
   token,
   chainId,
+  superToken = false,
 }) => {
-  const { data, isLoading, isError } = useBalance({
-    address: address!,
-    token: token,
-    chainId: chainId,
-    // query: { enabled: !!address && !!token },
-  })
-
-  if (!address || !token)
+  if (!address || !token) {
     return (
       <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
         <p className="text-sm text-muted-foreground">
@@ -32,20 +29,52 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
         </p>
       </div>
     )
+  }
 
-  if (isLoading)
+  const {
+    data: erc20Data,
+    isLoading: erc20Loading,
+    isError: erc20Error,
+  } = useBalance({
+    address,
+    token,
+    chainId,
+    query: { enabled: !superToken },
+  })
+
+  const {
+    data: sfData,
+    isLoading: sfLoading,
+    isError: sfError,
+  } = useSuperfluidBalance({
+    account: address,
+    token,
+    chainId,
+    enabled: superToken,
+  })
+
+  //
+  // Choose based on superToken
+  //
+  const isLoading = superToken ? sfLoading : erc20Loading
+  const isError = superToken ? sfError : erc20Error
+  const data = superToken ? sfData : erc20Data
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
         <p className="text-sm text-muted-foreground">Fetching balance...</p>
       </div>
     )
+  }
 
-  if (isError || !data)
+  if (isError || !data) {
     return (
       <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
         <p className="text-sm text-red-500">Failed to fetch balance</p>
       </div>
     )
+  }
 
   const balance = parseFloat(formatUnits(data.value, data.decimals))
   const formattedBalance = Number(`${balance.toFixed(4)}`)
@@ -64,11 +93,10 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
   )
 }
 
-type AnimatedNumberProps = {
-  value: number
-}
-
-const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
+//
+// AnimatedNumber stays the same
+//
+const AnimatedNumber = ({ value }: { value: number }) => {
   const spring = useSpring(value, {
     mass: 0.5,
     stiffness: 50,

@@ -257,6 +257,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
               address={loop.address}
               token={loop.token}
               chainId={loop.chainId}
+              superToken={loop.super}
             />
           </div>
           <div className="border2 flex flex-col gap-2">
