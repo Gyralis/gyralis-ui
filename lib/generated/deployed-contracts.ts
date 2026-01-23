@@ -1,3891 +1,5368 @@
 const deployedContracts = {
   31337: {
-    loop: {
-      address: "0x36d4475f3bacDA9f3A2cE98c0c025B16ab1faFd9",
-      abi: [
+    "loop": {
+      "address": "0x788F1E4a99fa704Edb43fAE71946cFFDDcC16ccB",
+      "abi": [
         {
-          type: "function",
-          name: "DiamondCut_init",
-          inputs: [
+          "type": "function",
+          "name": "DiamondCut_init",
+          "inputs": [
             {
-              name: "_systemAdmin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_systemAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "diamondCut",
-          inputs: [
+          "type": "function",
+          "name": "diamondCut",
+          "inputs": [
             {
-              name: "facetCuts",
-              type: "tuple[]",
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
             },
             {
-              name: "init",
-              type: "address",
-              internalType: "address",
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "initData",
-              type: "bytes",
-              internalType: "bytes",
-            },
+              "name": "initData",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "setSystemAdmin",
-          inputs: [
+          "type": "function",
+          "name": "setSystemAdmin",
+          "inputs": [
             {
-              name: "_admin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "DiamondCut",
-          inputs: [
+          "type": "event",
+          "name": "DiamondCut",
+          "inputs": [
             {
-              name: "facetCuts",
-              type: "tuple[]",
-              indexed: false,
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "indexed": false,
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
-            },
-            {
-              name: "init",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "initData",
-              type: "bytes",
-              indexed: false,
-              internalType: "bytes",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Initialized",
-          inputs: [
-            {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SystemAdminUpdated",
-          inputs: [
-            {
-              name: "admin",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AddressEmptyCode",
-          inputs: [
-            {
-              name: "target",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotSystemAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_CannotRemoveFromOtherFacet",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsNotContract",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsZeroAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionAlreadyExists",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionFromSameFacet",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_ImmutableFacet",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_IncorrectFacetCutAction",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_InitIsNotContract",
-          inputs: [
-            {
-              name: "init",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_NonExistingFunction",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorArrayEmpty",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorIsZero",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FailedCall",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "DiamondLoupe_init",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "facetAddress",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetAddresses",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetFunctionSelectors",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facets",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "tuple[]",
-              internalType: "struct IDiamondLoupeBase.Facet[]",
-              components: [
-                {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "indexed": false,
+              "internalType": "bytes"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SystemAdminUpdated",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotSystemAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_CannotRemoveFromOtherFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsNotContract",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsZeroAddress",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionAlreadyExists",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionFromSameFacet",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_ImmutableFacet",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_IncorrectFacetCutAction",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_InitIsNotContract",
+          "inputs": [
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_NonExistingFunction",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorArrayEmpty",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondLoupe_init",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddress",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetFunctionSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facets",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "tuple[]",
+              "internalType": "struct IDiamondLoupeBase.Facet[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
-              ],
-            },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "supportsInterface",
-          inputs: [
+          "type": "function",
+          "name": "supportsInterface",
+          "inputs": [
             {
-              name: "interfaceId",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "LOOP_ADMIN_ROLE",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "Loop_init",
+          "inputs": [
             {
-              name: "",
-              type: "bytes32",
-              internalType: "bytes32",
+              "name": "_token",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "_loopAdmin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "_percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "_trustedBackendSigner",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "Loop_init",
-          inputs: [
+          "type": "function",
+          "name": "ONE_HUNDRED_PERCENT",
+          "inputs": [],
+          "outputs": [
             {
-              name: "_token",
-              type: "address",
-              internalType: "contract ERC20",
-            },
-            {
-              name: "_loopAdmin",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_periodLength",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "_percentPerPeriod",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "_trustedBackendSigner",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "ONE_HUNDRED_PERCENT",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "UNIT",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "claim",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "type": "function",
+          "name": "claim",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "claimAndRegister",
-          inputs: [
+          "type": "function",
+          "name": "claimAndRegister",
+          "inputs": [
             {
-              name: "signature",
-              type: "bytes",
-              internalType: "bytes",
-            },
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "getCurrentPeriod",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "getClaimerStatus",
+          "inputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getCurrentPeriodData",
-          inputs: [],
-          outputs: [
+          "outputs": [
             {
-              name: "totalRegisteredUsers",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "isRegistered",
+              "type": "bool",
+              "internalType": "bool"
             },
             {
-              name: "maxPayout",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "hasClaimed",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "getLoopDetails",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "getCurrentPeriod",
+          "inputs": [],
+          "outputs": [
             {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "periodLength",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "percentPerPeriod",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "firstPeriodStart",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "getPeriodIndividualPayout",
-          inputs: [
+          "type": "function",
+          "name": "getCurrentPeriodData",
+          "inputs": [],
+          "outputs": [
             {
-              name: "_periodNumber",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "totalRegisteredUsers",
+              "type": "uint256",
+              "internalType": "uint256"
             },
+            {
+              "name": "maxPayout",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getLoopDetails",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "firstPeriodStart",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "setPercentPerPeriod",
-          inputs: [
+          "type": "function",
+          "name": "getPeriodIndividualPayout",
+          "inputs": [
             {
-              name: "_percentPerPeriod",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "_periodNumber",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "setTrustedBackendSigner",
-          inputs: [
+          "outputs": [
             {
-              name: "_newSigner",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "withdrawDeposit",
-          inputs: [
+          "type": "function",
+          "name": "setPercentPerPeriod",
+          "inputs": [
             {
-              name: "_to",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "Claim",
-          inputs: [
+          "type": "function",
+          "name": "setTrustedBackendSigner",
+          "inputs": [
             {
-              name: "claimer",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "periodNumber",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-            {
-              name: "payout",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "_newSigner",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "FunctionAccessChanged",
-          inputs: [
+          "type": "function",
+          "name": "withdrawDeposit",
+          "inputs": [
             {
-              name: "functionSig",
-              type: "bytes4",
-              indexed: true,
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "_to",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "Initialize",
-          inputs: [
+          "type": "event",
+          "name": "Claim",
+          "inputs": [
             {
-              name: "token",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "claimer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "periodLength",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
             },
             {
-              name: "percentPerPeriod",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "payout",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "Register",
-          inputs: [
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
             {
-              name: "sender",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
             },
             {
-              name: "periodNumber",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "SetPercentPerPeriod",
-          inputs: [
+          "type": "event",
+          "name": "Initialize",
+          "inputs": [
             {
-              name: "percentPerPeriod",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
+              "name": "token",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "TrustedBackendSignerUpdated",
-          inputs: [
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "newSigner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "UserRoleUpdated",
-          inputs: [
+          "type": "event",
+          "name": "Register",
+          "inputs": [
             {
-              name: "user",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "sender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "Withdraw",
-          inputs: [
+          "type": "event",
+          "name": "SetPercentPerPeriod",
+          "inputs": [
             {
-              name: "admin",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "amount",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "AccessControl_CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "AccessControl_CannotRemoveAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "AlreadyRegistered",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CannotClaim",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ECDSAInvalidSignature",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ECDSAInvalidSignatureLength",
-          inputs: [
+          "type": "event",
+          "name": "TrustedBackendSignerUpdated",
+          "inputs": [
             {
-              name: "length",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "ECDSAInvalidSignatureS",
-          inputs: [
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
             {
-              name: "s",
-              type: "bytes32",
-              internalType: "bytes32",
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "FaucetBalanceIsZero",
-          inputs: [],
+          "type": "event",
+          "name": "Withdraw",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "InvalidPeriodLength",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidPeriodPercentage",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "AlreadyRegistered",
+          "inputs": []
         },
-      ],
+        {
+          "type": "error",
+          "name": "CannotClaim",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "FaucetBalanceIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "INVALID_ADDRESS",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "INVALID_ADMIN_ADDRESS",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "INVALID_SIGNER_ADDRESS",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidPeriodLength",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidPeriodPercentage",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "StreamingLoop_init",
+          "inputs": [
+            {
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_loopAdmin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "_backendSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "backendSigner",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getStreamingCurrentPeriod",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getStreamingLoopDetails",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "firstPeriodStart",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "periodLength",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "realtimeAvailableNow",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "setBackendSigner",
+          "inputs": [
+            {
+              "name": "newSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setPeriodLength",
+          "inputs": [
+            {
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setSuperToken",
+          "inputs": [
+            {
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "streamingClaim",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "streamingClaimAndRegister",
+          "inputs": [
+            {
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "streamingRegister",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "superToken",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "withdrawSuperTokens",
+          "inputs": [
+            {
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "Claim",
+          "inputs": [
+            {
+              "name": "claimer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "payout",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
+            {
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Register",
+          "inputs": [
+            {
+              "name": "sender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetBackendSigner",
+          "inputs": [
+            {
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetPeriodLength",
+          "inputs": [
+            {
+              "name": "newPeriodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetSuperToken",
+          "inputs": [
+            {
+              "name": "newSuperToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "StreamingFinalized",
+          "inputs": [
+            {
+              "name": "period",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "registered",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "accrued",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "perUser",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndPrev",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndNow",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "StreamingInitialize",
+          "inputs": [
+            {
+              "name": "superToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CannotClaim",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidParam",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidSignature",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NoRegistrations",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NothingToFinalize",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "TransferFailed",
+          "inputs": []
+        }
+      ]
     },
-    organization: {
-      address: "0x4fBd2B1681897666FCc9E953839f3F49cA16bf20",
-      abi: [
+    "organization": {
+      "address": "0xe082b26cEf079a095147F35c9647eC97c2401B83",
+      "abi": [
         {
-          type: "function",
-          name: "DiamondCut_init",
-          inputs: [
+          "type": "function",
+          "name": "DiamondCut_init",
+          "inputs": [
             {
-              name: "_systemAdmin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_systemAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "diamondCut",
-          inputs: [
+          "type": "function",
+          "name": "diamondCut",
+          "inputs": [
             {
-              name: "facetCuts",
-              type: "tuple[]",
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
             },
             {
-              name: "init",
-              type: "address",
-              internalType: "address",
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "initData",
-              type: "bytes",
-              internalType: "bytes",
-            },
+              "name": "initData",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "setSystemAdmin",
-          inputs: [
+          "type": "function",
+          "name": "setSystemAdmin",
+          "inputs": [
             {
-              name: "_admin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "DiamondCut",
-          inputs: [
+          "type": "event",
+          "name": "DiamondCut",
+          "inputs": [
             {
-              name: "facetCuts",
-              type: "tuple[]",
-              indexed: false,
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "indexed": false,
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
-            },
-            {
-              name: "init",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "initData",
-              type: "bytes",
-              indexed: false,
-              internalType: "bytes",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Initialized",
-          inputs: [
-            {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SystemAdminUpdated",
-          inputs: [
-            {
-              name: "admin",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AddressEmptyCode",
-          inputs: [
-            {
-              name: "target",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotSystemAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_CannotRemoveFromOtherFacet",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsNotContract",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsZeroAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionAlreadyExists",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionFromSameFacet",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_ImmutableFacet",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_IncorrectFacetCutAction",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_InitIsNotContract",
-          inputs: [
-            {
-              name: "init",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_NonExistingFunction",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorArrayEmpty",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorIsZero",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FailedCall",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "DiamondLoupe_init",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "facetAddress",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetAddresses",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetFunctionSelectors",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facets",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "tuple[]",
-              internalType: "struct IDiamondLoupeBase.Facet[]",
-              components: [
-                {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "indexed": false,
+              "internalType": "bytes"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SystemAdminUpdated",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotSystemAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_CannotRemoveFromOtherFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsNotContract",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsZeroAddress",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionAlreadyExists",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionFromSameFacet",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_ImmutableFacet",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_IncorrectFacetCutAction",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_InitIsNotContract",
+          "inputs": [
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_NonExistingFunction",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorArrayEmpty",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondLoupe_init",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddress",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetFunctionSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facets",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "tuple[]",
+              "internalType": "struct IDiamondLoupeBase.Facet[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
-              ],
-            },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "supportsInterface",
-          inputs: [
+          "type": "function",
+          "name": "supportsInterface",
+          "inputs": [
             {
-              name: "interfaceId",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "Organization_init",
-          inputs: [
+          "type": "function",
+          "name": "Organization_init",
+          "inputs": [
             {
-              name: "_name",
-              type: "string",
-              internalType: "string",
+              "name": "_name",
+              "type": "string",
+              "internalType": "string"
             },
             {
-              name: "_admin",
-              type: "address",
-              internalType: "address",
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "_description",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "_description",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "addAdmin",
-          inputs: [
+          "type": "function",
+          "name": "addAdmin",
+          "inputs": [
             {
-              name: "newAdmin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "newAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "createNewLoop",
-          inputs: [
+          "type": "function",
+          "name": "createNewLoop",
+          "inputs": [
             {
-              name: "systemDiamond",
-              type: "address",
-              internalType: "address",
+              "name": "systemDiamond",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "token",
-              type: "address",
-              internalType: "address",
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "periodLength",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
             },
             {
-              name: "percentPerPeriod",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "newLoop",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "newLoop",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "getOrganizationAdmin",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "createNewLoopOfKind",
+          "inputs": [
             {
-              name: "",
-              type: "address",
-              internalType: "address",
+              "name": "systemDiamond",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "kind",
+              "type": "uint8",
+              "internalType": "enum ILoopFactory.LoopKind"
+            },
+            {
+              "name": "args",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getOrganizationDescription",
-          inputs: [],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "newLoop",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "getOrganizationName",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "getOrganizationAdmin",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "removeAdmin",
-          inputs: [
+          "type": "function",
+          "name": "getOrganizationDescription",
+          "inputs": [],
+          "outputs": [
             {
-              name: "adminToRemove",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "FunctionAccessChanged",
-          inputs: [
+          "type": "function",
+          "name": "getOrganizationName",
+          "inputs": [],
+          "outputs": [
             {
-              name: "functionSig",
-              type: "bytes4",
-              indexed: true,
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          anonymous: false,
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "function",
+          "name": "removeAdmin",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
+              "name": "adminToRemove",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "LoopCreated",
-          inputs: [
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
             {
-              name: "loopAddress",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
             },
             {
-              name: "token",
-              type: "address",
-              indexed: false,
-              internalType: "address",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
             {
-              name: "periodLength",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-            {
-              name: "percentPerPeriod",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "UserRoleUpdated",
-          inputs: [
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "user",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "AccessControl_CallerIsNotAuthorized",
-          inputs: [],
+          "type": "event",
+          "name": "LoopCreated",
+          "inputs": [
+            {
+              "name": "loopAddress",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "AccessControl_CannotRemoveAdmin",
-          inputs: [],
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-      ],
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        }
+      ]
     },
-    system_diamond: {
-      address: "0xb17646006b3057714eafF5329b8e95F654B03Ba4",
-      abi: [
+    "streaming_loop": {
+      "address": "0x88577731Cc84560fE297792ab784b600A54728E2",
+      "abi": [
         {
-          type: "function",
-          name: "AccessControl_init",
-          inputs: [
+          "type": "function",
+          "name": "DiamondCut_init",
+          "inputs": [
             {
-              name: "roleAdmin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_systemAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "canCall",
-          inputs: [
+          "type": "function",
+          "name": "diamondCut",
+          "inputs": [
             {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "functionSig",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "functionRoles",
-          inputs: [
-            {
-              name: "functionSig",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes32",
-              internalType: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "hasRole",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              internalType: "uint8",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "roleHasAccess",
-          inputs: [
-            {
-              name: "role",
-              type: "uint8",
-              internalType: "uint8",
-            },
-            {
-              name: "functionSig",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "setFunctionAccess",
-          inputs: [
-            {
-              name: "functionSig",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "setUserRole",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "userRoles",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes32",
-              internalType: "bytes32",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "event",
-          name: "FunctionAccessChanged",
-          inputs: [
-            {
-              name: "functionSig",
-              type: "bytes4",
-              indexed: true,
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Initialized",
-          inputs: [
-            {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "UserRoleUpdated",
-          inputs: [
-            {
-              name: "user",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AccessControl_CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "AccessControl_CannotRemoveAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "DiamondCut_init",
-          inputs: [
-            {
-              name: "_systemAdmin",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "diamondCut",
-          inputs: [
-            {
-              name: "facetCuts",
-              type: "tuple[]",
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
             },
             {
-              name: "init",
-              type: "address",
-              internalType: "address",
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "initData",
-              type: "bytes",
-              internalType: "bytes",
-            },
+              "name": "initData",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "setSystemAdmin",
-          inputs: [
+          "type": "function",
+          "name": "setSystemAdmin",
+          "inputs": [
             {
-              name: "_admin",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "DiamondCut",
-          inputs: [
+          "type": "event",
+          "name": "DiamondCut",
+          "inputs": [
             {
-              name: "facetCuts",
-              type: "tuple[]",
-              indexed: false,
-              internalType: "struct IDiamond.FacetCut[]",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "indexed": false,
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
-                },
-                {
-                  name: "action",
-                  type: "uint8",
-                  internalType: "enum IDiamond.FacetCutAction",
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
-                },
-              ],
-            },
-            {
-              name: "init",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "initData",
-              type: "bytes",
-              indexed: false,
-              internalType: "bytes",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "Initialized",
-          inputs: [
-            {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "SystemAdminUpdated",
-          inputs: [
-            {
-              name: "admin",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "AddressEmptyCode",
-          inputs: [
-            {
-              name: "target",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotSystemAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_CannotRemoveFromOtherFacet",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsNotContract",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FacetIsZeroAddress",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionAlreadyExists",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_FunctionFromSameFacet",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_ImmutableFacet",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_IncorrectFacetCutAction",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_InitIsNotContract",
-          inputs: [
-            {
-              name: "init",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_NonExistingFunction",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorArrayEmpty",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "DiamondCut_SelectorIsZero",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FailedCall",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "DiamondLoupe_init",
-          inputs: [],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "facetAddress",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetAddresses",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetFunctionSelectors",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facets",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "tuple[]",
-              internalType: "struct IDiamondLoupeBase.Facet[]",
-              components: [
-                {
-                  name: "facet",
-                  type: "address",
-                  internalType: "address",
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
                 },
                 {
-                  name: "selectors",
-                  type: "bytes4[]",
-                  internalType: "bytes4[]",
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "indexed": false,
+              "internalType": "bytes"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SystemAdminUpdated",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotSystemAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_CannotRemoveFromOtherFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsNotContract",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsZeroAddress",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionAlreadyExists",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionFromSameFacet",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_ImmutableFacet",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_IncorrectFacetCutAction",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_InitIsNotContract",
+          "inputs": [
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_NonExistingFunction",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorArrayEmpty",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondLoupe_init",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddress",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetFunctionSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facets",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "tuple[]",
+              "internalType": "struct IDiamondLoupeBase.Facet[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
                 },
-              ],
-            },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "supportsInterface",
-          inputs: [
+          "type": "function",
+          "name": "supportsInterface",
+          "inputs": [
             {
-              name: "interfaceId",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "LoopFactory_init",
-          inputs: [
+          "type": "function",
+          "name": "StreamingLoop_init",
+          "inputs": [
             {
-              name: "diamondFactory",
-              type: "address",
-              internalType: "address",
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "facetRegistry",
-              type: "address",
-              internalType: "address",
+              "name": "_loopAdmin",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "_trustedBackendSigner",
-              type: "address",
-              internalType: "address",
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
             },
+            {
+              "name": "_backendSigner",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "createLoop",
-          inputs: [
+          "type": "function",
+          "name": "backendSigner",
+          "inputs": [],
+          "outputs": [
             {
-              name: "organization",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "token",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "admin",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "periodLength",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "percentPerPeriod",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getStreamingCurrentPeriod",
+          "inputs": [],
+          "outputs": [
             {
-              name: "newLoop",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "getLoopsByOrganization",
-          inputs: [
+          "type": "function",
+          "name": "getStreamingLoopDetails",
+          "inputs": [],
+          "outputs": [
             {
-              name: "organization",
-              type: "address",
-              internalType: "address",
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "firstPeriodStart",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "periodLength",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "setTrustedBackendSigner",
-          inputs: [
+          "type": "function",
+          "name": "realtimeAvailableNow",
+          "inputs": [],
+          "outputs": [
             {
-              name: "_newSigner",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "FunctionAccessChanged",
-          inputs: [
+          "type": "function",
+          "name": "setBackendSigner",
+          "inputs": [
             {
-              name: "functionSig",
-              type: "bytes4",
-              indexed: true,
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "newSigner",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "function",
+          "name": "setPeriodLength",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
-            },
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "LoopCreated",
-          inputs: [
+          "type": "function",
+          "name": "setSuperToken",
+          "inputs": [
             {
-              name: "loopId",
-              type: "uint256",
-              indexed: true,
-              internalType: "uint256",
-            },
-            {
-              name: "loopAddress",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "organization",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "token",
-              type: "address",
-              indexed: false,
-              internalType: "address",
-            },
-            {
-              name: "periodLength",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
-            {
-              name: "percentPerPeriod",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "TrustedBackendSignerUpdated",
-          inputs: [
+          "type": "function",
+          "name": "streamingClaim",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "streamingClaimAndRegister",
+          "inputs": [
             {
-              name: "newSigner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "UserRoleUpdated",
-          inputs: [
+          "type": "function",
+          "name": "streamingRegister",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "superToken",
+          "inputs": [],
+          "outputs": [
             {
-              name: "user",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "stateMutability": "view"
         },
         {
-          type: "error",
-          name: "AccessControl_CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "AccessControl_CannotRemoveAdmin",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-        {
-          type: "function",
-          name: "ADMIN_ROLE",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "withdrawSuperTokens",
+          "inputs": [
             {
-              name: "",
-              type: "bytes32",
-              internalType: "bytes32",
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "OrganizationFactory_init",
-          inputs: [
+          "type": "event",
+          "name": "Claim",
+          "inputs": [
             {
-              name: "diamondFactory",
-              type: "address",
-              internalType: "address",
+              "name": "claimer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "facetRegistry",
-              type: "address",
-              internalType: "address",
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
             },
+            {
+              "name": "payout",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "anonymous": false
         },
         {
-          type: "function",
-          name: "createOrganization",
-          inputs: [
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
             {
-              name: "name",
-              type: "string",
-              internalType: "string",
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
             },
             {
-              name: "admin",
-              type: "address",
-              internalType: "address",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
             {
-              name: "description",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          outputs: [
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          stateMutability: "nonpayable",
+          "anonymous": false
         },
         {
-          type: "function",
-          name: "getOrganizationById",
-          inputs: [
+          "type": "event",
+          "name": "Register",
+          "inputs": [
             {
-              name: "id",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "sender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
+            {
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetBackendSigner",
+          "inputs": [
             {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "anonymous": false
         },
         {
-          type: "function",
-          name: "getOrganizationCount",
-          inputs: [],
-          outputs: [
+          "type": "event",
+          "name": "SetPeriodLength",
+          "inputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "newPeriodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "FunctionAccessChanged",
-          inputs: [
+          "type": "event",
+          "name": "SetSuperToken",
+          "inputs": [
             {
-              name: "functionSig",
-              type: "bytes4",
-              indexed: true,
-              internalType: "bytes4",
-            },
-            {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
-            },
-            {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "newSuperToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "Initialized",
-          inputs: [
+          "type": "event",
+          "name": "StreamingFinalized",
+          "inputs": [
             {
-              name: "version",
-              type: "uint64",
-              indexed: false,
-              internalType: "uint64",
+              "name": "period",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
             },
+            {
+              "name": "registered",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "accrued",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "perUser",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndPrev",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndNow",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "OrganizationCreated",
-          inputs: [
+          "type": "event",
+          "name": "StreamingInitialize",
+          "inputs": [
             {
-              name: "id",
-              type: "uint256",
-              indexed: true,
-              internalType: "uint256",
+              "name": "superToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "organizationAddress",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "name",
-              type: "string",
-              indexed: false,
-              internalType: "string",
-            },
-            {
-              name: "admin",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "description",
-              type: "string",
-              indexed: false,
-              internalType: "string",
-            },
+              "name": "periodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "UserRoleUpdated",
-          inputs: [
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
             {
-              name: "user",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "role",
-              type: "uint8",
-              indexed: true,
-              internalType: "uint8",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
             {
-              name: "enabled",
-              type: "bool",
-              indexed: false,
-              internalType: "bool",
-            },
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "AccessControl_CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "AccessControl_CannotRemoveAdmin",
-          inputs: [],
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotAuthorized",
-          inputs: [],
+          "type": "error",
+          "name": "CannotClaim",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "CallerIsNotOwner",
-          inputs: [],
+          "type": "error",
+          "name": "InvalidParam",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "DelegateNotAllowed",
-          inputs: [],
+          "type": "error",
+          "name": "InvalidSignature",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "InvalidInitialization",
-          inputs: [],
+          "type": "error",
+          "name": "NoRegistrations",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "NotInitializing",
-          inputs: [],
+          "type": "error",
+          "name": "NothingToFinalize",
+          "inputs": []
         },
         {
-          type: "error",
-          name: "OnlyDelegate",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "ReentrancyGuardReentrantCall",
-          inputs: [],
-        },
-      ],
+          "type": "error",
+          "name": "TransferFailed",
+          "inputs": []
+        }
+      ]
     },
-    test_token_address: {
-      address: "0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650",
-      abi: [
+    "system_diamond": {
+      "address": "0x8aCd85898458400f7Db866d53FCFF6f0D49741FF",
+      "abi": [
         {
-          type: "constructor",
-          inputs: [
+          "type": "function",
+          "name": "AccessControl_init",
+          "inputs": [
             {
-              name: "name",
-              type: "string",
-              internalType: "string",
-            },
-            {
-              name: "symbol",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "roleAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "allowance",
-          inputs: [
+          "type": "function",
+          "name": "canCall",
+          "inputs": [
             {
-              name: "owner",
-              type: "address",
-              internalType: "address",
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "functionSig",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "approve",
-          inputs: [
+          "type": "function",
+          "name": "functionRoles",
+          "inputs": [
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "functionSig",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "balanceOf",
-          inputs: [
+          "type": "function",
+          "name": "hasRole",
+          "inputs": [
             {
-              name: "account",
-              type: "address",
-              internalType: "address",
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "role",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "decimals",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "roleHasAccess",
+          "inputs": [
             {
-              name: "",
-              type: "uint8",
-              internalType: "uint8",
+              "name": "role",
+              "type": "uint8",
+              "internalType": "uint8"
             },
+            {
+              "name": "functionSig",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
           ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "name",
-          inputs: [],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "symbol",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "setFunctionAccess",
+          "inputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
+              "name": "functionSig",
+              "type": "bytes4",
+              "internalType": "bytes4"
             },
+            {
+              "name": "role",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "totalSupply",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "setUserRole",
+          "inputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "role",
+              "type": "uint8",
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "transfer",
-          inputs: [
+          "type": "function",
+          "name": "userRoles",
+          "inputs": [
             {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "user",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "transferFrom",
-          inputs: [
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
             {
-              name: "from",
-              type: "address",
-              internalType: "address",
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
             },
             {
-              name: "to",
-              type: "address",
-              internalType: "address",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
             {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          outputs: [
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
           ],
-          stateMutability: "nonpayable",
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "Approval",
-          inputs: [
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
             {
-              name: "owner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "spender",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
             },
             {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "Transfer",
-          inputs: [
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondCut_init",
+          "inputs": [
             {
-              name: "from",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "_systemAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "error",
-          name: "ERC20InsufficientAllowance",
-          inputs: [
+          "type": "function",
+          "name": "diamondCut",
+          "inputs": [
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "allowance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InsufficientBalance",
-          inputs: [
-            {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "balance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidApprover",
-          inputs: [
-            {
-              name: "approver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidReceiver",
-          inputs: [
-            {
-              name: "receiver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSender",
-          inputs: [
-            {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSpender",
-          inputs: [
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-      ],
-    },
-    FacetRegistry: {
-      address: "0x9d4454b023096f34b160d6b654540c56a1f81688",
-      abi: [
-        {
-          type: "constructor",
-          inputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "addFacet",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "selectors",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "computeFacetAddress",
-          inputs: [
-            {
-              name: "salt",
-              type: "bytes32",
-              internalType: "bytes32",
-            },
-            {
-              name: "creationCode",
-              type: "bytes",
-              internalType: "bytes",
-            },
-          ],
-          outputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "deployFacet",
-          inputs: [
-            {
-              name: "salt",
-              type: "bytes32",
-              internalType: "bytes32",
-            },
-            {
-              name: "creationCode",
-              type: "bytes",
-              internalType: "bytes",
-            },
-            {
-              name: "selectors",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          outputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "facetAddresses",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address[]",
-              internalType: "address[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "facetSelectors",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bytes4[]",
-              internalType: "bytes4[]",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "getFacetBySelector",
-          inputs: [
-            {
-              name: "selector",
-              type: "bytes4",
-              internalType: "bytes4",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "owner",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "removeFacet",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "event",
-          name: "FacetRegistered",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "selectors",
-              type: "bytes4[]",
-              indexed: false,
-              internalType: "bytes4[]",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "FacetUnregistered",
-          inputs: [
-            {
-              name: "facet",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "OwnerSet",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "Create2EmptyBytecode",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FacetRegistry_FacetAddressZero",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FacetRegistry_FacetAlreadyRegistered",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FacetRegistry_FacetMustHaveSelectors",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FacetRegistry_FacetNotContract",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FacetRegistry_FacetNotRegistered",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "FailedDeployment",
-          inputs: [],
-        },
-        {
-          type: "error",
-          name: "InsufficientBalance",
-          inputs: [
-            {
-              name: "balance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-        },
-      ],
-      inheritedFunctions: {},
-    },
-    DiamondFactory: {
-      address: "0xcd8a1c3ba11cf5ecfa6267617243239504a98d90",
-      abi: [
-        {
-          type: "constructor",
-          inputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "createDiamond",
-          inputs: [
-            {
-              name: "initParams",
-              type: "tuple",
-              internalType: "struct IDiamond.InitParams",
-              components: [
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
                 {
-                  name: "baseFacets",
-                  type: "tuple[]",
-                  internalType: "struct IDiamond.FacetCut[]",
-                  components: [
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setSystemAdmin",
+          "inputs": [
+            {
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "DiamondCut",
+          "inputs": [
+            {
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "indexed": false,
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "indexed": false,
+              "internalType": "bytes"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SystemAdminUpdated",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotSystemAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_CannotRemoveFromOtherFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsNotContract",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsZeroAddress",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionAlreadyExists",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionFromSameFacet",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_ImmutableFacet",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_IncorrectFacetCutAction",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_InitIsNotContract",
+          "inputs": [
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_NonExistingFunction",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorArrayEmpty",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondLoupe_init",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddress",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetFunctionSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facets",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "tuple[]",
+              "internalType": "struct IDiamondLoupeBase.Facet[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "supportsInterface",
+          "inputs": [
+            {
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "LoopFactory_init",
+          "inputs": [
+            {
+              "name": "diamondFactory",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "facetRegistry",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_trustedBackendSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "createLoop",
+          "inputs": [
+            {
+              "name": "organization",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "admin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "kind",
+              "type": "uint8",
+              "internalType": "enum ILoopFactory.LoopKind"
+            },
+            {
+              "name": "args",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "newLoop",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "createLoop",
+          "inputs": [
+            {
+              "name": "organization",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "admin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "newLoop",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "getLoopsByOrganization",
+          "inputs": [
+            {
+              "name": "organization",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "setLoopFactoryTrustedSigner",
+          "inputs": [
+            {
+              "name": "_newSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
+            {
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "LoopCreated",
+          "inputs": [
+            {
+              "name": "loopId",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "loopAddress",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "organization",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "kind",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "enum ILoopFactory.LoopKind"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "TrustedBackendSignerUpdated",
+          "inputs": [
+            {
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "ADMIN_ROLE",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "OrganizationFactory_init",
+          "inputs": [
+            {
+              "name": "diamondFactory",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "facetRegistry",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "createOrganization",
+          "inputs": [
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "admin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "getOrganizationById",
+          "inputs": [
+            {
+              "name": "id",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getOrganizationCount",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
+            {
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "OrganizationCreated",
+          "inputs": [
+            {
+              "name": "id",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "organizationAddress",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+            },
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        }
+      ]
+    },
+    "test_token_address": {
+      "address": "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+      "abi": [
+        {
+          "type": "constructor",
+          "inputs": [
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "symbol",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "allowance",
+          "inputs": [
+            {
+              "name": "owner",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "approve",
+          "inputs": [
+            {
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "balanceOf",
+          "inputs": [
+            {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "decimals",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "decreaseAllowance",
+          "inputs": [
+            {
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "subtractedValue",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "increaseAllowance",
+          "inputs": [
+            {
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "addedValue",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "name",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "symbol",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "totalSupply",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "transfer",
+          "inputs": [
+            {
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "transferFrom",
+          "inputs": [
+            {
+              "name": "from",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "Approval",
+          "inputs": [
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Transfer",
+          "inputs": [
+            {
+              "name": "from",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        }
+      ]
+    },
+    "FacetRegistry": {
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "abi": [
+        {
+          "type": "constructor",
+          "inputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "addFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selectors",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "computeFacetAddress",
+          "inputs": [
+            {
+              "name": "salt",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "creationCode",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "deployFacet",
+          "inputs": [
+            {
+              "name": "salt",
+              "type": "bytes32",
+              "internalType": "bytes32"
+            },
+            {
+              "name": "creationCode",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "selectors",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getFacetBySelector",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "owner",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "removeFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "FacetRegistered",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "selectors",
+              "type": "bytes4[]",
+              "indexed": false,
+              "internalType": "bytes4[]"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "FacetUnregistered",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "OwnerSet",
+          "inputs": [
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "FacetRegistry_FacetAddressZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "FacetRegistry_FacetAlreadyRegistered",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "FacetRegistry_FacetMustHaveSelectors",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "FacetRegistry_FacetNotContract",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "FacetRegistry_FacetNotRegistered",
+          "inputs": []
+        }
+      ],
+      "inheritedFunctions": {
+        "addFacet": "contracts/registry/IFacetRegistry.sol",
+        "computeFacetAddress": "contracts/registry/IFacetRegistry.sol",
+        "deployFacet": "contracts/registry/IFacetRegistry.sol",
+        "facetAddresses": "contracts/registry/IFacetRegistry.sol",
+        "facetSelectors": "contracts/registry/IFacetRegistry.sol",
+        "getFacetBySelector": "contracts/registry/IFacetRegistry.sol",
+        "removeFacet": "contracts/registry/IFacetRegistry.sol",
+        "owner": "contracts/registry/FacetRegistryBase.sol"
+      }
+    },
+    "DiamondFactory": {
+      "address": "0x8a791620dd6260079bf849dc5567adc3f2fdc318",
+      "abi": [
+        {
+          "type": "constructor",
+          "inputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "createDiamond",
+          "inputs": [
+            {
+              "name": "initParams",
+              "type": "tuple",
+              "internalType": "struct IDiamond.InitParams",
+              "components": [
+                {
+                  "name": "baseFacets",
+                  "type": "tuple[]",
+                  "internalType": "struct IDiamond.FacetCut[]",
+                  "components": [
                     {
-                      name: "facet",
-                      type: "address",
-                      internalType: "address",
+                      "name": "facet",
+                      "type": "address",
+                      "internalType": "address"
                     },
                     {
-                      name: "action",
-                      type: "uint8",
-                      internalType: "enum IDiamond.FacetCutAction",
+                      "name": "action",
+                      "type": "uint8",
+                      "internalType": "enum IDiamond.FacetCutAction"
                     },
                     {
-                      name: "selectors",
-                      type: "bytes4[]",
-                      internalType: "bytes4[]",
-                    },
-                  ],
+                      "name": "selectors",
+                      "type": "bytes4[]",
+                      "internalType": "bytes4[]"
+                    }
+                  ]
                 },
                 {
-                  name: "init",
-                  type: "address",
-                  internalType: "address",
+                  "name": "init",
+                  "type": "address",
+                  "internalType": "address"
                 },
                 {
-                  name: "initData",
-                  type: "bytes",
-                  internalType: "bytes",
-                },
-              ],
-            },
+                  "name": "initData",
+                  "type": "bytes",
+                  "internalType": "bytes"
+                }
+              ]
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "diamond",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "diamond",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "owner",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "owner",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "setSystemDiamond",
-          inputs: [
+          "type": "function",
+          "name": "setSystemDiamond",
+          "inputs": [
             {
-              name: "_systemDiamond",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "_systemDiamond",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
+          "outputs": [],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "systemDiamond",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "systemDiamond",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "DiamondCreated",
-          inputs: [
+          "type": "event",
+          "name": "DiamondCreated",
+          "inputs": [
             {
-              name: "diamond",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "diamond",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "deployer",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
+              "name": "deployer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "OwnerSet",
-          inputs: [
+          "type": "event",
+          "name": "OwnerSet",
+          "inputs": [
             {
-              name: "owner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "event",
-          name: "SystemDiamondSet",
-          inputs: [
+          "type": "event",
+          "name": "SystemDiamondSet",
+          "inputs": [
             {
-              name: "systemDiamond",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
+              "name": "systemDiamond",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
           ],
-          anonymous: false,
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "DiamondFactory_LoupeNotSupported",
-          inputs: [],
-        },
+          "type": "error",
+          "name": "DiamondFactory_LoupeNotSupported",
+          "inputs": []
+        }
       ],
-      inheritedFunctions: {},
+      "inheritedFunctions": {
+        "createDiamond": "contracts/factory/IDiamondFactory.sol",
+        "owner": "contracts/factory/DiamondFactoryBase.sol",
+        "systemDiamond": "contracts/factory/DiamondFactoryBase.sol"
+      }
     },
-    TestToken: {
-      address: "0x7bc06c482dead17c0e297afbc32f6e63d3846650",
-      abi: [
+    "TestToken": {
+      "address": "0x0dcd1bf9a1b36ce34237eeafef220932846bcd82",
+      "abi": [
         {
-          type: "constructor",
-          inputs: [
+          "type": "constructor",
+          "inputs": [
             {
-              name: "name",
-              type: "string",
-              internalType: "string",
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
             },
             {
-              name: "symbol",
-              type: "string",
-              internalType: "string",
-            },
+              "name": "symbol",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "allowance",
-          inputs: [
+          "type": "function",
+          "name": "allowance",
+          "inputs": [
             {
-              name: "owner",
-              type: "address",
-              internalType: "address",
+              "name": "owner",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "approve",
-          inputs: [
+          "type": "function",
+          "name": "approve",
+          "inputs": [
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
           ],
-          stateMutability: "nonpayable",
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "balanceOf",
-          inputs: [
+          "type": "function",
+          "name": "balanceOf",
+          "inputs": [
             {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            }
           ],
-          outputs: [
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "decimals",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "decimals",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "uint8",
-              internalType: "uint8",
-            },
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "name",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "decreaseAllowance",
+          "inputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "subtractedValue",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "symbol",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "increaseAllowance",
+          "inputs": [
             {
-              name: "",
-              type: "string",
-              internalType: "string",
+              "name": "spender",
+              "type": "address",
+              "internalType": "address"
             },
+            {
+              "name": "addedValue",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          stateMutability: "view",
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "function",
-          name: "totalSupply",
-          inputs: [],
-          outputs: [
+          "type": "function",
+          "name": "name",
+          "inputs": [],
+          "outputs": [
             {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          stateMutability: "view",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "transfer",
-          inputs: [
+          "type": "function",
+          "name": "symbol",
+          "inputs": [],
+          "outputs": [
             {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
           ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "function",
-          name: "transferFrom",
-          inputs: [
+          "type": "function",
+          "name": "totalSupply",
+          "inputs": [],
+          "outputs": [
             {
-              name: "from",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "nonpayable",
+          "stateMutability": "view"
         },
         {
-          type: "event",
-          name: "Approval",
-          inputs: [
+          "type": "function",
+          "name": "transfer",
+          "inputs": [
             {
-              name: "owner",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "spender",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "event",
-          name: "Transfer",
-          inputs: [
+          "type": "function",
+          "name": "transferFrom",
+          "inputs": [
             {
-              name: "from",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "from",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "to",
-              type: "address",
-              indexed: true,
-              internalType: "address",
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              name: "value",
-              type: "uint256",
-              indexed: false,
-              internalType: "uint256",
-            },
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
           ],
-          anonymous: false,
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "nonpayable"
         },
         {
-          type: "error",
-          name: "ERC20InsufficientAllowance",
-          inputs: [
+          "type": "event",
+          "name": "Approval",
+          "inputs": [
             {
-              name: "spender",
-              type: "address",
-              internalType: "address",
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "allowance",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "spender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
+          "anonymous": false
         },
         {
-          type: "error",
-          name: "ERC20InsufficientBalance",
-          inputs: [
+          "type": "event",
+          "name": "Transfer",
+          "inputs": [
             {
-              name: "sender",
-              type: "address",
-              internalType: "address",
+              "name": "from",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "balance",
-              type: "uint256",
-              internalType: "uint256",
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
             },
             {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
-            },
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
           ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidApprover",
-          inputs: [
-            {
-              name: "approver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidReceiver",
-          inputs: [
-            {
-              name: "receiver",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSender",
-          inputs: [
-            {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
-        {
-          type: "error",
-          name: "ERC20InvalidSpender",
-          inputs: [
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-        },
+          "anonymous": false
+        }
       ],
-      inheritedFunctions: {
-        allowance: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        approve: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        balanceOf: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        decimals: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        name: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        symbol: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        totalSupply:
-          "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        transfer: "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-        transferFrom:
-          "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
-      },
+      "inheritedFunctions": {
+        "allowance": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "approve": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "balanceOf": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "decimals": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "decreaseAllowance": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "increaseAllowance": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "name": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "symbol": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "totalSupply": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "transfer": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol",
+        "transferFrom": "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol"
+      }
     },
+    "MockSuperTokenStreaming": {
+      "address": "0x9a9f2ccfde556a7e9ff0848998aa4a0cfd8863ae",
+      "abi": [
+        {
+          "type": "constructor",
+          "inputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "allowance",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "approve",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "balanceOf",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "base",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "int256",
+              "internalType": "int256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "decimals",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "downgradeTo",
+          "inputs": [
+            {
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "name",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "rate",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "int256",
+              "internalType": "int256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "realtimeBalanceOf",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "ts",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "available",
+              "type": "int256",
+              "internalType": "int256"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "realtimeBalanceOfNow",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "available",
+              "type": "int256",
+              "internalType": "int256"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "setStream",
+          "inputs": [
+            {
+              "name": "_base",
+              "type": "int256",
+              "internalType": "int256"
+            },
+            {
+              "name": "_rate",
+              "type": "int256",
+              "internalType": "int256"
+            },
+            {
+              "name": "_t0",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "symbol",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "t0",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "totalSupply",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "transfer",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "function",
+          "name": "transferFrom",
+          "inputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "pure"
+        },
+        {
+          "type": "event",
+          "name": "StreamSet",
+          "inputs": [
+            {
+              "name": "base",
+              "type": "int256",
+              "indexed": false,
+              "internalType": "int256"
+            },
+            {
+              "name": "rate",
+              "type": "int256",
+              "indexed": false,
+              "internalType": "int256"
+            },
+            {
+              "name": "t0",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Transfer",
+          "inputs": [
+            {
+              "name": "from",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        }
+      ],
+      "inheritedFunctions": {}
+    }
   },
   100: {
     loop: {
@@ -7823,6 +9300,860 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
+    },
+    "streaming_loop": {
+      "address": "0x88577731Cc84560fE297792ab784b600A54728E2",
+      "abi": [
+        {
+          "type": "function",
+          "name": "DiamondCut_init",
+          "inputs": [
+            {
+              "name": "_systemAdmin",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "diamondCut",
+          "inputs": [
+            {
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setSystemAdmin",
+          "inputs": [
+            {
+              "name": "_admin",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "DiamondCut",
+          "inputs": [
+            {
+              "name": "facetCuts",
+              "type": "tuple[]",
+              "indexed": false,
+              "internalType": "struct IDiamond.FacetCut[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "action",
+                  "type": "uint8",
+                  "internalType": "enum IDiamond.FacetCutAction"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            },
+            {
+              "name": "init",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            },
+            {
+              "name": "initData",
+              "type": "bytes",
+              "indexed": false,
+              "internalType": "bytes"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SystemAdminUpdated",
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotSystemAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_CannotRemoveFromOtherFacet",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsNotContract",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FacetIsZeroAddress",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionAlreadyExists",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_FunctionFromSameFacet",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_ImmutableFacet",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_IncorrectFacetCutAction",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_InitIsNotContract",
+          "inputs": [
+            {
+              "name": "init",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_NonExistingFunction",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorArrayEmpty",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "type": "error",
+          "name": "DiamondCut_SelectorIsZero",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "DiamondLoupe_init",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "facetAddress",
+          "inputs": [
+            {
+              "name": "selector",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetAddresses",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address[]",
+              "internalType": "address[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facetFunctionSelectors",
+          "inputs": [
+            {
+              "name": "facet",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bytes4[]",
+              "internalType": "bytes4[]"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "facets",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "tuple[]",
+              "internalType": "struct IDiamondLoupeBase.Facet[]",
+              "components": [
+                {
+                  "name": "facet",
+                  "type": "address",
+                  "internalType": "address"
+                },
+                {
+                  "name": "selectors",
+                  "type": "bytes4[]",
+                  "internalType": "bytes4[]"
+                }
+              ]
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "supportsInterface",
+          "inputs": [
+            {
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CallerIsNotOwner",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "DelegateNotAllowed",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "OnlyDelegate",
+          "inputs": []
+        },
+        {
+          "type": "function",
+          "name": "StreamingLoop_init",
+          "inputs": [
+            {
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_loopAdmin",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "_backendSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "backendSigner",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "claim",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "claimAndRegister",
+          "inputs": [
+            {
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "getCurrentPeriod",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "getLoopDetails",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "token",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "percentPerPeriod",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "firstPeriodStart",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "periodLength",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "realtimeAvailableNow",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "register",
+          "inputs": [],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setBackendSigner",
+          "inputs": [
+            {
+              "name": "newSigner",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setPeriodLength",
+          "inputs": [
+            {
+              "name": "_periodLength",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "setSuperToken",
+          "inputs": [
+            {
+              "name": "_superToken",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "function",
+          "name": "superToken",
+          "inputs": [],
+          "outputs": [
+            {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+            }
+          ],
+          "stateMutability": "view"
+        },
+        {
+          "type": "function",
+          "name": "withdrawSuperTokens",
+          "inputs": [
+            {
+              "name": "to",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ],
+          "outputs": [],
+          "stateMutability": "nonpayable"
+        },
+        {
+          "type": "event",
+          "name": "Claim",
+          "inputs": [
+            {
+              "name": "claimer",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "payout",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "FunctionAccessChanged",
+          "inputs": [
+            {
+              "name": "functionSig",
+              "type": "bytes4",
+              "indexed": true,
+              "internalType": "bytes4"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Initialized",
+          "inputs": [
+            {
+              "name": "version",
+              "type": "uint8",
+              "indexed": false,
+              "internalType": "uint8"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "Register",
+          "inputs": [
+            {
+              "name": "sender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodNumber",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetBackendSigner",
+          "inputs": [
+            {
+              "name": "newSigner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetPeriodLength",
+          "inputs": [
+            {
+              "name": "newPeriodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "SetSuperToken",
+          "inputs": [
+            {
+              "name": "newSuperToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "StreamingFinalized",
+          "inputs": [
+            {
+              "name": "period",
+              "type": "uint256",
+              "indexed": true,
+              "internalType": "uint256"
+            },
+            {
+              "name": "registered",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "accrued",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "perUser",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndPrev",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "availEndNow",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "StreamingInitialize",
+          "inputs": [
+            {
+              "name": "superToken",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "periodLength",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "event",
+          "name": "UserRoleUpdated",
+          "inputs": [
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "role",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            }
+          ],
+          "anonymous": false
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CallerIsNotAuthorized",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "AccessControl_CannotRemoveAdmin",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "CannotClaim",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidParam",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "InvalidSignature",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NoRegistrations",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "NothingToFinalize",
+          "inputs": []
+        },
+        {
+          "type": "error",
+          "name": "TransferFailed",
+          "inputs": []
+        }
+      ]
     },
   },
 } as const;
