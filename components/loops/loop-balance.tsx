@@ -53,7 +53,7 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
   return (
     <div className="rounded-2xl bg-gradient-to-br from-card/50 to-muted/30 p-4 text-center shadow-inner">
       <div className="flex items-center justify-center gap-2">
-        <FaWallet className="h-4 w-4 text-primary" />
+        <FaWallet className="size-4 text-primary" />
         <p className="text-sm font-medium text-muted-foreground">Balance:</p>
       </div>
       <p className="font-heading mt-2 text-3xl font-bold text-primary md:text-4xl">

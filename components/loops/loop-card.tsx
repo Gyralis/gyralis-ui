@@ -96,7 +96,7 @@ const ChainIcon = ({
   return (
     <div className={className}>
       {CHAIN_ICONS[chainId] ?? (
-        <div className="h-6 w-6 rounded-full bg-gray-400" />
+        <div className="size-6 rounded-full bg-gray-400" />
       )}
     </div>
   )
@@ -228,7 +228,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
               <div className="flex items-center gap-2">
                 <ChainIcon
                   chainId={loop.chainId}
-                  className="h-7 w-7 flex-shrink-0"
+                  className="size-7 shrink-0"
                 />
                 <h3 className="font-heading text-xl text-foreground md:text-2xl">
                   {loop.title}

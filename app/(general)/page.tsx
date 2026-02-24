@@ -66,9 +66,9 @@ function BlobBuddy() {
   const animationProgress = Math.min(scrollY / scrollThreshold, 1)
 
   return (
-    <div className="relative flex h-80 w-80 items-center justify-center">
+    <div className="relative flex size-80 items-center justify-center">
       <div
-        className="relative h-64 w-64 rounded-full transition-all duration-700 ease-out"
+        className="relative size-64 rounded-full transition-all duration-700 ease-out"
         style={{
           background: `
             radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), transparent 50%),
@@ -88,19 +88,19 @@ function BlobBuddy() {
           opacity: 1 - animationProgress * 0.3,
         }}
       >
-        <div className="absolute left-12 top-20 h-8 w-8 rounded-full bg-white shadow-lg">
-          <div className="absolute left-2 top-2 h-4 w-4 rounded-full bg-gray-900"></div>
-          <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white"></div>
+        <div className="absolute left-12 top-20 size-8 rounded-full bg-white shadow-lg">
+          <div className="absolute left-2 top-2 size-4 rounded-full bg-gray-900"></div>
+          <div className="absolute left-1 top-1 size-2 rounded-full bg-white"></div>
         </div>
-        <div className="absolute right-12 top-20 h-8 w-8 rounded-full bg-white shadow-lg">
-          <div className="absolute left-2 top-2 h-4 w-4 rounded-full bg-gray-900"></div>
-          <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white"></div>
+        <div className="absolute right-12 top-20 size-8 rounded-full bg-white shadow-lg">
+          <div className="absolute left-2 top-2 size-4 rounded-full bg-gray-900"></div>
+          <div className="absolute left-1 top-1 size-2 rounded-full bg-white"></div>
         </div>
-        <div className="absolute left-6 top-24 h-6 w-6 rounded-full bg-pink-300 opacity-60 blur-sm"></div>
-        <div className="absolute right-6 top-24 h-6 w-6 rounded-full bg-pink-300 opacity-60 blur-sm"></div>
-        <div className="absolute bottom-16 left-1/2 h-8 w-16 -translate-x-1/2 transform rounded-full border-b-4 border-gray-900"></div>
+        <div className="absolute left-6 top-24 size-6 rounded-full bg-pink-300 opacity-60 blur-sm"></div>
+        <div className="absolute right-6 top-24 size-6 rounded-full bg-pink-300 opacity-60 blur-sm"></div>
+        <div className="absolute bottom-16 left-1/2 h-8 w-16 -translate-x-1/2 rounded-full border-b-4 border-gray-900"></div>
         <div
-          className="absolute left-8 top-8 h-16 w-16 rounded-full opacity-40 blur-xl"
+          className="absolute left-8 top-8 size-16 rounded-full opacity-40 blur-xl"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)",
@@ -108,7 +108,7 @@ function BlobBuddy() {
         ></div>
       </div>
       <div
-        className="absolute right-0 top-0 h-12 w-12 rounded-full transition-all duration-700 ease-out"
+        className="absolute right-0 top-0 size-12 rounded-full transition-all duration-700 ease-out"
         style={{
           background: "linear-gradient(135deg, #ffd89b 0%, #19547b 100%)",
           boxShadow:
@@ -120,7 +120,7 @@ function BlobBuddy() {
         }}
       ></div>
       <div
-        className="absolute bottom-0 left-0 h-10 w-10 rounded-full transition-all duration-700 ease-out"
+        className="absolute bottom-0 left-0 size-10 rounded-full transition-all duration-700 ease-out"
         style={{
           background: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
           boxShadow:
@@ -150,9 +150,9 @@ function CubicCompanion() {
   const animationProgress = Math.min(scrollY / scrollThreshold, 1)
 
   return (
-    <div className="perspective-1000 relative flex h-80 w-80 items-center justify-center">
+    <div className="perspective-1000 relative flex size-80 items-center justify-center">
       <div
-        className="relative h-48 w-48 transition-all duration-700 ease-out"
+        className="relative size-48 transition-all duration-700 ease-out"
         style={{
           transform: `
             translateY(${animationProgress * 50}px) 
@@ -173,15 +173,15 @@ function CubicCompanion() {
             transform: "translateZ(24px)",
           }}
         >
-          <div className="absolute left-8 top-12 h-10 w-10 rotate-3 transform rounded-lg bg-white shadow-lg">
-            <div className="absolute left-2 top-2 h-6 w-6 rounded-lg bg-gray-900"></div>
-            <div className="absolute left-1 top-1 h-3 w-3 rounded-sm bg-white"></div>
+          <div className="absolute left-8 top-12 size-10 rotate-3 rounded-lg bg-white shadow-lg">
+            <div className="absolute left-2 top-2 size-6 rounded-lg bg-gray-900"></div>
+            <div className="absolute left-1 top-1 size-3 rounded-sm bg-white"></div>
           </div>
-          <div className="absolute right-8 top-12 h-10 w-10 -rotate-3 transform rounded-lg bg-white shadow-lg">
-            <div className="absolute left-2 top-2 h-6 w-6 rounded-lg bg-gray-900"></div>
-            <div className="absolute left-1 top-1 h-3 w-3 rounded-sm bg-white"></div>
+          <div className="absolute right-8 top-12 size-10 -rotate-3 rounded-lg bg-white shadow-lg">
+            <div className="absolute left-2 top-2 size-6 rounded-lg bg-gray-900"></div>
+            <div className="absolute left-1 top-1 size-3 rounded-sm bg-white"></div>
           </div>
-          <div className="absolute bottom-12 left-1/2 h-3 w-20 -translate-x-1/2 transform rounded-full bg-gray-900"></div>
+          <div className="absolute bottom-12 left-1/2 h-3 w-20 -translate-x-1/2 rounded-full bg-gray-900"></div>
         </div>
         <div
           className="absolute inset-0 rounded-2xl"
@@ -202,7 +202,7 @@ function CubicCompanion() {
           }}
         ></div>
         <div
-          className="absolute left-4 top-4 h-12 w-12 rounded-lg opacity-30 blur-lg"
+          className="absolute left-4 top-4 size-12 rounded-lg opacity-30 blur-lg"
           style={{
             background:
               "radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)",
@@ -211,7 +211,7 @@ function CubicCompanion() {
         ></div>
       </div>
       <div
-        className="absolute right-8 top-8 h-16 w-16 transition-all duration-700 ease-out"
+        className="absolute right-8 top-8 size-16 transition-all duration-700 ease-out"
         style={{
           background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
           boxShadow: "0 15px 40px rgba(240, 147, 251, 0.4)",
@@ -223,7 +223,7 @@ function CubicCompanion() {
         }}
       ></div>
       <div
-        className="absolute bottom-8 left-8 h-14 w-14 transition-all duration-700 ease-out"
+        className="absolute bottom-8 left-8 size-14 transition-all duration-700 ease-out"
         style={{
           background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
           boxShadow: "0 15px 40px rgba(79, 172, 254, 0.4)",
@@ -262,9 +262,9 @@ function OrbitalOrb() {
   const animationProgress = Math.min(scrollY / scrollThreshold, 1)
 
   return (
-    <div className="relative flex h-80 w-80 items-center justify-center">
+    <div className="relative flex size-80 items-center justify-center">
       <div
-        className="relative h-56 w-56 rounded-full transition-all duration-700 ease-out"
+        className="relative size-56 rounded-full transition-all duration-700 ease-out"
         style={{
           background: `
             radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9), transparent 40%),
@@ -283,19 +283,19 @@ function OrbitalOrb() {
           opacity: 1 - animationProgress * 0.3,
         }}
       >
-        <div className="absolute left-16 top-16 h-10 w-10 rounded-full bg-white shadow-xl">
-          <div className="absolute left-2 top-2 h-6 w-6 rounded-full bg-gray-900">
-            <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white"></div>
+        <div className="absolute left-16 top-16 size-10 rounded-full bg-white shadow-xl">
+          <div className="absolute left-2 top-2 size-6 rounded-full bg-gray-900">
+            <div className="absolute left-1 top-1 size-2 rounded-full bg-white"></div>
           </div>
         </div>
-        <div className="absolute right-16 top-16 h-10 w-10 rounded-full bg-white shadow-xl">
-          <div className="absolute left-2 top-2 h-6 w-6 rounded-full bg-gray-900">
-            <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white"></div>
+        <div className="absolute right-16 top-16 size-10 rounded-full bg-white shadow-xl">
+          <div className="absolute left-2 top-2 size-6 rounded-full bg-gray-900">
+            <div className="absolute left-1 top-1 size-2 rounded-full bg-white"></div>
           </div>
         </div>
-        <div className="absolute bottom-14 left-1/2 h-10 w-20 -translate-x-1/2 transform rounded-full border-b-4 border-gray-900"></div>
-        <div className="absolute left-8 top-20 h-8 w-8 rounded-full bg-pink-400 opacity-50 blur-md"></div>
-        <div className="absolute right-8 top-20 h-8 w-8 rounded-full bg-pink-400 opacity-50 blur-md"></div>
+        <div className="absolute bottom-14 left-1/2 h-10 w-20 -translate-x-1/2 rounded-full border-b-4 border-gray-900"></div>
+        <div className="absolute left-8 top-20 size-8 rounded-full bg-pink-400 opacity-50 blur-md"></div>
+        <div className="absolute right-8 top-20 size-8 rounded-full bg-pink-400 opacity-50 blur-md"></div>
       </div>
       <div
         className="absolute inset-0 transition-all duration-700 ease-out"
@@ -307,7 +307,7 @@ function OrbitalOrb() {
         }}
       >
         <div
-          className="absolute left-1/2 top-1/2 h-72 w-72 rounded-full border-4 border-dashed"
+          className="absolute left-1/2 top-1/2 size-72 rounded-full border-4 border-dashed"
           style={{
             borderColor: "rgba(99, 102, 241, 0.3)",
             transform: "translate(-50%, -50%) rotateX(70deg)",
@@ -315,7 +315,7 @@ function OrbitalOrb() {
           }}
         >
           <div
-            className="absolute left-1/2 top-0 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="absolute left-1/2 top-0 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
               boxShadow: "0 5px 15px rgba(102, 126, 234, 0.5)",
@@ -333,7 +333,7 @@ function OrbitalOrb() {
         }}
       >
         <div
-          className="absolute left-1/2 top-1/2 h-80 w-80 rounded-full border-4 border-dotted"
+          className="absolute left-1/2 top-1/2 size-80 rounded-full border-4 border-dotted"
           style={{
             borderColor: "rgba(236, 72, 153, 0.3)",
             transform: "translate(-50%, -50%) rotateX(70deg) rotateZ(60deg)",
@@ -341,7 +341,7 @@ function OrbitalOrb() {
           }}
         >
           <div
-            className="absolute bottom-0 left-1/2 h-5 w-5 -translate-x-1/2 translate-y-1/2 rounded-full"
+            className="absolute bottom-0 left-1/2 size-5 -translate-x-1/2 translate-y-1/2 rounded-full"
             style={{
               background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
               boxShadow: "0 5px 15px rgba(240, 147, 251, 0.5)",
@@ -350,7 +350,7 @@ function OrbitalOrb() {
         </div>
       </div>
       <div
-        className="absolute right-12 top-4 h-3 w-3 bg-yellow-400 transition-all duration-700 ease-out"
+        className="absolute right-12 top-4 size-3 bg-yellow-400 transition-all duration-700 ease-out"
         style={{
           clipPath:
             "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
@@ -361,7 +361,7 @@ function OrbitalOrb() {
         }}
       ></div>
       <div
-        className="absolute bottom-8 left-4 h-4 w-4 bg-cyan-400 transition-all duration-700 ease-out"
+        className="absolute bottom-8 left-4 size-4 bg-cyan-400 transition-all duration-700 ease-out"
         style={{
           clipPath:
             "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
@@ -377,7 +377,7 @@ function OrbitalOrb() {
 
 function LoopOctopus() {
   return (
-    <div className="relative flex h-80 w-80 items-center justify-center">
+    <div className="relative flex size-80 items-center justify-center">
       <motion.div
         className="relative z-10"
         animate={{
@@ -389,7 +389,7 @@ function LoopOctopus() {
           ease: "easeInOut",
         }}
       >
-        <div className="relative h-48 w-48">
+        <div className="relative size-48">
           <div
             className="absolute inset-0 rounded-full bg-gradient-to-br from-pink-300 via-pink-400 to-pink-600 dark:from-pink-500 dark:via-pink-600 dark:to-pink-800"
             style={{
@@ -400,29 +400,29 @@ function LoopOctopus() {
               `,
             }}
           />
-          <div className="absolute left-8 top-8 h-16 w-16 rounded-full bg-white/40 blur-xl" />
+          <div className="absolute left-8 top-8 size-16 rounded-full bg-white/40 blur-xl" />
           <div
-            className="absolute left-12 top-16 h-12 w-12 rounded-full bg-white dark:bg-gray-100"
+            className="absolute left-12 top-16 size-12 rounded-full bg-white dark:bg-gray-100"
             style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.2)" }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-8 w-8 rounded-full bg-gray-900"
+              className="absolute left-2 top-2 size-8 rounded-full bg-gray-900"
               animate={{ x: [0, 2, 0, -2, 0] }}
               transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
             >
-              <div className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white" />
+              <div className="absolute left-1 top-1 size-3 rounded-full bg-white" />
             </motion.div>
           </div>
           <div
-            className="absolute right-12 top-16 h-12 w-12 rounded-full bg-white dark:bg-gray-100"
+            className="absolute right-12 top-16 size-12 rounded-full bg-white dark:bg-gray-100"
             style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.2)" }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-8 w-8 rounded-full bg-gray-900"
+              className="absolute left-2 top-2 size-8 rounded-full bg-gray-900"
               animate={{ x: [0, -2, 0, 2, 0] }}
               transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
             >
-              <div className="absolute left-1 top-1 h-3 w-3 rounded-full bg-white" />
+              <div className="absolute left-1 top-1 size-3 rounded-full bg-white" />
             </motion.div>
           </div>
           <div className="absolute bottom-12 left-1/2 h-8 w-16 -translate-x-1/2 rounded-b-full border-b-4 border-gray-800 dark:border-gray-900" />
@@ -461,7 +461,7 @@ function LoopOctopus() {
               }}
             >
               <div
-                className={`h-full w-full rounded-full bg-gradient-to-r ${colors[i]} dark:opacity-90`}
+                className={`size-full rounded-full bg-gradient-to-r ${colors[i]} dark:opacity-90`}
                 style={{
                   boxShadow: `
                     inset 0 -4px 8px rgba(0,0,0,0.3),
@@ -471,9 +471,9 @@ function LoopOctopus() {
                   clipPath: "polygon(0 0, 100% 20%, 100% 80%, 0 100%)",
                 }}
               >
-                <div className="absolute bottom-1 left-1/4 h-3 w-3 rounded-full bg-white/30" />
-                <div className="absolute bottom-1 left-1/2 h-3 w-3 rounded-full bg-white/30" />
-                <div className="absolute bottom-1 left-3/4 h-3 w-3 rounded-full bg-white/30" />
+                <div className="absolute bottom-1 left-1/4 size-3 rounded-full bg-white/30" />
+                <div className="absolute bottom-1 left-1/2 size-3 rounded-full bg-white/30" />
+                <div className="absolute bottom-1 left-3/4 size-3 rounded-full bg-white/30" />
               </div>
             </motion.div>
           )
@@ -482,7 +482,7 @@ function LoopOctopus() {
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute h-4 w-4 rounded-full bg-blue-300/30 dark:bg-blue-400/20"
+          className="absolute size-4 rounded-full bg-blue-300/30 dark:bg-blue-400/20"
           style={{
             left: `${20 + i * 15}%`,
             top: `${30 + (i % 3) * 20}%`,
@@ -505,7 +505,7 @@ function LoopOctopus() {
 
 function GeometricOcto() {
   return (
-    <div className="relative flex h-80 w-80 items-center justify-center">
+    <div className="relative flex size-80 items-center justify-center">
       <motion.div
         className="relative z-10"
         animate={{
@@ -518,7 +518,7 @@ function GeometricOcto() {
         }}
         style={{ transformStyle: "preserve-3d" }}
       >
-        <div className="relative h-40 w-40">
+        <div className="relative size-40">
           <div
             className="absolute inset-0 bg-gradient-to-br from-purple-400 via-purple-500 to-purple-700 dark:from-purple-600 dark:via-purple-700 dark:to-purple-900"
             style={{
@@ -539,23 +539,23 @@ function GeometricOcto() {
             }}
           />
           <div
-            className="absolute left-8 top-12 h-10 w-10 rotate-45 transform bg-white dark:bg-gray-100"
+            className="absolute left-8 top-12 size-10 rotate-45 bg-white dark:bg-gray-100"
             style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-6 w-6 rotate-0 transform bg-gray-900"
+              className="absolute left-2 top-2 size-6 rotate-0 bg-gray-900"
               animate={{ scale: [1, 0.9, 1] }}
               transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
             >
-              <div className="absolute left-1 top-1 h-2 w-2 bg-white" />
+              <div className="absolute left-1 top-1 size-2 bg-white" />
             </motion.div>
           </div>
           <div
-            className="absolute right-8 top-12 h-10 w-10 rotate-45 transform bg-white dark:bg-gray-100"
+            className="absolute right-8 top-12 size-10 rotate-45 bg-white dark:bg-gray-100"
             style={{ boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-6 w-6 rotate-0 transform bg-gray-900"
+              className="absolute left-2 top-2 size-6 rotate-0 bg-gray-900"
               animate={{ scale: [1, 0.9, 1] }}
               transition={{
                 duration: 3,
@@ -563,12 +563,12 @@ function GeometricOcto() {
                 delay: 0.2,
               }}
             >
-              <div className="absolute left-1 top-1 h-2 w-2 bg-white" />
+              <div className="absolute left-1 top-1 size-2 bg-white" />
             </motion.div>
           </div>
           <div className="absolute bottom-8 left-1/2 h-1 w-12 -translate-x-1/2 bg-gray-800 dark:bg-gray-900" />
-          <div className="absolute bottom-8 left-1/2 h-1 w-8 origin-left -translate-x-1/2 rotate-45 transform bg-gray-800 dark:bg-gray-900" />
-          <div className="absolute bottom-8 left-1/2 h-1 w-8 origin-right -translate-x-1/2 -rotate-45 transform bg-gray-800 dark:bg-gray-900" />
+          <div className="absolute bottom-8 left-1/2 h-1 w-8 origin-left -translate-x-1/2 rotate-45 bg-gray-800 dark:bg-gray-900" />
+          <div className="absolute bottom-8 left-1/2 h-1 w-8 origin-right -translate-x-1/2 -rotate-45 bg-gray-800 dark:bg-gray-900" />
         </div>
         {[...Array(8)].map((_, i) => {
           const angle = i * 45 - 90
@@ -603,7 +603,7 @@ function GeometricOcto() {
               }}
             >
               <div
-                className={`relative h-full w-full bg-gradient-to-r ${colors[i]} dark:opacity-90`}
+                className={`relative size-full bg-gradient-to-r ${colors[i]} dark:opacity-90`}
                 style={{
                   clipPath:
                     "polygon(0 30%, 25% 0, 75% 0, 100% 30%, 100% 70%, 75% 100%, 25% 100%, 0 70%)",
@@ -614,9 +614,9 @@ function GeometricOcto() {
                   `,
                 }}
               >
-                <div className="absolute bottom-0 left-1/4 top-0 w-px bg-black/20" />
-                <div className="absolute bottom-0 left-1/2 top-0 w-px bg-black/20" />
-                <div className="absolute bottom-0 left-3/4 top-0 w-px bg-black/20" />
+                <div className="absolute inset-y-0 left-1/4 w-px bg-black/20" />
+                <div className="absolute inset-y-0 left-1/2 w-px bg-black/20" />
+                <div className="absolute inset-y-0 left-3/4 w-px bg-black/20" />
               </div>
             </motion.div>
           )
@@ -625,7 +625,7 @@ function GeometricOcto() {
       {[...Array(8)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute h-3 w-3 rotate-45 transform bg-purple-400/40 dark:bg-purple-500/30"
+          className="absolute size-3 rotate-45 bg-purple-400/40 dark:bg-purple-500/30"
           style={{
             left: `${15 + i * 12}%`,
             top: `${25 + (i % 4) * 15}%`,
@@ -648,7 +648,7 @@ function GeometricOcto() {
 
 function CosmicOctopus() {
   return (
-    <div className="relative flex h-80 w-80 items-center justify-center">
+    <div className="relative flex size-80 items-center justify-center">
       <div className="bg-gradient-radial absolute inset-0 from-purple-500/20 via-transparent to-transparent blur-3xl" />
       <motion.div
         className="relative z-10"
@@ -662,7 +662,7 @@ function CosmicOctopus() {
           ease: "easeInOut",
         }}
       >
-        <div className="relative h-44 w-44">
+        <div className="relative size-44">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400/60 via-purple-500/60 to-pink-500/60 blur-xl" />
           <div
             className="absolute inset-2 rounded-full bg-gradient-to-br from-indigo-300 via-purple-400 to-pink-400 dark:from-indigo-500 dark:via-purple-600 dark:to-pink-600"
@@ -675,16 +675,16 @@ function CosmicOctopus() {
               `,
             }}
           />
-          <div className="absolute left-6 top-6 h-20 w-20 rounded-full bg-white/30 blur-2xl" />
+          <div className="absolute left-6 top-6 size-20 rounded-full bg-white/30 blur-2xl" />
           <div
-            className="absolute left-10 top-14 h-14 w-14 rounded-full bg-white/90 dark:bg-white/80"
+            className="absolute left-10 top-14 size-14 rounded-full bg-white/90 dark:bg-white/80"
             style={{
               boxShadow:
                 "0 0 20px rgba(255,255,255,0.6), 0 4px 8px rgba(0,0,0,0.2)",
             }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600"
+              className="absolute left-2 top-2 size-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600"
               animate={{
                 scale: [1, 1.1, 1],
                 boxShadow: [
@@ -695,19 +695,19 @@ function CosmicOctopus() {
               }}
               transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
             >
-              <div className="absolute left-2 top-2 h-4 w-4 rounded-full bg-white" />
-              <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white/60" />
+              <div className="absolute left-2 top-2 size-4 rounded-full bg-white" />
+              <div className="absolute left-1 top-1 size-2 rounded-full bg-white/60" />
             </motion.div>
           </div>
           <div
-            className="absolute right-10 top-14 h-14 w-14 rounded-full bg-white/90 dark:bg-white/80"
+            className="absolute right-10 top-14 size-14 rounded-full bg-white/90 dark:bg-white/80"
             style={{
               boxShadow:
                 "0 0 20px rgba(255,255,255,0.6), 0 4px 8px rgba(0,0,0,0.2)",
             }}
           >
             <motion.div
-              className="absolute left-2 top-2 h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600"
+              className="absolute left-2 top-2 size-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600"
               animate={{
                 scale: [1, 1.1, 1],
                 boxShadow: [
@@ -722,8 +722,8 @@ function CosmicOctopus() {
                 delay: 0.3,
               }}
             >
-              <div className="absolute left-2 top-2 h-4 w-4 rounded-full bg-white" />
-              <div className="absolute left-1 top-1 h-2 w-2 rounded-full bg-white/60" />
+              <div className="absolute left-2 top-2 size-4 rounded-full bg-white" />
+              <div className="absolute left-1 top-1 size-2 rounded-full bg-white/60" />
             </motion.div>
           </div>
           <div
@@ -796,7 +796,7 @@ function CosmicOctopus() {
               }}
             >
               <div
-                className={`relative h-full w-full rounded-full bg-gradient-to-r ${colors[i].from} ${colors[i].to} dark:opacity-90`}
+                className={`relative size-full rounded-full bg-gradient-to-r ${colors[i].from} ${colors[i].to} dark:opacity-90`}
                 style={{
                   boxShadow: `
                     0 0 15px ${colors[i].glow},
@@ -808,7 +808,7 @@ function CosmicOctopus() {
                 }}
               >
                 <motion.div
-                  className="absolute top-1/2 h-2 w-2 rounded-full bg-white"
+                  className="absolute top-1/2 size-2 rounded-full bg-white"
                   style={{ left: "30%", marginTop: "-4px" }}
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -821,7 +821,7 @@ function CosmicOctopus() {
                   }}
                 />
                 <motion.div
-                  className="absolute top-1/2 h-2 w-2 rounded-full bg-white"
+                  className="absolute top-1/2 size-2 rounded-full bg-white"
                   style={{ left: "60%", marginTop: "-4px" }}
                   animate={{
                     opacity: [0.4, 1, 0.4],
@@ -858,7 +858,7 @@ function CosmicOctopus() {
           }}
         >
           <div
-            className="h-1 w-1 rounded-full bg-white"
+            className="size-1 rounded-full bg-white"
             style={{ boxShadow: "0 0 8px rgba(255,255,255,0.8)" }}
           />
         </motion.div>
@@ -875,10 +875,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="floating absolute left-10 top-20 h-8 w-8 rounded-full bg-orange-300 opacity-60 dark:opacity-30"></div>
-          <div className="floating absolute right-20 top-40 h-6 w-6 rounded-full bg-blue-300 opacity-60 dark:opacity-30"></div>
-          <div className="floating absolute left-1/4 top-60 h-4 w-4 rounded-full bg-green-300 opacity-60 dark:opacity-30"></div>
-          <div className="floating absolute bottom-40 right-10 h-10 w-10 rounded-full bg-pink-300 opacity-60 dark:opacity-30"></div>
+          <div className="floating absolute left-10 top-20 size-8 rounded-full bg-orange-300 opacity-60 dark:opacity-30"></div>
+          <div className="floating absolute right-20 top-40 size-6 rounded-full bg-blue-300 opacity-60 dark:opacity-30"></div>
+          <div className="floating absolute left-1/4 top-60 size-4 rounded-full bg-green-300 opacity-60 dark:opacity-30"></div>
+          <div className="floating absolute bottom-40 right-10 size-10 rounded-full bg-pink-300 opacity-60 dark:opacity-30"></div>
         </div>
 
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">
@@ -1076,11 +1076,11 @@ export default function HomePage() {
               whileHover={{ scale: 1.02, y: -5 }}
             >
               <motion.div
-                className={`h-14 w-14 rounded-full bg-gradient-to-br ${feature.gradient} mb-4 flex items-center justify-center shadow-lg`}
+                className={`size-14 rounded-full bg-gradient-to-br ${feature.gradient} mb-4 flex items-center justify-center shadow-lg`}
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
               >
-                <feature.icon className="h-7 w-7 text-white" />
+                <feature.icon className="size-7 text-white" />
               </motion.div>
               <h3 className="mb-2 font-heading text-xl text-gray-800 dark:text-foreground">
                 {feature.title}
@@ -1160,12 +1160,12 @@ export default function HomePage() {
                 transition={{ duration: 0.3 }}
               >
                 <div
-                  className={`h-24 w-24 rounded-full bg-gradient-to-br ${step.gradient} mx-auto flex items-center justify-center shadow-2xl`}
+                  className={`size-24 rounded-full bg-gradient-to-br ${step.gradient} mx-auto flex items-center justify-center shadow-2xl`}
                 >
-                  <step.icon className="h-12 w-12 text-white" />
+                  <step.icon className="size-12 text-white" />
                 </div>
                 <motion.div
-                  className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-white shadow-lg"
+                  className="absolute -right-2 -top-2 flex size-8 items-center justify-center rounded-full bg-primary font-bold text-white shadow-lg"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
@@ -1303,7 +1303,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Whether you're a steward, facilitator, partner, or contributor —
+            Whether you are a steward, facilitator, partner, or contributor —
             Gyralis helps you prove participation and grow reputation.
           </motion.p>
           <motion.div

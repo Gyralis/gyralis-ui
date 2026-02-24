@@ -66,10 +66,10 @@ export default function HomePage() {
       <div className="relative overflow-hidden">
         {/* Floating decorative elements */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="floating absolute left-10 top-20 h-8 w-8 rounded-full bg-orange-300 opacity-60"></div>
-          <div className="floating absolute right-20 top-40 h-6 w-6 rounded-full bg-blue-300 opacity-60"></div>
-          <div className="floating absolute left-1/4 top-60 h-4 w-4 rounded-full bg-green-300 opacity-60"></div>
-          <div className="floating absolute bottom-40 right-10 h-10 w-10 rounded-full bg-pink-300 opacity-60"></div>
+          <div className="floating absolute left-10 top-20 size-8 rounded-full bg-orange-300 opacity-60"></div>
+          <div className="floating absolute right-20 top-40 size-6 rounded-full bg-blue-300 opacity-60"></div>
+          <div className="floating absolute left-1/4 top-60 size-4 rounded-full bg-green-300 opacity-60"></div>
+          <div className="floating absolute bottom-40 right-10 size-10 rounded-full bg-pink-300 opacity-60"></div>
         </div>
 
         {/* loop-page-header */}
@@ -105,45 +105,45 @@ export default function HomePage() {
                 {/* Main device body */}
                 <div className="relative h-96 w-80 rounded-3xl bg-gradient-to-b from-pink-300 to-pink-400 shadow-2xl">
                   {/* Device screen */}
-                  <div className="absolute left-8 right-8 top-12 h-48 overflow-hidden rounded-2xl border-4 border-yellow-400 bg-gradient-to-b from-yellow-200 to-yellow-300">
+                  <div className="absolute inset-x-8 top-12 h-48 overflow-hidden rounded-2xl border-4 border-yellow-400 bg-gradient-to-b from-yellow-200 to-yellow-300">
                     {/* Digital pet */}
                     <div className="flex h-full items-center justify-center">
-                      <div className="pulse-glow relative h-24 w-24 rounded-full bg-green-400">
+                      <div className="pulse-glow relative size-24 rounded-full bg-green-400">
                         {/* Eyes */}
-                        <div className="absolute left-4 top-6 h-3 w-3 rounded-full bg-black"></div>
-                        <div className="absolute right-4 top-6 h-3 w-3 rounded-full bg-black"></div>
+                        <div className="absolute left-4 top-6 size-3 rounded-full bg-black"></div>
+                        <div className="absolute right-4 top-6 size-3 rounded-full bg-black"></div>
                         {/* Mouth */}
-                        <div className="absolute bottom-6 left-1/2 h-4 w-8 -translate-x-1/2 transform rounded-full border-b-4 border-black"></div>
+                        <div className="absolute bottom-6 left-1/2 h-4 w-8 -translate-x-1/2 rounded-full border-b-4 border-black"></div>
                         {/* Cheeks */}
-                        <div className="absolute left-1 top-8 h-4 w-4 rounded-full bg-pink-300 opacity-80"></div>
-                        <div className="absolute right-1 top-8 h-4 w-4 rounded-full bg-pink-300 opacity-80"></div>
+                        <div className="absolute left-1 top-8 size-4 rounded-full bg-pink-300 opacity-80"></div>
+                        <div className="absolute right-1 top-8 size-4 rounded-full bg-pink-300 opacity-80"></div>
                       </div>
                     </div>
                   </div>
 
                   {/* Device buttons */}
-                  <div className="absolute bottom-16 left-1/2 flex -translate-x-1/2 transform gap-4">
-                    <div className="h-12 w-12 rounded-full bg-orange-400 shadow-lg"></div>
-                    <div className="h-12 w-12 rounded-full bg-orange-400 shadow-lg"></div>
-                    <div className="h-12 w-12 rounded-full bg-orange-400 shadow-lg"></div>
+                  <div className="absolute bottom-16 left-1/2 flex -translate-x-1/2 gap-4">
+                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
+                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
+                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
                   </div>
 
                   {/* Device details */}
-                  <div className="absolute left-1/2 top-4 flex -translate-x-1/2 transform gap-2">
-                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
-                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
-                    <div className="h-3 w-3 rounded-full bg-red-400"></div>
+                  <div className="absolute left-1/2 top-4 flex -translate-x-1/2 gap-2">
+                    <div className="size-3 rounded-full bg-red-400"></div>
+                    <div className="size-3 rounded-full bg-red-400"></div>
+                    <div className="size-3 rounded-full bg-red-400"></div>
                   </div>
                 </div>
 
                 {/* Decorative gears and elements */}
-                <div className="floating absolute -right-4 -top-4 h-16 w-16 rounded-full bg-blue-400 opacity-80"></div>
+                <div className="floating absolute -right-4 -top-4 size-16 rounded-full bg-blue-400 opacity-80"></div>
                 <div
-                  className="floating absolute -bottom-8 -left-8 h-12 w-12 bg-orange-400 opacity-80"
+                  className="floating absolute -bottom-8 -left-8 size-12 bg-orange-400 opacity-80"
                   style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
                 ></div>
                 <div
-                  className="floating absolute -right-12 top-1/2 h-8 w-8 bg-teal-400 opacity-80"
+                  className="floating absolute -right-12 top-1/2 size-8 bg-teal-400 opacity-80"
                   style={{
                     clipPath:
                       "polygon(30% 0%, 0% 50%, 30% 100%, 70% 100%, 100% 50%, 70% 0%)",

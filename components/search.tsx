@@ -57,10 +57,10 @@ export function SearchWithTags({
           <>
             <button
               onClick={scrollLeft}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
               aria-label="Scroll left"
             >
-              <HiChevronLeft className="h-5 w-5 text-gray-600" />
+              <HiChevronLeft className="size-5 text-gray-600" />
             </button>
 
             <div
@@ -102,34 +102,34 @@ export function SearchWithTags({
 
             <button
               onClick={scrollRight}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
               aria-label="Scroll right"
             >
-              <HiChevronRight className="h-5 w-5 text-gray-600" />
+              <HiChevronRight className="size-5 text-gray-600" />
             </button>
 
             <button
               onClick={() => setShowSearch(true)}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
               aria-label="Search"
             >
-              <HiSearch className="h-5 w-5 text-gray-600" />
+              <HiSearch className="size-5 text-gray-600" />
             </button>
 
             {/* Filters button */}
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown((prev) => !prev)}
-                className="flex h-10 flex-shrink-0 items-center gap-2 rounded-full bg-white px-4 shadow-sm"
+                className="flex h-10 shrink-0 items-center gap-2 rounded-full bg-white px-4 shadow-sm"
               >
                 <span className="font-body text-sm font-medium uppercase tracking-wide text-gray-700">
                   Filters
                 </span>
-                <HiSlidersHorizontal className="h-4 w-4 text-gray-600" />
+                <HiSlidersHorizontal className="size-4 text-gray-600" />
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full z-[10] mt-2 w-48 rounded-xl bg-white p-4 shadow-lg">
+                <div className="absolute right-0 top-full z-10 mt-2 w-48 rounded-xl bg-white p-4 shadow-lg">
                   <div className="mb-2 font-semibold">Chain</div>
                   <div className="mb-4 flex flex-col gap-2">
                     {chains.map((chain) => (
@@ -178,7 +178,7 @@ export function SearchWithTags({
         ) : (
           <>
             <div className="relative flex-1">
-              <HiSearch className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <HiSearch className="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder={placeholder}
@@ -193,7 +193,7 @@ export function SearchWithTags({
                 setShowSearch(false)
                 onChange("")
               }}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white shadow-sm"
               aria-label="Close search"
             >
               X

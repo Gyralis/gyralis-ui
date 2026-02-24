@@ -23,7 +23,7 @@ export const LoopShield: React.FC<LoopShieldProps> = ({
     <div>
       <div className="border2 flex cursor-pointer items-center justify-between rounded-lg bg-gradient-to-br from-muted/30 to-muted/50 p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)] dark:from-muted/20 dark:to-muted/30 dark:shadow-[-2px_-2px_5px_rgba(255,255,255,0.05),2px_2px_5px_rgba(0,0,0,0.4)] dark:hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.03),inset_2px_2px_5px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2">
-          <FaShieldAlt className="h-4 w-4 text-primary dark:text-primary" />
+          <FaShieldAlt className="size-4 text-primary dark:text-primary" />
           <h4 className="font-heading text-xs text-foreground dark:text-foreground">
             Shield
           </h4>
@@ -66,7 +66,7 @@ export const LoopEligibility: React.FC<LoopEligibilityProps> = ({
     <div>
       <div className="border2 flex cursor-pointer items-center justify-between rounded-lg bg-gradient-to-br from-muted/30 to-muted/50 p-3 shadow-[-2px_-2px_5px_rgba(255,255,255,0.7),2px_2px_5px_rgba(0,0,0,0.15)] transition-all duration-300 hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.7),inset_2px_2px_5px_rgba(0,0,0,0.15)] dark:from-muted/20 dark:to-muted/30 dark:shadow-[-2px_-2px_5px_rgba(255,255,255,0.05),2px_2px_5px_rgba(0,0,0,0.4)] dark:hover:shadow-[inset_-2px_-2px_5px_rgba(255,255,255,0.03),inset_2px_2px_5px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2">
-          <FaStar className="h-4 w-4 text-primary dark:text-primary" />
+          <FaStar className="size-4 text-primary dark:text-primary" />
           <h4 className="font-heading text-xs text-foreground dark:text-foreground">
             Eligibility
           </h4>
