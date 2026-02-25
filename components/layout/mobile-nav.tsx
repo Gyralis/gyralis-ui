@@ -53,7 +53,6 @@ export function MobileNav() {
         </SheetTrigger>
       </div>
       <SheetContent className="pr-0">
-        {/* @ts-ignore */}
         <div className="flex items-center gap-x-4">
           <MobileLink
             href="/"
@@ -70,7 +69,7 @@ export function MobileNav() {
           </MobileLink>
           <ModeToggle />
         </div>
-        {/* @ts-ignore */}
+
         <ScrollArea className="my-4 mr-4 h-[calc(100vh-8rem)] pb-10">
           <div className="flex flex-col space-y-4">
             <Accordion type="single" collapsible className="mx-auto w-full">

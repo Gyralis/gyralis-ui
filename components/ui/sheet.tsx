@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
-import { cva, type VariantProps } from "lib/utils/cva"
+import { cva } from "lib/utils/cva"
 import { LuX } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
@@ -61,10 +61,13 @@ const sheetVariants = cva(
   }
 )
 
+type SheetSide = "top" | "bottom" | "left" | "right"
+
 type SheetContentProps = React.ComponentPropsWithoutRef<
   typeof SheetPrimitive.Content
-> &
-  VariantProps<typeof sheetVariants>
+> & {
+  side?: SheetSide
+}
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
