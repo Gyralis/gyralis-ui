@@ -11,13 +11,16 @@ import {
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
+import {
+  eligibilityRequestSchema,
+  findAllowlistedLoop,
+} from "@/lib/loops/eligibility"
+
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = process.env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = process.env.SCORER_ID ?? ""
 const SUBGRAPH_URL =
   "https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/0.1.23"
-
-const THRESHOLD = 15
 
 interface PassportScoreResponse {
   score: number
@@ -92,16 +95,29 @@ async function checkMembership(userAddress: string) {
 
 export async function POST(req: Request) {
   try {
-    const { userAddress, loopAddress, chainId } = await req.json()
-    if (!userAddress || !loopAddress || !chainId)
+    const parsed = eligibilityRequestSchema.safeParse(await req.json())
+    if (!parsed.success)
       return NextResponse.json(
-        { success: false, error: "Missing parameters" },
+        { success: false, error: "Invalid request payload" },
         { status: 400 }
+      )
+
+    const { userAddress, loopAddress, chainId } = parsed.data
+
+    const allowlistedLoop = findAllowlistedLoop(
+      "garden_1hive",
+      loopAddress,
+      chainId
+    )
+    if (!allowlistedLoop)
+      return NextResponse.json(
+        { success: false, error: "Loop is not enabled for this eligibility" },
+        { status: 403 }
       )
 
     // Passport score
     const passportScore = await fetchPassportScore(userAddress)
-    if (passportScore <= THRESHOLD)
+    if (passportScore < allowlistedLoop.passportMinScore)
       return NextResponse.json(
         { success: false, error: "Passport score below threshold" },
         { status: 403 }
@@ -116,12 +132,16 @@ export async function POST(req: Request) {
       )
 
     // Next period
-    const nextPeriod = await fetchNextPeriod(chainId, loopAddress)
+    const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
 
     // Eligibility signature
     const eligibilityMessage = encodePacked(
       ["address", "uint256", "address"],
-      [userAddress, BigInt(Math.floor(nextPeriod)), loopAddress]
+      [
+        userAddress as `0x${string}`,
+        BigInt(Math.floor(nextPeriod)),
+        allowlistedLoop.address,
+      ]
     )
     const eligibilityMessageHash = keccak256(eligibilityMessage)
 

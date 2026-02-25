@@ -1,5 +1,7 @@
 import { Address } from "viem"
 
+export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
+
 export interface LoopCardData {
   id: number
   title: string
@@ -19,6 +21,9 @@ export interface LoopCardData {
   super?: boolean
   chainId: number
   chainName: string
+  eligibilityProvider: LoopEligibilityProvider
+  passportMinScore: number
+  enabled: boolean
   claimAmount: string // New: Amount user can claim
   balanceNumeric: number // New: Numeric balance for calculations
   currency: string // New: Currency symbol
@@ -53,6 +58,9 @@ export const LoopCardsData: LoopCardData[] = [
     super: true,
     chainId: 100,
     chainName: "Gnosis",
+    eligibilityProvider: "garden_1hive",
+    passportMinScore: 15,
+    enabled: true,
     claimAmount: "10 HNY",
     balanceNumeric: 100,
     currency: "HNY",
@@ -79,6 +87,9 @@ export const LoopCardsData: LoopCardData[] = [
     super: false,
     chainId: 1,
     chainName: "Ethereum",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 15,
+    enabled: true,
     claimAmount: "25 DAI",
     balanceNumeric: 500,
     currency: "DAI",
@@ -102,6 +113,9 @@ export const LoopCardsData: LoopCardData[] = [
     ],
     chainId: 137,
     chainName: "Polygon",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 15,
+    enabled: true,
     claimAmount: "37.5 ETH",
     balanceNumeric: 250,
     currency: "ETH",
@@ -128,6 +142,9 @@ export const LoopCardsData: LoopCardData[] = [
     ],
     chainId: 42161,
     chainName: "Arbitrum",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 15,
+    enabled: true,
     claimAmount: "6 GNO",
     balanceNumeric: 75,
     currency: "GNO",

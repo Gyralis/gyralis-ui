@@ -11,6 +11,11 @@ import {
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
+import {
+  eligibilityRequestSchema,
+  findAllowlistedLoop,
+} from "@/lib/loops/eligibility"
+
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = process.env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = process.env.SCORER_ID ?? ""
@@ -19,8 +24,6 @@ const SCORER_ID = process.env.SCORER_ID ?? ""
 const BLOCKSCOUT_POINTS_BASE =
   process.env.BLOCKSCOUT_POINTS_BASE ?? "https://points.k8s-dev.blockscout.com"
 const BLOCKSCOUT_OFFER_ID = process.env.BLOCKSCOUT_OFFER_ID ?? "gyralis-offer"
-
-const THRESHOLD = 15
 
 interface PassportScoreResponse {
   score: number
@@ -136,16 +139,29 @@ async function hasBlockscoutRedemption(userAddress: string): Promise<boolean> {
 
 export async function POST(req: Request) {
   try {
-    const { userAddress, loopAddress, chainId } = await req.json()
-    if (!userAddress || !loopAddress || !chainId)
+    const parsed = eligibilityRequestSchema.safeParse(await req.json())
+    if (!parsed.success)
       return NextResponse.json(
-        { success: false, error: "Missing parameters" },
+        { success: false, error: "Invalid request payload" },
         { status: 400 }
+      )
+
+    const { userAddress, loopAddress, chainId } = parsed.data
+
+    const allowlistedLoop = findAllowlistedLoop(
+      "blockscout",
+      loopAddress,
+      chainId
+    )
+    if (!allowlistedLoop)
+      return NextResponse.json(
+        { success: false, error: "Loop is not enabled for this eligibility" },
+        { status: 403 }
       )
 
     // 1) Gitcoin Passport score gate
     const passportScore = await fetchPassportScore(userAddress)
-    if (passportScore <= THRESHOLD)
+    if (passportScore < allowlistedLoop.passportMinScore)
       return NextResponse.json(
         { success: false, error: "Passport score below threshold" },
         { status: 403 }
@@ -160,12 +176,16 @@ export async function POST(req: Request) {
       )
 
     // 3) Compute next period from the Loop contract
-    const nextPeriod = await fetchNextPeriod(Number(chainId), loopAddress)
+    const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
 
     // 4) Eligibility signature: keccak256(encodePacked(user, nextPeriod, loopAddress))
     const eligibilityMessage = encodePacked(
       ["address", "uint256", "address"],
-      [userAddress, BigInt(Math.floor(nextPeriod)), loopAddress]
+      [
+        userAddress as `0x${string}`,
+        BigInt(Math.floor(nextPeriod)),
+        allowlistedLoop.address,
+      ]
     )
     const eligibilityMessageHash = keccak256(eligibilityMessage)
 
