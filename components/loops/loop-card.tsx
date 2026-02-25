@@ -270,7 +270,11 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           <LoopSettings address={loop.address ?? "0x"} chainId={loop.chainId} />
 
           {/* <ClaimButton/> */}
-          <LoopClaim address={loop.address ?? "0x"} chainId={loop.chainId} />
+          <LoopClaim
+            address={loop.address ?? "0x"}
+            chainId={loop.chainId}
+            eligibilityProvider={loop.eligibilityProvider}
+          />
         </div>
       </div>
     </div>

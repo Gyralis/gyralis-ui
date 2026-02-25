@@ -11,14 +11,15 @@ import {
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
+import { env } from "@/env.mjs"
 import {
   eligibilityRequestSchema,
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
-const GITCOIN_PASSPORT_API_KEY = process.env.GITCOIN_PASSPORT_API_KEY ?? ""
-const SCORER_ID = process.env.SCORER_ID ?? ""
+const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
+const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 
 /** Blockscout “Merits/Points” API */
 const BLOCKSCOUT_POINTS_BASE =
@@ -54,12 +55,21 @@ function getViemChain(chainId: string | number): Chain {
 async function fetchPassportScore(userAddress: string): Promise<number> {
   if (!GITCOIN_PASSPORT_API_KEY)
     throw new Error("Gitcoin Passport API key missing")
+  if (!SCORER_ID) throw new Error("Gitcoin Passport scorer id missing")
 
   const endpoint = `https://api.scorer.gitcoin.co/registry/score/${SCORER_ID}/${userAddress}`
   const response = await fetch(endpoint, {
     headers: { "X-API-KEY": GITCOIN_PASSPORT_API_KEY },
   })
-  if (!response.ok) throw new Error("Failed to fetch passport score")
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(
+      `Failed to fetch passport score (${response.status}): ${body.slice(
+        0,
+        240
+      )}`
+    )
+  }
   const data = (await response.json()) as PassportScoreResponse
   return data.score
 }
@@ -138,29 +148,48 @@ async function hasBlockscoutRedemption(userAddress: string): Promise<boolean> {
 }
 
 export async function POST(req: Request) {
+  const requestId = `blockscout:${Date.now()}`
   try {
+    console.log(`[${requestId}] Incoming eligibility request`)
     const parsed = eligibilityRequestSchema.safeParse(await req.json())
-    if (!parsed.success)
+    if (!parsed.success) {
+      console.warn(`[${requestId}] Invalid payload`, parsed.error.flatten())
       return NextResponse.json(
         { success: false, error: "Invalid request payload" },
         { status: 400 }
       )
+    }
 
     const { userAddress, loopAddress, chainId } = parsed.data
+    console.log(`[${requestId}] Payload parsed`, {
+      userAddress,
+      loopAddress,
+      chainId,
+    })
 
     const allowlistedLoop = findAllowlistedLoop(
       "blockscout",
       loopAddress,
       chainId
     )
-    if (!allowlistedLoop)
+    if (!allowlistedLoop) {
+      console.warn(`[${requestId}] Loop not allowlisted`, {
+        loopAddress,
+        chainId,
+      })
       return NextResponse.json(
         { success: false, error: "Loop is not enabled for this eligibility" },
         { status: 403 }
       )
+    }
+    console.log(`[${requestId}] Allowlist check passed`, allowlistedLoop)
 
     // 1) Gitcoin Passport score gate
     const passportScore = await fetchPassportScore(userAddress)
+    console.log(`[${requestId}] Passport score fetched`, {
+      score: passportScore,
+      threshold: allowlistedLoop.passportMinScore,
+    })
     if (passportScore < allowlistedLoop.passportMinScore)
       return NextResponse.json(
         { success: false, error: "Passport score below threshold" },
@@ -169,6 +198,9 @@ export async function POST(req: Request) {
 
     // 2) Blockscout Merits / Points gate (replaces the 1Hive membership check)
     const redeemed = await hasBlockscoutRedemption(userAddress)
+    console.log(`[${requestId}] Blockscout redemption check result`, {
+      redeemed,
+    })
     if (!redeemed)
       return NextResponse.json(
         { success: false, error: "No valid Blockscout redemption found" },
@@ -177,6 +209,7 @@ export async function POST(req: Request) {
 
     // 3) Compute next period from the Loop contract
     const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
+    console.log(`[${requestId}] Next period fetched`, { nextPeriod })
 
     // 4) Eligibility signature: keccak256(encodePacked(user, nextPeriod, loopAddress))
     const eligibilityMessage = encodePacked(
@@ -199,6 +232,7 @@ export async function POST(req: Request) {
       account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
       message: { raw: eligibilityMessageHash },
     })
+    console.log(`[${requestId}] Signature generated`)
 
     return NextResponse.json({
       success: true,
@@ -206,7 +240,7 @@ export async function POST(req: Request) {
       message: "User is eligible and signature has been generated",
     })
   } catch (error) {
-    console.error("API Error:", error)
+    console.error(`[${requestId}] API Error`, error)
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

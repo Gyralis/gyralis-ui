@@ -23,6 +23,7 @@ export const env = createEnv({
     MORALIS_API_KEY: z.string().min(1).optional(),
     GITCOIN_PASSPORT_SCORER_ID: z.string().min(1).optional(),
     GITCOIN_PASSPORT_API_KEY: z.string().min(1).optional(),
+    GARDENS_SUBGRAPH_VERSION: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_USE_PUBLIC_PROVIDER: z.enum(["true", "false"]).default("true"),
@@ -47,6 +48,7 @@ export const env = createEnv({
     MORALIS_API_KEY: process.env.MORALIS_API_KEY,
     GITCOIN_PASSPORT_SCORER_ID: process.env.GITCOIN_PASSPORT_SCORER_ID,
     GITCOIN_PASSPORT_API_KEY: process.env.GITCOIN_PASSPORT_API_KEY,
+    GARDENS_SUBGRAPH_VERSION: process.env.GARDENS_SUBGRAPH_VERSION,
     NEXT_PUBLIC_USE_PUBLIC_PROVIDER:
       process.env.NEXT_PUBLIC_USE_PUBLIC_PROVIDER,
     NEXT_PUBLIC_ALCHEMY_API_KEY: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
