@@ -1,8 +1,14 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Address } from "viem"
-import { useAccount, useReadContract, useWriteContract } from "wagmi"
+import {
+  useAccount,
+  useChainId,
+  useReadContract,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi"
 
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import deployedContracts from "@/lib/generated/deployed-contracts"
@@ -27,8 +33,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   chainId,
   eligibilityProvider,
 }) => {
-  const [isClaiming, setIsClaiming] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
   const { address: connectedAccount } = useAccount()
+  const currentChainId = useChainId()
   const { toast } = useToast()
   const { writeContractAsync } = useWriteContract()
 
@@ -58,9 +66,83 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       },
     })
 
+  const {
+    data: currentPeriod,
+    refetch: refetchCurrentPeriod,
+    isLoading: isLoadingCurrentPeriod,
+  } = useReadContract({
+    address,
+    abi: loopAbi,
+    functionName: "getCurrentPeriod",
+    chainId,
+    query: {
+      enabled: !!connectedAccount,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+
+  const {
+    data: currentPeriodPayout,
+    refetch: refetchCurrentPeriodPayout,
+    isLoading: isLoadingCurrentPeriodPayout,
+  } = useReadContract({
+    address,
+    abi: loopAbi,
+    functionName: "getPeriodIndividualPayout",
+    args: [currentPeriod ?? 0n],
+    account: connectedAccount,
+    chainId,
+    query: {
+      enabled: !!connectedAccount && currentPeriod != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+
   const isRegistered = Boolean(claimerStatus?.[0])
   const hasClaimed = Boolean(claimerStatus?.[1])
+  const claimableAmount = currentPeriodPayout ?? 0n
+  const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
+  const isWaitingNextPeriod = isRegistered && !hasClaimed && !isClaimableNow
+  const isLoadingOnchainState =
+    isLoadingCurrentPeriod || isLoadingCurrentPeriodPayout
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
+  const wrongNetwork = currentChainId !== chainId
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: txHash,
+      chainId,
+      query: {
+        enabled: !!txHash,
+      },
+    })
+
+  useEffect(() => {
+    if (!isConfirmed || !txHash) return
+
+    toast({
+      title: "Transaction confirmed",
+      description: "Claim was confirmed onchain.",
+    })
+
+    void Promise.all([
+      refetchClaimerStatus(),
+      refetchSettings(),
+      refetchCurrentPeriod(),
+      refetchCurrentPeriodPayout(),
+    ])
+
+    setTxHash(undefined)
+  }, [
+    isConfirmed,
+    txHash,
+    refetchClaimerStatus,
+    refetchSettings,
+    refetchCurrentPeriod,
+    refetchCurrentPeriodPayout,
+    toast,
+  ])
 
   const handleClaim = async () => {
     if (!connectedAccount) {
@@ -88,7 +170,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       return
     }
 
-    setIsClaiming(true)
+    setIsSubmitting(true)
 
     try {
       const endpoint = ELIGIBILITY_ENDPOINTS[eligibilityProvider]
@@ -114,29 +196,26 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      if (isRegistered) {
-        await writeContractAsync({
+      const hash = isRegistered
+        ? await writeContractAsync({
           address,
           abi: loopAbi,
           functionName: "claim",
           chainId,
         })
-      } else {
-        await writeContractAsync({
+        : await writeContractAsync({
           address,
           abi: loopAbi,
           functionName: "claimAndRegister",
           args: [payload.signature],
           chainId,
         })
-      }
+      setTxHash(hash)
 
       toast({
         title: "Transaction sent",
-        description: "Claim transaction submitted to your wallet.",
+        description: "Transaction submitted. Waiting for confirmation...",
       })
-
-      void Promise.all([refetchClaimerStatus(), refetchSettings()])
     } catch (error) {
       toast({
         title: "Claim failed",
@@ -145,7 +224,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         variant: "destructive",
       })
     } finally {
-      setIsClaiming(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -154,12 +233,37 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       <Button
         chainId={chainId}
         onClick={handleClaim}
-        disabled={isClaiming || hasClaimed || !isValidLoopAddress}
-        isLoading={isClaiming}
+        disabled={
+          !wrongNetwork &&
+          (isSubmitting ||
+            isConfirming ||
+            hasClaimed ||
+            !isValidLoopAddress ||
+            isLoadingOnchainState ||
+            isWaitingNextPeriod)
+        }
+        isLoading={isSubmitting || isConfirming}
         className="w-full py-3 text-lg"
       >
-        {hasClaimed ? "Already Claimed" : "Claim Tokens"}
+        {isSubmitting
+          ? "Submitting transaction..."
+          : isConfirming
+            ? "Confirming transaction..."
+            : hasClaimed
+          ? "Already Claimed"
+          : !isRegistered
+            ? "Register for next period"
+            : isWaitingNextPeriod
+              ? "Claim opens next period"
+              : isLoadingOnchainState
+                ? "Checking claim status..."
+                : "Claim now"}
       </Button>
+      {isWaitingNextPeriod && (
+        <p className="text-xs text-muted-foreground">
+          Registered this period. Claim opens next period.
+        </p>
+      )}
     </div>
   )
 }
