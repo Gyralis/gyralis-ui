@@ -1,5 +1,5 @@
 {
-  "name": "@turbo-eth/template-web3-app",
+  "name": "@turbo-npm audit/template-web3-app",
   "version": "0.0.0",
   "license": "MIT",
   "contributors": [
@@ -62,6 +62,7 @@
     "@tanstack/react-query": "^5.32.1",
     "abitype": "^0.9.6",
     "axios": "^1.2.2",
+    "ethers": "^5.8.0",
     "framer-motion": "^8.4.3",
     "luxon": "^3.2.1",
     "next": "^14.0.3",
@@ -123,6 +124,6 @@
     "prettier": "^2.8.1",
     "prettier-plugin-tailwindcss": "^0.2.0",
     "prisma": "^4.8.1",
-    "typescript": "5.0.4"
+    "typescript": "^5.9.3"
   }
 }
