@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Address } from "viem"
+import { Address, type Abi } from "viem"
 import { useReadContracts } from "wagmi"
 
 import deployedContracts from "@/lib/generated/deployed-contracts"
@@ -20,38 +20,67 @@ interface UseLoopSettingsProps {
 
 export function useLoopSettings(
   loopAddress: Address,
-  chainId: number
+  chainId: number,
+  superToken: boolean
 ): UseLoopSettingsProps {
-  const loopAbi = useMemo(
-    () =>
-      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
-        ?.abi ?? [],
-    [chainId]
+  const { abi, getDetailsFn, getPeriodFn } = useMemo(() => {
+    const chain = deployedContracts?.[chainId as keyof typeof deployedContracts]
+
+    if (!chain) {
+      return {
+        abi: [] as Abi,
+        getDetailsFn: undefined,
+        getPeriodFn: undefined,
+      }
+    }
+
+    if (superToken) {
+      return {
+        abi: (chain.streaming_loop?.abi ?? []) as Abi,
+        getDetailsFn: "getStreamingLoopDetails" as const,
+        getPeriodFn: "getStreamingCurrentPeriod" as const,
+      }
+    }
+
+    return {
+      abi: (chain.loop?.abi ?? []) as Abi,
+      getDetailsFn: "getLoopDetails" as const,
+      getPeriodFn: "getCurrentPeriod" as const,
+    }
+  }, [chainId, superToken])
+
+  const enabled = Boolean(
+    loopAddress && chainId && abi.length && getDetailsFn && getPeriodFn
   )
 
   const { data, isLoading, refetch } = useReadContracts({
     allowFailure: false,
-    contracts: [
-      {
-        address: loopAddress,
-        abi: loopAbi,
-        functionName: "getLoopDetails",
-        chainId,
-      },
-      {
-        address: loopAddress,
-        abi: loopAbi,
-        functionName: "getCurrentPeriod",
-        chainId,
-      },
-    ],
-    query: {
-      enabled: Boolean(loopAddress && chainId),
-    },
+    contracts: enabled
+      ? [
+          {
+            address: loopAddress,
+            abi,
+            functionName: getDetailsFn,
+            chainId,
+          },
+          {
+            address: loopAddress,
+            abi,
+            functionName: getPeriodFn,
+            chainId,
+          },
+        ]
+      : [],
+    query: { enabled },
   })
 
   if (!data) {
-    return { settings: undefined, currentPeriod: undefined, isLoading, refetch }
+    return {
+      settings: undefined,
+      currentPeriod: undefined,
+      isLoading,
+      refetch,
+    }
   }
 
   const [settingsRaw, currentPeriod] = data

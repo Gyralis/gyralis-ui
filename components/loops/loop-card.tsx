@@ -257,6 +257,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
               address={loop.address}
               token={loop.token}
               chainId={loop.chainId}
+              superToken={loop.super}
             />
           </div>
           <div className="border2 flex flex-col gap-2">
@@ -267,7 +268,11 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
         {/* Loop Setting */}
         <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
-          <LoopSettings address={loop.address ?? "0x"} chainId={loop.chainId} />
+          <LoopSettings
+            address={loop.address ?? "0x"}
+            chainId={loop.chainId}
+            superToken={loop.super}
+          />
 
           {/* <ClaimButton/> */}
           <LoopClaim address={loop.address ?? "0x"} chainId={loop.chainId} />

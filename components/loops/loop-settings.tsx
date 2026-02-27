@@ -1,5 +1,6 @@
 "use client"
 
+import { setUncaughtExceptionCaptureCallback } from "process"
 import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { motion, useSpring, useTransform } from "framer-motion"
 import { Address } from "viem"
@@ -14,20 +15,28 @@ import { secondsToTime } from "@/lib/utils/time"
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
+  superToken?: boolean
 }
 
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
+  superToken = false,
 }) => {
   const [superLoop, setSuperLoop] = useState<boolean>(false)
   const [isAddressesModalOpen, setIsAddressesModalOpen] = useState(false)
 
   const { settings, currentPeriod, isLoading } = useLoopSettings(
     address,
-    chainId
+    chainId,
+    superToken
   )
 
+  console.log("SUPER ", superToken)
+  if (superToken) {
+    console.log("SETTINGs ", settings)
+    console.log("currentPeriod ", currentPeriod)
+  }
   const nextPeriodStart =
     settings && currentPeriod != null
       ? BigInt(settings.firstPeriodStart) +
