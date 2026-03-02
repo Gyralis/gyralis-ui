@@ -1,5 +1,5 @@
 {
-  "name": "@turbo-npm audit/template-web3-app",
+  "name": "@turbo-eth/template-web3-app",
   "version": "0.0.0",
   "license": "MIT",
   "contributors": [
@@ -17,7 +17,7 @@
     "format": "prettier . --list-different",
     "format-fix": "prettier . --write",
     "run-ci": "concurrently -c \"auto\" -p \"name\" -n \"format,lint\" \"pnpm format\"  \"pnpm lint\"  ",
-    "prepare": "husky install ; prisma generate ; wagmi generate"
+    "prepare": "prisma generate && wagmi generate"
   },
   "husky": {
     "hooks": {
