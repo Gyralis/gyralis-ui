@@ -9,9 +9,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
-  periodLength: string
-  periodDistribution: string
-  nextDistributionIn: string
+
   shieldScore: string
   eligibility: string
   chainBadgeColor: string
@@ -24,9 +22,9 @@ export interface LoopCardData {
   eligibilityProvider: LoopEligibilityProvider
   passportMinScore: number
   enabled: boolean
-  claimAmount: string // New: Amount user can claim
-  balanceNumeric: number // New: Numeric balance for calculations
-  currency: string // New: Currency symbol
+  claimAmount?: string // New: Amount user can claim
+  balanceNumeri?: number // New: Numeric balance for calculations
+  currency?: string // New: Currency symbol
 }
 
 export const LoopCardsData: LoopCardData[] = [
@@ -37,116 +35,54 @@ export const LoopCardsData: LoopCardData[] = [
     address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
     description: "loop and/or organization description",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-    periodLength: "24 hours",
-    periodDistribution: "10%",
-    nextDistributionIn: "02h 10min 25s",
     shieldScore: "Human Passport Score 15",
     eligibility: "1Hive member Gardensv2",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
-    registeredAddresses: [
-      { address: "0xabc...123", claimed: true },
-      { address: "0xdef...456", claimed: false },
-      { address: "0xghi...789", claimed: true },
-      { address: "0xjkl...012", claimed: false },
-      { address: "0xmnp...345", claimed: true },
-      { address: "0xqrst...678", claimed: false },
-      { address: "0xuvw...901", claimed: true },
-      { address: "0xxyz...234", claimed: false },
-    ],
-    super: true,
+    super: false,
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "garden_1hive",
     passportMinScore: 15,
     enabled: true,
-    claimAmount: "10 HNY",
-    balanceNumeric: 100,
-    currency: "HNY",
   },
   {
     id: 2,
-    title: "Another Loop",
-    by: "DAOStack",
-    description:
-      "A decentralized autonomous organization for collective decision-making.",
+    title: "Blockscout Merits Program",
+    by: "Blockscout",
+    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
+    description: "loop and/or organization description",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-
-    periodLength: "7 days",
-    periodDistribution: "5%",
-    nextDistributionIn: "05h 30min 10s",
-    shieldScore: "Gitcoin Passport Score 20",
-    eligibility: "DAOStack contributor",
-    chainBadgeColor: "bg-blue-500",
-    registeredAddresses: [
-      { address: "0x111...aaa", claimed: true },
-      { address: "0x222...bbb", claimed: false },
-      { address: "0x333...ccc", claimed: true },
-    ],
+    shieldScore: "Human Passport Score 15",
+    eligibility: "1 Merit Redemption",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
     super: false,
-    chainId: 1,
-    chainName: "Ethereum",
+    chainId: 100,
+    chainName: "Gnosis",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
-    claimAmount: "25 DAI",
-    balanceNumeric: 500,
-    currency: "DAI",
   },
   {
     id: 3,
-    title: "Community Fund",
-    by: "BlockScout",
-    description: "Funding initiatives for community growth and development.",
+    title: "Test Blockscout Merits Program",
+    by: "Blockscout",
+    address: "0xFC3FE4DA827f25402f744C221208C648E57324EE",
+    description: "loop and/or organization description",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-
-    periodLength: "30 days",
-    periodDistribution: "15%",
-    nextDistributionIn: "10h 05min 40s",
-    shieldScore: "BrightID Verified",
-    eligibility: "Aragon DAO member",
-    chainBadgeColor: "bg-purple-500",
-    registeredAddresses: [
-      { address: "0x444...ddd", claimed: false },
-      { address: "0x555...eee", claimed: true },
-    ],
-    chainId: 137,
-    chainName: "Polygon",
+    shieldScore: "Human Passport Score 15",
+    eligibility: "1 Merit Redemption",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: false,
+    chainId: 100,
+    chainName: "Gnosis",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
-    claimAmount: "37.5 ETH",
-    balanceNumeric: 250,
-    currency: "ETH",
-  },
-  {
-    id: 4,
-    title: "Grants Program",
-    by: "BrightId",
-    description:
-      "Supporting public goods and open-source development. This is much longer description to see how it look like so dont worry, be happy",
-    periodLength: "14 days",
-    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-
-    periodDistribution: "8%",
-    nextDistributionIn: "01h 45min 00s",
-    shieldScore: "Kleros Curated",
-    eligibility: "MolochDAO summoner",
-    chainBadgeColor: "bg-yellow-500",
-    registeredAddresses: [
-      { address: "0x666...fff", claimed: true },
-      { address: "0x777...ggg", claimed: false },
-      { address: "0x888...hhh", claimed: true },
-      { address: "0x999...iii", claimed: false },
-    ],
-    chainId: 42161,
-    chainName: "Arbitrum",
-    eligibilityProvider: "blockscout",
-    passportMinScore: 15,
-    enabled: true,
-    claimAmount: "6 GNO",
-    balanceNumeric: 75,
-    currency: "GNO",
   },
 ]
