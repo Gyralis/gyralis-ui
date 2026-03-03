@@ -1,24 +1,32 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { motion, useSpring, useTransform } from "framer-motion"
+import { LuUsers } from "react-icons/lu"
 import { Address } from "viem"
-import { useWatchBlocks } from "wagmi"
 
 import {
-  LoopSettingsProps,
   useLoopSettings,
 } from "@/lib/hooks/app/use-next-period-start"
 import { secondsToTime } from "@/lib/utils/time"
+import { LoopersModal } from "@/components/loops/loopers-modal"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
+  loopTitle?: string
 }
 
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
+  loopTitle,
 }) => {
   const [superLoop, setSuperLoop] = useState<boolean>(false)
   const [isAddressesModalOpen, setIsAddressesModalOpen] = useState(false)
@@ -66,14 +74,33 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             <Countdown nextPeriodStart={nextPeriodStart} />
           )}
 
-          {/* <button
-            onClick={() => setIsAddressesModalOpen(true)}
-            className="tamagotchi-button-secondary"
-          >
-            Loopers
-          </button> */}
+          <TooltipProvider delayDuration={120}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setIsAddressesModalOpen(true)}
+                  className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-1px_0_rgba(0,0,0,0.05),0_6px_16px_rgba(0,0,0,0.1)] transition hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(0,0,0,0.08),0_8px_20px_rgba(28,231,131,0.18)]"
+                  type="button"
+                  aria-label="Open loopers modal"
+                >
+                  <LuUsers className="size-4" />
+                  <span className="sr-only">Loopers</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>View loopers</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
+
+      <LoopersModal
+        chainId={chainId}
+        currentPeriod={currentPeriod}
+        isOpen={isAddressesModalOpen}
+        loopAddress={address}
+        loopTitle={loopTitle}
+        onOpenChange={setIsAddressesModalOpen}
+      />
     </div>
   )
 }

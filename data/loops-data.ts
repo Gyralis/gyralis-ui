@@ -70,7 +70,7 @@ export const LoopCardsData: LoopCardData[] = [
     id: 3,
     title: "Test Blockscout Merits Program",
     by: "Blockscout",
-    address: "0xFC3FE4DA827f25402f744C221208C648E57324EE",
+    address: "0xFD4B87a83acde1f54A1AC986b33BE20154cDDf70",
     description: "loop and/or organization description",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     shieldScore: "Human Passport Score 15",
