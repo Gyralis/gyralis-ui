@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import { LoopEligibilityProvider } from "@/data/loops-data"
 import { Address } from "viem"
 import {
   useAccount,
@@ -10,7 +11,6 @@ import {
   useWriteContract,
 } from "wagmi"
 
-import { LoopEligibilityProvider } from "@/data/loops-data"
 import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 
@@ -47,10 +47,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     )
   }, [chainId])
 
-  const { refetch: refetchSettings } = useLoopSettings(
-    address,
-    chainId
-  )
+  const { refetch: refetchSettings } = useLoopSettings(address, chainId)
 
   const { data: claimerStatus, refetch: refetchClaimerStatus } =
     useReadContract({
@@ -109,6 +106,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     isLoadingCurrentPeriod || isLoadingCurrentPeriodPayout
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
   const wrongNetwork = currentChainId !== chainId
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash: txHash,
@@ -198,18 +196,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
       const hash = isRegistered
         ? await writeContractAsync({
-          address,
-          abi: loopAbi,
-          functionName: "claim",
-          chainId,
-        })
+            address,
+            abi: loopAbi,
+            functionName: "claim",
+            chainId,
+          })
         : await writeContractAsync({
-          address,
-          abi: loopAbi,
-          functionName: "claimAndRegister",
-          args: [payload.signature],
-          chainId,
-        })
+            address,
+            abi: loopAbi,
+            functionName: "claimAndRegister",
+            args: [payload.signature],
+            chainId,
+          })
       setTxHash(hash)
 
       toast({
@@ -248,16 +246,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         {isSubmitting
           ? "Submitting transaction..."
           : isConfirming
-            ? "Confirming transaction..."
-            : hasClaimed
+          ? "Confirming transaction..."
+          : hasClaimed
           ? "Already Claimed"
           : !isRegistered
-            ? "Register for next period"
-            : isWaitingNextPeriod
-              ? "Claim opens next period"
-              : isLoadingOnchainState
-                ? "Checking claim status..."
-                : "Claim now"}
+          ? "Register for next period"
+          : isWaitingNextPeriod
+          ? "Claim opens next period"
+          : isLoadingOnchainState
+          ? "Checking claim status..."
+          : "Claim now"}
       </Button>
       {isWaitingNextPeriod && (
         <p className="text-xs text-muted-foreground">

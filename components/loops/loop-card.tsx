@@ -114,109 +114,13 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
   const [isAddressesModalOpen, setIsAddressesModalOpen] = useState(false)
   const [isSwitchingChain, setIsSwitchingChain] = useState(false)
+
   const { isConnected, currentChainId, connectWallet, switchChain } =
     useWallet()
 
   const isCorrectChain = currentChainId === loop.chainId
 
   const canClaim = isConnected && isCorrectChain && !status.hasClaimed
-
-  const simulateApiCall = async (successRate: number, delay = 500) =>
-    new Promise<boolean>((resolve) =>
-      setTimeout(() => resolve(Math.random() < successRate), delay)
-    )
-
-  const simulateWalletSigning = async () =>
-    new Promise<boolean>((resolve) =>
-      setTimeout(() => resolve(Math.random() < 0.95), 1500)
-    )
-
-  // const handleClaimTokens = async () => {
-  //   if (!canClaim) return
-
-  //   setStatus({
-  //     ...status,
-  //     isClaiming: true,
-  //     message: null,
-  //     type: null,
-  //     shieldPassed: false,
-  //     eligibilityPassed: false,
-  //   })
-
-  //   const shieldCheck = await simulateApiCall(0.8)
-  //   if (!shieldCheck)
-  //     return setStatus({
-  //       ...status,
-  //       message: "Error: Shield requirement not met.",
-  //       type: "error",
-  //       isClaiming: false,
-  //     })
-
-  //   const eligibilityCheck = await simulateApiCall(0.7)
-  //   if (!eligibilityCheck)
-  //     return setStatus({
-  //       ...status,
-  //       message: "Error: Eligibility not met.",
-  //       type: "error",
-  //       isClaiming: false,
-  //     })
-
-  //   const walletSign = await simulateWalletSigning()
-  //   if (!walletSign)
-  //     return setStatus({
-  //       ...status,
-  //       message: "Error: Transaction failed.",
-  //       type: "error",
-  //       isClaiming: false,
-  //     })
-
-  //   const claimResult = await simulateApiCall(0.9)
-  //   if (claimResult) {
-  //     const claimAmountNumeric = parseFloat(card.claimAmount.split(" ")[0])
-  //     const newBalance = Math.max(0, card.balanceNumeric - claimAmountNumeric)
-  //     onBalanceUpdate(card.id, newBalance, `${newBalance} ${card.currency}`)
-  //     setStatus({
-  //       ...status,
-  //       message: `Successfully claimed ${card.claimAmount}!`,
-  //       type: "success",
-  //       hasClaimed: true,
-  //       isClaiming: false,
-  //     })
-  //   } else {
-  //     setStatus({
-  //       ...status,
-  //       message: "Error: Failed to claim tokens.",
-  //       type: "error",
-  //       isClaiming: false,
-  //     })
-  //   }
-  // }
-
-  const RenderClaimButton = useMemo(() => {
-    if (!isConnected)
-      return (
-        <Button onClick={connectWallet} className="tamagotchi-button w-full">
-          Connect Wallet
-        </Button>
-      )
-    if (status.hasClaimed)
-      return (
-        <Button
-          disabled
-          className="w-full cursor-not-allowed rounded-xl bg-muted py-3 text-lg text-muted-foreground"
-        >
-          Already Claimed
-        </Button>
-      )
-    return (
-      <Button
-        disabled={status.isClaiming}
-        className="tamagotchi-button w-full py-3 text-lg"
-      >
-        {status.isClaiming ? "Processing..." : "Claim Tokens"}
-      </Button>
-    )
-  }, [isConnected, status.hasClaimed, status.isClaiming])
 
   return (
     <div className="tamagotchi-card font-body relative p-6 md:p-8">
@@ -226,10 +130,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           <div>
             <div className="mb-4 flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
-                <ChainIcon
-                  chainId={loop.chainId}
-                  className="size-7 shrink-0"
-                />
+                <ChainIcon chainId={loop.chainId} className="size-7 shrink-0" />
                 <h3 className="font-heading text-xl text-foreground md:text-2xl">
                   {loop.title}
                 </h3>
