@@ -4,8 +4,11 @@ import { useEffect, useState } from "react"
 import { parseAbiItem, type Address } from "viem"
 import { usePublicClient } from "wagmi"
 
-const registerEventAbiItem = parseAbiItem(
+const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
+)
+const upgradedRegisterEventAbiItem = parseAbiItem(
+  "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
 
 interface UseRegisteredUsersResult {
@@ -35,21 +38,34 @@ export function useRegisteredUsers(
       setLoading(true)
 
       try {
-        const logs = await publicClient.getLogs({
-          address: loopAddress,
-          event: registerEventAbiItem,
-          args: {
-            periodNumber,
-          },
-          fromBlock: 0n,
-          toBlock: "latest",
-        })
+        const [legacyLogs, upgradedLogs] = await Promise.all([
+          publicClient.getLogs({
+            address: loopAddress,
+            event: legacyRegisterEventAbiItem,
+            args: {
+              periodNumber,
+            },
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+          publicClient.getLogs({
+            address: loopAddress,
+            event: upgradedRegisterEventAbiItem,
+            args: {
+              periodNumber,
+            },
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+        ])
 
         if (cancelled) {
           return
         }
 
-        const registered = logs.map((log) => log.args.sender as Address)
+        const registered = [...legacyLogs, ...upgradedLogs].map(
+          (log) => log.args.sender as Address
+        )
         setUsers(Array.from(new Set(registered)))
       } catch (error) {
         if (!cancelled) {

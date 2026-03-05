@@ -194,20 +194,13 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      const hash = isRegistered
-        ? await writeContractAsync({
-            address,
-            abi: loopAbi,
-            functionName: "claim",
-            chainId,
-          })
-        : await writeContractAsync({
-            address,
-            abi: loopAbi,
-            functionName: "claimAndRegister",
-            args: [payload.signature],
-            chainId,
-          })
+      const hash = await writeContractAsync({
+        address,
+        abi: loopAbi,
+        functionName: "claimAndRegister",
+        args: [payload.signature],
+        chainId,
+      })
       setTxHash(hash)
 
       toast({

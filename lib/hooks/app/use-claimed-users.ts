@@ -4,8 +4,11 @@ import { useEffect, useState } from "react"
 import { parseAbiItem, type Address } from "viem"
 import { usePublicClient } from "wagmi"
 
-const claimEventAbiItem = parseAbiItem(
+const legacyClaimEventAbiItem = parseAbiItem(
   "event Claim(address indexed claimer, uint256 periodNumber, uint256 payout)"
+)
+const upgradedClaimEventAbiItem = parseAbiItem(
+  "event Claim(address indexed claimer, address indexed token, uint256 indexed periodNumber, uint256 payout)"
 )
 
 interface UseClaimedUsersResult {
@@ -35,18 +38,26 @@ export function useClaimedUsers(
       setLoading(true)
 
       try {
-        const logs = await publicClient.getLogs({
-          address: loopAddress,
-          event: claimEventAbiItem,
-          fromBlock: 0n,
-          toBlock: "latest",
-        })
+        const [legacyLogs, upgradedLogs] = await Promise.all([
+          publicClient.getLogs({
+            address: loopAddress,
+            event: legacyClaimEventAbiItem,
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+          publicClient.getLogs({
+            address: loopAddress,
+            event: upgradedClaimEventAbiItem,
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+        ])
 
         if (cancelled) {
           return
         }
 
-        const claimed = logs
+        const claimed = [...legacyLogs, ...upgradedLogs]
           .filter((log) => log.args.periodNumber === periodNumber)
           .map((log) => log.args.claimer as Address)
 
