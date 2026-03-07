@@ -1,5 +1,7 @@
 import { Address } from "viem"
 
+import { EligibilityKey } from "@/lib/eligibility"
+
 export interface LoopCardData {
   id: number
   title: string
@@ -11,7 +13,7 @@ export interface LoopCardData {
   periodDistribution: string
   nextDistributionIn: string
   shieldScore: string
-  eligibility: string
+  eligibility: EligibilityKey
   chainBadgeColor: string
   shieldAccount?: string
   shieldValue?: string
@@ -36,7 +38,7 @@ export const LoopCardsData: LoopCardData[] = [
     periodDistribution: "10%",
     nextDistributionIn: "02h 10min 25s",
     shieldScore: "Human Passport Score 15",
-    eligibility: "1Hive member Gardensv2",
+    eligibility: "gardens_1hive",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -69,7 +71,7 @@ export const LoopCardsData: LoopCardData[] = [
     periodDistribution: "15%",
     nextDistributionIn: "10h 05min 40s",
     shieldScore: "BrightID Verified",
-    eligibility: "Aragon DAO member",
+    eligibility: "blockscout_merits",
     chainBadgeColor: "bg-purple-500",
     registeredAddresses: [
       { address: "0x444...ddd", claimed: false },
@@ -94,7 +96,7 @@ export const LoopCardsData: LoopCardData[] = [
     periodDistribution: "5%",
     nextDistributionIn: "05h 30min 10s",
     shieldScore: "Gitcoin Passport Score 20",
-    eligibility: "DAOStack contributor",
+    eligibility: "gardens_1hive",
     chainBadgeColor: "bg-blue-500",
     registeredAddresses: [
       { address: "0x111...aaa", claimed: true },
@@ -120,7 +122,7 @@ export const LoopCardsData: LoopCardData[] = [
     periodDistribution: "8%",
     nextDistributionIn: "01h 45min 00s",
     shieldScore: "Kleros Curated",
-    eligibility: "MolochDAO summoner",
+    eligibility: "gardens_1hive",
     chainBadgeColor: "bg-yellow-500",
     registeredAddresses: [
       { address: "0x666...fff", claimed: true },

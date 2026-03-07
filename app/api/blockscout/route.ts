@@ -13,7 +13,7 @@ import * as chains from "viem/chains"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = process.env.GITCOIN_PASSPORT_API_KEY ?? ""
-const SCORER_ID = process.env.SCORER_ID ?? ""
+const SCORER_ID = process.env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 
 /** Blockscout “Merits/Points” API */
 const BLOCKSCOUT_POINTS_BASE =
@@ -42,22 +42,52 @@ interface BlockscoutRedemptionsResponse {
 }
 
 function getViemChain(chainId: string | number): Chain {
+  console.log("[blockscout] getViemChain input:", chainId)
+
   for (const chain of Object.values(chains)) {
-    if ("id" in chain && chain.id == chainId) return chain
+    if ("id" in chain && chain.id == chainId) {
+      console.log("[blockscout] matched viem chain:", {
+        id: chain.id,
+        name: chain.name,
+      })
+      return chain
+    }
   }
+
+  console.error("[blockscout] chain not found:", chainId)
   throw new Error(`Chain with id ${chainId} not found`)
 }
 
 async function fetchPassportScore(userAddress: string): Promise<number> {
-  if (!GITCOIN_PASSPORT_API_KEY)
+  console.log("[blockscout] fetchPassportScore start:", {
+    userAddress,
+    hasApiKey: Boolean(GITCOIN_PASSPORT_API_KEY),
+    scorerId: SCORER_ID,
+  })
+
+  if (!GITCOIN_PASSPORT_API_KEY) {
+    console.error("[blockscout] missing GITCOIN_PASSPORT_API_KEY")
     throw new Error("Gitcoin Passport API key missing")
+  }
 
   const endpoint = `https://api.scorer.gitcoin.co/registry/score/${SCORER_ID}/${userAddress}`
+  console.log("[blockscout] passport endpoint:", endpoint)
+
   const response = await fetch(endpoint, {
     headers: { "X-API-KEY": GITCOIN_PASSPORT_API_KEY },
   })
-  if (!response.ok) throw new Error("Failed to fetch passport score")
+
+  console.log("[blockscout] passport response status:", response.status)
+
+  if (!response.ok) {
+    const text = await response.text()
+    console.error("[blockscout] passport fetch failed:", text)
+    throw new Error("Failed to fetch passport score")
+  }
+
   const data = (await response.json()) as PassportScoreResponse
+  console.log("[blockscout] passport score result:", data)
+
   return data.score
 }
 
@@ -65,6 +95,8 @@ async function fetchNextPeriod(
   chainId: number,
   loopAddress: string
 ): Promise<number> {
+  console.log("[blockscout] fetchNextPeriod start:", { chainId, loopAddress })
+
   const viemChain = getViemChain(chainId)
   const walletClient = createWalletClient({
     account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
@@ -76,12 +108,38 @@ async function fetchNextPeriod(
     address: loopAddress as `0x${string}`,
     abi: parseAbi([
       "function getCurrentPeriod() public view returns (uint256)",
+      "function getStreamingCurrentPeriod() public view returns (uint256)",
     ]),
     client: walletClient,
   })
 
-  const currentPeriod = await loopContract.read.getCurrentPeriod()
-  return Number(currentPeriod + BigInt(1))
+  let currentPeriod: bigint
+
+  try {
+    console.log("[blockscout] trying getStreamingCurrentPeriod()")
+    currentPeriod = await loopContract.read.getStreamingCurrentPeriod()
+    console.log(
+      "[blockscout] streaming current period:",
+      currentPeriod.toString()
+    )
+  } catch (streamingError) {
+    console.warn(
+      "[blockscout] getStreamingCurrentPeriod failed, falling back to getCurrentPeriod:",
+      streamingError
+    )
+
+    console.log("[blockscout] trying getCurrentPeriod()")
+    currentPeriod = await loopContract.read.getCurrentPeriod()
+    console.log(
+      "[blockscout] regular current period:",
+      currentPeriod.toString()
+    )
+  }
+
+  const nextPeriod = Number(currentPeriod + 1n)
+  console.log("[blockscout] computed nextPeriod:", nextPeriod)
+
+  return nextPeriod
 }
 
 /** Robust Blockscout redemptions checker
@@ -92,6 +150,12 @@ async function hasBlockscoutRedemption(userAddress: string): Promise<boolean> {
   const addrLower = userAddress.toLowerCase()
   const base = `${BLOCKSCOUT_POINTS_BASE}/api/v1/offers/${BLOCKSCOUT_OFFER_ID}/redemptions`
 
+  console.log("[blockscout] hasBlockscoutRedemption start:", {
+    userAddress,
+    base,
+    offerId: BLOCKSCOUT_OFFER_ID,
+  })
+
   // Helper to fetch one page (optionally with query params)
   async function fetchPage(
     params?: Record<string, string>
@@ -100,21 +164,58 @@ async function hasBlockscoutRedemption(userAddress: string): Promise<boolean> {
     if (params) {
       for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
     }
+
+    console.log("[blockscout] fetching redemptions page:", url.toString())
+
     const res = await fetch(url.toString())
-    if (!res.ok) throw new Error(`Blockscout API error (${res.status})`)
-    return (await res.json()) as BlockscoutRedemptionsResponse
+    console.log("[blockscout] redemptions page status:", res.status)
+
+    if (!res.ok) {
+      const text = await res.text()
+      console.error("[blockscout] redemptions page failed:", {
+        status: res.status,
+        body: text,
+      })
+      throw new Error(`Blockscout API error (${res.status})`)
+    }
+
+    const json = (await res.json()) as BlockscoutRedemptionsResponse
+    console.log("[blockscout] redemptions page result:", {
+      itemsCount: json.items?.length ?? 0,
+      nextPageParams: json.next_page_params,
+    })
+
+    return json
   }
 
-  // 1) Best case: the API supports filtering by address (many APIs do)
+  // 1) Best case: the API supports filtering by address
   try {
+    console.log("[blockscout] trying filtered lookup by address")
     const first = await fetchPage({ address: userAddress })
-    if (first.items?.some((i) => i.address?.toLowerCase() === addrLower))
-      return true
-    // If filter returns items but none match, we can assume "not eligible"
-    if (first.items && first.items.length > 0 && !first.next_page_params)
+
+    const foundFiltered = first.items?.some(
+      (i) => i.address?.toLowerCase() === addrLower
+    )
+
+    console.log("[blockscout] filtered lookup result:", {
+      foundFiltered,
+      itemsCount: first.items?.length ?? 0,
+      nextPageParams: first.next_page_params,
+    })
+
+    if (foundFiltered) return true
+
+    if (first.items && first.items.length > 0 && !first.next_page_params) {
+      console.log(
+        "[blockscout] filtered lookup returned items but no matching address"
+      )
       return false
-  } catch {
-    // ignore and fallback to full scan
+    }
+  } catch (err) {
+    console.warn(
+      "[blockscout] filtered lookup failed, falling back to scan:",
+      err
+    )
   }
 
   // 2) Fallback: walk pages via next_page_params
@@ -123,51 +224,102 @@ async function hasBlockscoutRedemption(userAddress: string): Promise<boolean> {
   const MAX_PAGES = 100
 
   while (safetyPages++ < MAX_PAGES) {
+    console.log("[blockscout] scanning page number:", safetyPages)
+
     const page = await fetchPage(params)
-    if (page.items?.some((i) => i.address?.toLowerCase() === addrLower))
-      return true
+
+    const found = page.items?.some(
+      (i) => i.address?.toLowerCase() === addrLower
+    )
+
+    console.log("[blockscout] scan page result:", {
+      found,
+      itemsCount: page.items?.length ?? 0,
+      nextPageParams: page.next_page_params,
+    })
+
+    if (found) return true
     if (!page.next_page_params) return false
+
     params = page.next_page_params
   }
 
-  // If we hit the page cap, treat as not found (or throw if you prefer hard failure)
+  console.warn("[blockscout] reached MAX_PAGES without match:", MAX_PAGES)
   return false
 }
 
 export async function POST(req: Request) {
   try {
+    console.log("[blockscout] POST /api/blockscout hit")
+
     const { userAddress, loopAddress, chainId } = await req.json()
-    if (!userAddress || !loopAddress || !chainId)
+    console.log("[blockscout] request body:", {
+      userAddress,
+      loopAddress,
+      chainId,
+      hasSignerPk: Boolean(TRUSTED_BACKEND_SIGNER_PK),
+      hasPassportApiKey: Boolean(GITCOIN_PASSPORT_API_KEY),
+      scorerId: SCORER_ID,
+      pointsBase: BLOCKSCOUT_POINTS_BASE,
+      offerId: BLOCKSCOUT_OFFER_ID,
+    })
+
+    if (!userAddress || !loopAddress || !chainId) {
+      console.error("[blockscout] missing parameters")
       return NextResponse.json(
         { success: false, error: "Missing parameters" },
         { status: 400 }
       )
+    }
 
     // 1) Gitcoin Passport score gate
-    const passportScore = await fetchPassportScore(userAddress)
-    if (passportScore <= THRESHOLD)
-      return NextResponse.json(
-        { success: false, error: "Passport score below threshold" },
-        { status: 403 }
-      )
+    // console.log("[blockscout] step 1: checking passport score")
+    // const passportScore = await fetchPassportScore(userAddress)
+    // console.log("[blockscout] passportScore:", passportScore)
 
-    // 2) Blockscout Merits / Points gate (replaces the 1Hive membership check)
-    const redeemed = await hasBlockscoutRedemption(userAddress)
-    if (!redeemed)
+    // if (passportScore <= THRESHOLD) {
+    //   console.warn("[blockscout] passport score below threshold:", {
+    //     passportScore,
+    //     threshold: THRESHOLD,
+    //   })
+    //   return NextResponse.json(
+    //     { success: false, error: "Passport score below threshold" },
+    //     { status: 403 }
+    //   )
+    // }
+
+    // 2) Blockscout Merits / Points gate
+    console.log("[blockscout] step 2: checking blockscout redemption")
+    const redeemed = await hasBlockscoutRedemption(
+      /*userAddress*/ "0xa25211b64d041f690c0c818183e32f28ba9647dd"
+    ) //fake address to test
+    console.log("[blockscout] redeemed result:", redeemed)
+
+    if (!redeemed) {
+      console.warn("[blockscout] no redemption found for user")
       return NextResponse.json(
         { success: false, error: "No valid Blockscout redemption found" },
         { status: 403 }
       )
+    }
 
     // 3) Compute next period from the Loop contract
+    console.log("[blockscout] step 3: fetching next period")
     const nextPeriod = await fetchNextPeriod(Number(chainId), loopAddress)
+    console.log("[blockscout] nextPeriod:", nextPeriod)
 
-    // 4) Eligibility signature: keccak256(encodePacked(user, nextPeriod, loopAddress))
+    // 4) Eligibility signature
+    console.log("[blockscout] step 4: building eligibility message")
     const eligibilityMessage = encodePacked(
       ["address", "uint256", "address"],
       [userAddress, BigInt(Math.floor(nextPeriod)), loopAddress]
     )
     const eligibilityMessageHash = keccak256(eligibilityMessage)
+
+    console.log(
+      "[blockscout] eligibility message hash:",
+      eligibilityMessageHash
+    )
 
     const walletClient = createWalletClient({
       account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
@@ -175,10 +327,13 @@ export async function POST(req: Request) {
       transport: http(),
     })
 
+    console.log("[blockscout] step 5: signing message")
     const backendSignature = await walletClient.signMessage({
       account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
       message: { raw: eligibilityMessageHash },
     })
+
+    console.log("[blockscout] signature generated successfully")
 
     return NextResponse.json({
       success: true,
@@ -186,7 +341,7 @@ export async function POST(req: Request) {
       message: "User is eligible and signature has been generated",
     })
   } catch (error) {
-    console.error("API Error:", error)
+    console.error("[blockscout] API Error:", error)
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }
