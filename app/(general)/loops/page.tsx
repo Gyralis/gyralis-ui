@@ -1,38 +1,22 @@
 "use client"
 
-import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
-import { LoopCardData, LoopCardsData } from "@/data/loops-data"
-import { FaDiscord, FaGithub } from "react-icons/fa"
-import { LuBook } from "react-icons/lu"
+import { useState } from "react"
 
-import { siteConfig } from "@/config/site"
-import { useLoopSettings } from "@/lib/hooks/app/use-loop-settings"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  PageHeader,
-  PageHeaderCTA,
-  PageHeaderDescription,
-  PageHeaderHeading,
-} from "@/components/layout/page-header"
+import loopBackgroundDark from "@/assets/gyralis_background_dark.png"
+import loopBackgroundLight from "@/assets/gyralis_background_light.png"
+import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import LoopCard from "@/components/loops/loop-card"
-import { LoopMetadata } from "@/components/loops/loop-metadata"
 import { SearchWithTags } from "@/components/search"
-import { CopyButton } from "@/components/shared/copy-button"
 
 export default function HomePage() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
-
   const [searchQuery, setSearch] = useState("")
   const [activeTag, setActiveTag] = useState<string | null>(null)
-  const [selectedCommunity, setSelectedCommunity] = useState("All")
 
-  const tags = Array.from(new Set(LoopCardsData.map((loop) => loop.by)))
+  const tags = Array.from(new Set(cards.map((loop) => loop.by)))
 
-  const filteredLoopCards = LoopCardsData.filter((card) => {
+  const filteredLoopCards = cards.filter((card) => {
     const matchesSearch =
       !searchQuery ||
       card.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -40,13 +24,11 @@ export default function HomePage() {
       card.by.toLowerCase().includes(searchQuery.toLowerCase())
 
     const matchesTag =
-      activeTag === null || // "All" selected
-      card.by.toLowerCase() === activeTag.toLowerCase() // exact match with tag
+      activeTag === null || card.by.toLowerCase() === activeTag.toLowerCase()
 
     return matchesSearch && matchesTag
   })
 
-  // Handler to update card balances
   const handleBalanceUpdate = (
     cardId: number,
     newBalance: number,
@@ -64,118 +46,94 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
-        {/* Floating decorative elements */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="floating absolute left-10 top-20 size-8 rounded-full bg-orange-300 opacity-60"></div>
-          <div className="floating absolute right-20 top-40 size-6 rounded-full bg-blue-300 opacity-60"></div>
-          <div className="floating absolute left-1/4 top-60 size-4 rounded-full bg-green-300 opacity-60"></div>
-          <div className="floating absolute bottom-40 right-10 size-10 rounded-full bg-pink-300 opacity-60"></div>
-        </div>
+        <div className="mx-auto max-w-6xl px-4 pb-6 pt-10 md:pt-14">
+          <section className="relative overflow-hidden rounded-3xl border border-border/70 shadow-[0_16px_48px_-28px_rgba(0,0,0,0.4)]">
+            <Image
+              src={loopBackgroundLight}
+              alt=""
+              fill
+              priority
+              aria-hidden="true"
+              className="object-cover dark:hidden"
+            />
+            <Image
+              src={loopBackgroundDark}
+              alt=""
+              fill
+              priority
+              aria-hidden="true"
+              className="hidden object-cover dark:block"
+            />
 
-        {/* loop-page-header */}
-        <div className="border2 mx-auto max-w-6xl px-4 py-16">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            {/* Left side - Text content */}
-            <div className="space-y-8">
-              <h1 className="font-heading text-5xl leading-tight text-gray-800 lg:text-6xl">
-                Keep the
-                <br />
-                <span className="text-primary">Loop Alive.</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/45 dark:from-background/90 dark:via-background/70 dark:to-background/30" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.24),transparent_45%)] dark:bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.18),transparent_45%)]" />
+
+            <div className="relative flex min-h-[280px] flex-col items-center justify-center px-6 py-10 text-center sm:min-h-[320px] sm:px-10">
+              <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-primary/90 sm:text-sm">
+                Daily Loop Rewards
+              </p>
+              <h1 className="mt-4 font-heading text-4xl leading-[0.9] sm:text-6xl md:text-7xl">
+                <span className="inline-block text-black dark:text-white">
+                  PROVE
+                </span>
+                <span className="mx-3 inline-block size-2 rounded-full bg-black/70 align-middle dark:bg-white/80" />
+                <span className="mx-3 inline-block text-primary">CLAIM</span>
+                <span className="mx-3 inline-block size-2 rounded-full bg-black/70 align-middle dark:bg-white/80" />
+                <span className="inline-block text-[#ff6f61]">REPEAT</span>
               </h1>
-
-              <p className="max-w-lg font-body text-xl leading-relaxed text-gray-600">
-                Gyralis is where communities grow by showing up. Think of it
-                like a digital heartbeat—feed it, nurture it, and earn rewards
-                as your loop thrives.
+              <p className="mt-4 max-w-2xl font-body text-base text-muted-foreground sm:text-lg">
+                Prove you are human. Claim tokens every day.
               </p>
 
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <Button
-                  chainId={100}
-                  onClick={() => console.log("Button click as primary")}
-                >
-                  Feed the loop
-                </Button>
-              </div>
-            </div>
-
-            {/* Right side - Tamagotchi device */}
-            <div className="relative flex justify-center">
-              <div className="relative">
-                {/* Main device body */}
-                <div className="relative h-96 w-80 rounded-3xl bg-gradient-to-b from-pink-300 to-pink-400 shadow-2xl">
-                  {/* Device screen */}
-                  <div className="absolute inset-x-8 top-12 h-48 overflow-hidden rounded-2xl border-4 border-yellow-400 bg-gradient-to-b from-yellow-200 to-yellow-300">
-                    {/* Digital pet */}
-                    <div className="flex h-full items-center justify-center">
-                      <div className="pulse-glow relative size-24 rounded-full bg-green-400">
-                        {/* Eyes */}
-                        <div className="absolute left-4 top-6 size-3 rounded-full bg-black"></div>
-                        <div className="absolute right-4 top-6 size-3 rounded-full bg-black"></div>
-                        {/* Mouth */}
-                        <div className="absolute bottom-6 left-1/2 h-4 w-8 -translate-x-1/2 rounded-full border-b-4 border-black"></div>
-                        {/* Cheeks */}
-                        <div className="absolute left-1 top-8 size-4 rounded-full bg-pink-300 opacity-80"></div>
-                        <div className="absolute right-1 top-8 size-4 rounded-full bg-pink-300 opacity-80"></div>
-                      </div>
+              <div className="mt-8 flex w-full max-w-3xl flex-nowrap items-center justify-center gap-2 overflow-x-auto pb-1 sm:gap-4">
+                {[
+                  {
+                    label: "Prove you are a human",
+                    color: "bg-black/90 text-white dark:bg-white/90 dark:text-black",
+                  },
+                  {
+                    label: "Claim token - every day",
+                    color: "bg-[#1CE783]/90 text-black",
+                  },
+                  {
+                    label: "Repeat daily",
+                    color: "bg-[#ff6f61]/90 text-white",
+                  },
+                ].map((step) => (
+                  <div
+                    key={step.label}
+                    className="flex shrink-0 items-center justify-center"
+                  >
+                    <div
+                      className={`whitespace-nowrap rounded-full px-3 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.08em] shadow-lg sm:py-3 sm:text-sm ${step.color}`}
+                    >
+                      {step.label}
                     </div>
                   </div>
-
-                  {/* Device buttons */}
-                  <div className="absolute bottom-16 left-1/2 flex -translate-x-1/2 gap-4">
-                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
-                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
-                    <div className="size-12 rounded-full bg-orange-400 shadow-lg"></div>
-                  </div>
-
-                  {/* Device details */}
-                  <div className="absolute left-1/2 top-4 flex -translate-x-1/2 gap-2">
-                    <div className="size-3 rounded-full bg-red-400"></div>
-                    <div className="size-3 rounded-full bg-red-400"></div>
-                    <div className="size-3 rounded-full bg-red-400"></div>
-                  </div>
-                </div>
-
-                {/* Decorative gears and elements */}
-                <div className="floating absolute -right-4 -top-4 size-16 rounded-full bg-blue-400 opacity-80"></div>
-                <div
-                  className="floating absolute -bottom-8 -left-8 size-12 bg-orange-400 opacity-80"
-                  style={{ clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" }}
-                ></div>
-                <div
-                  className="floating absolute -right-12 top-1/2 size-8 bg-teal-400 opacity-80"
-                  style={{
-                    clipPath:
-                      "polygon(30% 0%, 0% 50%, 30% 100%, 70% 100%, 100% 50%, 70% 0%)",
-                  }}
-                ></div>
+                ))}
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         <div className="mx-auto max-w-6xl overflow-visible px-4 py-8">
-          {/* search */}
           <div className="z-50">
             <SearchWithTags
               value={searchQuery}
               onChange={setSearch}
-              activeTag={activeTag} // <-- this should control your tag filter
-              onTagChange={setActiveTag} // <-- updates activeTag
+              activeTag={activeTag}
+              onTagChange={setActiveTag}
               tags={tags}
             />
           </div>
-          {/* loops */}
 
           <div className="grid gap-6">
             {filteredLoopCards.map((loop) => (
-              <>
-                <LoopCard
-                  key={loop.id}
-                  loop={loop}
-                  onBalanceUpdate={handleBalanceUpdate}
-                />
-              </>
+              <LoopCard
+                key={loop.id}
+                loop={loop}
+                onBalanceUpdate={handleBalanceUpdate}
+              />
             ))}
           </div>
         </div>

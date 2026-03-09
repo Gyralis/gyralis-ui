@@ -90,7 +90,7 @@ export const LoopCardsData: LoopCardData[] = [
     description: "loop and/or organization description",
     token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",
     shieldScore: "Human Passport Score 15",
-    eligibility: "1 Merit Redemption",
+    eligibility: "1Hive member Gardensv2",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
