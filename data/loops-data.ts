@@ -85,7 +85,7 @@ export const LoopCardsData: LoopCardData[] = [
   {
     id: 4,
     title: "Test 1hive Gardens",
-    by: "Blockscout",
+    by: "Gardens",
     address: "0xB29018e60Cbdc1938C77d02c588c74c1B060C6B3",
     description: "loop and/or organization description",
     token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",

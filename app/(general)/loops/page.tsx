@@ -1,11 +1,11 @@
 "use client"
 
-import Image from "next/image"
 import { useState } from "react"
-
+import Image from "next/image"
 import loopBackgroundDark from "@/assets/gyralis_background_dark.png"
 import loopBackgroundLight from "@/assets/gyralis_background_light.png"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
+
 import LoopCard from "@/components/loops/loop-card"
 import { SearchWithTags } from "@/components/search"
 
@@ -46,7 +46,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-4 pb-6 pt-10 md:pt-14">
+        <div className="mx-auto max-w-screen-xl px-4 pb-6 pt-10 md:pt-14">
           <section className="relative overflow-hidden rounded-3xl border border-border/70 shadow-[0_16px_48px_-28px_rgba(0,0,0,0.4)]">
             <Image
               src={loopBackgroundLight}
@@ -69,54 +69,30 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.24),transparent_45%)] dark:bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.18),transparent_45%)]" />
 
             <div className="relative flex min-h-[280px] flex-col items-center justify-center px-6 py-10 text-center sm:min-h-[320px] sm:px-10">
-              <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-primary/90 sm:text-sm">
+              <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-foreground sm:text-sm">
                 Daily Loop Rewards
               </p>
-              <h1 className="mt-4 font-heading text-4xl leading-[0.9] sm:text-6xl md:text-7xl">
-                <span className="inline-block text-black dark:text-white">
-                  PROVE
+              <h1 className="mt-4 text-center text-5xl font-extrabold leading-[0.95] tracking-[0.08em] text-foreground">
+                <span className="flex flex-col flex-wrap items-center justify-center gap-1 sm:flex-row sm:flex-nowrap sm:gap-3">
+                  <span>Prove</span>
+                  <span className="hidden sm:inline-block">-</span>
+                  <span>Claim</span>
+                  <span className="hidden sm:inline-block">-</span>
+                  <span>Repeat</span>
                 </span>
-                <span className="mx-3 inline-block size-2 rounded-full bg-black/70 align-middle dark:bg-white/80" />
-                <span className="mx-3 inline-block text-primary">CLAIM</span>
-                <span className="mx-3 inline-block size-2 rounded-full bg-black/70 align-middle dark:bg-white/80" />
-                <span className="inline-block text-[#ff6f61]">REPEAT</span>
               </h1>
-              <p className="mt-4 max-w-2xl font-body text-base text-muted-foreground sm:text-lg">
-                Prove you are human. Claim tokens every day.
-              </p>
 
-              <div className="mt-8 flex w-full max-w-3xl flex-nowrap items-center justify-center gap-2 overflow-x-auto pb-1 sm:gap-4">
-                {[
-                  {
-                    label: "Prove you are a human",
-                    color: "bg-black/90 text-white dark:bg-white/90 dark:text-black",
-                  },
-                  {
-                    label: "Claim token - every day",
-                    color: "bg-[#1CE783]/90 text-black",
-                  },
-                  {
-                    label: "Repeat daily",
-                    color: "bg-[#ff6f61]/90 text-white",
-                  },
-                ].map((step) => (
-                  <div
-                    key={step.label}
-                    className="flex shrink-0 items-center justify-center"
-                  >
-                    <div
-                      className={`whitespace-nowrap rounded-full px-3 py-2 font-body text-[11px] font-semibold uppercase tracking-[0.08em] shadow-lg sm:py-3 sm:text-sm ${step.color}`}
-                    >
-                      {step.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p className="mt-4 max-w-lg font-body text-base text-muted-foreground sm:text-lg">
+                <span>Prove you are human, claim tokens, repeat daily.</span>
+                <span className="mt-1 block">
+                  Gyralis is for protocols that value real participation.
+                </span>
+              </p>
             </div>
           </section>
         </div>
 
-        <div className="mx-auto max-w-6xl overflow-visible px-4 py-8">
+        <div className="mx-auto max-w-screen-xl overflow-visible px-4 py-8">
           <div className="z-50">
             <SearchWithTags
               value={searchQuery}
