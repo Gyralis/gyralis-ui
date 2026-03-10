@@ -94,7 +94,7 @@ const ChainIcon = ({
   className?: string
 }) => {
   return (
-    <div className={className}>
+    <div className={`${className} [&>svg]:size-full`}>
       {CHAIN_ICONS[chainId] ?? (
         <div className="size-6 rounded-full bg-gray-400" />
       )}
@@ -126,28 +126,36 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
     <div className="tamagotchi-card font-body relative p-6 md:p-8">
       <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
         {/* Loop metadata */}
-        <div className="border2 col-span-1 flex flex-col justify-between lg:pr-6">
-          <div>
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <ChainIcon chainId={loop.chainId} className="size-7 shrink-0" />
-                <h3 className="font-heading text-xl text-foreground md:text-2xl">
-                  {loop.title}
-                </h3>
-              </div>
-              <span
-                className={`inline-block rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg ${
-                  loop.super
-                    ? "bg-gradient-to-r from-orange-400 to-pink-400 text-white"
-                    : "bg-gradient-to-r from-blue-400 to-teal-400 text-white"
-                }`}
-              >
-                {loop.super ? "SUPER LOOP" : "LOOP"}
+        <div className="col-span-1 flex flex-col rounded-2xl border border-border/60 bg-gradient-to-br from-card/80 via-card/65 to-muted/30 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] lg:pr-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              <ChainIcon chainId={loop.chainId} className="size-4 shrink-0" />
+              <span className="truncate text-foreground">
+                Deployed on {loop.chainName}
               </span>
-            </div>
-            <p className="mb-6 text-base leading-relaxed text-muted-foreground md:text-lg">
-              {loop.description}
-            </p>
+            </span>
+            <span
+              className={`inline-flex shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                loop.super
+                  ? "bg-gradient-to-r from-orange-400 to-pink-400 text-white"
+                  : "bg-gradient-to-r from-blue-400 to-teal-400 text-white"
+              }`}
+            >
+              {loop.super ? "SUPER LOOP" : "LOOP"}
+            </span>
+          </div>
+
+          <h3 className="font-heading text-2xl leading-tight text-foreground md:text-[2rem]">
+            {loop.title}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+            {loop.description}
+          </p>
+
+          <div className="mt-auto pt-5">
+            <span className="inline-flex rounded-full bg-popover px-3 py-1.5 text-xs font-semibold text-secondary-foreground">
+              by {loop.by}
+            </span>
           </div>
         </div>
 
