@@ -175,7 +175,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Loop Setting */}
-        <div className="border2 col-span-1 flex flex-col justify-between rounded-2xl bg-gradient-to-br from-muted/30 to-muted/50 p-4 shadow-[inset_-3px_-3px_8px_rgba(255,255,255,0.7),inset_3px_3px_8px_rgba(0,0,0,0.15)] md:p-6">
+        <div className="col-span-1 flex flex-col rounded-2xl border border-border/60 bg-gradient-to-br from-card/80 via-card/65 to-muted/30 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] lg:px-6">
           <LoopSettings
             address={loop.address ?? "0x"}
             chainId={loop.chainId}

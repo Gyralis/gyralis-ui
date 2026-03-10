@@ -219,8 +219,25 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     }
   }
 
+  const actionLabel = isSubmitting
+    ? "Submitting transaction..."
+    : isConfirming
+    ? "Confirming transaction..."
+    : hasClaimed
+    ? "Already Claimed"
+    : !isRegistered
+    ? "Register for next period"
+    : isWaitingNextPeriod
+    ? "Claim opens next period"
+    : isLoadingOnchainState
+    ? "Checking claim status..."
+    : "Claim now"
+
   return (
-    <div className="space-y-2">
+    <div className="mt-4 space-y-2 rounded-xl border border-border/60 bg-background/60 p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        Claim Action
+      </p>
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -234,24 +251,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             isWaitingNextPeriod)
         }
         isLoading={isSubmitting || isConfirming}
-        className="w-full py-3 text-lg"
+        className="min-h-[48px] w-full px-4 py-3 text-base"
       >
-        {isSubmitting
-          ? "Submitting transaction..."
-          : isConfirming
-          ? "Confirming transaction..."
-          : hasClaimed
-          ? "Already Claimed"
-          : !isRegistered
-          ? "Register for next period"
-          : isWaitingNextPeriod
-          ? "Claim opens next period"
-          : isLoadingOnchainState
-          ? "Checking claim status..."
-          : "Claim now"}
+        {actionLabel}
       </Button>
       {isWaitingNextPeriod && (
-        <p className="text-xs text-muted-foreground">
+        <p className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
           Registered this period. Claim opens next period.
         </p>
       )}
