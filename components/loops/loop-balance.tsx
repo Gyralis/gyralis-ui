@@ -24,42 +24,54 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
     // query: { enabled: !!address && !!token },
   })
 
-  if (!address || !token)
-    return (
-      <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
-        <p className="text-sm text-muted-foreground">
-          Waiting for addresses...
-        </p>
-      </div>
-    )
+  if (!address || !token) {
+    return <StatusCard message="Waiting for addresses..." />
+  }
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
-        <p className="text-sm text-muted-foreground">Fetching balance...</p>
-      </div>
-    )
+  if (isLoading) {
+    return <StatusCard message="Fetching balance..." />
+  }
 
-  if (isError || !data)
-    return (
-      <div className="flex items-center justify-center rounded-2xl bg-muted/30 p-4">
-        <p className="text-sm text-red-500">Failed to fetch balance</p>
-      </div>
-    )
+  if (isError || !data) {
+    return <StatusCard message="Failed to fetch balance" tone="error" />
+  }
 
   const balance = parseFloat(formatUnits(data.value, data.decimals))
   const formattedBalance = Number(`${balance.toFixed(4)}`)
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-card/50 to-muted/30 p-4 text-center shadow-inner">
-      <div className="flex items-center justify-center gap-2">
-        <FaWallet className="size-4 text-primary" />
-        <p className="text-sm font-medium text-muted-foreground">Balance:</p>
+    <div className="rounded-xl border border-border/60 bg-background/60 p-4 text-center">
+      <div className="mb-3 flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <FaWallet className="size-3.5 text-primary" />
+        <p>Loop Balance</p>
       </div>
-      <p className="font-heading mt-2 text-3xl font-bold text-primary md:text-4xl">
-        {formattedBalance}
+
+      <div className="flex items-end justify-center gap-2">
+        <AnimatedNumber value={formattedBalance} />
+        <span className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          {data.symbol}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+const StatusCard = ({
+  message,
+  tone = "muted",
+}: {
+  message: string
+  tone?: "muted" | "error"
+}) => {
+  return (
+    <div className="rounded-xl border border-border/60 bg-background/60 px-4 py-6 text-center">
+      <p
+        className={`text-sm ${
+          tone === "error" ? "text-destructive" : "text-muted-foreground"
+        }`}
+      >
+        {message}
       </p>
-      <AnimatedNumber value={formattedBalance} />
     </div>
   )
 }
@@ -77,7 +89,7 @@ const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
 
   const display = useTransform(spring, (current) =>
     Number(current).toLocaleString(undefined, {
-      minimumFractionDigits: 1,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     })
   )
@@ -87,7 +99,7 @@ const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
   }, [value, spring])
 
   return (
-    <motion.span className="text-5xl font-bold text-[#0065BD] sm:text-6xl md:text-7xl">
+    <motion.span className="font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-6xl">
       {display}
     </motion.span>
   )

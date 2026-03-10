@@ -160,15 +160,15 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Loop Balance / Shield / Elegibility */}
-        <div className="border2 col-span-1 flex flex-col justify-between py-4 lg:px-6 lg:py-0">
-          <div className="rounded-2xl bg-gradient-to-br from-card/50 to-muted/30 p-4 text-center">
+        <div className="col-span-1 flex flex-col rounded-2xl border border-border/60 bg-gradient-to-br from-card/80 via-card/65 to-muted/30 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] lg:px-6">
+          <div className="rounded-2xl bg-background/35 p-1">
             <LoopBalance
               address={loop.address}
               token={loop.token}
               chainId={loop.chainId}
             />
           </div>
-          <div className="border2 flex flex-col gap-2">
+          <div className="mt-4 flex flex-col gap-3">
             <LoopShield shieldScore={loop.shieldScore} />
             <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>
