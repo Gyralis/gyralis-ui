@@ -72,7 +72,7 @@ export default function HomePage() {
               <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-foreground sm:text-sm">
                 Daily Loop Rewards
               </p>
-              <h1 className="mt-4 text-center text-5xl font-extrabold leading-[0.95] tracking-[0.08em] text-foreground">
+              <h1 className="mt-4 text-center text-5xl font-bold leading-[0.95] tracking-[0.08em] text-foreground">
                 <span className="flex flex-col flex-wrap items-center justify-center gap-1 sm:flex-row sm:flex-nowrap sm:gap-3">
                   <span>Prove</span>
                   <span className="hidden sm:inline-block">-</span>
