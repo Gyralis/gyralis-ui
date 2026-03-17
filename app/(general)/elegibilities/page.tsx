@@ -19,7 +19,7 @@ const eligibilityRequirements = [
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Visit the 1hive community in Gardens platform and connect your wallet.",
+      "Go to the 1hive community in Gardens platform and connect your wallet.",
       "Complete membership registration and stake required HNY tokens.",
       "Claim your daily rewards.",
     ],
@@ -39,7 +39,7 @@ const eligibilityRequirements = [
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Visit Blockscout Merits explorer to verify your wallet.",
+      "Visit Blockscout Merits explorer and verify your wallet.",
       "Redeem Gyralis loop rewards offer - 50 merits.",
       "Claim your daily rewards.",
     ],
@@ -85,18 +85,19 @@ const eligibilityRequirements = [
     id: 3,
     name: "Human Passport",
     description:
-      "Have a Human Passport score by collecting stamps. Verify and grow your online reputation.",
+      "Verify your Humanity. Collect stamps and build your unique passport score of +15 and pass the loop shield to be eligible.",
     requirement: "Passport Score",
     status: "active",
     color: "text-pink-500",
     bgColor: "bg-pink-50 dark:bg-pink-900/20",
     steps: [
-      "Connect your wallet and sign a message to verify your ownership",
+      "Sign in with Ethereum",
       "Collect “stamps” to validate your identity and earn passport score.",
       "Submit or update your score through the Gyralis platform identity hub.",
     ],
-    protocolUrl: "https://aura.org",
-    coverUrl: "/placeholder.svg?height=200&width=400",
+    protocolUrl: "https://app.passport.xyz/",
+    coverUrl: "/passport-cover.png",
+    logoUrl: "/passport-logo.svg",
   },
 ]
 
