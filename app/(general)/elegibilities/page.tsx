@@ -203,11 +203,24 @@ export default function ElegibilityPage() {
           <Modal
             isOpen={!!selectedEligibility}
             onClose={() => setSelectedEligibility(null)}
-            title={selectedEligibility.name}
+            title={
+              <div className="flex items-center gap-2">
+                {selectedEligibility.logoUrl && (
+                  <Image
+                    src={selectedEligibility.logoUrl}
+                    alt={`${selectedEligibility.name} logo`}
+                    width={18}
+                    height={18}
+                    className="h-4.5 w-4.5 object-contain"
+                  />
+                )}
+                <span>{selectedEligibility.name}</span>
+              </div>
+            }
             size="md"
           >
-            <div className="space-y-6 border2">
-              <div className="p-2 border2">
+            <div className="space-y-6">
+              <div className="">
                 <Image
                   src={selectedEligibility.coverUrl}
                   alt={selectedEligibility.name}

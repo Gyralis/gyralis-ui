@@ -10,11 +10,12 @@ export const WalletConnect = ({
       <ConnectButton
         showBalance={false}
         accountStatus={{
-          smallScreen: "avatar",
-          largeScreen: "avatar",
+          smallScreen: "address",
+          largeScreen: "address",
         }}
+        // Keep chain network icon only and preserve modal open flow for connect/disconnect.
         chainStatus={{
-          smallScreen: "icon",
+          smallScreen: "none",
           largeScreen: "icon",
         }}
       />

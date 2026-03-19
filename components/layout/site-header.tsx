@@ -1,8 +1,5 @@
 "use client"
 
-import Link from "next/link"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-
 import useScroll from "@/lib/hooks/use-scroll"
 import { cn } from "@/lib/utils"
 import { MainNav } from "@/components/layout/main-nav"
@@ -25,7 +22,7 @@ export function SiteHeader() {
       <div className="border2 container flex h-20 items-center justify-between">
         <MainNav />
         <MobileNav />
-        <div className="border2 hidden flex-1 items-center justify-between space-x-2 md:flex md:justify-end">
+        <div className="border2 hidden items-center justify-end space-x-2 md:flex">
           <WalletConnect />
           <ModeToggle />
         </div>
