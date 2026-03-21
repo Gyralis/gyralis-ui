@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 import { ModeToggle } from "../shared/mode-toggle"
 import { WalletConnect } from "../blockchain/wallet-connect"
+import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
@@ -29,6 +30,7 @@ export function MobileNav() {
           />
         </Link>
         <div className="flex items-center gap-x-4">
+          <IdentityHubDrawer compact />
           <WalletConnect className="shrink-0" />
           <SheetTrigger asChild>
             <Button className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden">

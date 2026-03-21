@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { MainNav } from "@/components/layout/main-nav"
 //import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { MobileNav } from "./mobile-nav"
@@ -23,6 +24,7 @@ export function SiteHeader() {
         <MainNav />
         <MobileNav />
         <div className="border2 hidden items-center justify-end space-x-2 md:flex">
+          <IdentityHubDrawer />
           <WalletConnect />
           <ModeToggle />
         </div>

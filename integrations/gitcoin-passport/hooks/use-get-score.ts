@@ -1,11 +1,17 @@
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
 
 import { AddressScoreResponse } from "../utils/types"
 
-export const useGetScore = () => {
+type UseGetScoreOptions = {
+  enabled?: boolean
+}
+
+export const useGetScore = (options: UseGetScoreOptions = {}) => {
   const { address } = useAccount()
+  const enabled = options.enabled ?? true
+
   const {
     isLoading,
     isError,
@@ -17,6 +23,7 @@ export const useGetScore = () => {
     refetchOnWindowFocus: false,
 
     queryKey: ["score", address],
+    enabled: enabled && Boolean(address),
     queryFn: async () => {
       if (!address) throw new Error("No address provided.")
       const response = await fetch(`/api/gitcoin-passport/${address}/score`)
@@ -31,9 +38,12 @@ export const useGetScore = () => {
 
   const refetch = useCallback(() => void refetchQuery(), [refetchQuery])
 
-  useEffect(() => {
-    refetch()
-  }, [address])
-
-  return { isLoading: isLoading || isRefetching, isError, error, data, refetch }
+  return {
+    isLoading: isLoading || isRefetching,
+    isRefetching,
+    isError,
+    error,
+    data,
+    refetch,
+  }
 }

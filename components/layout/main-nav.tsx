@@ -48,28 +48,42 @@ function MainNavMenu() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/loops", label: "Loops" },
-    { href: "/elegibilities", label: "Elegibilities" },
-    { href: "/leaderboards", label: "Leaderboards" },
+    { href: "/loops", label: "Loops", disabled: false },
+    { href: "/elegibilities", label: "Elegibilities", disabled: false },
+    { href: "/leaderboard", label: "Leaderboard", disabled: true },
   ]
 
   return (
     <NavigationMenu>
       <NavigationMenuList>
         {/* Simple links */}
-        {links.map(({ href, label }) => {
+        {links.map(({ href, label, disabled }) => {
           const isActive = pathname === href
           return (
             <NavigationMenuItem key={href}>
-              <LinkComponent href={href}>
+              {disabled ? (
                 <NavigationMenuLink
-                  className={`${navigationMenuTriggerStyle()} ${
-                    isActive ? "bg-accent text-primary" : "text-foreground"
-                  }`}
+                  className={`${navigationMenuTriggerStyle()} cursor-not-allowed pointer-events-none text-muted-foreground opacity-60`}
+                  aria-disabled="true"
                 >
-                  {label}
+                  <span>{label}</span>
+                  <span className="ml-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Soon
+                  </span>
                 </NavigationMenuLink>
-              </LinkComponent>
+              ) : (
+                <LinkComponent href={href}>
+                  <NavigationMenuLink
+                    className={`${navigationMenuTriggerStyle()} ${
+                      isActive
+                        ? "underline decoration-primary underline-offset-4"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </NavigationMenuLink>
+                </LinkComponent>
+              )}
             </NavigationMenuItem>
           )
         })}
