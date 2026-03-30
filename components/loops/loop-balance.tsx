@@ -40,15 +40,15 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
   const formattedBalance = Number(`${balance.toFixed(4)}`)
 
   return (
-    <div className="rounded-xl border border-border/60 bg-background/60 p-4 text-center">
-      <div className="mb-3 flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <FaWallet className="size-3.5 text-primary" />
         <p>Loop Balance</p>
       </div>
 
-      <div className="flex items-end justify-center gap-2">
+      <div className="mt-4 flex items-end gap-2.5">
         <AnimatedNumber value={formattedBalance} />
-        <span className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {data.symbol}
         </span>
       </div>
@@ -64,7 +64,7 @@ const StatusCard = ({
   tone?: "muted" | "error"
 }) => {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/60 px-4 py-6 text-center">
+    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <p
         className={`text-sm ${
           tone === "error" ? "text-destructive" : "text-muted-foreground"
@@ -99,7 +99,7 @@ const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
   }, [value, spring])
 
   return (
-    <motion.span className="font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-6xl">
+    <motion.span className="block font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-[3.4rem]">
       {display}
     </motion.span>
   )

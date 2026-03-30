@@ -43,7 +43,7 @@ const LoopCriteriaCard = ({
   value: string
 }) => {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/60 p-3 transition-colors hover:bg-background/75">
+    <div className="rounded-[1.35rem] border border-border/80 bg-background/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-background/45">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
           {icon}
@@ -52,7 +52,7 @@ const LoopCriteriaCard = ({
           {label}
         </p>
       </div>
-      <p className="mt-2 line-clamp-2 text-sm leading-snug text-foreground">
+      <p className="mt-3 line-clamp-2 text-sm leading-6 text-foreground">
         {value}
       </p>
     </div>

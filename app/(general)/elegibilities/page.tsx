@@ -20,8 +20,8 @@ const eligibilityRequirements = [
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
       "Go to the 1hive community in Gardens platform and connect your wallet.",
-      "Complete membership registration and stake required HNY tokens.",
-      "Claim your daily rewards.",
+      "Complete membership registration and stake 3 HNY tokens.",
+      "Claim your daily loop rewards.",
     ],
     protocolUrl:
       "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
@@ -39,11 +39,11 @@ const eligibilityRequirements = [
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Visit Blockscout Merits explorer and verify your wallet.",
+      "Visit Blockscout Merits explorer and sign in with your wallet.",
       "Redeem Gyralis loop rewards offer - 50 merits.",
-      "Claim your daily rewards.",
+      "Claim your daily loop rewards.",
     ],
-    protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=campaigns",
+    protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=spend",
     coverUrl: "/blockscout-cover.png",
     logoUrl: "/blockscout-logo.png",
   },

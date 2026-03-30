@@ -1,32 +1,23 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
-import { LuUsers } from "react-icons/lu"
+import { LoopEligibilityProvider } from "@/data/loops-data"
 import { Address } from "viem"
 
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
-import { secondsToTime } from "@/lib/utils/time"
-import { LoopersModal } from "@/components/loops/loopers-modal"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { LoopClaim } from "@/components/loops/loop-claim"
 
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
-  loopTitle?: string
+  eligibilityProvider: LoopEligibilityProvider
 }
 
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
-  loopTitle,
+  eligibilityProvider,
 }) => {
-  const [isAddressesModalOpen, setIsAddressesModalOpen] = useState(false)
-
   const { settings, currentPeriod, isLoading } = useLoopSettings(address, chainId)
 
   const nextPeriodStart =
@@ -38,7 +29,15 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   const periodLengthLabel = useMemo(() => {
     if (isLoading) return "Loading..."
     if (!settings) return "--"
-    return secondsToTime(Number(settings.periodLength))
+
+    const periodLengthInSeconds = Number(settings.periodLength)
+    const minutes = Math.floor(periodLengthInSeconds / 60)
+
+    if (minutes >= 1 && periodLengthInSeconds % 60 === 0) {
+      return `${minutes} minute${minutes === 1 ? "" : "s"}`
+    }
+
+    return `${periodLengthInSeconds}s`
   }, [isLoading, settings])
 
   const distributionLabel = useMemo(() => {
@@ -50,65 +49,44 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   }, [isLoading, settings])
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <SettingStatCard label="Period Length" value={periodLengthLabel} />
+    <div className="rounded-[1.65rem] border border-border/80 bg-background/32 px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-7 md:py-7">
+      <div className="grid grid-cols-2 gap-6 text-center">
+        <SettingStatCard label="Period" value={periodLengthLabel} />
         <SettingStatCard label="Distribution" value={distributionLabel} />
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Next Distribution
-          </p>
-
-          <TooltipProvider delayDuration={120}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setIsAddressesModalOpen(true)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border/70 bg-background px-3 text-xs font-semibold uppercase tracking-[0.12em] text-foreground transition-colors hover:border-primary hover:text-primary"
-                  type="button"
-                  aria-label="Open loopers modal"
-                >
-                  <LuUsers className="size-4" />
-                  <span className="hidden sm:inline">Loopers</span>
-                  <span className="sr-only">Loopers</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>View loopers</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+      <div className="mt-7">
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Next Distribution
+        </p>
 
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
           <Countdown nextPeriodStart={nextPeriodStart} />
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="pt-5 text-center text-sm text-muted-foreground">
             {isLoading ? "Loading timer..." : "Timer unavailable."}
           </p>
         )}
       </div>
 
-      <LoopersModal
-        chainId={chainId}
-        currentPeriod={currentPeriod}
-        isOpen={isAddressesModalOpen}
-        loopAddress={address}
-        loopTitle={loopTitle}
-        onOpenChange={setIsAddressesModalOpen}
-      />
+      <div className="mt-8">
+        <LoopClaim
+          address={address}
+          chainId={chainId}
+          eligibilityProvider={eligibilityProvider}
+        />
+      </div>
     </div>
   )
 }
 
 const SettingStatCard = ({ label, value }: { label: string; value: string }) => {
   return (
-    <div className="rounded-xl border border-border/60 bg-background/60 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </p>
-      <p className="font-heading mt-1.5 text-lg leading-tight text-foreground md:text-xl">
+      <p className="mt-2 text-[1.7rem] font-semibold leading-none text-foreground">
         {value}
       </p>
     </div>
@@ -137,10 +115,17 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   const totalHours = days * 24 + hours
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <TimeBlock label="Hours" value={totalHours} />
-      <TimeBlock label="Minutes" value={minutes} />
-      <TimeBlock label="Seconds" value={seconds} />
+    <div className="pt-5 text-center">
+      <div className="flex items-baseline justify-center gap-4 whitespace-nowrap">
+        <TimeValue value={totalHours} />
+        <TimeValue value={minutes} />
+        <TimeValue value={seconds} highlight />
+      </div>
+      <div className="mt-3 grid grid-cols-3 gap-4">
+        <TimeLabel label="Hours" />
+        <TimeLabel label="Min" />
+        <TimeLabel label="Sec" />
+      </div>
     </div>
   )
 }
@@ -154,18 +139,31 @@ const formatTime = (totalSeconds: number) => {
   return { days, hours, minutes, seconds }
 }
 
-const TimeBlock = ({ label, value }: { label: string; value: number }) => {
+const TimeValue = ({
+  value,
+  highlight = false,
+}: {
+  value: number
+  highlight?: boolean
+}) => {
   const display = value.toString().padStart(2, "0")
 
   return (
-    <div className="rounded-lg border border-border/60 bg-background/70 p-2 text-center">
-      <div className="font-heading text-xl leading-none text-foreground sm:text-2xl">
-        {display}
-      </div>
-      <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </div>
-    </div>
+    <span
+      className={`font-heading text-[2.3rem] leading-none tracking-[0.04em] sm:text-[2.5rem] ${
+        highlight ? "text-primary" : "text-foreground"
+      }`}
+    >
+      {display}
+    </span>
+  )
+}
+
+const TimeLabel = ({ label }: { label: string }) => {
+  return (
+    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      {label}
+    </p>
   )
 }
 

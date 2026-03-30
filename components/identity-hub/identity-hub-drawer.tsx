@@ -10,8 +10,8 @@ import {
   HiCheckCircle,
   HiChevronLeft,
   HiChevronRight,
-  HiSparkles,
 } from "react-icons/hi2"
+import { PiFingerprintLight } from "react-icons/pi"
 import { useAccount } from "wagmi"
 
 import { useToast } from "@/lib/hooks/use-toast"
@@ -213,7 +213,7 @@ const IdentityHubMethodCard = ({
             className="w-full"
           >
             <FiRefreshCcw className="size-4" />
-            Refresh
+            Update Score
           </Button>
         )}
       </div>
@@ -233,6 +233,7 @@ export const IdentityHubDrawer = ({
   const [guideOpen, setGuideOpen] = useState(false)
   const [sheetSide, setSheetSide] = useState<"right" | "bottom">("right")
   const { toast } = useToast()
+  const drawerWidth = guideOpen ? 800 : 500
 
   const scoreQuery = useGetScore({
     enabled: open,
@@ -393,26 +394,31 @@ export const IdentityHubDrawer = ({
             className
           )}
         >
-          <HiSparkles className="size-4" />
+          <PiFingerprintLight className="size-4 text-primary" />
           <span>GyraHub</span>
         </button>
       </SheetTrigger>
       <SheetContent
         side={sheetSide}
-        className={cn(
-          "w-full overflow-hidden p-0 transition-[max-width] duration-300 ease-out",
-          guideOpen ? "sm:max-w-[820px]" : "sm:max-w-[500px]"
-        )}
+        className="!overflow-hidden !p-0 transition-[width,max-width] duration-300 ease-out"
+        style={
+          sheetSide === "right"
+            ? {
+                width: `${drawerWidth}px`,
+                maxWidth: "calc(100vw - 1rem)",
+              }
+            : undefined
+        }
       >
         <div
           className={cn(
             "grid h-full min-h-[80vh] grid-cols-1",
             guideOpen
-              ? "md:grid-cols-[minmax(0,500px)_320px]"
+              ? "md:grid-cols-[minmax(0,1fr)_300px]"
               : "md:grid-cols-[minmax(0,1fr)]"
           )}
         >
-          <div className="flex h-full flex-col bg-background px-3 py-4 md:px-4 md:py-4">
+          <div className="flex h-full min-w-0 flex-col bg-background px-3 py-4 md:px-4 md:py-4">
             <div className="flex-1">
               <SheetHeader className="pr-10 text-left">
                 <div className="flex items-start justify-between gap-3">
@@ -427,8 +433,9 @@ export const IdentityHubDrawer = ({
                       />
                     </div>
                     <div>
-                      <SheetTitle className="text-2xl tracking-tight">
-                        GyraHub
+                      <SheetTitle className="flex items-center gap-2 text-2xl tracking-tight">
+                        <PiFingerprintLight className="size-6 shrink-0" />
+                        <span>GyraHub</span>
                       </SheetTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Your identity checkpoint for score, submission, and
@@ -457,12 +464,12 @@ export const IdentityHubDrawer = ({
                     Connected wallet
                   </p>
                   <div className="flex items-center gap-2">
-                  {address ? (
-                    <>
-                      <HiCheckBadge className="size-4 text-emerald-500" />
-                      <span className="font-mono text-foreground">
-                        {truncateAddress(address)}
-                      </span>
+                    {address ? (
+                      <>
+                        <HiCheckBadge className="size-4 text-emerald-500" />
+                        <span className="font-mono text-foreground">
+                          {truncateAddress(address)}
+                        </span>
                       </>
                     ) : (
                       <span className="text-foreground">Not connected</span>
@@ -515,7 +522,7 @@ export const IdentityHubDrawer = ({
           </div>
 
           {guideOpen && (
-            <div className="bg-muted/30 border-t border-border/50 px-3 py-4 md:w-[320px] md:border-l md:border-t-0 md:px-4">
+            <div className="min-w-0 border-t border-border/50 bg-muted/30 px-3 py-4 md:w-[300px] md:border-l md:border-t-0 md:px-4">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-xl font-semibold tracking-tight">
@@ -541,7 +548,9 @@ export const IdentityHubDrawer = ({
                       {index + 1}
                     </div>
                     <div className="pt-0.5">
-                      <p className="font-medium text-foreground">{step.title}</p>
+                      <p className="font-medium text-foreground">
+                        {step.title}
+                      </p>
                       <p className="mt-1 text-sm leading-6 text-muted-foreground">
                         {step.description}
                       </p>
