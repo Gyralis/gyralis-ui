@@ -18,7 +18,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   chainId,
   eligibilityProvider,
 }) => {
-  const { settings, currentPeriod, isLoading } = useLoopSettings(address, chainId)
+  const { settings, currentPeriod, isLoading } = useLoopSettings(
+    address,
+    chainId
+  )
 
   const nextPeriodStart =
     settings && currentPeriod != null
@@ -80,15 +83,19 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   )
 }
 
-const SettingStatCard = ({ label, value }: { label: string; value: string }) => {
+const SettingStatCard = ({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) => {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+      <p className="text-[11px]  uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </p>
-      <p className="mt-2 text-[1.7rem] font-semibold leading-none text-foreground">
-        {value}
-      </p>
+      <p className="mt-2 text-[1rem] leading-none text-foreground">{value}</p>
     </div>
   )
 }
@@ -116,12 +123,12 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
 
   return (
     <div className="pt-5 text-center">
-      <div className="flex items-baseline justify-center gap-4 whitespace-nowrap">
+      <div className="flex items-baseline justify-center gap-4 whitespace-nowrap border2">
         <TimeValue value={totalHours} />
         <TimeValue value={minutes} />
         <TimeValue value={seconds} highlight />
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-4">
+      <div className="flex items-baseline justify-center gap-8 whitespace-nowrap border2 mt-1">
         <TimeLabel label="Hours" />
         <TimeLabel label="Min" />
         <TimeLabel label="Sec" />
@@ -166,4 +173,3 @@ const TimeLabel = ({ label }: { label: string }) => {
     </p>
   )
 }
-

@@ -12,14 +12,14 @@ const eligibilityRequirements = [
     id: 1,
     name: "Gardens",
     description:
-      "Be registered as a member in 1hive community and participate in decentralized decision making.",
+      "Gardens is a bottom-up governance framework for web3 ecosystems. Register as a member in 1Hive community and participate in decentralized decision making.",
     requirement: "1Hive Membership",
     status: "active",
     icon: LuLaptop,
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Go to the 1hive community in Gardens platform and connect your wallet.",
+      "Go to the 1Hive community in Gardens platform and connect your wallet.",
       "Complete membership registration and stake 3 HNY tokens.",
       "Claim your daily loop rewards.",
     ],
@@ -30,16 +30,16 @@ const eligibilityRequirements = [
   },
   {
     id: 2,
-    name: "Blockscout Mertis",
+    name: "Blockscout Merits",
     description:
-      "Earn merits points on Blockscout Mertis incentives programm by signing in and showing consistent blockchain interaction.",
+      "Blockscout Merits is a gamified rewards program that lets users earn points (“Merits”) by exploring the blockchain—claiming daily bonuses, completing tasks, using tools, and inviting others.",
     requirement: "Redeem Gyralis Offer",
     status: "active",
     icon: LuLaptop,
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Visit Blockscout Merits explorer and sign in with your wallet.",
+      "Visit Blockscout Merits explorer, sign up with your wallet and receive 100 Merits.",
       "Redeem Gyralis loop rewards offer - 50 merits.",
       "Claim your daily loop rewards.",
     ],
@@ -47,40 +47,7 @@ const eligibilityRequirements = [
     coverUrl: "/blockscout-cover.png",
     logoUrl: "/blockscout-logo.png",
   },
-  // {
-  //   id: 3,
-  //   name: "Transaction History",
-  //   description:
-  //     "Maintain an active on-chain presence with minimum of 5 transactions in the last 90 days",
-  //   requirement: "5+ transactions",
-  //   status: "active",
-  //   icon: LuSun,
-  //   color: "text-purple-500",
-  //   bgColor: "bg-purple-50 dark:bg-purple-900/20",
-  //   steps: [
-  //     "Ensure your wallet is active on supported networks",
-  //     "Maintain at least 5 transactions in the last 90 days",
-  //   ],
-  //   protocolUrl: "https://etherscan.io",
-  //   coverUrl: "/placeholder.svg?height=200&width=400",
-  // },
-  // {
-  //   id: 4,
-  //   name: "ENS Domain",
-  //   description:
-  //     "Own an ENS domain name to establish your decentralized identity",
-  //   requirement: "ENS ownership",
-  //   status: "coming-soon",
-  //   icon: LuShield,
-  //   color: "text-gray-400",
-  //   bgColor: "bg-gray-50 dark:bg-gray-900/20",
-  //   steps: [
-  //     "Visit the ENS app and search for available domain names",
-  //     "Register your preferred .eth domain and link it to your wallet",
-  //   ],
-  //   protocolUrl: "https://app.ens.domains",
-  //   coverUrl: "/placeholder.svg?height=200&width=400",
-  // },
+
   {
     id: 3,
     name: "Human Passport",

@@ -45,9 +45,6 @@ const LoopCriteriaCard = ({
   return (
     <div className="rounded-[1.35rem] border border-border/80 bg-background/35 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-background/45">
       <div className="flex items-center gap-2">
-        <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary">
-          {icon}
-        </span>
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {label}
         </p>

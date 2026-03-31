@@ -21,7 +21,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
   return (
     <div className="tamagotchi-card font-body relative p-7 md:p-8">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.15fr_1fr_0.98fr] lg:items-center">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
         {/* Loop metadata */}
         <div className="col-span-1 flex min-h-[248px] flex-col justify-between py-2 pr-2">
           <div>
@@ -60,13 +60,13 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Loop Balance / Shield / Elegibility */}
-        <div className="col-span-1 flex h-full flex-col justify-center">
+        <div className="col-span-1 flex h-full flex-col justify-center border2">
           <LoopBalance
             address={loop.address}
             token={loop.token}
             chainId={loop.chainId}
           />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 border2">
             <LoopShield shieldScore={loop.shieldScore} />
             <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>
