@@ -93,9 +93,9 @@ const truncateAddress = (address: string) =>
 
 const gyraHubSteps = [
   {
-    title: "Open Human Passport",
+    title: "Go to Human Passport",
     description:
-      "Head to Passport and connect the same wallet you use in GyraHub.",
+      "Head to Human Passport app and sign in the same wallet you use in GyraHub.",
   },
   {
     title: "Collect verification stamps",
@@ -423,23 +423,14 @@ export const IdentityHubDrawer = ({
               <SheetHeader className="pr-10 text-left">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                      <Image
-                        src="/passport-logo.svg"
-                        alt="Human Passport"
-                        width={24}
-                        height={24}
-                        className="size-6 object-contain"
-                      />
-                    </div>
                     <div>
                       <SheetTitle className="flex items-center gap-2 text-2xl tracking-tight">
                         <PiFingerprintLight className="size-6 shrink-0" />
                         <span>GyraHub</span>
                       </SheetTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Your identity checkpoint for score, submission, and
-                        trust signals.
+                      <p className="mt-1 text-sm text-muted-foreground text-left">
+                        Your identity checkpoint for submission and score
+                        updates
                       </p>
                     </div>
                   </div>
@@ -458,7 +449,7 @@ export const IdentityHubDrawer = ({
                 </div>
               </SheetHeader>
 
-              <div className="mt-3 overflow-hidden rounded-[1.2rem] border border-border/50 bg-muted/20 shadow-sm">
+              <div className="mt-4 overflow-hidden rounded-[1.2rem] border border-border/50 bg-muted/20 shadow-sm">
                 <div className="flex min-h-[72px] items-center justify-between gap-4 bg-background/90 px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Connected wallet
@@ -466,7 +457,7 @@ export const IdentityHubDrawer = ({
                   <div className="flex items-center gap-2">
                     {address ? (
                       <>
-                        <HiCheckBadge className="size-4 text-emerald-500" />
+                        <HiCheckBadge className="size-4 text-primary" />
                         <span className="font-mono text-foreground">
                           {truncateAddress(address)}
                         </span>
@@ -478,7 +469,7 @@ export const IdentityHubDrawer = ({
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2.5 mt-4">
                 {methods.map((method) => (
                   <IdentityHubMethodCard
                     key={method.id}
@@ -544,7 +535,7 @@ export const IdentityHubDrawer = ({
               <div className="space-y-3">
                 {gyraHubSteps.map((step, index) => (
                   <div key={step.title} className="flex items-start gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-base font-semibold shadow-sm">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
                       {index + 1}
                     </div>
                     <div className="pt-0.5">
@@ -559,12 +550,12 @@ export const IdentityHubDrawer = ({
                 ))}
               </div>
 
-              <div className="mt-4 rounded-[1.1rem] border border-emerald-200/60 bg-background/80 p-3 dark:border-emerald-900/80">
+              <div className="mt-4 rounded-[1.1rem] border border-border/60 bg-background/80 p-3 dark:border-border/80">
                 <div className="flex items-center gap-3">
                   {isSubmittingPassport || scoreQuery.isRefetching ? (
-                    <HiArrowPath className="size-5 animate-spin text-emerald-600" />
+                    <HiArrowPath className="size-5 animate-spin text-primary" />
                   ) : (
-                    <HiCheckCircle className="size-5 text-emerald-600" />
+                    <HiCheckCircle className="size-5 text-primary" />
                   )}
                   <div>
                     <p className="font-medium text-foreground">

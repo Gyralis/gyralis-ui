@@ -73,10 +73,10 @@ export function SearchWithTags({
                   key="all"
                   onClick={() => onTagChange?.(null)}
                   className={cn(
-                    "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-bold shadow-sm transition-colors duration-200",
+                    "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm  shadow-sm transition-colors duration-200 inline-flex shrink-0 items-center justify-center gap-2 border border-border   hover:opacity-80",
                     activeTag === null
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                      ? "bg-secondary text-primary-foreground"
+                      : "text-muted-foreground"
                   )}
                 >
                   All
@@ -88,10 +88,10 @@ export function SearchWithTags({
                       onTagChange?.(activeTag === tag ? null : tag)
                     }
                     className={cn(
-                      "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-bold shadow-sm transition-colors duration-200",
+                      "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm font shadow-sm duration-200 inline-flex shrink-0 items-center justify-center gap-2  border border-border   transition-colors  hover:opacity-80",
                       activeTag === tag
-                        ? "bg-[#1CE783] text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-secondary text-primary-foreground"
+                        : "text-muted-foreground"
                     )}
                   >
                     {tag}

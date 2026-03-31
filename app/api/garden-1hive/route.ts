@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server"
 import { env } from "@/env.mjs"
-import {
-  Chain,
-  createWalletClient,
-  getContract,
-  http,
-  parseAbi,
-} from "viem"
+import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
@@ -19,7 +13,7 @@ import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
-const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? "0.2.6"
+const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
 const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
 
 interface PassportScoreResponse {

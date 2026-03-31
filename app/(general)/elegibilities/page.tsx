@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { LuActivitySquare, LuLaptop, LuMoon, LuSun } from "react-icons/lu"
+import { LuLaptop } from "react-icons/lu"
 
 import Modal from "@/components/ui/modal"
 import { LinkComponent } from "@/components/shared/link-component"
@@ -60,7 +60,7 @@ const eligibilityRequirements = [
     steps: [
       "Sign in with Ethereum",
       "Collect “stamps” to validate your identity and earn passport score.",
-      "Submit or update your score through the Gyralis platform identity hub.",
+      "Submit or update your score in the GyraHub.",
     ],
     protocolUrl: "https://app.passport.xyz/",
     coverUrl: "/passport-cover.png",
@@ -198,19 +198,13 @@ export default function ElegibilityPage() {
               </div>
 
               <div>
-                <p className="font-body text-sm leading-relaxed text-foreground opacity-70 sm:text-base">
-                  {selectedEligibility.description}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="mb-4 font-heading text-lg font-bold text-foreground">
+                <h3 className="mb-4 text-lg font-bold text-foreground">
                   How to become eligible:
                 </h3>
                 <div className="space-y-3">
                   {selectedEligibility.steps.map((step, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary font-heading text-xs font-bold text-foreground shadow-lg">
+                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground shadow-lg">
                         {index + 1}
                       </div>
                       <p className="flex-1 font-body text-sm leading-relaxed text-foreground">
