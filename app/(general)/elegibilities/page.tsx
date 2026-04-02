@@ -2,8 +2,10 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { FiExternalLink } from "react-icons/fi"
 import { LuLaptop } from "react-icons/lu"
 
+import { Button } from "@/components/ui/button"
 import Modal from "@/components/ui/modal"
 import { LinkComponent } from "@/components/shared/link-component"
 
@@ -220,10 +222,16 @@ export default function ElegibilityPage() {
                   href={selectedEligibility.protocolUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tamagotchi-button inline-flex min-h-[44px] w-full items-center justify-center space-x-2 rounded-2xl bg-primary px-4 py-3 font-body text-sm font-semibold text-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary/90 hover:shadow-xl"
+                  className="w-full"
                 >
-                  <span>Visit {selectedEligibility.name}</span>
-                  <LinkComponent className="size-4" href={""} isExternal />
+                  TODO:
+                  <Button
+                    variant="primary"
+                    className="w-full font-baloo"
+                    icon={<FiExternalLink />}
+                  >
+                    Visit {selectedEligibility.name}
+                  </Button>
                 </a>
               </div>
             </div>

@@ -73,9 +73,9 @@ export function SearchWithTags({
                   key="all"
                   onClick={() => onTagChange?.(null)}
                   className={cn(
-                    "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm  shadow-sm transition-colors duration-200 inline-flex shrink-0 items-center justify-center gap-2 border border-border   hover:opacity-80",
+                    "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm shadow-sm transition-colors duration-200 inline-flex shrink-0 items-center justify-center gap-2 border border-border hover:opacity-80",
                     activeTag === null
-                      ? "bg-secondary text-primary-foreground"
+                      ? "bg-secondary text-foreground"
                       : "text-muted-foreground"
                   )}
                 >
@@ -90,7 +90,7 @@ export function SearchWithTags({
                     className={cn(
                       "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm font shadow-sm duration-200 inline-flex shrink-0 items-center justify-center gap-2  border border-border   transition-colors  hover:opacity-80",
                       activeTag === tag
-                        ? "bg-secondary text-primary-foreground"
+                        ? "bg-secondary text-secondary-foreground"
                         : "text-muted-foreground"
                     )}
                   >
