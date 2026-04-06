@@ -189,15 +189,13 @@ export default function ElegibilityPage() {
             size="md"
           >
             <div className="space-y-6">
-              <div className="">
-                <Image
-                  src={selectedEligibility.coverUrl}
-                  alt={selectedEligibility.name}
-                  width={1200}
-                  height={320}
-                  className="w-full object-contain shadow-sm"
-                />
-              </div>
+              <Image
+                src={selectedEligibility.coverUrl}
+                alt={selectedEligibility.name}
+                width={1200}
+                height={320}
+                className="w-full object-contain"
+              />
 
               <div>
                 <h3 className="mb-4 text-lg font-bold text-foreground">
@@ -206,10 +204,10 @@ export default function ElegibilityPage() {
                 <div className="space-y-3">
                   {selectedEligibility.steps.map((step, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground shadow-lg">
+                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent border border-border dark:bg-secondary text-xs font-bold text-secondary-foreground shadow-lg">
                         {index + 1}
                       </div>
-                      <p className="flex-1 font-body text-sm leading-relaxed text-foreground">
+                      <p className="flex-1 font-body text-sm  text-foreground">
                         {step}
                       </p>
                     </div>
@@ -224,7 +222,6 @@ export default function ElegibilityPage() {
                   rel="noopener noreferrer"
                   className="w-full"
                 >
-                  TODO:
                   <Button
                     variant="primary"
                     className="w-full font-baloo"

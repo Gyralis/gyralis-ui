@@ -535,7 +535,7 @@ export const IdentityHubDrawer = ({
               <div className="space-y-3">
                 {gyraHubSteps.map((step, index) => (
                   <div key={step.title} className="flex items-start gap-3">
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+                    <div className="flex size-8 shrink-0 items-center justify-center border border-border rounded-full bg-accent text-foreground dark:bg-secondary dark:text-secondary-foreground">
                       {index + 1}
                     </div>
                     <div className="pt-0.5">
