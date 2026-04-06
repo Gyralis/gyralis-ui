@@ -53,8 +53,7 @@ type IdentityVerificationMethod = {
 }
 
 const statusClassMap: Record<IdentityVerificationStatus, string> = {
-  verified:
-    "text-emerald-700 bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-300",
+  verified: "text-primary-foreground bg-primary",
   "action-needed":
     "text-amber-700 bg-amber-100 dark:bg-amber-950 dark:text-amber-300",
   error: "text-rose-700 bg-rose-100 dark:bg-rose-950 dark:text-rose-300",
@@ -67,7 +66,7 @@ const statusLabelMap: Record<IdentityVerificationStatus, string> = {
   verified: "Verified",
   "action-needed": "Action needed",
   error: "Error",
-  loading: "Updating",
+  loading: "Syncing...",
   disconnected: "Connect wallet",
 }
 
@@ -310,12 +309,11 @@ export const IdentityHubDrawer = ({
           {
             id: "passport",
             title: "Gitcoin Passport",
-            summary:
-              "Your Passport has not been submitted to this community yet.",
+            summary: "Your Passport has not been submitted yet.",
             status: "action-needed" as const,
             statusLabel: "Ready to submit",
             details:
-              "Submit your Passport here to create or update your score for this GyraHub community.",
+              "Submit your Passport here to create or update your score for GyraHub.",
             actionLabel: "Submit Passport",
             onAction: submitPassportAndRefresh,
             actionInProgress: isSubmittingPassport,
@@ -535,7 +533,7 @@ export const IdentityHubDrawer = ({
               <div className="space-y-3">
                 {gyraHubSteps.map((step, index) => (
                   <div key={step.title} className="flex items-start gap-3">
-                    <div className="flex size-8 shrink-0 items-center justify-center border border-border rounded-full bg-accent text-foreground dark:bg-secondary dark:text-secondary-foreground">
+                    <div className="flex size-6 shrink-0 items-center justify-center border border-border rounded-full bg-accent text-foreground dark:bg-secondary dark:text-secondary-foreground">
                       {index + 1}
                     </div>
                     <div className="pt-0.5">

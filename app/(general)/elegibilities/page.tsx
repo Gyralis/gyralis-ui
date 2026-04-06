@@ -204,7 +204,7 @@ export default function ElegibilityPage() {
                 <div className="space-y-3">
                   {selectedEligibility.steps.map((step, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent border border-border dark:bg-secondary text-xs font-bold text-secondary-foreground shadow-lg">
+                      <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent border border-border dark:bg-secondary text-sm font-bold text-secondary-foreground shadow-lg">
                         {index + 1}
                       </div>
                       <p className="flex-1 font-body text-sm  text-foreground">
@@ -215,7 +215,7 @@ export default function ElegibilityPage() {
                 </div>
               </div>
 
-              <div className="border-t border-border pt-6">
+              <div className="border-t border-border pt-6 flex items-center gap-1">
                 <a
                   href={selectedEligibility.protocolUrl}
                   target="_blank"
@@ -225,9 +225,10 @@ export default function ElegibilityPage() {
                   <Button
                     variant="primary"
                     className="w-full font-baloo"
-                    icon={<FiExternalLink />}
+                    // icon={<FiExternalLink />}
                   >
-                    Visit {selectedEligibility.name}
+                    Visit {selectedEligibility.name}{" "}
+                    <FiExternalLink className="size-4" />
                   </Button>
                 </a>
               </div>
