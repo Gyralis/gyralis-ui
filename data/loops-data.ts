@@ -9,6 +9,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  eligibilityLogoUrl?: string
 
   shieldScore: string
   eligibility: string
@@ -36,6 +37,7 @@ export const LoopCardsData: LoopCardData[] = [
     description:
       "Claim HNY tokens by being a member in 1Hive community on Gardnes.",
     token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",
+    eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
     eligibility: "1Hive Membership",
     chainBadgeColor: "bg-custom-green",
@@ -55,6 +57,7 @@ export const LoopCardsData: LoopCardData[] = [
     address: "0xFD4B87a83acde1f54A1AC986b33BE20154cDDf70",
     description: "Sign up and Redeem Gyralis offer in Blockscout Merits.",
     token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",
+    eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score +15",
     eligibility: "Gyralis Offer Redemption",
     chainBadgeColor: "bg-custom-green",

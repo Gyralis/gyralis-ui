@@ -2,26 +2,38 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
+import { LuUsers } from "react-icons/lu"
+import { SiLoop } from "react-icons/si"
 import { Address } from "viem"
 
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { LoopClaim } from "@/components/loops/loop-claim"
+import { LoopersModal } from "@/components/loops/loopers-modal"
 
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
   eligibilityProvider: LoopEligibilityProvider
+  loopTitle?: string
 }
 
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
   eligibilityProvider,
+  loopTitle,
 }) => {
   const { settings, currentPeriod, isLoading } = useLoopSettings(
     address,
     chainId
   )
+  const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
 
   const nextPeriodStart =
     settings && currentPeriod != null
@@ -70,6 +82,24 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             {isLoading ? "Loading timer..." : "Timer unavailable."}
           </p>
         )}
+
+        <div className=" flex justify-center border2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open loopers"
+                  className="inline-flex  items-center justify-center rounded-full border text-secondary-foreground"
+                  onClick={() => setIsLoopersModalOpen(true)}
+                >
+                  <SiLoop className="size-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Loopers</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       <div className="mt-8">
@@ -79,6 +109,15 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           eligibilityProvider={eligibilityProvider}
         />
       </div>
+
+      <LoopersModal
+        chainId={chainId}
+        currentPeriod={currentPeriod}
+        isOpen={isLoopersModalOpen}
+        loopAddress={address}
+        loopTitle={loopTitle}
+        onOpenChange={setIsLoopersModalOpen}
+      />
     </div>
   )
 }

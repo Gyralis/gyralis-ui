@@ -1,12 +1,24 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { LuCheck, LuChevronLeft, LuChevronRight, LuCopy, LuUsers } from "react-icons/lu"
+import {
+  LuCheck,
+  LuChevronLeft,
+  LuChevronRight,
+  LuCopy,
+  LuUsers,
+} from "react-icons/lu"
 import { type Address } from "viem"
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
+
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface LoopersModalProps {
   chainId: number
@@ -24,7 +36,10 @@ interface CopyAddressButtonProps {
 const formatAddress = (address: Address) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`
 
-const formatPeriodLabel = (selectedPeriod: bigint | undefined, offset: number) => {
+const formatPeriodLabel = (
+  selectedPeriod: bigint | undefined,
+  offset: number
+) => {
   if (selectedPeriod == null) {
     return "Current Period"
   }
@@ -90,8 +105,11 @@ export function LoopersModal({
 
   const { users: registeredUsers, loading: loadingRegisteredUsers } =
     useRegisteredUsers(loopAddress, chainId, selectedPeriod)
-  const { users: claimedUsers, loading: loadingClaimedUsers } =
-    useClaimedUsers(loopAddress, chainId, selectedPeriod)
+  const { users: claimedUsers, loading: loadingClaimedUsers } = useClaimedUsers(
+    loopAddress,
+    chainId,
+    selectedPeriod
+  )
 
   const claimedUsersSet = useMemo(
     () => new Set(claimedUsers.map((user) => user.toLowerCase())),
@@ -115,7 +133,8 @@ export function LoopersModal({
   const canGoBack =
     currentPeriod != null && currentPeriod + BigInt(periodOffset - 1) >= 0n
   const canGoForward =
-    currentPeriod != null && currentPeriod + BigInt(periodOffset) < currentPeriod + 1n
+    currentPeriod != null &&
+    currentPeriod + BigInt(periodOffset) < currentPeriod + 1n
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -146,7 +165,10 @@ export function LoopersModal({
 
           <div className="grid gap-4 border-b border-border px-6 py-5 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div className="grid gap-3 sm:grid-cols-3">
-              <MetricCard label="Registered" value={registeredCount.toString()} />
+              <MetricCard
+                label="Registered"
+                value={registeredCount.toString()}
+              />
               <MetricCard label="Claimed" value={claimedCount.toString()} />
               <MetricCard label="Rate" value={`${claimRate}%`} />
             </div>
@@ -211,7 +233,8 @@ export function LoopersModal({
 
           <div className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
             <p className="font-body text-sm text-muted-foreground">
-              {registeredCount} looper{registeredCount === 1 ? "" : "s"} registered
+              {registeredCount} looper{registeredCount === 1 ? "" : "s"}{" "}
+              registered
             </p>
             <button
               type="button"

@@ -164,7 +164,10 @@ export default function ElegibilityPage() {
               • Each loop may have its own unique Human Passport score to meet.
             </p>
 
-            <p>• Requirements are checked every time you attempt to claim.</p>
+            <p>
+              • Elegibilities are checked every time you attempt to register or
+              claim.
+            </p>
           </div>
         </div>
 

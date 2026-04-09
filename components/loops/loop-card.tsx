@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import Image from "next/image"
 import { LoopCardData } from "@/data/loops-data"
 
 import { LoopBalance } from "./loop-balance"
@@ -32,20 +33,33 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   Deployed on {loop.chainName}
                 </span>
               </span>
-              <span className="inline-flex shrink-0 rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-300">
+              <span className="inline-flex shrink-0 rounded-full bg-popover px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-popover-foreground">
                 LOOP
               </span>
               {loop.super && (
-                <span className="inline-flex shrink-0 rounded-full bg-orange-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-200">
+                <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-200">
                   SUPER LOOP
                 </span>
               )}
             </div>
 
             <div className="mt-7 space-y-5">
-              <h3 className="max-w-[14ch] font-heading text-[2.3rem] leading-[1.05] text-foreground">
-                {loop.title}
-              </h3>
+              <div className="flex items-center gap-1 border2">
+                {loop.eligibilityLogoUrl && (
+                  <div className="mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/70 p-2">
+                    <Image
+                      src={loop.eligibilityLogoUrl}
+                      alt={`${loop.eligibility} logo`}
+                      width={28}
+                      height={28}
+                      className="size-7 object-contain"
+                    />
+                  </div>
+                )}
+                <h2 className="max-w-[14ch] text-foreground border2 text-[1.65rem]">
+                  {loop.title}
+                </h2>
+              </div>
               <p className="max-w-[34ch] text-base leading-8 text-muted-foreground">
                 {loop.description}
               </p>
@@ -78,6 +92,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
             eligibilityProvider={loop.eligibilityProvider}
+            loopTitle={loop.title}
           />
         </div>
       </div>
