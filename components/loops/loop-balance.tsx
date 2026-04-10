@@ -46,7 +46,7 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
         <p>Loop Balance</p>
       </div>
 
-      <div className="mt-4 flex items-end gap-2.5">
+      <div className="mt-2.5 flex items-end gap-2.5 border2">
         <AnimatedNumber value={formattedBalance} />
         <span className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {data.symbol}

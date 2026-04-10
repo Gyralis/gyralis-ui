@@ -64,13 +64,13 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   }, [isLoading, settings])
 
   return (
-    <div className="rounded-[1.65rem] border border-border/80 bg-background/32 px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-7 md:py-7">
-      <div className="grid grid-cols-2 gap-6 text-center">
+    <div className="rounded-[1.65rem] border border-border/80 bg-background/32 px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-7 md:py-7 border2">
+      <div className="grid grid-cols-2 gap-4 text-center">
         <SettingStatCard label="Period" value={periodLengthLabel} />
         <SettingStatCard label="Distribution" value={distributionLabel} />
       </div>
 
-      <div className="mt-7">
+      <div className="mt-4 border2 relative">
         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
           Next Distribution
         </p>
@@ -78,19 +78,19 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
           <Countdown nextPeriodStart={nextPeriodStart} />
         ) : (
-          <p className="pt-5 text-center text-sm text-muted-foreground">
+          <p className="pt-2.5 text-center text-sm text-muted-foreground">
             {isLoading ? "Loading timer..." : "Timer unavailable."}
           </p>
         )}
 
-        <div className=" flex justify-center border2">
+        <div className="flex justify-center border2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
                   aria-label="Open loopers"
-                  className="inline-flex  items-center justify-center rounded-full border text-secondary-foreground"
+                  className="inline-flex  items-center justify-center rounded-full border text-secondary-foreground animate-spin hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary-100"
                   onClick={() => setIsLoopersModalOpen(true)}
                 >
                   <SiLoop className="size-5" />
@@ -102,7 +102,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-4">
         <LoopClaim
           address={address}
           chainId={chainId}
@@ -134,7 +134,9 @@ const SettingStatCard = ({
       <p className="text-[11px]  uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </p>
-      <p className="mt-2 text-[1rem] leading-none text-foreground">{value}</p>
+      <p className="mt-0.5 text-[1rem] tracking-[0.16em]e text-foreground">
+        {value}
+      </p>
     </div>
   )
 }
