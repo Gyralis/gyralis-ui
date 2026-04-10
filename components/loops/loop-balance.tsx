@@ -40,13 +40,13 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
   const formattedBalance = Number(`${balance.toFixed(4)}`)
 
   return (
-    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-5">
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         <FaWallet className="size-3.5 text-primary" />
         <p>Loop Balance</p>
       </div>
 
-      <div className="mt-2.5 flex items-end gap-2.5 border2">
+      <div className="mt-2.5 flex items-end gap-2.5">
         <AnimatedNumber value={formattedBalance} />
         <span className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           {data.symbol}

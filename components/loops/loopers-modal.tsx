@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
 import {
   LuCheck,
   LuChevronLeft,
@@ -23,8 +24,10 @@ import {
 interface LoopersModalProps {
   chainId: number
   currentPeriod?: bigint
+  eligibilityLogoUrl?: string
   isOpen: boolean
   loopAddress: Address
+  loopIsSuper?: boolean
   loopTitle?: string
   onOpenChange: (open: boolean) => void
 }
@@ -46,6 +49,14 @@ const formatPeriodLabel = (
 
   if (offset === 0) {
     return "Current Period"
+  }
+
+  if (offset === -1) {
+    return "Previous Period"
+  }
+
+  if (offset === 1) {
+    return "Next Period"
   }
 
   return `Period ${selectedPeriod.toString()}`
@@ -81,8 +92,10 @@ function CopyAddressButton({ address }: CopyAddressButtonProps) {
 export function LoopersModal({
   chainId,
   currentPeriod,
+  eligibilityLogoUrl,
   isOpen,
   loopAddress,
+  loopIsSuper,
   loopTitle,
   onOpenChange,
 }: LoopersModalProps) {
@@ -138,7 +151,7 @@ export function LoopersModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[94vw] max-w-[94vw] overflow-hidden rounded-[2rem] border border-border bg-card p-0 shadow-[0_24px_80px_rgba(0,0,0,0.16)] md:w-[min(94vw,80rem)] md:max-w-7xl xl:w-[min(92vw,86rem)] xl:max-w-[86rem]">
+      <DialogContent className="w-[94vw] max-w-5xl overflow-hidden rounded-[2rem] border border-border bg-card p-0 shadow-[0_24px_80px_rgba(0,0,0,0.16)] md:w-[min(94vw,80rem)] md:max-w-5xl">
         <DialogTitle className="sr-only">
           {loopTitle ? `${loopTitle} loopers` : "Loopers"}
         </DialogTitle>
@@ -149,16 +162,37 @@ export function LoopersModal({
         <div className="bg-gradient-to-br from-card via-card to-muted/30">
           <div className="border-b border-border p-6 sm:px-8">
             <div className="flex items-start gap-4 pr-10">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_18px_rgba(0,0,0,0.08)]">
-                <LuUsers className="size-6 text-primary" />
-              </div>
-              <div>
-                <p className="font-heading text-2xl text-foreground">
-                  {loopTitle ?? "Loopers"}
-                </p>
-                <p className="font-body text-sm text-muted-foreground">
-                  Registered addresses by distribution period
-                </p>
+              <div className="flex items-start gap-3">
+                {eligibilityLogoUrl && (
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/80 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_6px_16px_rgba(0,0,0,0.08)]">
+                    <Image
+                      src={eligibilityLogoUrl}
+                      alt={`${loopTitle ?? "Loop"} eligibility logo`}
+                      width={24}
+                      height={24}
+                      className="size-6 object-contain"
+                    />
+                  </div>
+                )}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-heading text-2xl text-foreground">
+                      {loopTitle ?? "Loopers"}
+                    </p>
+                    <span
+                      className={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
+                        loopIsSuper
+                          ? "bg-secondary/20 text-orange-200"
+                          : "bg-popover text-popover-foreground"
+                      }`}
+                    >
+                      {loopIsSuper ? "SUPER LOOP" : "LOOP"}
+                    </span>
+                  </div>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Registered addresses and claim activity by period
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -206,7 +240,7 @@ export function LoopersModal({
                 rows.map((row, index) => (
                   <div
                     key={row.address}
-                    className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 border-b border-border px-6 py-4 font-body text-sm text-foreground sm:px-8"
+                    className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
                   >
                     <span className="w-6 text-muted-foreground">
                       {index + 1}
@@ -231,11 +265,7 @@ export function LoopersModal({
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <p className="font-body text-sm text-muted-foreground">
-              {registeredCount} looper{registeredCount === 1 ? "" : "s"}{" "}
-              registered
-            </p>
+          {/* <div className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-end sm:px-8">
             <button
               type="button"
               className="self-start font-body text-sm font-semibold text-foreground transition hover:text-primary sm:self-auto"
@@ -243,7 +273,7 @@ export function LoopersModal({
             >
               Close
             </button>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>

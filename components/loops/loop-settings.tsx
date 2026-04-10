@@ -20,6 +20,8 @@ interface LoopSettingsComponentProps {
   address: Address
   chainId: number
   eligibilityProvider: LoopEligibilityProvider
+  eligibilityLogoUrl?: string
+  isSuper?: boolean
   loopTitle?: string
 }
 
@@ -27,6 +29,8 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
   eligibilityProvider,
+  eligibilityLogoUrl,
+  isSuper,
   loopTitle,
 }) => {
   const { settings, currentPeriod, isLoading } = useLoopSettings(
@@ -64,16 +68,33 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   }, [isLoading, settings])
 
   return (
-    <div className="rounded-[1.65rem] border border-border/80 bg-background/32 px-6 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:px-7 md:py-7 border2">
+    <div className="rounded-[1.65rem] border border-border/80 bg-background/35 px-6 py-6  md:px-7 md:py-7 ">
       <div className="grid grid-cols-2 gap-4 text-center">
         <SettingStatCard label="Period" value={periodLengthLabel} />
         <SettingStatCard label="Distribution" value={distributionLabel} />
       </div>
 
-      <div className="mt-4 border2 relative">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          Next Distribution
-        </p>
+      <div className="mt-4 relative">
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Next Distribution
+          </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Open loopers"
+                  className="inline-flex items-center justify-center rounded-full text-secondary-foreground hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary-100"
+                  onClick={() => setIsLoopersModalOpen(true)}
+                >
+                  <SiLoop className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Loopers</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
 
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
           <Countdown nextPeriodStart={nextPeriodStart} />
@@ -82,24 +103,6 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             {isLoading ? "Loading timer..." : "Timer unavailable."}
           </p>
         )}
-
-        <div className="flex justify-center border2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Open loopers"
-                  className="inline-flex  items-center justify-center rounded-full border text-secondary-foreground animate-spin hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary-100"
-                  onClick={() => setIsLoopersModalOpen(true)}
-                >
-                  <SiLoop className="size-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Loopers</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
       </div>
 
       <div className="mt-4">
@@ -113,8 +116,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
       <LoopersModal
         chainId={chainId}
         currentPeriod={currentPeriod}
+        eligibilityLogoUrl={eligibilityLogoUrl}
         isOpen={isLoopersModalOpen}
         loopAddress={address}
+        loopIsSuper={isSuper}
         loopTitle={loopTitle}
         onOpenChange={setIsLoopersModalOpen}
       />
@@ -164,12 +169,12 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
 
   return (
     <div className="pt-5 text-center">
-      <div className="flex items-baseline justify-center gap-4 whitespace-nowrap border2">
+      <div className="flex items-baseline justify-center gap-4 whitespace-nowrap ">
         <TimeValue value={totalHours} />
         <TimeValue value={minutes} />
         <TimeValue value={seconds} highlight />
       </div>
-      <div className="flex items-baseline justify-center gap-8 whitespace-nowrap border2 mt-1">
+      <div className="flex items-baseline justify-center gap-8 whitespace-nowrap  mt-1">
         <TimeLabel label="Hours" />
         <TimeLabel label="Min" />
         <TimeLabel label="Sec" />

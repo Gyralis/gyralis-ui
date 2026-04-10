@@ -44,7 +44,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             </div>
 
             <div className="mt-7 space-y-5">
-              <div className="flex items-center gap-1 border2">
+              <div className="flex items-center gap-1 ">
                 {loop.eligibilityLogoUrl && (
                   <div className="mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/70 p-2">
                     <Image
@@ -56,11 +56,11 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                     />
                   </div>
                 )}
-                <h2 className="max-w-[14ch] text-foreground border2 text-[1.65rem]">
+                <h2 className="max-w-[14ch] text-foreground  text-[1.65rem]">
                   {loop.title}
                 </h2>
               </div>
-              <p className="max-w-[34ch] text-base leading-8 text-muted-foreground">
+              <p className="max-w-[34ch] text-base  text-muted-foreground">
                 {loop.description}
               </p>
             </div>
@@ -74,13 +74,13 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Loop Balance / Shield / Elegibility */}
-        <div className="col-span-1 flex h-full flex-col justify-center border2">
+        <div className="col-span-1 flex h-full flex-col justify-center ">
           <LoopBalance
             address={loop.address}
             token={loop.token}
             chainId={loop.chainId}
           />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 border2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 ">
             <LoopShield shieldScore={loop.shieldScore} />
             <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>
@@ -92,6 +92,8 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
             eligibilityProvider={loop.eligibilityProvider}
+            eligibilityLogoUrl={loop.eligibilityLogoUrl}
+            isSuper={loop.super}
             loopTitle={loop.title}
           />
         </div>
