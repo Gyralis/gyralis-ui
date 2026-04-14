@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server"
 import { env } from "@/env.mjs"
-import {
-  Chain,
-  createWalletClient,
-  encodePacked,
-  getContract,
-  http,
-  keccak256,
-  parseAbi,
-} from "viem"
+import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
@@ -16,11 +8,12 @@ import {
   eligibilityRequestSchema,
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
+import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
-const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? "0.2.6"
+const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
 const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
 
 interface PassportScoreResponse {
@@ -165,26 +158,13 @@ export async function POST(req: Request) {
     const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
     console.log(`[${requestId}] Next period fetched`, { nextPeriod })
 
-    // Eligibility signature
-    const eligibilityMessage = encodePacked(
-      ["address", "uint256", "address"],
-      [
-        userAddress as `0x${string}`,
-        BigInt(Math.floor(nextPeriod)),
-        allowlistedLoop.address,
-      ]
-    )
-    const eligibilityMessageHash = keccak256(eligibilityMessage)
-
-    const walletClient = createWalletClient({
-      account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
-      chain: getViemChain(chainId),
-      transport: http(),
-    })
-
-    const backendSignature = await walletClient.signMessage({
-      account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
-      message: { raw: eligibilityMessageHash },
+    // Eligibility signature (EIP-712 typed data)
+    const backendSignature = await generateEligibilitySignature({
+      userAddress: userAddress as `0x${string}`,
+      loopAddress: allowlistedLoop.address,
+      chainId,
+      nextPeriod,
+      privateKey: TRUSTED_BACKEND_SIGNER_PK as `0x${string}`,
     })
     console.log(`[${requestId}] Signature generated`)
 

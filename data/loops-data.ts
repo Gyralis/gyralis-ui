@@ -9,6 +9,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  eligibilityLogoUrl?: string
 
   shieldScore: string
   eligibility: string
@@ -30,13 +31,15 @@ export interface LoopCardData {
 export const LoopCardsData: LoopCardData[] = [
   {
     id: 1,
-    title: "Title",
+    title: "1Hive Gardens",
     by: "1Hive",
-    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
-    description: "loop and/or organization description",
-    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-    shieldScore: "Human Passport Score 15",
-    eligibility: "1Hive member Gardensv2",
+    address: "0xB29018e60Cbdc1938C77d02c588c74c1B060C6B3",
+    description:
+      "Claim HNY tokens by being a member in 1Hive community on Gardnes.",
+    token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",
+    eligibilityLogoUrl: "/gardens-logo.png",
+    shieldScore: "Passport Score +15",
+    eligibility: "1Hive Membership",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -44,18 +47,19 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "garden_1hive",
-    passportMinScore: 15,
+    passportMinScore: -1,
     enabled: true,
   },
   {
     id: 2,
-    title: "Blockscout Merits Program",
+    title: "Blockscout Merits",
     by: "Blockscout",
-    address: "0x67BBeDE3F4D1ae743dB4Fe11287eE425a8CD3216",
-    description: "loop and/or organization description",
-    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-    shieldScore: "Human Passport Score 15",
-    eligibility: "1 Merit Redemption",
+    address: "0xFD4B87a83acde1f54A1AC986b33BE20154cDDf70",
+    description: "Sign up and Redeem Gyralis offer in Blockscout Merits.",
+    token: "0x012270Fc0c65bE86FC87d9C0D5C8860b0103BA55",
+    eligibilityLogoUrl: "/blockscout-logo.png",
+    shieldScore: "Passport Score +15",
+    eligibility: "Gyralis Offer Redemption",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -63,26 +67,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "blockscout",
-    passportMinScore: 15,
-    enabled: true,
-  },
-  {
-    id: 3,
-    title: "Test Blockscout Merits Program",
-    by: "Blockscout",
-    address: "0xFC3FE4DA827f25402f744C221208C648E57324EE",
-    description: "loop and/or organization description",
-    token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
-    shieldScore: "Human Passport Score 15",
-    eligibility: "1 Merit Redemption",
-    chainBadgeColor: "bg-custom-green",
-    shieldAccount: "0xtt...453",
-    shieldValue: "26",
-    super: false,
-    chainId: 100,
-    chainName: "Gnosis",
-    eligibilityProvider: "blockscout",
-    passportMinScore: 15,
+    passportMinScore: -1,
     enabled: true,
   },
 ]

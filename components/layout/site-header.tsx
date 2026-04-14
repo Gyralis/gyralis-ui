@@ -1,10 +1,8 @@
 "use client"
 
-import Link from "next/link"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-
 import useScroll from "@/lib/hooks/use-scroll"
 import { cn } from "@/lib/utils"
+import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer"
 import { MainNav } from "@/components/layout/main-nav"
 //import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/shared/mode-toggle"
@@ -22,10 +20,11 @@ export function SiteHeader() {
         scrolled && "bg-background/50 "
       )}
     >
-      <div className="border2 container flex h-20 items-center justify-between">
+      <div className="container flex h-20 items-center justify-between">
         <MainNav />
         <MobileNav />
-        <div className="border2 hidden flex-1 items-center justify-between space-x-2 md:flex md:justify-end">
+        <div className="hidden items-center justify-end space-x-2 md:flex">
+          <IdentityHubDrawer />
           <WalletConnect />
           <ModeToggle />
         </div>

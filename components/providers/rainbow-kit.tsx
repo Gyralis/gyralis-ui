@@ -11,11 +11,11 @@ import {
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useTheme } from "next-themes"
 import { WagmiProvider } from "wagmi"
 
 import { chains, transports } from "@/config/networks"
 import { siteConfig } from "@/config/site"
-import { useColorMode } from "@/lib/state/color-mode"
 
 const wagmiConfig = getDefaultConfig({
   appName: siteConfig.title,
@@ -28,14 +28,14 @@ const wagmiConfig = getDefaultConfig({
 const queryClient = new QueryClient()
 
 export function RainbowKit({ children }: { children: ReactNode }) {
-  const [colorMode] = useColorMode()
+  const { resolvedTheme } = useTheme()
   return (
     <>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider
             initialChain={1}
-            theme={colorMode == "dark" ? darkTheme() : lightTheme()}
+            theme={resolvedTheme === "dark" ? darkTheme() : lightTheme()}
           >
             {children}
           </RainbowKitProvider>

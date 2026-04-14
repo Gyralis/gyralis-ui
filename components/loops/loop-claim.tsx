@@ -194,20 +194,13 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      const hash = isRegistered
-        ? await writeContractAsync({
-            address,
-            abi: loopAbi,
-            functionName: "claim",
-            chainId,
-          })
-        : await writeContractAsync({
-            address,
-            abi: loopAbi,
-            functionName: "claimAndRegister",
-            args: [payload.signature],
-            chainId,
-          })
+      const hash = await writeContractAsync({
+        address,
+        abi: loopAbi,
+        functionName: "claimAndRegister",
+        args: [payload.signature],
+        chainId,
+      })
       setTxHash(hash)
 
       toast({
@@ -226,8 +219,22 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     }
   }
 
+  const actionLabel = isSubmitting
+    ? "Submitting transaction..."
+    : isConfirming
+    ? "Confirming transaction..."
+    : hasClaimed
+    ? "Already Claimed"
+    : !isRegistered
+    ? "Register for next period"
+    : isWaitingNextPeriod
+    ? "Claim opens next period"
+    : isLoadingOnchainState
+    ? "Checking claim status..."
+    : "Claim now"
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -241,24 +248,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             isWaitingNextPeriod)
         }
         isLoading={isSubmitting || isConfirming}
-        className="w-full py-3 text-lg"
+        className="min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
       >
-        {isSubmitting
-          ? "Submitting transaction..."
-          : isConfirming
-          ? "Confirming transaction..."
-          : hasClaimed
-          ? "Already Claimed"
-          : !isRegistered
-          ? "Register for next period"
-          : isWaitingNextPeriod
-          ? "Claim opens next period"
-          : isLoadingOnchainState
-          ? "Checking claim status..."
-          : "Claim now"}
+        {actionLabel}
       </Button>
       {isWaitingNextPeriod && (
-        <p className="text-xs text-muted-foreground">
+        <p className="rounded-[1rem] bg-muted/35 px-4 py-2.5 text-center text-xs text-muted-foreground">
           Registered this period. Claim opens next period.
         </p>
       )}
