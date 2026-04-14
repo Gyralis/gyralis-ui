@@ -2,11 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { LuUsers } from "react-icons/lu"
-import { SiLoop } from "react-icons/si"
-import { Address } from "viem"
+import { LuInfo } from "react-icons/lu"
+import { Address, formatUnits } from "viem"
+import { useBalance } from "wagmi"
 
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import { trimFormattedBalance } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -38,6 +39,14 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
     chainId
   )
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
+  const { data: loopBalance } = useBalance({
+    address,
+    token: settings?.token,
+    chainId,
+    query: {
+      enabled: Boolean(address && settings?.token),
+    },
+  })
 
   const nextPeriodStart =
     settings && currentPeriod != null
@@ -67,81 +76,123 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
     return percentPerPeriod === 0 ? "Infinite" : `${percentPerPeriod}%`
   }, [isLoading, settings])
 
-  return (
-    <div className="rounded-[1.65rem] border border-border/80 bg-background/35 px-6 py-6  md:px-7 md:py-7 ">
-      <div className="grid grid-cols-2 gap-4 text-center">
-        <SettingStatCard label="Period" value={periodLengthLabel} />
-        <SettingStatCard label="Distribution" value={distributionLabel} />
-      </div>
+  const distributionAmountLabel = useMemo(() => {
+    if (isLoading) return undefined
+    if (!settings || !loopBalance || settings.percentPerPeriod === 0n) {
+      return undefined
+    }
 
-      <div className="mt-4 relative">
-        <div className="flex items-center justify-center gap-2">
-          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-            Next Distribution
-          </p>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label="Open loopers"
-                  className="inline-flex items-center justify-center rounded-full text-secondary-foreground hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary-100"
-                  onClick={() => setIsLoopersModalOpen(true)}
-                >
-                  <SiLoop className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>Loopers</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+    const distributedValue =
+      (loopBalance.value * settings.percentPerPeriod) / 100n
+    const distributedAmount = formatUnits(distributedValue, loopBalance.decimals)
+    const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
+
+    return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
+  }, [isLoading, settings, loopBalance])
+
+  const distributionDetail = distributionAmountLabel
+    ? `${distributionAmountLabel} this period`
+    : undefined
+
+  return (
+    <TooltipProvider>
+      <div className="rounded-[1.65rem] border border-border/80 bg-background/35 p-6 md:p-7 lg:p-8">
+        <div className="grid grid-cols-2 gap-5 text-center">
+          <SettingStatCard
+            label="Period"
+            value={periodLengthLabel}
+            tooltip="How often registration and claims reset for this loop."
+          />
+          <SettingStatCard
+            label="Distribution"
+            value={distributionLabel}
+            detail={distributionDetail}
+            tooltip="Share of the loop balance released each period."
+          />
         </div>
 
-        {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-          <Countdown nextPeriodStart={nextPeriodStart} />
-        ) : (
-          <p className="pt-2.5 text-center text-sm text-muted-foreground">
-            {isLoading ? "Loading timer..." : "Timer unavailable."}
-          </p>
-        )}
-      </div>
+        <div className="relative mt-6">
+          <div className="text-center">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Next Distribution
+            </p>
+          </div>
 
-      <div className="mt-4">
-        <LoopClaim
-          address={address}
+          {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
+            <Countdown nextPeriodStart={nextPeriodStart} />
+          ) : (
+            <p className="pt-2.5 text-center text-sm text-muted-foreground">
+              {isLoading ? "Loading timer..." : "Timer unavailable."}
+            </p>
+          )}
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLoopersModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              View loopers
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <LoopClaim
+            address={address}
+            chainId={chainId}
+            eligibilityProvider={eligibilityProvider}
+          />
+        </div>
+
+        <LoopersModal
           chainId={chainId}
-          eligibilityProvider={eligibilityProvider}
+          currentPeriod={currentPeriod}
+          eligibilityLogoUrl={eligibilityLogoUrl}
+          isOpen={isLoopersModalOpen}
+          loopAddress={address}
+          loopIsSuper={isSuper}
+          loopTitle={loopTitle}
+          onOpenChange={setIsLoopersModalOpen}
         />
       </div>
-
-      <LoopersModal
-        chainId={chainId}
-        currentPeriod={currentPeriod}
-        eligibilityLogoUrl={eligibilityLogoUrl}
-        isOpen={isLoopersModalOpen}
-        loopAddress={address}
-        loopIsSuper={isSuper}
-        loopTitle={loopTitle}
-        onOpenChange={setIsLoopersModalOpen}
-      />
-    </div>
+    </TooltipProvider>
   )
 }
 
 const SettingStatCard = ({
   label,
   value,
+  detail,
+  tooltip,
 }: {
   label: string
   value: string
+  detail?: string
+  tooltip: string
 }) => {
   return (
     <div>
-      <p className="text-[11px]  uppercase tracking-[0.16em] text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-0.5 text-[1rem] tracking-[0.16em]e text-foreground">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="mx-auto inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground focus:outline-none"
+          >
+            <span>{label}</span>
+            <LuInfo className="size-3.5 shrink-0" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+      <p className="mt-0.5 text-[1rem] tracking-[0.16em] text-foreground">
         {value}
       </p>
+      {detail ? (
+        <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+          {detail}
+        </p>
+      ) : null}
     </div>
   )
 }

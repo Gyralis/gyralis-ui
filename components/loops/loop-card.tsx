@@ -87,7 +87,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         </div>
 
         {/* Loop Setting */}
-        <div className="col-span-1">
+        <div className="col-span-1 lg:pl-1">
           <LoopSettings
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
