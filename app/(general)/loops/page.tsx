@@ -8,6 +8,7 @@ import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 
 import LoopCard from "@/components/loops/loop-card"
 import { SearchWithTags } from "@/components/search"
+import { Badge } from "@/components/ui/badge"
 
 export default function HomePage() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
@@ -69,23 +70,20 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.24),transparent_45%)] dark:bg-[radial-gradient(circle_at_20%_30%,rgba(28,231,131,0.18),transparent_45%)]" />
 
             <div className="relative flex min-h-[280px] flex-col items-center justify-center px-6 py-10 text-center sm:min-h-[320px] sm:px-10">
-              <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-foreground sm:text-sm">
-                Daily Loop Rewards
-              </p>
-              <h1 className="mt-4 text-center text-5xl font-bold leading-[0.95] tracking-[0.08em] text-foreground">
+              <h1 className="mt-4 text-center text-5xl font-bold leading-[0.95] tracking-[0.08em] text-foreground sm:text-6xl">
                 <span className="flex flex-col flex-wrap items-center justify-center gap-1 sm:flex-row sm:flex-nowrap sm:gap-3">
                   <span>Prove</span>
                   <span className="hidden sm:inline-block">-</span>
-                  <span>Claim</span>
+                  <span className="text-primary">Claim</span>
                   <span className="hidden sm:inline-block">-</span>
                   <span>Repeat</span>
                 </span>
               </h1>
 
               <p className="mt-4 max-w-lg font-body text-base text-muted-foreground sm:text-lg">
-                <span>Prove you are human, claim tokens, repeat daily.</span>
+                <span>Show up daily, prove participation, and claim your rewards.</span>
                 <span className="mt-1 block">
-                  Gyralis is for protocols that value real participation.
+                  Gyralis is built for protocols that value real participation.
                 </span>
               </p>
             </div>
@@ -101,6 +99,15 @@ export default function HomePage() {
               onTagChange={setActiveTag}
               tags={tags}
             />
+          </div>
+
+          <div className="my-6 flex justify-center sm:my-8">
+            <Badge
+              variant="outline"
+              className="rounded-full border border-primary/20 bg-transparent px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-foreground shadow-none"
+            >
+              Daily Loop Rewards
+            </Badge>
           </div>
 
           <div className="grid gap-6">

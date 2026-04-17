@@ -13,10 +13,9 @@ export const WalletConnect = ({
           smallScreen: "address",
           largeScreen: "address",
         }}
-        // Keep chain network icon only and preserve modal open flow for connect/disconnect.
         chainStatus={{
           smallScreen: "none",
-          largeScreen: "icon",
+          largeScreen: "none",
         }}
       />
     </span>

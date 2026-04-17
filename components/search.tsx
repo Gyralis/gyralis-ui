@@ -61,7 +61,7 @@ export function SearchWithTags({
     Boolean(activeTag) || Boolean(selectedChain) || Boolean(selectedType)
 
   return (
-    <div className="relative z-50 mb-8 rounded-3xl border bg-background p-4 shadow-md backdrop-blur-sm">
+    <div className="relative z-10 mb-8 rounded-3xl border bg-background p-4 shadow-md backdrop-blur-sm">
       <div className="flex items-center gap-3">
         {!showSearch ? (
           <>
@@ -151,7 +151,7 @@ export function SearchWithTags({
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full z-50 mt-3 w-80 overflow-hidden rounded-3xl border border-border/70 bg-background p-4 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.45)]">
+                <div className="absolute right-0 top-full z-40 mt-3 w-80 overflow-hidden rounded-3xl border border-border/70 bg-background p-4 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.45)]">
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
@@ -173,9 +173,6 @@ export function SearchWithTags({
                         <h3 className="text-sm font-semibold text-foreground">
                           Chain
                         </h3>
-                        <span className="text-xs text-muted-foreground">
-                          Gnosis is live
-                        </span>
                       </div>
                       <div className="flex flex-col gap-2">
                         {chains.map((chain) => {
@@ -219,9 +216,6 @@ export function SearchWithTags({
                         <h3 className="text-sm font-semibold text-foreground">
                           Type
                         </h3>
-                        <span className="text-xs text-muted-foreground">
-                          Superloops coming soon
-                        </span>
                       </div>
                       <div className="flex flex-col gap-2">
                         {types.map((type) => {
