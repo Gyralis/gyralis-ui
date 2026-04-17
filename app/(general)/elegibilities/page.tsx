@@ -34,14 +34,14 @@ const eligibilityRequirements = [
     id: 2,
     name: "Blockscout Merits",
     description:
-      "Blockscout Merits is a gamified rewards program that lets users earn points (“Merits”) by exploring the blockchain—claiming daily bonuses, completing tasks, using tools, and inviting others.",
+      "Blockscout Merits is a gamified rewards program that lets users earn points (“Merits”) by exploring the blockchain, completing tasks, using tools, and inviting others.",
     requirement: "Redeem Gyralis Offer",
     status: "active",
     icon: LuLaptop,
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Visit Blockscout Merits explorer, sign up with your wallet and receive 100 Merits.",
+      "Visit Blockscout Merits explorer and sign up with your wallet. Receive 100 Merits.",
       "Redeem Gyralis loop rewards offer - 50 merits.",
       "Claim your daily loop rewards.",
     ],
