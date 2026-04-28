@@ -17,7 +17,7 @@ import { StampCard } from "./stamp-card"
 import { SubmitPassportButton } from "./submit-passport-button"
 
 const SCORE_INFO_TEXT =
-  "Make sure to hit the Submit Passport button after you claimed any new stamps to update your score."
+  "Refresh your Passport score after you claim new stamps."
 
 export const ListStamps = () => {
   const { stamps, isLoading: stampsLoading } = useGetStampsMetadata()
@@ -105,10 +105,9 @@ export const ListStamps = () => {
             {scoreError &&
               String(scoreError) === HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR && (
                 <span className="block text-sm text-gray-600 dark:text-gray-400">
-                  This usually means you have not submitted your passport for
-                  scoring yet, please hit the{" "}
-                  <span className="font-mono">Submit Passport for Scoring</span>{" "}
-                  button to calculate your score.
+                  This usually means a score is not available yet. Use the{" "}
+                  <span className="font-mono">Refresh Passport Score</span>{" "}
+                  button to request your latest score.
                 </span>
               )}
             {scoreData?.last_score_timestamp && (

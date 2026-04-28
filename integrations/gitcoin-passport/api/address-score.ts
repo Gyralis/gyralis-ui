@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs"
 
-import { GITCOIN_API_BASE_URL } from "../utils/constants"
+import { PASSPORT_STAMPS_API_BASE_URL } from "../utils/constants"
 
 export async function GET(
   req: Request,
@@ -25,7 +25,7 @@ export async function GET(
     )
 
   return await fetch(
-    `${GITCOIN_API_BASE_URL}/score/${env.GITCOIN_PASSPORT_SCORER_ID}/${params.address}`,
+    `${PASSPORT_STAMPS_API_BASE_URL}/${env.GITCOIN_PASSPORT_SCORER_ID}/score/${params.address}`,
     {
       headers: {
         "Content-Type": "application/json",
