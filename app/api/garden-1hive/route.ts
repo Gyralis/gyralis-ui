@@ -13,6 +13,7 @@ import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
+const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
 const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
 
@@ -137,9 +138,9 @@ export async function POST(req: Request) {
     const passportScore = await fetchPassportScore(userAddress)
     console.log(`[${requestId}] Passport score fetched`, {
       score: passportScore,
-      threshold: allowlistedLoop.passportMinScore,
+      threshold: THRESHOLD_SCORE,
     })
-    if (passportScore < allowlistedLoop.passportMinScore)
+    if (passportScore < THRESHOLD_SCORE)
       return NextResponse.json(
         { success: false, error: "Passport score below threshold" },
         { status: 403 }

@@ -23,6 +23,8 @@ interface SearchWithTagsProps {
   onChainChange?: (chain: string | null) => void
   selectedType?: string | null
   onTypeChange?: (type: string | null) => void
+  className?: string
+  variant?: "default" | "hero"
 }
 
 export function SearchWithTags({
@@ -38,6 +40,8 @@ export function SearchWithTags({
   onChainChange,
   selectedType,
   onTypeChange,
+  className,
+  variant = "default",
 }: SearchWithTagsProps) {
   const [showSearch, setShowSearch] = useState(false)
   const [showFilterDropdown, setShowFilterDropdown] = useState(false)
@@ -59,18 +63,51 @@ export function SearchWithTags({
     scrollContainerRef.current?.scrollBy({ left: 200, behavior: "smooth" })
   const hasActiveFilters =
     Boolean(activeTag) || Boolean(selectedChain) || Boolean(selectedType)
+  const isHero = variant === "hero"
+
+  const heroShellClass =
+    "rounded-[2rem] border border-border/60 bg-[linear-gradient(180deg,rgba(248,248,252,0.96)_0%,rgba(234,235,245,0.98)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_24px_70px_-28px_rgba(15,23,42,0.24)] backdrop-blur-xl dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(26,29,42,0.96)_0%,rgba(14,16,27,0.98)_100%)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_70px_-28px_rgba(0,0,0,0.74)]"
+  const heroIconButtonClass =
+    "border border-border/60 bg-white/70 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-border hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-white/8"
+  const heroPillClass =
+    "border border-[#d9dced] bg-[linear-gradient(180deg,#f4f5fb_0%,#e8eaf6_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-[#cdd2e8] hover:bg-[linear-gradient(180deg,#f7f8fd_0%,#edf0fb_100%)] dark:border-white/8 dark:bg-[linear-gradient(180deg,rgba(64,55,108,0.92)_0%,rgba(43,37,77,0.98)_100%)] dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-[linear-gradient(180deg,rgba(74,63,124,0.96)_0%,rgba(53,45,93,0.99)_100%)] dark:hover:text-white"
+  const heroPillActiveClass =
+    "border-secondary/45 bg-secondary text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_12px_30px_-18px_rgba(140,75,255,0.22)] hover:border-secondary/55 hover:bg-secondary/92 hover:text-secondary-foreground dark:border-primary/35 dark:bg-[linear-gradient(135deg,#88e593_0%,#57c76f_100%)] dark:text-[#112212] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_30px_-18px_rgba(28,231,131,0.38)] dark:hover:border-primary/45 dark:hover:bg-[linear-gradient(135deg,#92ea9c_0%,#60cc78_100%)] dark:hover:text-[#112212]"
+  const baseTagButtonClass =
+    "font-body inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200"
+
+  void showFilters
+  void onToggleFilters
 
   return (
-    <div className="relative z-10 mb-8 rounded-3xl border bg-background p-4 shadow-md backdrop-blur-sm">
+    <div
+      className={cn(
+        "relative z-10",
+        isHero
+          ? heroShellClass
+          : "mb-8 rounded-3xl border bg-background p-4 shadow-md backdrop-blur-sm",
+        className
+      )}
+    >
       <div className="flex items-center gap-3">
         {!showSearch ? (
           <>
             <button
               onClick={scrollLeft}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accemt shadow-sm lg:hidden"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm lg:hidden",
+                isHero ? heroIconButtonClass : "bg-accemt"
+              )}
               aria-label="Scroll left"
             >
-              <HiChevronLeft className="size-5 text-muted-foreground" />
+              <HiChevronLeft
+                className={cn(
+                  "size-5",
+                  isHero
+                    ? "text-foreground/70 dark:text-white/72"
+                    : "text-muted-foreground"
+                )}
+              />
             </button>
 
             <div
@@ -78,15 +115,20 @@ export function SearchWithTags({
               className="scrollbar-hide flex-1 overflow-x-auto scroll-smooth"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              <div className="flex min-w-max gap-2">
+              <div className="flex min-w-max gap-2.5">
                 <button
                   key="all"
                   onClick={() => onTagChange?.(null)}
                   className={cn(
-                    "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm shadow-sm transition-colors duration-200 inline-flex shrink-0 items-center justify-center gap-2 border border-border hover:opacity-80",
+                    baseTagButtonClass,
+                    isHero ? heroPillClass : "border border-border hover:opacity-80",
                     activeTag === null
-                      ? "bg-accent text-foreground font-medium dark:bg-secondary dark:text-secondary-foreground"
-                      : "text-muted-foreground"
+                      ? isHero
+                        ? heroPillActiveClass
+                        : "bg-accent font-medium text-foreground dark:bg-secondary dark:text-secondary-foreground"
+                      : isHero
+                        ? ""
+                        : "text-muted-foreground"
                   )}
                 >
                   All
@@ -98,10 +140,15 @@ export function SearchWithTags({
                       onTagChange?.(activeTag === tag ? null : tag)
                     }
                     className={cn(
-                      "font-body whitespace-nowrap rounded-full px-6 py-2.5 text-sm font shadow-sm duration-200 inline-flex shrink-0 items-center justify-center gap-2  border border-border   transition-colors  hover:opacity-80",
+                      baseTagButtonClass,
+                      isHero ? heroPillClass : "border border-border hover:opacity-80",
                       activeTag === tag
-                        ? "bg-accent text-foreground font-medium dark:bg-secondary dark:text-secondary-foreground"
-                        : "text-muted-foreground"
+                        ? isHero
+                          ? heroPillActiveClass
+                          : "bg-accent font-medium text-foreground dark:bg-secondary dark:text-secondary-foreground"
+                        : isHero
+                          ? ""
+                          : "text-muted-foreground"
                     )}
                   >
                     {tag}
@@ -112,40 +159,63 @@ export function SearchWithTags({
 
             <button
               onClick={scrollRight}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accemt shadow-sm lg:hidden"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm lg:hidden",
+                isHero ? heroIconButtonClass : "bg-accemt"
+              )}
               aria-label="Scroll right"
             >
-              <HiChevronRight className="size-5 text-muted-foreground" />
+              <HiChevronRight
+                className={cn(
+                  "size-5",
+                  isHero
+                    ? "text-foreground/70 dark:text-white/72"
+                    : "text-muted-foreground"
+                )}
+              />
             </button>
 
             <button
               onClick={() => setShowSearch(true)}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accemt shadow-sm"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-2xl shadow-sm",
+                isHero ? heroPillClass : "rounded-full bg-accemt"
+              )}
               aria-label="Search"
             >
-              <HiSearch className="size-5 text-muted-foreground" />
+              <HiSearch
+                className={cn(
+                  "size-5",
+                  isHero ? "text-foreground dark:text-white" : "text-muted-foreground"
+                )}
+              />
             </button>
 
-            {/* Filters button */}
             <div className="relative">
               <button
                 onClick={() => setShowFilterDropdown((prev) => !prev)}
                 className={cn(
-                  "flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-card-foreground shadow-sm transition-colors",
+                  "flex h-10 shrink-0 items-center gap-2 border px-4 shadow-sm transition-colors",
+                  isHero
+                    ? "rounded-2xl border-border/70 bg-[rgba(255,255,255,0.92)] px-5 text-[#151515] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_10px_24px_-18px_rgba(15,23,42,0.24)] hover:bg-white dark:border-white/12 dark:bg-[rgba(247,247,249,0.96)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_10px_24px_-18px_rgba(0,0,0,0.52)]"
+                    : "rounded-full text-card-foreground",
                   hasActiveFilters
-                    ? "border-primary/30 bg-accent text-foreground hover:bg-accent/90"
-                    : "border-border/70 bg-background/80 hover:bg-accent/60"
+                    ? isHero
+                      ? "border-primary/40"
+                      : "border-primary/30 bg-accent text-foreground hover:bg-accent/90"
+                    : isHero
+                      ? ""
+                      : "border-border/70 bg-background/80 hover:bg-accent/60"
                 )}
               >
-                <span className="font-body text-sm font-medium uppercase tracking-wide">
+                <span className="font-body text-sm font-semibold uppercase tracking-wide">
                   Filters
                 </span>
                 <HiSlidersHorizontal
                   className={cn(
                     "size-4",
-                    hasActiveFilters
-                      ? "text-foreground"
-                      : "text-muted-foreground"
+                    isHero ? "text-[#151515]" : "text-muted-foreground",
+                    hasActiveFilters && !isHero && "text-foreground"
                   )}
                 />
               </button>
@@ -266,7 +336,12 @@ export function SearchWithTags({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 autoFocus
-                className="font-body w-full rounded-full border-2 border-[#1CE783] bg-accemt py-2.5 pl-12 pr-4 text-sm shadow-sm focus:border-[#1CE783] focus:outline-none"
+                className={cn(
+                  "font-body w-full py-2.5 pl-12 pr-4 text-sm shadow-sm focus:outline-none",
+                  isHero
+                    ? "rounded-2xl border border-[#d9dced] bg-[linear-gradient(180deg,#f4f5fb_0%,#e8eaf6_100%)] text-foreground placeholder:text-foreground/45 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_-18px_rgba(15,23,42,0.18)] focus:border-primary dark:border-white/8 dark:bg-[linear-gradient(180deg,rgba(64,55,108,0.92)_0%,rgba(43,37,77,0.98)_100%)] dark:text-white dark:placeholder:text-white/50 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-18px_rgba(0,0,0,0.72)]"
+                    : "rounded-full border-2 border-[#1CE783] bg-accemt focus:border-[#1CE783]"
+                )}
               />
             </div>
             <button
@@ -274,7 +349,12 @@ export function SearchWithTags({
                 setShowSearch(false)
                 onChange("")
               }}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accemt shadow-sm"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center shadow-sm",
+                isHero
+                  ? "rounded-2xl border border-[#d9dced] bg-[linear-gradient(180deg,#f4f5fb_0%,#e8eaf6_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_-18px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-[linear-gradient(180deg,rgba(64,55,108,0.92)_0%,rgba(43,37,77,0.98)_100%)] dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-18px_rgba(0,0,0,0.72)]"
+                  : "rounded-full bg-accemt"
+              )}
               aria-label="Close search"
             >
               X
