@@ -150,6 +150,45 @@
 
 }
 
+.loop-hero-card {
+  animation: loop-hero-card-enter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.loop-hero-card::before {
+  background-size: 220% 100%;
+  animation: loop-hero-card-stripe 7s ease-in-out infinite;
+}
+
+@keyframes loop-hero-card-enter {
+  from {
+    opacity: 0;
+    transform: translateX(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes loop-hero-card-stripe {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loop-hero-card,
+  .loop-hero-card::before {
+    animation: none;
+  }
+}
+
 /* Enhanced button styling with gradients and animations */
 .tamagotchi-button {
   background: linear-gradient(135deg, #1ce783 0%, #4ade80 100%);

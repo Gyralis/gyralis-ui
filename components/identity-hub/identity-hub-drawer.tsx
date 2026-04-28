@@ -2,15 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import { FiRefreshCcw } from "react-icons/fi"
 import {
-  HiArrowPath,
   HiArrowRight,
   HiCheckBadge,
-  HiCheckCircle,
   HiChevronLeft,
   HiChevronRight,
 } from "react-icons/hi2"
+import { FiExternalLink } from "react-icons/fi"
 import { PiFingerprintLight } from "react-icons/pi"
 import { useAccount } from "wagmi"
 
@@ -48,7 +46,6 @@ type IdentityVerificationMethod = {
   lastSubmittedAt?: string | null
   details?: string | null
   actionInProgress?: boolean
-  hideRefresh?: boolean
   onAction: (() => Promise<void>) | null
 }
 
@@ -95,6 +92,7 @@ const gyraHubSteps = [
     title: "Go to Human Passport",
     description:
       "Head to Human Passport app and sign in the same wallet you use in GyraHub.",
+    href: "https://app.passport.xyz/",
   },
   {
     title: "Collect verification stamps",
@@ -102,25 +100,16 @@ const gyraHubSteps = [
       "Add identity and reputation proofs to grow your Passport score.",
   },
   {
-    title: "Submit your Passport here",
+    title: "Open GyraHub",
     description:
-      "Use the action in GyraHub to sign a message and request scoring.",
-  },
-  {
-    title: "Refresh your status",
-    description:
-      "After new stamps or a fresh submission, refresh to sync your latest score.",
+      "Open GyraHub and check your Passport score for the connected wallet.",
   },
 ]
 
 const IdentityHubMethodCard = ({
   method,
-  onRefresh,
-  isRefreshing = false,
 }: {
   method: IdentityVerificationMethod
-  onRefresh: () => void
-  isRefreshing?: boolean
 }) => {
   const isBusy = Boolean(method.actionInProgress)
 
@@ -203,18 +192,6 @@ const IdentityHubMethodCard = ({
             {method.actionLabel}
           </Button>
         )}
-        {!method.hideRefresh && (
-          <Button
-            variant="secondary"
-            onClick={onRefresh}
-            isLoading={isRefreshing}
-            disabled={isBusy || isRefreshing}
-            className="w-full"
-          >
-            <FiRefreshCcw className="size-4" />
-            Update Score
-          </Button>
-        )}
       </div>
     </div>
   )
@@ -231,6 +208,7 @@ export const IdentityHubDrawer = ({
   const [open, setOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [sheetSide, setSheetSide] = useState<"right" | "bottom">("right")
+  const [submitSucceeded, setSubmitSucceeded] = useState(false)
   const { toast } = useToast()
   const drawerWidth = guideOpen ? 800 : 500
 
@@ -240,16 +218,18 @@ export const IdentityHubDrawer = ({
   const { submitPassport, isLoading: isSubmittingPassport } =
     useSubmitPassport()
 
-  const submitPassportAndRefresh = useCallback(async () => {
+  const submitPassportForScoring = useCallback(async () => {
     try {
+      setSubmitSucceeded(false)
       await submitPassport()
-      scoreQuery.refetch()
+      setSubmitSucceeded(true)
       toast({
-        title: "Passport submitted",
+        title: "You have been submitted",
         description:
-          "Your Passport was submitted and score refresh was requested. Check back in a few moments.",
+          "GyraHub accepted your wallet and requested the latest Passport score.",
       })
     } catch (error) {
+      setSubmitSucceeded(false)
       const message =
         error instanceof Error ? error.message : "Failed to submit passport."
       toast({
@@ -257,7 +237,11 @@ export const IdentityHubDrawer = ({
         description: message,
       })
     }
-  }, [submitPassport, scoreQuery, toast])
+  }, [submitPassport, toast])
+
+  useEffect(() => {
+    setSubmitSucceeded(false)
+  }, [address])
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)")
@@ -281,7 +265,42 @@ export const IdentityHubDrawer = ({
             "Connect your wallet to unlock GyraHub and view your Human Passport status.",
           onAction: null,
           actionInProgress: false,
-          hideRefresh: true,
+        },
+      ]
+    }
+
+    if (isSubmittingPassport) {
+      return [
+        {
+          id: "passport",
+          title: "Gitcoin Passport",
+          summary: "Submitting your wallet for Passport scoring.",
+          status: "loading" as const,
+          statusLabel: "Submitting...",
+          onAction: null,
+          actionInProgress: true,
+          details:
+            "Keep this drawer open while GyraHub requests your latest Passport score.",
+        },
+      ]
+    }
+
+    if (submitSucceeded) {
+      return [
+        {
+          id: "passport",
+          title: "Gitcoin Passport",
+          summary: "You have been submitted.",
+          status: "verified" as const,
+          statusLabel: "Submitted",
+          score: scoreQuery.data?.score
+            ? Number.parseFloat(scoreQuery.data.score).toFixed(2)
+            : undefined,
+          lastSubmittedAt: scoreQuery.data?.last_score_timestamp,
+          onAction: null,
+          actionInProgress: false,
+          details:
+            "GyraHub accepted your wallet and requested the latest Passport score.",
         },
       ]
     }
@@ -297,7 +316,6 @@ export const IdentityHubDrawer = ({
           actionInProgress: true,
           details:
             "GyraHub is syncing your current score and submission status.",
-          hideRefresh: false,
         },
       ]
     }
@@ -309,15 +327,14 @@ export const IdentityHubDrawer = ({
           {
             id: "passport",
             title: "Gitcoin Passport",
-            summary: "Your Passport has not been submitted yet.",
+            summary: "Your Passport score is not available yet.",
             status: "action-needed" as const,
             statusLabel: "Ready to submit",
             details:
-              "Submit your Passport here to create or update your score for GyraHub.",
-            actionLabel: "Submit Passport",
-            onAction: submitPassportAndRefresh,
+              "Request your latest Passport score for GyraHub.",
+            actionLabel: "Submit wallet",
+            onAction: submitPassportForScoring,
             actionInProgress: isSubmittingPassport,
-            hideRefresh: true,
           },
         ]
       }
@@ -331,7 +348,6 @@ export const IdentityHubDrawer = ({
           details: errorMessage,
           onAction: null,
           actionInProgress: false,
-          hideRefresh: false,
         },
       ]
     }
@@ -345,12 +361,11 @@ export const IdentityHubDrawer = ({
           summary: "A score is not available yet for this wallet.",
           status: "action-needed" as const,
           statusLabel: "Need submission",
-          actionLabel: "Submit Passport",
-          onAction: submitPassportAndRefresh,
+          actionLabel: "Submit wallet",
+          onAction: submitPassportForScoring,
           actionInProgress: isSubmittingPassport,
           details:
-            "Once submitted, GyraHub will request a score and keep this panel updated.",
-          hideRefresh: true,
+            "GyraHub will request your latest score and keep this panel updated.",
         },
       ]
     }
@@ -365,10 +380,9 @@ export const IdentityHubDrawer = ({
         score: `${scoreValue.toFixed(2)}`,
         lastSubmittedAt: scoreQuery.data?.last_score_timestamp,
         details:
-          "Claim new stamps in Passport, then refresh here to pull the latest score into GyraHub.",
+          "Your Passport score is available for this connected wallet.",
         onAction: null,
         actionInProgress: false,
-        hideRefresh: false,
       },
     ]
   }, [
@@ -379,11 +393,18 @@ export const IdentityHubDrawer = ({
     scoreQuery.isLoading,
     scoreQuery.isRefetching,
     isSubmittingPassport,
-    submitPassportAndRefresh,
+    submitSucceeded,
+    submitPassportForScoring,
   ])
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) setSubmitSucceeded(false)
+      }}
+    >
       <SheetTrigger asChild>
         <button
           className={cn(
@@ -475,12 +496,6 @@ export const IdentityHubDrawer = ({
                       ...method,
                       score: method.score ?? undefined,
                     }}
-                    isRefreshing={
-                      scoreQuery.isRefetching || scoreQuery.isLoading
-                    }
-                    onRefresh={() => {
-                      if (address) void scoreQuery.refetch()
-                    }}
                   />
                 ))}
               </div>
@@ -491,7 +506,7 @@ export const IdentityHubDrawer = ({
                   onClick={() => setGuideOpen(true)}
                   type="button"
                 >
-                  Need help submitting?
+                  Need help checking your score?
                   <span className="inline-flex items-center gap-1">
                     Open guide
                     <HiArrowRight className="size-4" />
@@ -503,7 +518,10 @@ export const IdentityHubDrawer = ({
             <SheetClose asChild>
               <button
                 className="mt-4 inline-flex w-full justify-center rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false)
+                  setSubmitSucceeded(false)
+                }}
               >
                 Close GyraHub
               </button>
@@ -537,41 +555,27 @@ export const IdentityHubDrawer = ({
                       {index + 1}
                     </div>
                     <div className="pt-0.5">
-                      <p className="font-medium text-foreground">
-                        {step.title}
-                      </p>
+                      {step.href ? (
+                        <a
+                          href={step.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 font-medium text-foreground transition-colors hover:text-primary"
+                        >
+                          {step.title}
+                          <FiExternalLink className="size-3.5" />
+                        </a>
+                      ) : (
+                        <p className="font-medium text-foreground">
+                          {step.title}
+                        </p>
+                      )}
                       <p className="mt-1 text-sm leading-6 text-muted-foreground">
                         {step.description}
                       </p>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-4 rounded-[1.1rem] border border-border/60 bg-background/80 p-3 dark:border-border/80">
-                <div className="flex items-center gap-3">
-                  {isSubmittingPassport || scoreQuery.isRefetching ? (
-                    <HiArrowPath className="size-5 animate-spin text-primary" />
-                  ) : (
-                    <HiCheckCircle className="size-5 text-primary" />
-                  )}
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {isSubmittingPassport
-                        ? "Submitting your Passport"
-                        : scoreQuery.isRefetching
-                        ? "Refreshing your score"
-                        : "Ready to sync"}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {isSubmittingPassport
-                        ? "Keep this panel open while your signature and submission complete."
-                        : scoreQuery.isRefetching
-                        ? "GyraHub is checking for the latest score update now."
-                        : "When you earn new stamps, return here and sync your updated score."}
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           )}

@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server"
 import { env } from "@/env.mjs"
-import {
-  Chain,
-  createWalletClient,
-  getContract,
-  http,
-  parseAbi,
-} from "viem"
+import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
@@ -24,6 +18,7 @@ const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const BLOCKSCOUT_POINTS_BASE =
   process.env.BLOCKSCOUT_POINTS_BASE ?? "https://points.k8s-dev.blockscout.com"
 const BLOCKSCOUT_OFFER_ID = process.env.BLOCKSCOUT_OFFER_ID ?? "gyralis-offer"
+const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 
 interface PassportScoreResponse {
   score: number
@@ -187,9 +182,9 @@ export async function POST(req: Request) {
     const passportScore = await fetchPassportScore(userAddress)
     console.log(`[${requestId}] Passport score fetched`, {
       score: passportScore,
-      threshold: allowlistedLoop.passportMinScore,
+      threshold: THRESHOLD_SCORE,
     })
-    if (passportScore < allowlistedLoop.passportMinScore)
+    if (passportScore < THRESHOLD_SCORE)
       return NextResponse.json(
         { success: false, error: "Passport score below threshold" },
         { status: 403 }

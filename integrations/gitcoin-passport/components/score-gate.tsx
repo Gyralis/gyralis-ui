@@ -18,10 +18,9 @@ export const ScoreGate = ({ score, children, fallback }: ScoreGateProps) => {
         {String(error) === HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR && (
           <>
             <span className="block text-sm text-gray-600 dark:text-gray-400">
-              This usually means you have not submitted your passport for
-              scoring yet, please hit the{" "}
-              <span className="font-mono">Submit Passport for Scoring</span>{" "}
-              button to calculate your score.
+              This usually means a score is not available yet. Use the{" "}
+              <span className="font-mono">Refresh Passport Score</span> button
+              to request your latest score.
             </span>
             <SubmitPassportButton onSuccess={refetch} />
           </>
