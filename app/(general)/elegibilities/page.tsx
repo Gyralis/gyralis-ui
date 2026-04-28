@@ -60,9 +60,9 @@ const eligibilityRequirements = [
     color: "text-pink-500",
     bgColor: "bg-pink-50 dark:bg-pink-900/20",
     steps: [
-      "Sign in with Ethereum",
+      "Go to the Human Passport app and sign in with Ethereum.",
       "Collect “stamps” to validate your identity and earn passport score.",
-      "Submit or update your score in the GyraHub.",
+      "Go to the gyraHub and view your passport score.",
     ],
     protocolUrl: "https://app.passport.xyz/",
     coverUrl: "/passport-cover.png",
