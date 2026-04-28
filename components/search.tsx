@@ -66,13 +66,13 @@ export function SearchWithTags({
   const isHero = variant === "hero"
 
   const heroShellClass =
-    "rounded-[2rem] border border-border/60 bg-[linear-gradient(180deg,rgba(248,248,252,0.96)_0%,rgba(234,235,245,0.98)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_24px_70px_-28px_rgba(15,23,42,0.24)] backdrop-blur-xl dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(26,29,42,0.96)_0%,rgba(14,16,27,0.98)_100%)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_70px_-28px_rgba(0,0,0,0.74)]"
+    "rounded-[2rem]  bg-[linear-gradient(180deg,rgba(248,248,252,0.96)_0%,rgba(234,235,245,0.98)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_24px_70px_-28px_rgba(15,23,42,0.24)] backdrop-blur-xl  dark:bg-[linear-gradient(180deg,rgba(26,29,42,0.96)_0%,rgba(14,16,27,0.98)_100%)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_70px_-28px_rgba(0,0,0,0.74)]"
   const heroIconButtonClass =
-    "border border-border/60 bg-white/70 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-border hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-white/8"
+    "bg-white/70 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-border hover:bg-white  dark:bg-white/5 dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-white/8"
   const heroPillClass =
-    "border border-[#d9dced] bg-[linear-gradient(180deg,#f4f5fb_0%,#e8eaf6_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-[#cdd2e8] hover:bg-[linear-gradient(180deg,#f7f8fd_0%,#edf0fb_100%)] dark:border-white/8 dark:bg-[linear-gradient(180deg,rgba(64,55,108,0.92)_0%,rgba(43,37,77,0.98)_100%)] dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-[linear-gradient(180deg,rgba(74,63,124,0.96)_0%,rgba(53,45,93,0.99)_100%)] dark:hover:text-white"
+    "bg-[linear-gradient(180deg,#f4f5fb_0%,#e8eaf6_100%)] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_10px_24px_-18px_rgba(15,23,42,0.18)] hover:border-[#cdd2e8] hover:bg-[linear-gradient(180deg,#f7f8fd_0%,#edf0fb_100%)] dark:border-white/8 dark:bg-[linear-gradient(180deg,rgba(64,55,108,0.92)_0%,rgba(43,37,77,0.98)_100%)] dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_10px_24px_-18px_rgba(0,0,0,0.72)] dark:hover:border-white/16 dark:hover:bg-[linear-gradient(180deg,rgba(74,63,124,0.96)_0%,rgba(53,45,93,0.99)_100%)] dark:hover:text-white"
   const heroPillActiveClass =
-    "border-secondary/45 bg-secondary text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_12px_30px_-18px_rgba(140,75,255,0.22)] hover:border-secondary/55 hover:bg-secondary/92 hover:text-secondary-foreground dark:border-primary/35 dark:bg-[linear-gradient(135deg,#88e593_0%,#57c76f_100%)] dark:text-[#112212] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_30px_-18px_rgba(28,231,131,0.38)] dark:hover:border-primary/45 dark:hover:bg-[linear-gradient(135deg,#92ea9c_0%,#60cc78_100%)] dark:hover:text-[#112212]"
+    "bg-secondary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_12px_30px_-18px_rgba(140,75,255,0.22)] hover:border-secondary/55 hover:bg-secondary/92 dark:border-primary/35 dark:bg-[linear-gradient(135deg,#88e593_0%,#57c76f_100%)] dark:text-[#112212] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_12px_30px_-18px_rgba(28,231,131,0.38)] dark:hover:border-primary/45 dark:hover:bg-[linear-gradient(135deg,#92ea9c_0%,#60cc78_100%)] dark:hover:text-[#112212]"
   const baseTagButtonClass =
     "font-body inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200"
 
@@ -96,7 +96,7 @@ export function SearchWithTags({
               onClick={scrollLeft}
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm lg:hidden",
-                isHero ? heroIconButtonClass : "bg-accemt"
+                isHero ? heroIconButtonClass : "bg-accent"
               )}
               aria-label="Scroll left"
             >
@@ -121,14 +121,16 @@ export function SearchWithTags({
                   onClick={() => onTagChange?.(null)}
                   className={cn(
                     baseTagButtonClass,
-                    isHero ? heroPillClass : "border border-border hover:opacity-80",
+                    isHero
+                      ? heroPillClass
+                      : "border border-border hover:opacity-80",
                     activeTag === null
                       ? isHero
                         ? heroPillActiveClass
                         : "bg-accent font-medium text-foreground dark:bg-secondary dark:text-secondary-foreground"
                       : isHero
-                        ? ""
-                        : "text-muted-foreground"
+                      ? ""
+                      : "text-muted-foreground"
                   )}
                 >
                   All
@@ -141,14 +143,16 @@ export function SearchWithTags({
                     }
                     className={cn(
                       baseTagButtonClass,
-                      isHero ? heroPillClass : "border border-border hover:opacity-80",
+                      isHero
+                        ? heroPillClass
+                        : "border border-border hover:opacity-80",
                       activeTag === tag
                         ? isHero
                           ? heroPillActiveClass
                           : "bg-accent font-medium text-foreground dark:bg-secondary dark:text-secondary-foreground"
                         : isHero
-                          ? ""
-                          : "text-muted-foreground"
+                        ? ""
+                        : "text-muted-foreground"
                     )}
                   >
                     {tag}
@@ -186,7 +190,9 @@ export function SearchWithTags({
               <HiSearch
                 className={cn(
                   "size-5",
-                  isHero ? "text-foreground dark:text-white" : "text-muted-foreground"
+                  isHero
+                    ? "text-foreground dark:text-white"
+                    : "text-muted-foreground"
                 )}
               />
             </button>
@@ -197,15 +203,15 @@ export function SearchWithTags({
                 className={cn(
                   "flex h-10 shrink-0 items-center gap-2 border px-4 shadow-sm transition-colors",
                   isHero
-                    ? "rounded-2xl border-border/70 bg-[rgba(255,255,255,0.92)] px-5 text-[#151515] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_10px_24px_-18px_rgba(15,23,42,0.24)] hover:bg-white dark:border-white/12 dark:bg-[rgba(247,247,249,0.96)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_10px_24px_-18px_rgba(0,0,0,0.52)]"
+                    ? "rounded-2xl border-border/70 bg-card px-5  shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_10px_24px_-18px_rgba(15,23,42,0.24)] hover:opacity-80"
                     : "rounded-full text-card-foreground",
                   hasActiveFilters
                     ? isHero
                       ? "border-primary/40"
                       : "border-primary/30 bg-accent text-foreground hover:bg-accent/90"
                     : isHero
-                      ? ""
-                      : "border-border/70 bg-background/80 hover:bg-accent/60"
+                    ? ""
+                    : "border-border/70 bg-background/80 hover:bg-accent/60"
                 )}
               >
                 <span className="font-body text-sm font-semibold uppercase tracking-wide">
@@ -221,7 +227,7 @@ export function SearchWithTags({
               </button>
 
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full z-40 mt-3 w-80 overflow-hidden rounded-3xl border border-border/70 bg-background p-4 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.45)]">
+                <div className="absolute right-0 top-full z-40 mt-3 w-80 overflow-hidden rounded-3xl  bg-background p-4 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.45)]">
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">

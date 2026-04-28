@@ -88,7 +88,7 @@ export default function HomePage() {
                     </span>
                     <span className="block">REPEAT</span>
                   </h1>
-                  <p className="mt-6 max-w-sm font-body text-xl leading-9  sm:text-2xl sm:leading-10 text-popover-foreground">
+                  <p className="mt-6 max-w-md text-xl leading-9 sm:text-xl  text-accent-foreground">
                     Gyralis is for protocols and communities that value real
                     participation.
                   </p>
