@@ -21,14 +21,16 @@ const eligibilityRequirements = [
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Go to the 1Hive community in Gardens platform and connect your wallet.",
-      "Complete membership registration and stake 3 HNY tokens.",
-      "Claim your daily loop rewards.",
+      "Go to the Gardens and open the 1Hive community. Connect your wallet.",
+      "Click Join and complete membership",
+      "Stake 3 HNY to activate your membership. You can unstake anytime.",
+      "Go to Gyralis and register for the next period. Starting next cycle, claim daily rewards.",
     ],
     protocolUrl:
       "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
     coverUrl: "/gardens-cover.png",
     logoUrl: "/gardens-logo.png",
+    type: "loop",
   },
   {
     id: 2,
@@ -41,15 +43,16 @@ const eligibilityRequirements = [
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Visit Blockscout Merits explorer and sign up with your wallet. Receive 100 Merits.",
-      "Redeem Gyralis loop rewards offer - 50 merits.",
-      "Claim your daily loop rewards.",
+      "Go to the Blockscout Merits Explorer and connect your wallet.You’ll receive 100 Merits.",
+      "Open the Spend Merits tab and find the Gyralis Loop Rewards.",
+      "Redeem the offer for 50 Merits.",
+      "Go to Gyralis and register for the next period. Starting next cycle, claim daily rewards.",
     ],
     protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=spend",
     coverUrl: "/blockscout-cover.png",
     logoUrl: "/blockscout-logo.png",
+    type: "loop",
   },
-
   {
     id: 3,
     name: "Human Passport",
@@ -62,11 +65,12 @@ const eligibilityRequirements = [
     steps: [
       "Go to the Human Passport app and sign in with Ethereum.",
       "Collect “stamps” to validate your identity and earn passport score.",
-      "Go to the gyraHub and view your passport score.",
+      "Go to the GyraHub and view your passport score.",
     ],
     protocolUrl: "https://app.passport.xyz/",
     coverUrl: "/passport-cover.png",
     logoUrl: "/passport-logo.svg",
+    type: "shield",
   },
 ]
 
