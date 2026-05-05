@@ -14,6 +14,8 @@ import {
 } from "react-icons/fa"
 import { PiFingerprintLight } from "react-icons/pi"
 
+import { HowLoopsWork } from "@/components/loops/how-loops-work"
+
 type HeroFloatingMark = {
   size: number
   colorClass: string
@@ -139,12 +141,10 @@ export default function HomePage() {
                   Enter the Loop
                   <FaArrowRight className="size-4" aria-hidden="true" />
                 </Link>
-                <Link
-                  href="#how-it-works"
-                  className="tamagotchi-button-secondary flex items-center justify-center gap-2 px-8 py-4 text-lg transition-all ease-out"
-                >
-                  See How It Works
-                </Link>
+                <HowLoopsWork
+                  triggerLabel="See How It Works"
+                  triggerClassName="tamagotchi-button-secondary flex items-center justify-center gap-2 px-8 py-4 text-lg transition-all ease-out"
+                />
               </motion.div>
             </motion.div>
 
