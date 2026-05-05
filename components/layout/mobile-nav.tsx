@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { LightDarkImage } from "@/components/shared/light-dark-image"
 import { ModeToggle } from "../shared/mode-toggle"
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
+import { NavLogoMark } from "./main-nav"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
@@ -20,14 +20,8 @@ export function MobileNav() {
     <Sheet open={open} onOpenChange={setOpen}>
       <div className="flex w-full items-center justify-between md:hidden">
         <Link href="/" className="flex items-center space-x-2">
-          <LightDarkImage
-            LightImage="/gyralis-logo.svg"
-            DarkImage="/gyralis-logo.svg"
-            alt="Gyralis"
-            className="rounded-full"
-            height={32}
-            width={32}
-          />
+          <NavLogoMark />
+          <span className="sr-only">Gyralis</span>
         </Link>
         <div className="flex items-center gap-x-4">
           <IdentityHubDrawer compact />
@@ -43,13 +37,8 @@ export function MobileNav() {
       <SheetContent className="pr-0">
         <div className="flex items-center gap-x-4">
           <MobileLink href="/" onOpenChange={setOpen}>
-            <LightDarkImage
-              LightImage="/gyralis-logo.svg"
-              DarkImage="/gyralis-logo.svg"
-              alt="Gyralis"
-              height={32}
-              width={32}
-            />
+            <NavLogoMark />
+            <span className="sr-only">Gyralis</span>
           </MobileLink>
         </div>
 

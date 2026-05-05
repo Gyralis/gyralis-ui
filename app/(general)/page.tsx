@@ -1,24 +1,104 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { FaNetworkWired, FaShieldAlt, FaTrophy, FaUsers } from "react-icons/fa"
+import {
+  FaArrowRight,
+  FaCalendarCheck,
+  FaDoorOpen,
+  FaShieldAlt,
+  FaTrophy,
+  FaUsers,
+} from "react-icons/fa"
+import { PiFingerprintLight } from "react-icons/pi"
+
+type HeroFloatingMark = {
+  size: number
+  colorClass: string
+  rotation: number
+  animationDelay: number
+  animationDuration: number
+}
+
+const heroFloatingColors = [
+  "text-orange-300",
+  "text-blue-300",
+  "text-green-300",
+  "text-pink-300",
+  "text-teal-300",
+  "text-purple-300",
+]
+
+function randomBetween(min: number, max: number) {
+  return Math.round(min + Math.random() * (max - min))
+}
+
+function createHeroFloatingMark(): HeroFloatingMark {
+  return {
+    size: randomBetween(220, 300),
+    colorClass:
+      heroFloatingColors[randomBetween(0, heroFloatingColors.length - 1)],
+    rotation: randomBetween(-28, 28),
+    animationDelay: randomBetween(0, 20) / 10,
+    animationDuration: randomBetween(30, 58) / 10,
+  }
+}
+
+function GyralisFloatingMark({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 292 260"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M29.6602 231.698C29.6602 231.698 54.3786 265.642 139.863 257.985C225.351 250.329 342.843 175.285 267.997 115.504C193.149 55.7228 52.4654 110.259 137.054 143.581C137.054 143.581 110.864 123.283 140.498 112.032C163.551 103.278 181.576 104.247 188.277 105.882C191.118 106.576 194.308 106.756 196.519 107.352C214.284 112.139 284.115 129.668 252.347 188.73C223.281 242.773 129.808 250.491 94.4295 251.444C83.8967 251.73 73.6512 250.782 63.8115 248.495C51.4453 245.624 35.7887 240.413 29.6602 231.698Z"
+        fill="currentColor"
+      />
+      <path
+        d="M49.9566 29.2191C44.3992 35.4111 41.763 43.1043 39.9243 52.5282C38.0772 61.9592 37.4997 72.1216 38.1929 83.0199C38.8838 93.9223 40.7716 104.681 43.8535 115.294C46.936 125.911 51.2451 136.007 56.7927 145.584C62.3304 155.165 69.0697 163.232 77.001 169.797C84.924 176.356 93.9881 181.105 104.177 184.041C114.36 186.976 125.651 187.161 138.045 184.59C150.656 181.975 160.649 177.488 168.026 171.117C175.405 164.752 182.802 158.755 187.663 152.784C190.596 149.181 205.708 126.499 205.914 126.342C202.727 140.047 197.408 152.616 189.963 164.046C186.949 168.879 183.274 173.744 178.936 178.637C174.598 183.532 169.577 188.101 163.881 192.326C158.176 196.562 151.691 200.218 144.42 203.303C137.144 206.39 128.956 208.561 119.859 209.816C107.123 211.828 95.4901 211.869 84.9546 209.953C74.4143 208.034 65.0248 204.888 56.762 200.496C48.5049 196.11 41.2796 190.824 35.1061 184.631C28.9262 178.449 23.6946 172.011 19.4211 165.322C15.1397 158.639 11.7056 151.991 9.11927 145.374C6.52539 138.761 4.70895 132.93 3.66655 127.886C0.672037 113.362 0.0450102 99.29 1.81005 85.675C3.55883 72.0577 7.74767 59.673 14.3584 48.5211C20.9669 37.3666 29.9637 27.7689 41.3446 19.7329C72.881 -2.55457 120.412 -7.68641 153.828 13.2911C122.985 8.38299 75.6808 0.55333 49.9566 29.2191Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+function HeroFloatingLogo({ mark }: { mark: HeroFloatingMark }) {
+  return (
+    <div
+      className={`floating ${mark.colorClass} opacity-70 dark:opacity-45`}
+      style={{
+        width: `${mark.size}px`,
+        height: `${Math.round(mark.size * 0.89)}px`,
+        transform: `rotate(${mark.rotation}deg)`,
+        animationDelay: `${mark.animationDelay}s`,
+        animationDuration: `${mark.animationDuration}s`,
+      }}
+    >
+      <GyralisFloatingMark className="size-full drop-shadow-xl" />
+    </div>
+  )
+}
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50 dark:from-background dark:via-background dark:to-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="floating absolute left-10 top-20 size-8 rounded-full bg-orange-300 opacity-60 dark:opacity-30"></div>
-          <div className="floating absolute left-1/4 top-60 size-4 rounded-full bg-green-300 opacity-60 dark:opacity-30"></div>
-        </div>
+  const [heroFloatingMark, setHeroFloatingMark] =
+    useState<HeroFloatingMark | null>(null)
 
+  useEffect(() => {
+    setHeroFloatingMark(createHeroFloatingMark())
+  }, [])
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-blue-50 to-green-50 dark:from-background dark:via-background dark:to-background">
+      {/* Hero Section */}
+      <div className="relative z-10 overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">
-          <div className="max-w-3xl">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_360px]">
             <motion.div
-              className="space-y-8"
+              className="max-w-3xl space-y-8"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
@@ -42,9 +122,8 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
-                Gyralis helps communities reward real humans for daily
-                participation through score-gated loops and Human Passport
-                verification.
+                Gyralis helps protocols and communities reward verified humans
+                for consistent participation through proof-based loops.
               </motion.p>
 
               <motion.div
@@ -57,7 +136,8 @@ export default function HomePage() {
                   href="/loops"
                   className="tamagotchi-button flex items-center justify-center gap-2 px-8 py-4 text-lg transition-all ease-out"
                 >
-                  Launch Prototype
+                  Enter the Loop
+                  <FaArrowRight className="size-4" aria-hidden="true" />
                 </Link>
                 <Link
                   href="#how-it-works"
@@ -67,6 +147,18 @@ export default function HomePage() {
                 </Link>
               </motion.div>
             </motion.div>
+
+            {heroFloatingMark != null && (
+              <motion.div
+                className="hidden min-h-80 items-center justify-center lg:flex"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                aria-hidden="true"
+              >
+                <HeroFloatingLogo mark={heroFloatingMark} />
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
@@ -74,7 +166,7 @@ export default function HomePage() {
       {/* Why Gyralis Section */}
       <motion.div
         id="why-gyralis"
-        className="mx-auto max-w-6xl px-4 py-16 md:py-24"
+        className="relative z-10 mx-auto max-w-6xl px-4 py-16 md:py-24"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -91,7 +183,7 @@ export default function HomePage() {
             Why Gyralis?
           </h2>
           <p className="font-body text-xl text-gray-600 dark:text-muted-foreground">
-            Built for communities that value real participation
+            A participation layer for human-first protocols.
           </p>
         </motion.div>
 
@@ -99,44 +191,45 @@ export default function HomePage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[
             {
-              icon: FaShieldAlt,
               gradient: "from-orange-400 to-pink-400",
               title: "Turn Rituals into Proofs",
               description:
-                "Convert daily or weekly check-ins into verifiable participation.",
+                "Convert daily check-ins into verifiable participation.",
               delay: 0,
             },
             {
-              icon: FaShieldAlt,
               gradient: "from-blue-400 to-teal-400",
-              title: "Stay Human-First",
-              description:
-                "Identity shields protect privacy while keeping bots out.",
+              title: "Loops that Keep It Human",
+              description: "Keep loops human-first with proof of verification.",
               delay: 0.1,
             },
             {
-              icon: FaUsers,
               gradient: "from-green-400 to-emerald-400",
-              title: "Built for Communities",
+              title: "Built for Protocols & Communities",
               description:
-                "DAOs and guilds can design loops that match their rhythms.",
+                "DAOs and protocols can design loops that match their rhythms.",
               delay: 0.2,
             },
+            // {
+            //   gradient: "from-purple-400 to-indigo-400",
+            //   title: "Frictionless",
+            //   description:
+            //     "Claim and track activity across Ethereum, Gnosis, Optimism, and more.",
+            //   delay: 0.3,
+            // },
             {
-              icon: FaNetworkWired,
-              gradient: "from-purple-400 to-indigo-400",
-              title: "Cross-Chain, Frictionless",
-              description:
-                "Claim and track activity across Ethereum, Gnosis, Optimism, and more.",
-              delay: 0.3,
-            },
-            {
-              icon: FaShieldAlt,
               gradient: "from-yellow-400 to-orange-400",
               title: "Always Transparent",
               description:
                 "Live leaderboards and open metrics show who's really active.",
               delay: 0.4,
+            },
+            {
+              gradient: "from-cyan-400 to-blue-500",
+              title: "Gate Rewards by Eligibility",
+              description:
+                "Make rewards available only to contributors who meet the loop's entry requirements.",
+              delay: 0.5,
             },
           ].map((feature, index) => (
             <motion.div
@@ -153,7 +246,7 @@ export default function HomePage() {
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
               >
-                <feature.icon className="size-7 text-white" />
+                <GyralisFloatingMark className="size-8 text-white" />
               </motion.div>
               <h3 className="mb-2 font-heading text-xl text-gray-800 dark:text-foreground">
                 {feature.title}
@@ -169,7 +262,7 @@ export default function HomePage() {
       {/* How It Works Section */}
       <motion.div
         id="how-it-works"
-        className="mx-auto max-w-6xl px-4 py-16 md:py-24"
+        className="relative z-10 mx-auto max-w-6xl px-4 py-16 md:py-24"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -186,7 +279,7 @@ export default function HomePage() {
             How It Works
           </h2>
           <p className="font-body text-xl text-gray-600 dark:text-muted-foreground">
-            Verify humanity, join eligible loops, and claim daily.
+            Verify humanity, enter eligible loops, and claim daily.
           </p>
         </motion.div>
 
@@ -194,26 +287,25 @@ export default function HomePage() {
         <div className="grid gap-8 md:grid-cols-3">
           {[
             {
-              icon: FaShieldAlt,
-              gradient: "from-blue-400 to-teal-400",
+              icon: PiFingerprintLight,
+              gradient: "from-secondary to-primary",
               number: 1,
               title: "Prove You're Human",
-              description:
-                "Connect your wallet and verify with Human Passport.",
+              description: "Connect your wallet and get verified in GyraHub.",
               direction: -50,
             },
             {
-              icon: FaUsers,
-              gradient: "from-green-400 to-emerald-400",
+              icon: FaDoorOpen,
+              gradient: "from-secondary to-primary",
               number: 2,
-              title: "Join an Eligible Loop",
+              title: "Enter an Eligible Loop",
               description:
-                "Enter loops that match your Human Passport score and meet the requirements to join.",
+                "Enter loops that match your Human Passport score and meet the elegibility requirement to join.",
               direction: 0,
             },
             {
-              icon: FaTrophy,
-              gradient: "from-orange-400 to-pink-400",
+              icon: FaCalendarCheck,
+              gradient: "from-secondary to-primary",
               number: 3,
               title: "Claim Every Day",
               description:
@@ -267,7 +359,7 @@ export default function HomePage() {
       {/* Ecosystem Section */}
       <motion.div
         id="partners"
-        className="mx-auto max-w-6xl px-4 py-16 md:py-24"
+        className="relative z-10 mx-auto max-w-6xl px-4 py-16 md:py-24"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -290,21 +382,21 @@ export default function HomePage() {
             {
               name: "1Hive",
               description:
-                "Community network connected to Gyralis loop eligibility through Gardens.",
+                "Community connected to Gyralis for checking loop eligibility through Gardens.",
               logoUrl: "/1Hive-logo.png",
               delay: 0,
             },
             {
               name: "Blockscout",
               description:
-                "Explorer and Merits integration for checking loop entrance requirements.",
+                "Blockscout community Merits Program integration for checking loop eligibility.",
               logoUrl: "/blockscout-logo.png",
               delay: 0.1,
             },
             {
               name: "Human Passport",
               description:
-                "Human verification and score checks used to keep loop access human-first.",
+                "Verifies humanity and score through GyraHub to keep loop access human-first.",
               logoUrl: "/passport-logo.svg",
               delay: 0.2,
             },
@@ -353,7 +445,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <motion.div
-        className="mx-auto max-w-4xl px-4 py-16 md:py-24"
+        className="relative z-10 mx-auto max-w-4xl px-4 py-16 md:py-24"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -374,7 +466,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Ready to Join the Loop?
+            Ready to Enter the Loop?
           </motion.h2>
           <motion.p
             className="mx-auto max-w-2xl font-body text-xl text-gray-600 dark:text-muted-foreground"
@@ -397,7 +489,8 @@ export default function HomePage() {
               href="/loops"
               className="tamagotchi-button flex items-center justify-center gap-2 px-10 py-5 text-lg transition-all ease-out"
             >
-              Launch Prototype
+              Enter the Loop
+              <FaArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </motion.div>
         </motion.div>
