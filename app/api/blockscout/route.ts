@@ -197,7 +197,11 @@ export async function POST(req: Request) {
     })
     if (!redeemed)
       return NextResponse.json(
-        { success: false, error: "No valid Blockscout redemption found" },
+        {
+          success: false,
+          error:
+            "You’re not eligible yet. Redeem Gyralis rewards in Blockscout.Merits",
+        },
         { status: 403 }
       )
 

@@ -21,6 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import { LoopTypeBadge } from "./loop-type-badge"
+
 interface LoopersModalProps {
   chainId: number
   currentPeriod?: bigint
@@ -179,15 +181,7 @@ export function LoopersModal({
                     <p className="font-heading text-2xl text-foreground">
                       {loopTitle ?? "Loopers"}
                     </p>
-                    <span
-                      className={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                        loopIsSuper
-                          ? "bg-secondary/20 text-orange-200"
-                          : "bg-popover text-popover-foreground"
-                      }`}
-                    >
-                      {loopIsSuper ? "SUPER LOOP" : "LOOP"}
-                    </span>
+                    <LoopTypeBadge isSuper={loopIsSuper} />
                   </div>
                   <p className="font-body text-sm text-muted-foreground">
                     Registered addresses and claim activity by period

@@ -291,7 +291,7 @@ export default function HomePage() {
               name: "1Hive",
               description:
                 "Community network connected to Gyralis loop eligibility through Gardens.",
-              logoUrl: "/gardens-logo.png",
+              logoUrl: "/1Hive-logo.png",
               delay: 0,
             },
             {

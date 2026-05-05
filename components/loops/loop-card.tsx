@@ -7,6 +7,7 @@ import { LoopCardData } from "@/data/loops-data"
 import { LoopBalance } from "./loop-balance"
 import { LoopEligibility, LoopShield } from "./loop-elegibility"
 import { LoopSettings } from "./loop-settings"
+import { LoopTypeBadge } from "./loop-type-badge"
 
 interface LoopCardProps {
   loop: LoopCardData
@@ -33,14 +34,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   Deployed on {loop.chainName}
                 </span>
               </span>
-              <span className="inline-flex shrink-0 rounded-full bg-popover px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-popover-foreground">
-                LOOP
-              </span>
-              {loop.super && (
-                <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-200">
-                  SUPER LOOP
-                </span>
-              )}
+              <LoopTypeBadge isSuper={loop.super} />
             </div>
 
             <div className="mt-7 space-y-5">

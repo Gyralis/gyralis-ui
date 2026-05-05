@@ -151,7 +151,11 @@ export async function POST(req: Request) {
     console.log(`[${requestId}] Membership check result`, { isMember })
     if (!isMember)
       return NextResponse.json(
-        { success: false, error: "Not a member of the community" },
+        {
+          success: false,
+          error:
+            "You’re not eligible yet. Register as a member of the 1Hive community in Gardens.",
+        },
         { status: 403 }
       )
 

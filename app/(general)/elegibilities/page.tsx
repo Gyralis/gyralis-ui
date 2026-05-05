@@ -21,9 +21,9 @@ const eligibilityRequirements = [
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Go to the Gardens and open the 1Hive community. Connect your wallet.",
-      "Click Join and complete membership",
-      "Stake 3 HNY to activate your membership. You can unstake anytime.",
+      "Go to Gardens app, search for 1Hive community and connect your wallet.",
+      "Click Join and complete membership.",
+      "Stake 3 HNY to activate your membership.",
       "Go to Gyralis and register for the next period. Starting next cycle, claim daily rewards.",
     ],
     protocolUrl:
