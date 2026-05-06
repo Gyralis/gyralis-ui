@@ -19,6 +19,17 @@ const BLOCKSCOUT_POINTS_BASE =
   process.env.BLOCKSCOUT_POINTS_BASE ?? "https://points.k8s-dev.blockscout.com"
 const BLOCKSCOUT_OFFER_ID = process.env.BLOCKSCOUT_OFFER_ID ?? "gyralis-offer"
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
+const PASSPORT_SCORE_NOT_SYNCED_ERROR =
+  "Passport score not synced. Open GyraHub to verify your Human Passport score, then enter the loop again."
+const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
+  "Unable to get score for provided scorer."
+
+class PassportScoreNotSyncedError extends Error {
+  constructor() {
+    super(PASSPORT_SCORE_NOT_SYNCED_ERROR)
+    this.name = "PassportScoreNotSyncedError"
+  }
+}
 
 interface PassportScoreResponse {
   score: number
@@ -57,6 +68,13 @@ async function fetchPassportScore(userAddress: string): Promise<number> {
   })
   if (!response.ok) {
     const body = await response.text()
+    if (
+      response.status === 404 ||
+      body.includes(HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR)
+    ) {
+      throw new PassportScoreNotSyncedError()
+    }
+
     throw new Error(
       `Failed to fetch passport score (${response.status}): ${body.slice(
         0,
@@ -186,7 +204,10 @@ export async function POST(req: Request) {
     })
     if (passportScore < THRESHOLD_SCORE)
       return NextResponse.json(
-        { success: false, error: "Passport score below threshold" },
+        {
+          success: false,
+          error: PASSPORT_SCORE_NOT_SYNCED_ERROR,
+        },
         { status: 403 }
       )
 
@@ -225,6 +246,13 @@ export async function POST(req: Request) {
       message: "User is eligible and signature has been generated",
     })
   } catch (error) {
+    if (error instanceof PassportScoreNotSyncedError) {
+      return NextResponse.json(
+        { success: false, error: PASSPORT_SCORE_NOT_SYNCED_ERROR },
+        { status: 403 }
+      )
+    }
+
     console.error(`[${requestId}] API Error`, error)
     return NextResponse.json(
       { success: false, error: "Internal server error" },

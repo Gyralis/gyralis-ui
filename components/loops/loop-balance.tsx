@@ -10,19 +10,27 @@ interface LoopBalanceProps {
   address?: Address
   token?: Address
   chainId: number
+  refreshKey?: number
 }
 
 export const LoopBalance: React.FC<LoopBalanceProps> = ({
   address,
   token,
   chainId,
+  refreshKey = 0,
 }) => {
-  const { data, isLoading, isError } = useBalance({
+  const { data, isLoading, isError, refetch } = useBalance({
     address: address!,
     token: token,
     chainId: chainId,
     // query: { enabled: !!address && !!token },
   })
+
+  useEffect(() => {
+    if (!address || !token) return
+
+    void refetch()
+  }, [address, token, refreshKey, refetch])
 
   if (!address || !token) {
     return <StatusCard message="Waiting for addresses..." />

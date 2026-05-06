@@ -7,9 +7,9 @@ import {
   LuChevronLeft,
   LuChevronRight,
   LuCopy,
-  LuUsers,
 } from "react-icons/lu"
-import { type Address } from "viem"
+import { formatUnits, type Address } from "viem"
+import { useBalance } from "wagmi"
 
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
@@ -30,8 +30,10 @@ interface LoopersModalProps {
   isOpen: boolean
   loopAddress: Address
   loopIsSuper?: boolean
+  loopToken?: Address
   loopTitle?: string
   onOpenChange: (open: boolean) => void
+  refreshKey?: number
 }
 
 interface CopyAddressButtonProps {
@@ -40,6 +42,14 @@ interface CopyAddressButtonProps {
 
 const formatAddress = (address: Address) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`
+
+const formatClaimPayout = (payout: bigint, decimals: number) => {
+  const formatted = formatUnits(payout, decimals)
+  const [whole, fraction = ""] = formatted.split(".")
+  const trimmedFraction = fraction.slice(0, 4).replace(/0+$/, "")
+
+  return trimmedFraction ? `${whole}.${trimmedFraction}` : whole
+}
 
 const formatPeriodLabel = (
   selectedPeriod: bigint | undefined,
@@ -98,8 +108,10 @@ export function LoopersModal({
   isOpen,
   loopAddress,
   loopIsSuper,
+  loopToken,
   loopTitle,
   onOpenChange,
+  refreshKey = 0,
 }: LoopersModalProps) {
   const [periodOffset, setPeriodOffset] = useState(0)
 
@@ -119,12 +131,20 @@ export function LoopersModal({
   }, [currentPeriod, periodOffset])
 
   const { users: registeredUsers, loading: loadingRegisteredUsers } =
-    useRegisteredUsers(loopAddress, chainId, selectedPeriod)
-  const { users: claimedUsers, loading: loadingClaimedUsers } = useClaimedUsers(
-    loopAddress,
+    useRegisteredUsers(loopAddress, chainId, selectedPeriod, refreshKey)
+  const {
+    users: claimedUsers,
+    payouts: claimedPayouts,
+    loading: loadingClaimedUsers,
+  } = useClaimedUsers(loopAddress, chainId, selectedPeriod, refreshKey)
+  const { data: loopBalance } = useBalance({
+    address: loopAddress,
+    token: loopToken,
     chainId,
-    selectedPeriod
-  )
+    query: {
+      enabled: Boolean(loopAddress && loopToken),
+    },
+  })
 
   const claimedUsersSet = useMemo(
     () => new Set(claimedUsers.map((user) => user.toLowerCase())),
@@ -136,8 +156,9 @@ export function LoopersModal({
       registeredUsers.map((address) => ({
         address,
         claimed: claimedUsersSet.has(address.toLowerCase()),
+        payout: claimedPayouts[address.toLowerCase()] ?? 0n,
       })),
-    [claimedUsersSet, registeredUsers]
+    [claimedPayouts, claimedUsersSet, registeredUsers]
   )
 
   const claimedCount = rows.filter((row) => row.claimed).length
@@ -234,7 +255,7 @@ export function LoopersModal({
                 rows.map((row, index) => (
                   <div
                     key={row.address}
-                    className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
+                    className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
                   >
                     <span className="w-6 text-muted-foreground">
                       {index + 1}
@@ -243,6 +264,19 @@ export function LoopersModal({
                       {formatAddress(row.address)}
                     </span>
                     <CopyAddressButton address={row.address} />
+                    <span
+                      className={cn(
+                        "min-w-[6.5rem] text-right text-xs font-semibold",
+                        row.claimed ? "text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      {row.claimed && loopBalance
+                        ? `${formatClaimPayout(
+                            row.payout,
+                            loopBalance.decimals
+                          )} ${loopBalance.symbol}`
+                        : "--"}
+                    </span>
                     <span
                       className={cn(
                         "inline-flex min-w-[6.5rem] items-center justify-center rounded-full px-3 py-2 text-xs font-semibold",

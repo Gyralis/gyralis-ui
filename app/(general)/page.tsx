@@ -141,10 +141,6 @@ export default function HomePage() {
                   Enter the Loop
                   <FaArrowRight className="size-4" aria-hidden="true" />
                 </Link>
-                <HowLoopsWork
-                  triggerLabel="See How It Works"
-                  triggerClassName="tamagotchi-button-secondary flex items-center justify-center gap-2 px-8 py-4 text-lg transition-all ease-out"
-                />
               </motion.div>
             </motion.div>
 
@@ -492,6 +488,10 @@ export default function HomePage() {
               Enter the Loop
               <FaArrowRight className="size-4" aria-hidden="true" />
             </Link>
+            <HowLoopsWork
+              triggerLabel="See How It Works"
+              triggerClassName="tamagotchi-button-secondary flex items-center justify-center gap-2 px-10 py-5 text-lg transition-all ease-out"
+            />
           </motion.div>
         </motion.div>
       </motion.div>

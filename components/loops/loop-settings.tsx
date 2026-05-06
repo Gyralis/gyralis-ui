@@ -24,6 +24,7 @@ interface LoopSettingsComponentProps {
   eligibilityLogoUrl?: string
   isSuper?: boolean
   loopTitle?: string
+  onClaimSuccess?: () => void
 }
 
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
@@ -33,13 +34,15 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   eligibilityLogoUrl,
   isSuper,
   loopTitle,
+  onClaimSuccess,
 }) => {
   const { settings, currentPeriod, isLoading } = useLoopSettings(
     address,
     chainId
   )
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
-  const { data: loopBalance } = useBalance({
+  const [modalRefreshKey, setModalRefreshKey] = useState(0)
+  const { data: loopBalance, refetch: refetchLoopBalance } = useBalance({
     address,
     token: settings?.token,
     chainId,
@@ -94,6 +97,12 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
     ? `${distributionAmountLabel} this period`
     : undefined
 
+  const handleClaimSuccess = () => {
+    void refetchLoopBalance()
+    setModalRefreshKey((key) => key + 1)
+    onClaimSuccess?.()
+  }
+
   return (
     <TooltipProvider>
       <div className="rounded-[1.65rem] border border-border/80 bg-background/35 p-6 md:p-7 lg:p-8">
@@ -142,6 +151,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             address={address}
             chainId={chainId}
             eligibilityProvider={eligibilityProvider}
+            onSuccess={handleClaimSuccess}
           />
         </div>
 
@@ -152,8 +162,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           isOpen={isLoopersModalOpen}
           loopAddress={address}
           loopIsSuper={isSuper}
+          loopToken={settings?.token}
           loopTitle={loopTitle}
           onOpenChange={setIsLoopersModalOpen}
+          refreshKey={modalRefreshKey}
         />
       </div>
     </TooltipProvider>

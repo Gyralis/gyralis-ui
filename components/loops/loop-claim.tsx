@@ -2,9 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { Address } from "viem"
+import { Address, formatUnits } from "viem"
 import {
   useAccount,
+  useBalance,
   useChainId,
   useReadContract,
   useWaitForTransactionReceipt,
@@ -13,6 +14,7 @@ import {
 
 import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import { trimFormattedBalance } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { useToast } from "../ui/use-toast"
@@ -21,6 +23,7 @@ interface LoopClaimProps {
   address: Address
   chainId: number
   eligibilityProvider: LoopEligibilityProvider
+  onSuccess?: () => void
 }
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
@@ -32,9 +35,13 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   address,
   chainId,
   eligibilityProvider,
+  onSuccess,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
+  const [pendingAction, setPendingAction] = useState<"enter" | "claim">("enter")
+  const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
+  const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
   const { address: connectedAccount } = useAccount()
   const currentChainId = useChainId()
   const { toast } = useToast()
@@ -47,7 +54,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     )
   }, [chainId])
 
-  const { refetch: refetchSettings } = useLoopSettings(address, chainId)
+  const { settings, refetch: refetchSettings } = useLoopSettings(
+    address,
+    chainId
+  )
+  const { data: loopBalance } = useBalance({
+    address,
+    token: settings?.token,
+    chainId,
+    query: {
+      enabled: Boolean(address && settings?.token),
+    },
+  })
 
   const { data: claimerStatus, refetch: refetchClaimerStatus } =
     useReadContract({
@@ -102,10 +120,26 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = currentPeriodPayout ?? 0n
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod = isRegistered && !hasClaimed && !isClaimableNow
+  const isEnteredForNextPeriod =
+    hasEnteredNextPeriod || isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod || isLoadingCurrentPeriodPayout
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
   const wrongNetwork = currentChainId !== chainId
+  const claimAmountLabel = loopBalance
+    ? `${trimFormattedBalance(
+        formatUnits(claimableAmount, loopBalance.decimals),
+        4
+      )} ${loopBalance.symbol}`
+    : undefined
+  const claimedAmount = lastClaimedAmount ?? claimableAmount
+  const claimedAmountLabel =
+    loopBalance && claimedAmount > 0n
+      ? `${trimFormattedBalance(
+          formatUnits(claimedAmount, loopBalance.decimals),
+          4
+        )} ${loopBalance.symbol}`
+      : undefined
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -117,11 +151,28 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     })
 
   useEffect(() => {
+    setHasEnteredNextPeriod(false)
+    setLastClaimedAmount(undefined)
+  }, [address, chainId, connectedAccount, currentPeriod])
+
+  useEffect(() => {
     if (!isConfirmed || !txHash) return
 
+    if (pendingAction === "enter") {
+      setHasEnteredNextPeriod(true)
+    } else {
+      setLastClaimedAmount(claimableAmount)
+    }
+
     toast({
-      title: "Transaction confirmed",
-      description: "Claim was confirmed onchain.",
+      title:
+        pendingAction === "enter"
+          ? "Entered the Loop"
+          : "Transaction confirmed",
+      description:
+        pendingAction === "enter"
+          ? "You are registered for the next period claim."
+          : "Claim was confirmed onchain.",
     })
 
     void Promise.all([
@@ -129,16 +180,21 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       refetchSettings(),
       refetchCurrentPeriod(),
       refetchCurrentPeriodPayout(),
-    ])
+    ]).finally(() => {
+      onSuccess?.()
+    })
 
     setTxHash(undefined)
   }, [
     isConfirmed,
     txHash,
+    pendingAction,
     refetchClaimerStatus,
     refetchSettings,
     refetchCurrentPeriod,
     refetchCurrentPeriodPayout,
+    onSuccess,
+    claimableAmount,
     toast,
   ])
 
@@ -194,6 +250,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
+      const nextAction = isClaimableNow ? "claim" : "enter"
+      setPendingAction(nextAction)
+
       const hash = await writeContractAsync({
         address,
         abi: loopAbi,
@@ -205,7 +264,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
       toast({
         title: "Transaction sent",
-        description: "Transaction submitted. Waiting for confirmation...",
+        description: nextAction === "claim"
+          ? "Claim submitted. Waiting for confirmation..."
+          : "Entering the Loop. Waiting for confirmation...",
       })
     } catch (error) {
       toast({
@@ -224,17 +285,21 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     : isConfirming
     ? "Confirming transaction..."
     : hasClaimed
-    ? "Already Claimed"
+    ? "Claimed this period"
     : !isRegistered
-    ? "Register for next period"
-    : isWaitingNextPeriod
-    ? "Claim opens next period"
+    ? hasEnteredNextPeriod
+      ? "Entered - claim next period"
+      : "Enter the Loop"
+    : isEnteredForNextPeriod
+    ? "Entered - claim next period"
     : isLoadingOnchainState
     ? "Checking claim status..."
-    : "Claim now"
+    : claimAmountLabel
+    ? `Claim ${claimAmountLabel}`
+    : "Claim"
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -245,16 +310,23 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             hasClaimed ||
             !isValidLoopAddress ||
             isLoadingOnchainState ||
-            isWaitingNextPeriod)
+            isEnteredForNextPeriod)
         }
         isLoading={isSubmitting || isConfirming}
         className="min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
       >
         {actionLabel}
       </Button>
-      {isWaitingNextPeriod && (
-        <p className="rounded-[1rem] bg-muted/35 px-4 py-2.5 text-center text-xs text-muted-foreground">
-          Registered this period. Claim opens next period.
+      {isEnteredForNextPeriod && (
+        <p className="rounded-[1rem] bg-muted/35 px-4 py-2 text-center text-xs font-medium text-primary">
+          You are registered for the next period claim.
+        </p>
+      )}
+      {hasClaimed && (
+        <p className="rounded-[1rem] bg-muted/35 px-4 py-2 text-center text-xs font-medium text-primary">
+          {claimedAmountLabel
+            ? `Claimed ${claimedAmountLabel} this period. Come back next period.`
+            : "Claimed this period. Come back next period."}
         </p>
       )}
     </div>

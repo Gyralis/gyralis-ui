@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
 import { LoopCardData } from "@/data/loops-data"
 
@@ -20,6 +20,7 @@ interface LoopCardProps {
 
 const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   void onBalanceUpdate
+  const [balanceRefreshKey, setBalanceRefreshKey] = useState(0)
 
   return (
     <div className="tamagotchi-card font-body relative p-7 md:p-8">
@@ -73,6 +74,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address}
             token={loop.token}
             chainId={loop.chainId}
+            refreshKey={balanceRefreshKey}
           />
           <div className="mt-4 grid gap-3 sm:grid-cols-2 ">
             <LoopShield shieldScore={loop.shieldScore} />
@@ -89,6 +91,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             eligibilityLogoUrl={loop.eligibilityLogoUrl}
             isSuper={loop.super}
             loopTitle={loop.title}
+            onClaimSuccess={() => setBalanceRefreshKey((key) => key + 1)}
           />
         </div>
       </div>
