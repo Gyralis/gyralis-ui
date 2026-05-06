@@ -287,7 +287,8 @@ export default function HomePage() {
               gradient: "from-secondary to-primary",
               number: 1,
               title: "Prove You're Human",
-              description: "Connect your wallet and get verified in GyraHub.",
+              description:
+                "Connect your wallet and open GyraHub to get verified.",
               direction: -50,
             },
             {
@@ -296,7 +297,7 @@ export default function HomePage() {
               number: 2,
               title: "Enter an Eligible Loop",
               description:
-                "Enter loops that match your Human Passport score and meet the elegibility requirement to join.",
+                "Enter the loops clycles  if you have human passport score and meet the elegibility requirement to join.",
               direction: 0,
             },
             {

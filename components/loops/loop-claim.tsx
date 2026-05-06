@@ -24,6 +24,7 @@ interface LoopClaimProps {
   chainId: number
   eligibilityProvider: LoopEligibilityProvider
   onSuccess?: () => void
+  onStatusChange?: (status: LoopClaimStatus) => void
 }
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
@@ -31,11 +32,14 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   blockscout: "/api/blockscout",
 }
 
+export type LoopClaimStatus = "default" | "entered" | "claimable" | "claimed"
+
 export const LoopClaim: React.FC<LoopClaimProps> = ({
   address,
   chainId,
   eligibilityProvider,
   onSuccess,
+  onStatusChange,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
@@ -120,8 +124,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = currentPeriodPayout ?? 0n
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod = isRegistered && !hasClaimed && !isClaimableNow
-  const isEnteredForNextPeriod =
-    hasEnteredNextPeriod || isWaitingNextPeriod
+  const isEnteredForNextPeriod = hasEnteredNextPeriod || isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod || isLoadingCurrentPeriodPayout
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
@@ -140,6 +143,13 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           4
         )} ${loopBalance.symbol}`
       : undefined
+  const claimStatus: LoopClaimStatus = hasClaimed
+    ? "claimed"
+    : isEnteredForNextPeriod
+    ? "entered"
+    : isClaimableNow
+    ? "claimable"
+    : "default"
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -154,6 +164,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     setHasEnteredNextPeriod(false)
     setLastClaimedAmount(undefined)
   }, [address, chainId, connectedAccount, currentPeriod])
+
+  useEffect(() => {
+    onStatusChange?.(claimStatus)
+  }, [claimStatus, onStatusChange])
 
   useEffect(() => {
     if (!isConfirmed || !txHash) return
@@ -264,9 +278,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
       toast({
         title: "Transaction sent",
-        description: nextAction === "claim"
-          ? "Claim submitted. Waiting for confirmation..."
-          : "Entering the Loop. Waiting for confirmation...",
+        description:
+          nextAction === "claim"
+            ? "Claim submitted. Waiting for confirmation..."
+            : "Entering the Loop. Waiting for confirmation...",
       })
     } catch (error) {
       toast({
@@ -281,9 +296,15 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   }
 
   const actionLabel = isSubmitting
-    ? "Submitting transaction..."
+    ? isClaimableNow && claimAmountLabel
+      ? `Claiming ${claimAmountLabel}...`
+      : isClaimableNow
+      ? "Claiming..."
+      : "Entering the Loop..."
     : isConfirming
-    ? "Confirming transaction..."
+    ? pendingAction === "claim"
+      ? "Confirming claim..."
+      : "Confirming entry..."
     : hasClaimed
     ? "Claimed this period"
     : !isRegistered
@@ -299,7 +320,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     : "Claim"
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 border2 ">
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -318,12 +339,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         {actionLabel}
       </Button>
       {isEnteredForNextPeriod && (
-        <p className="rounded-[1rem] bg-muted/35 px-4 py-2 text-center text-xs font-medium text-primary">
+        <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
           You are registered for the next period claim.
         </p>
       )}
       {hasClaimed && (
-        <p className="rounded-[1rem] bg-muted/35 px-4 py-2 text-center text-xs font-medium text-primary">
+        <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
           {claimedAmountLabel
             ? `Claimed ${claimedAmountLabel} this period. Come back next period.`
             : "Claimed this period. Come back next period."}

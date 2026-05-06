@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
@@ -14,7 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { LoopClaim } from "@/components/loops/loop-claim"
+import { LoopClaim, LoopClaimStatus } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
 
 interface LoopSettingsComponentProps {
@@ -42,6 +42,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   )
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
+  const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
   const { data: loopBalance, refetch: refetchLoopBalance } = useBalance({
     address,
     token: settings?.token,
@@ -97,11 +98,28 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
     ? `${distributionAmountLabel} this period`
     : undefined
 
+  const timerTitle = useMemo(() => {
+    switch (claimStatus) {
+      case "entered":
+        return "Claim opens in"
+      case "claimable":
+        return "Claim period ends in"
+      case "claimed":
+        return "Next claim opens in"
+      default:
+        return "Current period ends in"
+    }
+  }, [claimStatus])
+
   const handleClaimSuccess = () => {
     void refetchLoopBalance()
     setModalRefreshKey((key) => key + 1)
     onClaimSuccess?.()
   }
+
+  const handleClaimStatusChange = useCallback((status: LoopClaimStatus) => {
+    setClaimStatus(status)
+  }, [])
 
   return (
     <TooltipProvider>
@@ -122,8 +140,8 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
 
         <div className="relative mt-6">
           <div className="text-center">
-            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Next Distribution
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+              {timerTitle}
             </p>
           </div>
 
@@ -151,6 +169,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             address={address}
             chainId={chainId}
             eligibilityProvider={eligibilityProvider}
+            onStatusChange={handleClaimStatusChange}
             onSuccess={handleClaimSuccess}
           />
         </div>

@@ -9,8 +9,9 @@ import {
   LuCopy,
 } from "react-icons/lu"
 import { formatUnits, type Address } from "viem"
-import { useBalance } from "wagmi"
+import { useBalance, useReadContract } from "wagmi"
 
+import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
@@ -121,6 +122,13 @@ export function LoopersModal({
     }
   }, [isOpen])
 
+  const loopAbi = useMemo(
+    () =>
+      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
+        ?.abi ?? [],
+    [chainId]
+  )
+
   const selectedPeriod = useMemo(() => {
     if (currentPeriod == null) {
       return undefined
@@ -145,6 +153,16 @@ export function LoopersModal({
       enabled: Boolean(loopAddress && loopToken),
     },
   })
+  const { data: selectedPeriodPayout } = useReadContract({
+    address: loopAddress,
+    abi: loopAbi,
+    functionName: "getPeriodIndividualPayout",
+    args: [selectedPeriod ?? 0n],
+    chainId,
+    query: {
+      enabled: selectedPeriod != null,
+    },
+  })
 
   const claimedUsersSet = useMemo(
     () => new Set(claimedUsers.map((user) => user.toLowerCase())),
@@ -156,9 +174,12 @@ export function LoopersModal({
       registeredUsers.map((address) => ({
         address,
         claimed: claimedUsersSet.has(address.toLowerCase()),
-        payout: claimedPayouts[address.toLowerCase()] ?? 0n,
+        payout:
+          claimedPayouts[address.toLowerCase()] ??
+          selectedPeriodPayout ??
+          0n,
       })),
-    [claimedPayouts, claimedUsersSet, registeredUsers]
+    [claimedPayouts, claimedUsersSet, registeredUsers, selectedPeriodPayout]
   )
 
   const claimedCount = rows.filter((row) => row.claimed).length
@@ -270,7 +291,7 @@ export function LoopersModal({
                         row.claimed ? "text-primary" : "text-muted-foreground"
                       )}
                     >
-                      {row.claimed && loopBalance
+                      {loopBalance
                         ? `${formatClaimPayout(
                             row.payout,
                             loopBalance.decimals
