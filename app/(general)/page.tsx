@@ -199,8 +199,8 @@ export default function HomePage() {
             },
             {
               gradient: "from-blue-400 to-teal-400",
-              title: "Loops that Keep It Human",
-              description: "Keep loops human-first with proof of verification.",
+              title: "Loops Keep It Human",
+              description: "Loops are human-first proof of personhood.",
               delay: 0.1,
             },
             {

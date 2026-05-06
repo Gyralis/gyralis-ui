@@ -15,6 +15,7 @@ type ButtonProps = {
   icon?: React.ReactNode
   style?: React.CSSProperties
   chainId?: number
+  requireWallet?: boolean
 }
 
 export function Button({
@@ -28,6 +29,7 @@ export function Button({
   type = "button",
   style,
   chainId,
+  requireWallet = true,
 }: ButtonProps) {
   const { isConnected } = useAccount()
   const currentChainId = useChainId()
@@ -44,9 +46,9 @@ export function Button({
     variant === "primary" ? "tamagotchi-button" : "tamagotchi-button-secondary"
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isConnected) return
+    if (requireWallet && !isConnected) return
 
-    if (wrongNetwork && targetChain && switchChain) {
+    if (requireWallet && wrongNetwork && targetChain && switchChain) {
       // Call switchChain without await or .catch()
       switchChain({ chainId: targetChain.id })
       return
@@ -61,27 +63,35 @@ export function Button({
     ? `Switch to ${targetChain.name}`
     : children
 
-  const showTooltip = !isConnected ? "tooltip tooltip-bottom" : ""
+  const effectiveButtonLabel = !requireWallet
+    ? children
+    : buttonLabel
+
+  const showTooltip = requireWallet && !isConnected ? "tooltip tooltip-bottom" : ""
+  const isDisabled = disabled || isLoading || (requireWallet && !isConnected)
+  const ariaDisabled = isDisabled ? "true" : "false"
 
   return (
     <div
       className={showTooltip}
-      data-tip={!isConnected ? "Connect wallet" : ""}
+      data-tip={requireWallet && !isConnected ? "Connect wallet" : ""}
     >
       <button
         type={type}
         className={`${baseClass} flex items-center justify-center gap-2 transition-all ease-out disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
         onClick={handleClick}
-        disabled={disabled || isLoading || !isConnected}
+        disabled={isDisabled}
         style={style}
-        aria-disabled={disabled || isLoading || !isConnected ? "true" : "false"}
-        aria-label={typeof buttonLabel === "string" ? buttonLabel : ""}
+        aria-disabled={ariaDisabled}
+        aria-label={
+          typeof effectiveButtonLabel === "string" ? effectiveButtonLabel : ""
+        }
       >
         {isLoading && (
           <span className="loading loading-spinner loading-sm text-inherit" />
         )}
         {icon && !isLoading && icon}
-        {buttonLabel}
+        {effectiveButtonLabel}
       </button>
     </div>
   )

@@ -24,7 +24,7 @@ const eligibilityRequirements = [
       "Go to Gardens app, search for 1Hive community and connect your wallet.",
       "Click Join and complete membership.",
       "Stake 3 HNY to activate your membership.",
-      "Go to Gyralis and register for the next period. Starting next cycle, claim daily rewards.",
+      "Go to Gyralis and enter the 1Hive loop. Claim daily rewards.",
     ],
     protocolUrl:
       "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
@@ -46,7 +46,7 @@ const eligibilityRequirements = [
       "Go to the Blockscout Merits Explorer and connect your wallet.You’ll receive 100 Merits.",
       "Open the Spend Merits tab and find the Gyralis Loop Rewards.",
       "Redeem the offer for 50 Merits.",
-      "Go to Gyralis and register for the next period. Starting next cycle, claim daily rewards.",
+      "Go to Gyralis and enter the Blockscout Merits loop. Claim daily rewards.",
     ],
     protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=spend",
     coverUrl: "/blockscout-cover.png",
@@ -169,7 +169,7 @@ export default function ElegibilityPage() {
             </p>
 
             <p>
-              • Elegibilities are checked every time you attempt to register or
+              • Elegibilities are checked every time you attempt to enter or
               claim.
             </p>
           </div>

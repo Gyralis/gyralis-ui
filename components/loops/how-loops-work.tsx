@@ -1,110 +1,164 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import type { ComponentType } from "react"
 import { motion } from "framer-motion"
 import {
-  FaArrowRight,
   FaCalendarCheck,
-  FaCheck,
   FaDoorOpen,
   FaExclamationTriangle,
-  FaRedo,
-  FaShieldAlt,
 } from "react-icons/fa"
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Modal, useModal } from "@/components/ui/modal"
 
-type StepId =
-  | "shield"
-  | "enter"
-  | "claim-window"
-  | "continue"
+type FlowState =
+  | "ready-to-enter"
+  | "ready-to-claim"
+  | "claimed"
   | "missed"
-  | "enter-again"
-  | "claim-next"
+  | "ready-to-claim-after-miss"
 
-type LoopStep = {
-  id: StepId
+type PeriodCard = {
+  label: "Previous Period" | "Current Period" | "Next Period"
   title: string
   description: string
-  icon: React.ComponentType<{ className?: string }>
-  tone?: "primary" | "warning" | "success"
+  tone: "muted" | "primary" | "success" | "warning"
+  icon: ComponentType<{ className?: string }>
 }
 
-const stepById: Record<StepId, LoopStep> = {
-  shield: {
-    id: "shield",
-    title: "Pass the Shield",
-    description:
-      "Start verified in GyraHub with enough Human Passport score for this loop.",
-    icon: FaShieldAlt,
-  },
-  enter: {
-    id: "enter",
-    title: "Enter",
-    description:
-      "Entering now registers you for the next 24-hour period, not the current one.",
-    icon: FaDoorOpen,
-  },
-  "claim-window": {
-    id: "claim-window",
-    title: "Claim Window",
-    description:
-      "When that next period starts, you are entered in the current period and can claim.",
-    icon: FaCalendarCheck,
-  },
-  continue: {
-    id: "continue",
-    title: "Continue",
-    description:
-      "Claiming automatically enters you into the following period, keeping you in the rhythm.",
-    icon: FaRedo,
-    tone: "success",
-  },
-  missed: {
-    id: "missed",
-    title: "Missed Claim",
-    description:
-      "If you miss your claim period, you are not carried forward automatically.",
-    icon: FaExclamationTriangle,
-    tone: "warning",
-  },
-  "enter-again": {
-    id: "enter-again",
-    title: "Enter Again",
-    description:
-      "Enter again to register for the next 24-hour period.",
-    icon: FaDoorOpen,
-    tone: "warning",
-  },
-  "claim-next": {
-    id: "claim-next",
-    title: "Claim Next Period",
-    description:
-      "When that period starts, you can claim again and continue from there.",
-    icon: FaCalendarCheck,
-    tone: "warning",
-  },
+const periodContent: Record<FlowState, PeriodCard[]> = {
+  "ready-to-enter": [
+    {
+      label: "Previous Period",
+      title: "No claim available",
+      description:
+        "Claims come from a period where you were already entered.",
+      tone: "muted",
+      icon: FaCalendarCheck,
+    },
+    {
+      label: "Current Period",
+      title: "Enter the Loop",
+      description:
+        "The loop checks your Human Passport score through the shield and registers you for the next period.",
+      tone: "primary",
+      icon: FaDoorOpen,
+    },
+    {
+      label: "Next Period",
+      title: "Your entry lands here",
+      description:
+        "Entering now never applies to the current period. It prepares your claim for the next 24-hour period.",
+      tone: "muted",
+      icon: FaCalendarCheck,
+    },
+  ],
+  "ready-to-claim": [
+    {
+      label: "Previous Period",
+      title: "You entered",
+      description:
+        "The period where you entered moved into the past, making the current period claimable.",
+      tone: "success",
+      icon: FaDoorOpen,
+    },
+    {
+      label: "Current Period",
+      title: "Claim now",
+      description:
+        "You can claim because you were entered for this period before it started.",
+      tone: "primary",
+      icon: FaCalendarCheck,
+    },
+    {
+      label: "Next Period",
+      title: "Not entered yet",
+      description:
+        "Claiming now will automatically enter you for the following period.",
+      tone: "muted",
+      icon: FaCalendarCheck,
+    },
+  ],
+  claimed: [
+    {
+      label: "Previous Period",
+      title: "Claim completed",
+      description:
+        "The last current period moved back after you claimed its distribution.",
+      tone: "success",
+      icon: FaCalendarCheck,
+    },
+    {
+      label: "Current Period",
+      title: "Claim now",
+      description:
+        "Your automatic entry is now current, so you can claim again in this period.",
+      tone: "primary",
+      icon: FaCalendarCheck,
+    },
+    {
+      label: "Next Period",
+      title: "Claiming enters next",
+      description:
+        "Each successful claim keeps the loop going by entering the following period.",
+      tone: "muted",
+      icon: FaDoorOpen,
+    },
+  ],
+  missed: [
+    {
+      label: "Previous Period",
+      title: "Claim missed",
+      description:
+        "The claimable period passed without a claim, so the automatic entry did not happen.",
+      tone: "warning",
+      icon: FaExclamationTriangle,
+    },
+    {
+      label: "Current Period",
+      title: "Enter again",
+      description:
+        "You need to enter again. That entry will apply to the next period, not this one.",
+      tone: "primary",
+      icon: FaDoorOpen,
+    },
+    {
+      label: "Next Period",
+      title: "Waiting for entry",
+      description:
+        "After entering again, this becomes the period where you can claim.",
+      tone: "muted",
+      icon: FaCalendarCheck,
+    },
+  ],
+  "ready-to-claim-after-miss": [
+    {
+      label: "Previous Period",
+      title: "You re-entered",
+      description:
+        "The recovery entry moved into the previous period as time advanced.",
+      tone: "success",
+      icon: FaDoorOpen,
+    },
+    {
+      label: "Current Period",
+      title: "Claim now",
+      description:
+        "You are claimable again because you entered before this period started.",
+      tone: "primary",
+      icon: FaCalendarCheck,
+    },
+    {
+      label: "Next Period",
+      title: "Claim continues the loop",
+      description:
+        "Claiming now will enter you automatically for the following period.",
+      tone: "muted",
+      icon: FaDoorOpen,
+    },
+  ],
 }
-
-const initialPath: StepId[] = ["shield", "enter", "claim-window"]
-const claimPath: StepId[] = ["shield", "enter", "claim-window", "continue"]
-const missedPath: StepId[] = [
-  "shield",
-  "enter",
-  "claim-window",
-  "missed",
-  "enter-again",
-  "claim-next",
-  "continue",
-]
 
 export function HowLoopsWork({
   triggerLabel = "See How Loops Work",
@@ -113,225 +167,214 @@ export function HowLoopsWork({
   triggerLabel?: string
   triggerClassName?: string
 }) {
-  const [activeStep, setActiveStep] = useState<StepId>("shield")
-  const [path, setPath] = useState<StepId[]>(initialPath)
-  const [completedSteps, setCompletedSteps] = useState<StepId[]>([])
+  const { isOpen, openModal, closeModal } = useModal()
+  const [flowState, setFlowState] = useState<FlowState>("ready-to-enter")
   const [isSimulating, setIsSimulating] = useState(false)
+  const [simulationMessage, setSimulationMessage] = useState<string>()
+  const simulationTimers = useRef<number[]>([])
 
   useEffect(() => {
-    return () => setIsSimulating(false)
+    return () => {
+      simulationTimers.current.forEach((timer) => window.clearTimeout(timer))
+    }
   }, [])
 
-  const activeIndex = path.indexOf(activeStep)
-  const isFinished =
-    activeStep === "continue" && completedSteps.includes("continue")
-
-  const steps = useMemo(() => path.map((stepId) => stepById[stepId]), [path])
-
-  const advanceTo = (nextStep: StepId, nextPath = path) => {
+  const runSimulation = (
+    messages: string[],
+    nextState: FlowState,
+    delay = 750
+  ) => {
     if (isSimulating) return
 
     setIsSimulating(true)
-    window.setTimeout(() => {
-      setPath(nextPath)
-      setCompletedSteps((current) =>
-        current.includes(activeStep) ? current : [...current, activeStep]
-      )
-      setActiveStep(nextStep)
-      setIsSimulating(false)
-    }, 1500)
-  }
+    setSimulationMessage(messages[0])
+    simulationTimers.current.forEach((timer) => window.clearTimeout(timer))
 
-  const resetSimulation = () => {
-    setPath(initialPath)
-    setActiveStep("shield")
-    setCompletedSteps([])
-    setIsSimulating(false)
+    const timers = messages.slice(1).map((message, index) =>
+      window.setTimeout(() => setSimulationMessage(message), delay * (index + 1))
+    )
+
+    const finalTimer = window.setTimeout(() => {
+      setFlowState(nextState)
+      setIsSimulating(false)
+      setSimulationMessage(undefined)
+    }, delay * messages.length)
+
+    simulationTimers.current = [...timers, finalTimer]
   }
 
   const handlePrimaryAction = () => {
-    if (activeStep === "shield") {
-      advanceTo("enter")
+    if (flowState === "ready-to-enter") {
+      runSimulation(
+        [
+          "Checking the Human Passport shield...",
+          "Registering your entry for the next period...",
+          "The next 24-hour period is now current.",
+        ],
+        "ready-to-claim"
+      )
       return
     }
 
-    if (activeStep === "enter") {
-      advanceTo("claim-window")
+    if (
+      flowState === "ready-to-claim" ||
+      flowState === "ready-to-claim-after-miss" ||
+      flowState === "claimed"
+    ) {
+      runSimulation(
+        [
+          "Claiming the current period reward...",
+          "Entering you automatically for the next period...",
+          "The next 24-hour period is now current.",
+        ],
+        "claimed"
+      )
       return
     }
 
-    if (activeStep === "claim-window") {
-      advanceTo("continue", claimPath)
-      return
-    }
-
-    if (activeStep === "missed") {
-      advanceTo("enter-again", missedPath)
-      return
-    }
-
-    if (activeStep === "enter-again") {
-      advanceTo("claim-next", missedPath)
-      return
-    }
-
-    if (activeStep === "claim-next") {
-      advanceTo("continue", missedPath)
-      return
-    }
-
-    if (activeStep === "continue") {
-      setCompletedSteps((current) =>
-        current.includes("continue") ? current : [...current, "continue"]
+    if (flowState === "missed") {
+      runSimulation(
+        [
+          "Checking the loop shield again...",
+          "Registering your new entry for the next period...",
+          "The next 24-hour period is now current.",
+        ],
+        "ready-to-claim-after-miss"
       )
     }
   }
 
   const handleMissClaim = () => {
-    advanceTo("missed", missedPath)
+    runSimulation(
+      [
+        "Letting the claim window pass...",
+        "Automatic entry stops because no claim happened.",
+      ],
+      "missed"
+    )
+  }
+
+  const resetSimulation = () => {
+    simulationTimers.current.forEach((timer) => window.clearTimeout(timer))
+    simulationTimers.current = []
+    setFlowState("ready-to-enter")
+    setIsSimulating(false)
+    setSimulationMessage(undefined)
+  }
+
+  const handleClose = () => {
+    closeModal()
+    resetSimulation()
   }
 
   return (
-    <Dialog
-      onOpenChange={(open) => {
-        if (!open) resetSimulation()
-      }}
-    >
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className={
-            triggerClassName ??
-            "inline-flex items-center justify-center rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          }
-        >
-          {triggerLabel}
-        </button>
-      </DialogTrigger>
-      <DialogContent className="h-auto max-h-[82vh] w-[98vw] max-w-[92rem] overflow-y-auto rounded-[1.25rem] p-6 sm:p-7">
-        <DialogHeader>
-          <DialogTitle className="font-heading text-2xl">
-            How Loops Work
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-6">
-            Click through the route to see how entering, claiming, and missing a
-            claim change what happens next.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm font-semibold text-foreground">
-          <div className="flex flex-wrap items-center gap-2">
-            <span>Enter now</span>
-            <FaArrowRight className="size-3 text-primary" aria-hidden="true" />
-            <span>claim next period</span>
-            <FaArrowRight className="size-3 text-primary" aria-hidden="true" />
-            <span>claiming enters the following period</span>
-          </div>
+    <>
+      <Button
+        onClick={openModal}
+        requireWallet={false}
+        variant="secondary"
+        className={
+          triggerClassName ??
+          "rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-semibold text-foreground hover:border-primary hover:text-primary"
+        }
+      >
+        {triggerLabel}
+      </Button>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        size="full"
+        title="How Loops Work"
+        description="Enter now, claim in the next period, then claiming enters you for the following period."
+        className="h-auto max-h-[78vh] gap-3 overflow-y-auto rounded-[1.25rem] p-5 font-body sm:p-6 lg:w-[50vw] lg:max-w-[50vw]"
+        contentClassName="space-y-4 py-0"
+        headerClassName="pr-8"
+      >
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-foreground">
+          You need to be verified in GyraHub and have enough Human Passport
+          score to pass the loop shield. After that, loops work by periods:
+          entering always prepares the next period, while claiming happens only
+          once that entered period becomes current.
         </div>
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <InteractivePath
-            activeIndex={activeIndex}
-            activeStep={activeStep}
-            completedSteps={completedSteps}
+          <PeriodTimeline
+            flowState={flowState}
             isSimulating={isSimulating}
-            steps={steps}
           />
 
           <ActionPanel
-            activeStep={stepById[activeStep]}
-            isFinished={isFinished}
+            flowState={flowState}
             isSimulating={isSimulating}
             onMissClaim={handleMissClaim}
             onPrimaryAction={handlePrimaryAction}
             onReset={resetSimulation}
+            simulationMessage={simulationMessage}
           />
         </div>
 
         <div className="rounded-2xl bg-muted/60 p-4 text-sm leading-6 text-muted-foreground">
-          A loop needs entries before claims because each period&apos;s rewards
-          are split among the users registered for that period. Entering first
-          makes the next period&apos;s distribution predictable and fair.
+          This delay keeps distribution fair. The current period&apos;s claim is
+          based on who was already entered before it started, so rewards can be
+          split predictably among eligible humans.
         </div>
-      </DialogContent>
-    </Dialog>
+      </Modal>
+    </>
   )
 }
 
-function InteractivePath({
-  activeIndex,
-  activeStep,
-  completedSteps,
+function PeriodTimeline({
+  flowState,
   isSimulating,
-  steps,
 }: {
-  activeIndex: number
-  activeStep: StepId
-  completedSteps: StepId[]
+  flowState: FlowState
   isSimulating: boolean
-  steps: LoopStep[]
 }) {
-  const progress =
-    steps.length > 1 ? Math.max(0, activeIndex) / (steps.length - 1) : 0
-
   return (
-    <div className="relative rounded-2xl border border-border/70 bg-background/70 p-4">
-      <div className="absolute left-9 top-10 h-[calc(100%-5rem)] w-0.5 bg-border">
-        <motion.div
-          className="w-full bg-gradient-to-b from-primary via-secondary to-green-400"
-          animate={{ height: `${progress * 100}%` }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-        />
-      </div>
-
-      <div className="space-y-4">
-        {steps.map((step, index) => {
-          const isActive = step.id === activeStep
-          const isComplete = completedSteps.includes(step.id)
-          const isPending = index > activeIndex
-          const isWarning = step.tone === "warning"
-          const Icon = step.icon
+    <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+      <div className="grid gap-3">
+        {periodContent[flowState].map((period, index) => {
+          const Icon = period.icon
+          const isActive = period.tone === "primary"
 
           return (
             <motion.div
-              key={step.id}
-              className={`relative flex gap-4 rounded-2xl border p-4 transition-colors ${
-                isActive
-                  ? "border-primary bg-primary/5"
-                  : isComplete
-                  ? "border-green-400/40 bg-green-400/5"
-                  : "border-border/70 bg-background/85"
-              } ${isPending ? "opacity-60" : ""}`}
+              key={`${flowState}-${period.label}`}
+              layout
+              className={`rounded-2xl border p-4 transition-colors ${getPeriodClass(
+                period.tone
+              )}`}
+              initial={{ opacity: 0, y: 8 }}
               animate={{
-                scale: isActive && !isSimulating ? 1.02 : 1,
+                opacity: 1,
+                y: isSimulating && isActive ? [0, -4, 0] : 0,
+                scale: isActive ? 1.01 : 1,
               }}
-              transition={{ duration: 0.25 }}
+              transition={{
+                delay: index * 0.05,
+                duration: 0.25,
+                y: { repeat: isSimulating && isActive ? Infinity : 0 },
+              }}
             >
-              <div
-                className={`relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full shadow-md ${
-                  isComplete
-                    ? "bg-green-500 text-white"
-                    : isWarning
-                    ? "bg-amber-500 text-white"
-                    : "bg-primary text-primary-foreground"
-                }`}
-              >
-                {isComplete ? (
-                  <FaCheck className="size-4" />
-                ) : (
-                  <Icon className="size-4" />
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  {isActive ? "Current step" : `Step ${index + 1}`}
-                </p>
-                <h3 className="mt-1 font-heading text-lg text-foreground">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {step.description}
-                </p>
+              <div className="flex items-start gap-4">
+                <div
+                  className={`flex size-11 shrink-0 items-center justify-center rounded-full ${getIconClass(
+                    period.tone
+                  )}`}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    {period.label}
+                  </p>
+                  <h3 className="mt-1 font-heading text-lg text-foreground">
+                    {period.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {period.description}
+                  </p>
+                </div>
               </div>
             </motion.div>
           )
@@ -342,118 +385,140 @@ function InteractivePath({
 }
 
 function ActionPanel({
-  activeStep,
-  isFinished,
+  flowState,
   isSimulating,
   onMissClaim,
   onPrimaryAction,
   onReset,
+  simulationMessage,
 }: {
-  activeStep: LoopStep
-  isFinished: boolean
+  flowState: FlowState
   isSimulating: boolean
   onMissClaim: () => void
   onPrimaryAction: () => void
   onReset: () => void
+  simulationMessage?: string
 }) {
-  const primaryLabel = getPrimaryLabel(activeStep.id, isFinished)
+  const canMissClaim =
+    flowState === "ready-to-claim" ||
+    flowState === "ready-to-claim-after-miss" ||
+    flowState === "claimed"
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-background/85 p-5">
+    <div className="rounded-2xl border border-border/70 bg-background/85 p-5 lg:self-start">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
         Try it
       </p>
       <h3 className="mt-2 font-heading text-xl text-foreground">
-        {activeStep.title}
+        {getPanelTitle(flowState)}
       </h3>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
         {isSimulating
-          ? "Simulating the next period action..."
-          : getActionCopy(activeStep.id, isFinished)}
+          ? simulationMessage ?? "Updating the period state..."
+          : getPanelCopy(flowState)}
       </p>
 
       <div className="mt-5 space-y-3">
-        <button
-          type="button"
-          onClick={isFinished ? onReset : onPrimaryAction}
+        <Button
+          onClick={onPrimaryAction}
+          requireWallet={false}
           disabled={isSimulating}
-          className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          isLoading={isSimulating}
+          className="w-full rounded-full px-4 py-3 text-sm font-semibold"
         >
-          {isSimulating ? (
-            <span className="inline-flex items-center gap-2">
-              <span className="size-3 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" />
-              Loading...
-            </span>
-          ) : (
-            primaryLabel
-          )}
-        </button>
+          {isSimulating
+            ? simulationMessage ?? "Loading..."
+            : getPrimaryLabel(flowState)}
+        </Button>
 
-        {activeStep.id === "claim-window" && !isSimulating ? (
-          <button
-            type="button"
+        {canMissClaim && !isSimulating ? (
+          <Button
             onClick={onMissClaim}
-            className="inline-flex w-full items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-400/20 dark:text-amber-300"
+            requireWallet={false}
+            variant="secondary"
+            className="w-full rounded-full border border-amber-400/70 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-700 hover:bg-amber-400/20 dark:text-amber-300"
           >
             Miss claim
-          </button>
+          </Button>
         ) : null}
 
-        {!isFinished ? (
-          <button
-            type="button"
-            onClick={onReset}
-            disabled={isSimulating}
-            className="inline-flex w-full items-center justify-center rounded-full border border-border/70 px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            Restart route
-          </button>
-        ) : null}
+        <Button
+          onClick={onReset}
+          requireWallet={false}
+          variant="secondary"
+          disabled={isSimulating}
+          className="w-full rounded-full border border-border/70 px-4 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground"
+        >
+          Restart route
+        </Button>
       </div>
     </div>
   )
 }
 
-function getPrimaryLabel(stepId: StepId, isFinished: boolean) {
-  if (isFinished) return "Restart route"
-
-  switch (stepId) {
-    case "shield":
-      return "Pass shield"
-    case "enter":
-      return "Enter loop"
-    case "claim-window":
-      return "Claim"
+function getPrimaryLabel(flowState: FlowState) {
+  switch (flowState) {
+    case "ready-to-enter":
+      return "Enter the Loop"
+    case "ready-to-claim":
+    case "ready-to-claim-after-miss":
+    case "claimed":
+      return "Claim now"
     case "missed":
       return "Enter again"
-    case "enter-again":
-      return "Wait for next period"
-    case "claim-next":
-      return "Claim next period"
-    case "continue":
-      return "Complete route"
   }
 }
 
-function getActionCopy(stepId: StepId, isFinished: boolean) {
-  if (isFinished) {
-    return "You completed the route. Claiming keeps the loop going by entering you into the following period."
-  }
-
-  switch (stepId) {
-    case "shield":
-      return "Start by passing the loop shield with your GyraHub verification and Passport score."
-    case "enter":
-      return "Now enter the loop. Your entry will count for the next 24-hour period."
-    case "claim-window":
-      return "The next period has started. You can claim now, or see what happens if you miss it."
+function getPanelTitle(flowState: FlowState) {
+  switch (flowState) {
+    case "ready-to-enter":
+      return "Start by entering"
+    case "ready-to-claim":
+    case "ready-to-claim-after-miss":
+    case "claimed":
+      return "Current period is claimable"
     case "missed":
-      return "You missed the claim period, so the automatic continuation stopped."
-    case "enter-again":
-      return "Enter again to register for the next period."
-    case "claim-next":
-      return "That period is now active. Claim to continue the loop rhythm."
-    case "continue":
-      return "You claimed successfully and were entered into the following period."
+      return "Missed claim recovery"
+  }
+}
+
+function getPanelCopy(flowState: FlowState) {
+  switch (flowState) {
+    case "ready-to-enter":
+      return "Click enter to pass the shield and register for the next 24-hour period."
+    case "ready-to-claim":
+      return "The entered period is now current. Claim now to receive rewards and enter the following period."
+    case "ready-to-claim-after-miss":
+      return "After re-entering, the next period is now current and claimable again."
+    case "missed":
+      return "Missing the claim means you are not automatically entered. Enter again to recover."
+    case "claimed":
+      return "You claimed successfully. The automatic entry has rolled forward into another claimable current period."
+  }
+}
+
+function getPeriodClass(tone: PeriodCard["tone"]) {
+  switch (tone) {
+    case "primary":
+      return "border-primary bg-primary/5"
+    case "success":
+      return "border-green-400/40 bg-green-400/5"
+    case "warning":
+      return "border-amber-400/50 bg-amber-400/10"
+    case "muted":
+      return "border-border/70 bg-background/85"
+  }
+}
+
+function getIconClass(tone: PeriodCard["tone"]) {
+  switch (tone) {
+    case "primary":
+      return "bg-primary text-primary-foreground"
+    case "success":
+      return "bg-green-500 text-white"
+    case "warning":
+      return "bg-amber-500 text-white"
+    case "muted":
+      return "bg-muted text-muted-foreground"
   }
 }
