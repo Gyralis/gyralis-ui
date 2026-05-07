@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
 
 import { LoopBalance } from "./loop-balance"
@@ -55,9 +56,17 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   {loop.title}
                 </h2>
               </div>
-              <p className="max-w-[34ch] text-base  text-muted-foreground">
-                {loop.description}
-              </p>
+              <div className="max-w-[34ch] space-y-1.5">
+                <p className="text-base text-muted-foreground">
+                  {loop.description}
+                </p>
+                <Link
+                  href="/elegibilities"
+                  className="inline-flex text-sm font-semibold text-secondary-foreground/90 transition-colors hover:text-secondary-foreground"
+                >
+                  How to be eligible →
+                </Link>
+              </div>
             </div>
           </div>
 

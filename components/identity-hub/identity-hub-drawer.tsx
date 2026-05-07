@@ -264,7 +264,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary:
             "Identity reputation powered by wallet-linked verifications.",
           status: "disconnected" as const,
@@ -281,7 +281,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "Submitting your wallet for Passport scoring.",
           status: "loading" as const,
           statusLabel: "Submitting...",
@@ -297,7 +297,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "You have been submitted.",
           status: "verified" as const,
           statusLabel: "Submitted",
@@ -317,7 +317,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "Fetching your latest Human Passport data.",
           status: "loading" as const,
           onAction: null,
@@ -334,7 +334,7 @@ export const IdentityHubDrawer = ({
         return [
           {
             id: "passport",
-            title: "Gitcoin Passport",
+            title: "Human Passport",
             summary: "Your Passport score is not available yet.",
             status: "action-needed" as const,
             statusLabel: "Ready to submit",
@@ -349,7 +349,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "We could not load the Passport status.",
           status: "error" as const,
           details: errorMessage,
@@ -364,7 +364,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "A score is not available yet for this wallet.",
           status: "action-needed" as const,
           statusLabel: "Need submission",
@@ -381,7 +381,7 @@ export const IdentityHubDrawer = ({
     return [
       {
         id: "passport",
-        title: "Gitcoin Passport",
+        title: "Human Passport",
         summary: "Your live Human Passport score for this connected wallet.",
         status: Number.isFinite(scoreValue) ? "verified" : "error",
         score: `${scoreValue.toFixed(2)}`,
