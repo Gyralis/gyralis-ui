@@ -24,8 +24,8 @@ export function MobileNav() {
           <span className="sr-only">Gyralis</span>
         </Link>
         <div className="flex items-center gap-x-4">
-          <IdentityHubDrawer compact />
           <WalletConnect className="shrink-0" />
+          <IdentityHubDrawer compact />
           <SheetTrigger asChild>
             <Button className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden">
               <LuMenu className="size-5" />

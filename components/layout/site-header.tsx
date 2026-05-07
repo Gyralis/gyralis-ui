@@ -24,8 +24,8 @@ export function SiteHeader() {
         <MainNav />
         <MobileNav />
         <div className="hidden items-center justify-end space-x-2 md:flex">
-          <IdentityHubDrawer />
           <WalletConnect />
+          <IdentityHubDrawer />
           <ModeToggle />
         </div>
       </div>

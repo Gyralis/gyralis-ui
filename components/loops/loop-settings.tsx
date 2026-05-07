@@ -88,7 +88,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
 
     const distributedValue =
       (loopBalance.value * settings.percentPerPeriod) / 100n
-    const distributedAmount = formatUnits(distributedValue, loopBalance.decimals)
+    const distributedAmount = formatUnits(
+      distributedValue,
+      loopBalance.decimals
+    )
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
     return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
@@ -97,6 +100,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   const distributionDetail = distributionAmountLabel
     ? `${distributionAmountLabel} this period`
     : undefined
+  const distributionTooltip =
+    settings && settings.percentPerPeriod > 0n
+      ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
+      : "The loop balance is distributed evenly among registered users each period."
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
@@ -124,17 +131,12 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   return (
     <TooltipProvider>
       <div className="rounded-[1.65rem] border border-border/80 bg-background/35 p-6 md:p-7 lg:p-8">
-        <div className="grid grid-cols-2 gap-5 text-center">
-          <SettingStatCard
-            label="Period"
-            value={periodLengthLabel}
-            tooltip="How often registration and claims reset for this loop."
-          />
+        <div className="flex items-center justify-center">
           <SettingStatCard
             label="Distribution"
             value={distributionLabel}
             detail={distributionDetail}
-            tooltip="Share of the loop balance released each period."
+            tooltip={distributionTooltip}
           />
         </div>
 
@@ -203,28 +205,32 @@ const SettingStatCard = ({
   tooltip: string
 }) => {
   return (
-    <div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className="mx-auto inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground focus:outline-none"
-          >
-            <span>{label}</span>
-            <LuInfo className="size-3.5 shrink-0" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
-      </Tooltip>
-      <p className="mt-0.5 text-[1rem] tracking-[0.16em] text-foreground">
-        {value}
-      </p>
-      {detail ? (
-        <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-          {detail}
-        </p>
-      ) : null}
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          className="group inline-flex w-full cursor-help flex-wrap items-center justify-center gap-x-[5px] gap-y-0.5 rounded-xl px-2 py-1 text-center transition-colors hover:bg-background/40 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          role="button"
+          tabIndex={0}
+        >
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors group-hover:text-foreground">
+            {label}
+          </span>
+          <span className="text-[1rem]  tracking-[0.12em] text-foreground">
+            {value}
+          </span>
+          {detail ? (
+            <>
+              <span className="size-1 rounded-full bg-primary" />
+              <span className="text-[11px] font-medium leading-4 text-primary">
+                {detail}
+              </span>
+            </>
+          ) : null}
+          <LuInfo className="size-3.5 shrink-0 text-primary" />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
   )
 }
 
