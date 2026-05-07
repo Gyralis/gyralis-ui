@@ -7,10 +7,11 @@ import {
   LuChevronLeft,
   LuChevronRight,
   LuCopy,
-  LuUsers,
 } from "react-icons/lu"
-import { type Address } from "viem"
+import { formatUnits, type Address } from "viem"
+import { useBalance, useReadContract } from "wagmi"
 
+import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
@@ -21,6 +22,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import { LoopTypeBadge } from "./loop-type-badge"
+
 interface LoopersModalProps {
   chainId: number
   currentPeriod?: bigint
@@ -28,8 +31,10 @@ interface LoopersModalProps {
   isOpen: boolean
   loopAddress: Address
   loopIsSuper?: boolean
+  loopToken?: Address
   loopTitle?: string
   onOpenChange: (open: boolean) => void
+  refreshKey?: number
 }
 
 interface CopyAddressButtonProps {
@@ -38,6 +43,14 @@ interface CopyAddressButtonProps {
 
 const formatAddress = (address: Address) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`
+
+const formatClaimPayout = (payout: bigint, decimals: number) => {
+  const formatted = formatUnits(payout, decimals)
+  const [whole, fraction = ""] = formatted.split(".")
+  const trimmedFraction = fraction.slice(0, 4).replace(/0+$/, "")
+
+  return trimmedFraction ? `${whole}.${trimmedFraction}` : whole
+}
 
 const formatPeriodLabel = (
   selectedPeriod: bigint | undefined,
@@ -96,8 +109,10 @@ export function LoopersModal({
   isOpen,
   loopAddress,
   loopIsSuper,
+  loopToken,
   loopTitle,
   onOpenChange,
+  refreshKey = 0,
 }: LoopersModalProps) {
   const [periodOffset, setPeriodOffset] = useState(0)
 
@@ -106,6 +121,13 @@ export function LoopersModal({
       setPeriodOffset(0)
     }
   }, [isOpen])
+
+  const loopAbi = useMemo(
+    () =>
+      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
+        ?.abi ?? [],
+    [chainId]
+  )
 
   const selectedPeriod = useMemo(() => {
     if (currentPeriod == null) {
@@ -117,12 +139,30 @@ export function LoopersModal({
   }, [currentPeriod, periodOffset])
 
   const { users: registeredUsers, loading: loadingRegisteredUsers } =
-    useRegisteredUsers(loopAddress, chainId, selectedPeriod)
-  const { users: claimedUsers, loading: loadingClaimedUsers } = useClaimedUsers(
-    loopAddress,
+    useRegisteredUsers(loopAddress, chainId, selectedPeriod, refreshKey)
+  const {
+    users: claimedUsers,
+    payouts: claimedPayouts,
+    loading: loadingClaimedUsers,
+  } = useClaimedUsers(loopAddress, chainId, selectedPeriod, refreshKey)
+  const { data: loopBalance } = useBalance({
+    address: loopAddress,
+    token: loopToken,
     chainId,
-    selectedPeriod
-  )
+    query: {
+      enabled: Boolean(loopAddress && loopToken),
+    },
+  })
+  const { data: selectedPeriodPayout } = useReadContract({
+    address: loopAddress,
+    abi: loopAbi,
+    functionName: "getPeriodIndividualPayout",
+    args: [selectedPeriod ?? 0n],
+    chainId,
+    query: {
+      enabled: selectedPeriod != null,
+    },
+  })
 
   const claimedUsersSet = useMemo(
     () => new Set(claimedUsers.map((user) => user.toLowerCase())),
@@ -134,8 +174,12 @@ export function LoopersModal({
       registeredUsers.map((address) => ({
         address,
         claimed: claimedUsersSet.has(address.toLowerCase()),
+        payout:
+          claimedPayouts[address.toLowerCase()] ??
+          selectedPeriodPayout ??
+          0n,
       })),
-    [claimedUsersSet, registeredUsers]
+    [claimedPayouts, claimedUsersSet, registeredUsers, selectedPeriodPayout]
   )
 
   const claimedCount = rows.filter((row) => row.claimed).length
@@ -179,15 +223,7 @@ export function LoopersModal({
                     <p className="font-heading text-2xl text-foreground">
                       {loopTitle ?? "Loopers"}
                     </p>
-                    <span
-                      className={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-                        loopIsSuper
-                          ? "bg-secondary/20 text-orange-200"
-                          : "bg-popover text-popover-foreground"
-                      }`}
-                    >
-                      {loopIsSuper ? "SUPER LOOP" : "LOOP"}
-                    </span>
+                    <LoopTypeBadge isSuper={loopIsSuper} />
                   </div>
                   <p className="font-body text-sm text-muted-foreground">
                     Registered addresses and claim activity by period
@@ -237,30 +273,54 @@ export function LoopersModal({
                   No registered loopers for this period.
                 </div>
               ) : (
-                rows.map((row, index) => (
-                  <div
-                    key={row.address}
-                    className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
-                  >
-                    <span className="w-6 text-muted-foreground">
-                      {index + 1}
-                    </span>
-                    <span className="truncate font-medium">
-                      {formatAddress(row.address)}
-                    </span>
-                    <CopyAddressButton address={row.address} />
-                    <span
-                      className={cn(
-                        "inline-flex min-w-[6.5rem] items-center justify-center rounded-full px-3 py-2 text-xs font-semibold",
-                        row.claimed
-                          ? "bg-primary/12 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {row.claimed ? "Claimed" : "Pending"}
-                    </span>
+                <>
+                  <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 border-b border-border/70 px-6 py-3 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:px-8">
+                    <span className="w-6" />
+                    <span>Address</span>
+                    <span className="size-10" />
+                    <span className="min-w-[6.5rem] text-right">Payout</span>
+                    <span className="min-w-[6.5rem] text-center">Status</span>
                   </div>
-                ))
+                  {rows.map((row, index) => (
+                    <div
+                      key={row.address}
+                      className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
+                    >
+                      <span className="w-6 text-muted-foreground">
+                        {index + 1}
+                      </span>
+                      <span className="truncate font-medium">
+                        {formatAddress(row.address)}
+                      </span>
+                      <CopyAddressButton address={row.address} />
+                      <span
+                        className={cn(
+                          "min-w-[6.5rem] text-right text-xs font-semibold",
+                          row.claimed
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {loopBalance
+                          ? `${formatClaimPayout(
+                              row.payout,
+                              loopBalance.decimals
+                            )} ${loopBalance.symbol}`
+                          : "--"}
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex min-w-[6.5rem] items-center justify-center rounded-full px-3 py-2 text-xs font-semibold",
+                          row.claimed
+                            ? "bg-primary/12 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {row.claimed ? "Claimed" : "Pending"}
+                      </span>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>

@@ -13,21 +13,25 @@ const upgradedClaimEventAbiItem = parseAbiItem(
 
 interface UseClaimedUsersResult {
   users: Address[]
+  payouts: Record<string, bigint>
   loading: boolean
 }
 
 export function useClaimedUsers(
   loopAddress: Address,
   chainId: number,
-  periodNumber?: bigint
+  periodNumber?: bigint,
+  refreshKey = 0
 ): UseClaimedUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
+  const [payouts, setPayouts] = useState<Record<string, bigint>>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!publicClient || periodNumber == null) {
       setUsers([])
+      setPayouts({})
       setLoading(false)
       return
     }
@@ -59,13 +63,35 @@ export function useClaimedUsers(
 
         const claimed = [...legacyLogs, ...upgradedLogs]
           .filter((log) => log.args.periodNumber === periodNumber)
-          .map((log) => log.args.claimer as Address)
+          .reduce<Record<string, { address: Address; payout: bigint }>>(
+            (acc, log) => {
+              const claimer = log.args.claimer as Address
+              const key = claimer.toLowerCase()
 
-        setUsers(Array.from(new Set(claimed)))
+              acc[key] = {
+                address: claimer,
+                payout: log.args.payout ?? 0n,
+              }
+
+              return acc
+            },
+            {}
+          )
+
+        setUsers(Object.values(claimed).map((claim) => claim.address))
+        setPayouts(
+          Object.fromEntries(
+            Object.entries(claimed).map(([address, claim]) => [
+              address,
+              claim.payout,
+            ])
+          )
+        )
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching Claim logs:", error)
           setUsers([])
+          setPayouts({})
         }
       } finally {
         if (!cancelled) {
@@ -79,7 +105,7 @@ export function useClaimedUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, loopAddress, periodNumber, publicClient])
+  }, [chainId, loopAddress, periodNumber, publicClient, refreshKey])
 
-  return { users, loading }
+  return { users, payouts, loading }
 }

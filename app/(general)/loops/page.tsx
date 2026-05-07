@@ -53,7 +53,7 @@ export default function HomePage() {
       <div className="relative overflow-hidden">
         <div className="mx-auto max-w-screen-xl px-4 pb-6 pt-10 md:pt-14">
           <section className="relative">
-            <div className="tamagotchi-card loop-hero-card relative w-full min-h-[520px] !cursor-default !p-8 pb-24 hover:!translate-y-0 hover:!cursor-default sm:min-h-[560px] sm:!p-10 sm:pb-28 lg:min-h-[600px] lg:!p-14 lg:pb-32 before:!opacity-100">
+            <div className=" relative w-full min-h-[520px] !cursor-default !p-8 pb-24 hover:!translate-y-0 hover:!cursor-default sm:min-h-[560px] sm:!p-10 sm:pb-24 lg:!p-14 before:!opacity-100 rounded-lg">
               <Image
                 src={loopBackgroundLight}
                 alt=""
@@ -77,8 +77,8 @@ export default function HomePage() {
 
               <div className="relative z-10 flex min-h-[360px] flex-col justify-center gap-10 lg:min-h-[400px] lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-xl">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/28 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-md">
-                    <span className="size-2 rounded-full bg-primary" />
+                  <span className="inline-flex items-center gap-2 rounded-full  px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] backdrop-blur-md text-white/80">
+                    <span className="size-2 rounded-full bg-primary animate-pulse" />
                     Daily Loop Rewards
                   </span>
                   <h1 className="mt-5 font-baloo text-[3.2rem] font-bold leading-[0.91] drop-shadow-[0_3px_22px_rgba(0,0,0,0.48)] sm:text-[4.3rem] lg:text-[5rem] text-white">

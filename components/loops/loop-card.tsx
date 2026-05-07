@@ -1,12 +1,13 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
 import { LoopCardData } from "@/data/loops-data"
 
 import { LoopBalance } from "./loop-balance"
 import { LoopEligibility, LoopShield } from "./loop-elegibility"
 import { LoopSettings } from "./loop-settings"
+import { LoopTypeBadge } from "./loop-type-badge"
 
 interface LoopCardProps {
   loop: LoopCardData
@@ -19,6 +20,7 @@ interface LoopCardProps {
 
 const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   void onBalanceUpdate
+  const [balanceRefreshKey, setBalanceRefreshKey] = useState(0)
 
   return (
     <div className="tamagotchi-card font-body relative p-7 md:p-8">
@@ -33,14 +35,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   Deployed on {loop.chainName}
                 </span>
               </span>
-              <span className="inline-flex shrink-0 rounded-full bg-popover px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-popover-foreground">
-                LOOP
-              </span>
-              {loop.super && (
-                <span className="inline-flex shrink-0 rounded-full bg-secondary/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-200">
-                  SUPER LOOP
-                </span>
-              )}
+              <LoopTypeBadge isSuper={loop.super} />
             </div>
 
             <div className="mt-7 space-y-5">
@@ -79,8 +74,9 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address}
             token={loop.token}
             chainId={loop.chainId}
+            refreshKey={balanceRefreshKey}
           />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 ">
+          <div className="mt-4 gap-3 sm:grid-cols-2 flex flex-col">
             <LoopShield shieldScore={loop.shieldScore} />
             <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>
@@ -95,6 +91,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             eligibilityLogoUrl={loop.eligibilityLogoUrl}
             isSuper={loop.super}
             loopTitle={loop.title}
+            onClaimSuccess={() => setBalanceRefreshKey((key) => key + 1)}
           />
         </div>
       </div>

@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
+import { FiExternalLink } from "react-icons/fi"
 import {
   HiArrowRight,
   HiCheckBadge,
   HiChevronLeft,
   HiChevronRight,
 } from "react-icons/hi2"
-import { FiExternalLink } from "react-icons/fi"
 import { PiFingerprintLight } from "react-icons/pi"
 import { useAccount } from "wagmi"
 
@@ -162,7 +162,7 @@ const IdentityHubMethodCard = ({
           <div className="mx-4 border-t border-border/50" />
           <div className="flex min-h-[72px] items-center justify-between gap-4 bg-background/90 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Last submitted
+              Last updated
             </p>
             {method.status === "loading" ? (
               <Skeleton className="h-5 w-32" />
@@ -330,8 +330,7 @@ export const IdentityHubDrawer = ({
             summary: "Your Passport score is not available yet.",
             status: "action-needed" as const,
             statusLabel: "Ready to submit",
-            details:
-              "Request your latest Passport score for GyraHub.",
+            details: "Request your latest Passport score for GyraHub.",
             actionLabel: "Submit wallet",
             onAction: submitPassportForScoring,
             actionInProgress: isSubmittingPassport,
@@ -379,8 +378,7 @@ export const IdentityHubDrawer = ({
         status: Number.isFinite(scoreValue) ? "verified" : "error",
         score: `${scoreValue.toFixed(2)}`,
         lastSubmittedAt: scoreQuery.data?.last_score_timestamp,
-        details:
-          "Your Passport score is available for this connected wallet.",
+        details: "Your Passport score is available for this connected wallet.",
         onAction: null,
         actionInProgress: false,
       },

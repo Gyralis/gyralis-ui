@@ -19,7 +19,8 @@ interface UseRegisteredUsersResult {
 export function useRegisteredUsers(
   loopAddress: Address,
   chainId: number,
-  periodNumber?: bigint
+  periodNumber?: bigint,
+  refreshKey = 0
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
@@ -84,7 +85,7 @@ export function useRegisteredUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, loopAddress, periodNumber, publicClient])
+  }, [chainId, loopAddress, periodNumber, publicClient, refreshKey])
 
   return { users, loading }
 }
