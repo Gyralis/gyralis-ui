@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { FiExternalLink } from "react-icons/fi"
 import {
+  HiArrowPath,
   HiArrowRight,
   HiCheckBadge,
   HiChevronLeft,
   HiChevronRight,
+  HiExclamationTriangle,
 } from "react-icons/hi2"
 import { PiFingerprintLight } from "react-icons/pi"
 import { useAccount } from "wagmi"
@@ -100,9 +102,9 @@ const gyraHubSteps = [
       "Add identity and reputation proofs to grow your Passport score.",
   },
   {
-    title: "Open GyraHub",
+    title: "Come back to Gyralis",
     description:
-      "Open GyraHub and check your Passport score for the connected wallet.",
+      "GyraHub will check your connected wallet and show the latest Passport score.",
   },
 ]
 
@@ -213,10 +215,16 @@ export const IdentityHubDrawer = ({
   const drawerWidth = guideOpen ? 800 : 500
 
   const scoreQuery = useGetScore({
-    enabled: open,
+    enabled: Boolean(address),
   })
   const { submitPassport, isLoading: isSubmittingPassport } =
     useSubmitPassport()
+  const triggerScore = scoreQuery.data?.score
+  const triggerScoreValue =
+    triggerScore == null ? Number.NaN : Number.parseFloat(String(triggerScore))
+  const hasTriggerScore = Number.isFinite(triggerScoreValue)
+  const triggerNeedsAttention =
+    Boolean(address) && !scoreQuery.isLoading && !hasTriggerScore
 
   const submitPassportForScoring = useCallback(async () => {
     try {
@@ -256,7 +264,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary:
             "Identity reputation powered by wallet-linked verifications.",
           status: "disconnected" as const,
@@ -273,7 +281,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "Submitting your wallet for Passport scoring.",
           status: "loading" as const,
           statusLabel: "Submitting...",
@@ -289,7 +297,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "You have been submitted.",
           status: "verified" as const,
           statusLabel: "Submitted",
@@ -309,7 +317,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "Fetching your latest Human Passport data.",
           status: "loading" as const,
           onAction: null,
@@ -326,7 +334,7 @@ export const IdentityHubDrawer = ({
         return [
           {
             id: "passport",
-            title: "Gitcoin Passport",
+            title: "Human Passport",
             summary: "Your Passport score is not available yet.",
             status: "action-needed" as const,
             statusLabel: "Ready to submit",
@@ -341,7 +349,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "We could not load the Passport status.",
           status: "error" as const,
           details: errorMessage,
@@ -356,7 +364,7 @@ export const IdentityHubDrawer = ({
       return [
         {
           id: "passport",
-          title: "Gitcoin Passport",
+          title: "Human Passport",
           summary: "A score is not available yet for this wallet.",
           status: "action-needed" as const,
           statusLabel: "Need submission",
@@ -373,7 +381,7 @@ export const IdentityHubDrawer = ({
     return [
       {
         id: "passport",
-        title: "Gitcoin Passport",
+        title: "Human Passport",
         summary: "Your live Human Passport score for this connected wallet.",
         status: Number.isFinite(scoreValue) ? "verified" : "error",
         score: `${scoreValue.toFixed(2)}`,
@@ -406,13 +414,37 @@ export const IdentityHubDrawer = ({
       <SheetTrigger asChild>
         <button
           className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-semibold transition-colors hover:bg-accent hover:text-accent-foreground",
-            compact ? "h-9 px-3 text-xs" : "h-10 px-4 md:px-5",
+            "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border px-4 text-sm font-semibold shadow-sm transition-colors",
+            hasTriggerScore
+              ? "border-primary/50 bg-primary/10 text-foreground ring-1 ring-primary/10 hover:border-primary/70 hover:bg-primary/15"
+              : triggerNeedsAttention
+              ? "border-amber-300 bg-amber-50 text-amber-900 ring-1 ring-amber-200/70 hover:border-amber-400 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-900/70 dark:hover:bg-amber-950"
+              : "border-border bg-background hover:bg-accent hover:text-accent-foreground",
+            compact ? "h-10 text-xs" : "h-10",
             className
           )}
         >
-          <PiFingerprintLight className="size-4 text-primary" />
+          <PiFingerprintLight
+            className={cn(
+              "size-4",
+              triggerNeedsAttention ? "text-amber-600" : "text-primary"
+            )}
+          />
           <span>GyraHub</span>
+          {address && scoreQuery.isLoading && (
+            <HiArrowPath className="size-4 animate-spin text-muted-foreground" />
+          )}
+          {hasTriggerScore && (
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold tabular-nums text-primary-foreground">
+              {triggerScoreValue.toFixed(2)}
+            </span>
+          )}
+          {triggerNeedsAttention && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+              <HiExclamationTriangle className="size-3.5" />
+              Check
+            </span>
+          )}
         </button>
       </SheetTrigger>
       <SheetContent

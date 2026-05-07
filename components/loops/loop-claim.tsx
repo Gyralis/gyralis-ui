@@ -375,10 +375,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     ? "Claimed this period"
     : !isRegistered
     ? isEnteredForNextPeriod
-      ? "Entered - claim next period"
+      ? "You are in the loop"
       : "Enter the Loop"
     : isEnteredForNextPeriod
-    ? "Entered - claim next period"
+    ? "You are in the loop"
     : isLoadingOnchainState
     ? "Checking claim status..."
     : claimAmountLabel
@@ -404,7 +404,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       >
         {actionLabel}
       </Button>
-      {isEnteredForNextPeriod && (
+      {isEnteredForNextPeriod && !hasClaimed && (
         <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
           You are registered for the next period claim.
         </p>

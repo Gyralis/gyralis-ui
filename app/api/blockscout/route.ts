@@ -221,7 +221,7 @@ export async function POST(req: Request) {
         {
           success: false,
           error:
-            "You’re not eligible yet. Redeem Gyralis rewards in Blockscout.Merits",
+            "You are not eligible yet. Open the Eligibility tab to see how to enter this loop.",
         },
         { status: 403 }
       )
