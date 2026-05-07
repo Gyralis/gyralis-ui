@@ -76,7 +76,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             chainId={loop.chainId}
             refreshKey={balanceRefreshKey}
           />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 ">
+          <div className="mt-4 gap-3 sm:grid-cols-2 flex flex-col">
             <LoopShield shieldScore={loop.shieldScore} />
             <LoopEligibility eligibilityCriteria={loop.eligibility} />
           </div>

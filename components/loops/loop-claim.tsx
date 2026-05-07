@@ -2,11 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { Address, formatUnits } from "viem"
+import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
   useBalance,
   useChainId,
+  usePublicClient,
   useReadContract,
   useWaitForTransactionReceipt,
   useWriteContract,
@@ -32,6 +33,13 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   blockscout: "/api/blockscout",
 }
 
+const legacyRegisterEventAbiItem = parseAbiItem(
+  "event Register(address indexed sender, uint256 indexed periodNumber)"
+)
+const upgradedRegisterEventAbiItem = parseAbiItem(
+  "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
+)
+
 export type LoopClaimStatus = "default" | "entered" | "claimable" | "claimed"
 
 export const LoopClaim: React.FC<LoopClaimProps> = ({
@@ -45,9 +53,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
   const [pendingAction, setPendingAction] = useState<"enter" | "claim">("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
+  const [isRegisteredForNextPeriod, setIsRegisteredForNextPeriod] =
+    useState(false)
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
   const { address: connectedAccount } = useAccount()
   const currentChainId = useChainId()
+  const publicClient = usePublicClient({ chainId })
   const { toast } = useToast()
   const { writeContractAsync } = useWriteContract()
 
@@ -124,7 +135,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = currentPeriodPayout ?? 0n
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod = isRegistered && !hasClaimed && !isClaimableNow
-  const isEnteredForNextPeriod = hasEnteredNextPeriod || isWaitingNextPeriod
+  const isEnteredForNextPeriod =
+    hasEnteredNextPeriod || isRegisteredForNextPeriod || isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod || isLoadingCurrentPeriodPayout
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
@@ -132,7 +144,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimAmountLabel = loopBalance
     ? `${trimFormattedBalance(
         formatUnits(claimableAmount, loopBalance.decimals),
-        4
+        2
       )} ${loopBalance.symbol}`
     : undefined
   const claimedAmount = lastClaimedAmount ?? claimableAmount
@@ -140,7 +152,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     loopBalance && claimedAmount > 0n
       ? `${trimFormattedBalance(
           formatUnits(claimedAmount, loopBalance.decimals),
-          4
+          2
         )} ${loopBalance.symbol}`
       : undefined
   const claimStatus: LoopClaimStatus = hasClaimed
@@ -164,6 +176,60 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     setHasEnteredNextPeriod(false)
     setLastClaimedAmount(undefined)
   }, [address, chainId, connectedAccount, currentPeriod])
+
+  useEffect(() => {
+    if (!publicClient || !connectedAccount || currentPeriod == null) {
+      setIsRegisteredForNextPeriod(false)
+      return
+    }
+
+    let cancelled = false
+
+    const fetchNextPeriodRegistration = async () => {
+      try {
+        const nextPeriod = currentPeriod + 1n
+        const [legacyLogs, upgradedLogs] = await Promise.all([
+          publicClient.getLogs({
+            address,
+            event: legacyRegisterEventAbiItem,
+            args: {
+              sender: connectedAccount,
+              periodNumber: nextPeriod,
+            },
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+          publicClient.getLogs({
+            address,
+            event: upgradedRegisterEventAbiItem,
+            args: {
+              sender: connectedAccount,
+              periodNumber: nextPeriod,
+            },
+            fromBlock: 0n,
+            toBlock: "latest",
+          }),
+        ])
+
+        if (!cancelled) {
+          setIsRegisteredForNextPeriod(
+            legacyLogs.length > 0 || upgradedLogs.length > 0
+          )
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Error fetching next period Register logs:", error)
+          setIsRegisteredForNextPeriod(false)
+        }
+      }
+    }
+
+    void fetchNextPeriodRegistration()
+
+    return () => {
+      cancelled = true
+    }
+  }, [address, connectedAccount, currentPeriod, publicClient])
 
   useEffect(() => {
     onStatusChange?.(claimStatus)
@@ -308,7 +374,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     : hasClaimed
     ? "Claimed this period"
     : !isRegistered
-    ? hasEnteredNextPeriod
+    ? isEnteredForNextPeriod
       ? "Entered - claim next period"
       : "Enter the Loop"
     : isEnteredForNextPeriod
@@ -320,7 +386,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     : "Claim"
 
   return (
-    <div className="space-y-1 border2 ">
+    <div className="space-y-1">
       <Button
         chainId={chainId}
         onClick={handleClaim}

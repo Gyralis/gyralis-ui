@@ -273,43 +273,54 @@ export function LoopersModal({
                   No registered loopers for this period.
                 </div>
               ) : (
-                rows.map((row, index) => (
-                  <div
-                    key={row.address}
-                    className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
-                  >
-                    <span className="w-6 text-muted-foreground">
-                      {index + 1}
-                    </span>
-                    <span className="truncate font-medium">
-                      {formatAddress(row.address)}
-                    </span>
-                    <CopyAddressButton address={row.address} />
-                    <span
-                      className={cn(
-                        "min-w-[6.5rem] text-right text-xs font-semibold",
-                        row.claimed ? "text-primary" : "text-muted-foreground"
-                      )}
-                    >
-                      {loopBalance
-                        ? `${formatClaimPayout(
-                            row.payout,
-                            loopBalance.decimals
-                          )} ${loopBalance.symbol}`
-                        : "--"}
-                    </span>
-                    <span
-                      className={cn(
-                        "inline-flex min-w-[6.5rem] items-center justify-center rounded-full px-3 py-2 text-xs font-semibold",
-                        row.claimed
-                          ? "bg-primary/12 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {row.claimed ? "Claimed" : "Pending"}
-                    </span>
+                <>
+                  <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 border-b border-border/70 px-6 py-3 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:px-8">
+                    <span className="w-6" />
+                    <span>Address</span>
+                    <span className="size-10" />
+                    <span className="min-w-[6.5rem] text-right">Payout</span>
+                    <span className="min-w-[6.5rem] text-center">Status</span>
                   </div>
-                ))
+                  {rows.map((row, index) => (
+                    <div
+                      key={row.address}
+                      className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-6 py-4 font-body text-sm text-foreground sm:px-8"
+                    >
+                      <span className="w-6 text-muted-foreground">
+                        {index + 1}
+                      </span>
+                      <span className="truncate font-medium">
+                        {formatAddress(row.address)}
+                      </span>
+                      <CopyAddressButton address={row.address} />
+                      <span
+                        className={cn(
+                          "min-w-[6.5rem] text-right text-xs font-semibold",
+                          row.claimed
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {loopBalance
+                          ? `${formatClaimPayout(
+                              row.payout,
+                              loopBalance.decimals
+                            )} ${loopBalance.symbol}`
+                          : "--"}
+                      </span>
+                      <span
+                        className={cn(
+                          "inline-flex min-w-[6.5rem] items-center justify-center rounded-full px-3 py-2 text-xs font-semibold",
+                          row.claimed
+                            ? "bg-primary/12 text-primary"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {row.claimed ? "Claimed" : "Pending"}
+                      </span>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
