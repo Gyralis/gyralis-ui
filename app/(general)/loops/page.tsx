@@ -5,10 +5,14 @@ import Image from "next/image"
 import loopBackgroundDark from "@/assets/gyralis_background_dark.png"
 import loopBackgroundLight from "@/assets/gyralis_background_light.png"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
+import { motion } from "framer-motion"
 import { LuArrowDown } from "react-icons/lu"
 
 import LoopCard from "@/components/loops/loop-card"
+import { LoopsTable } from "@/components/loops/loops-table"
 import { SearchWithTags } from "@/components/search"
+
+type ViewMode = "cards" | "table"
 
 const activeLoopCount = LoopCardsData.length
 const chainCount = new Set(LoopCardsData.map((c) => c.chainName)).size
@@ -18,6 +22,7 @@ export default function HomePage() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
   const [searchQuery, setSearch] = useState("")
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>("cards")
 
   const tags = Array.from(new Set(cards.map((loop) => loop.by)))
 
@@ -153,16 +158,67 @@ export default function HomePage() {
           </section>
         </div>
 
-        <div className="mx-auto max-w-screen-xl overflow-visible px-4 pb-8 pt-16 sm:pt-24">
-          <div id="loops-grid" className="grid gap-6">
-            {filteredLoopCards.map((loop) => (
-              <LoopCard
-                key={loop.id}
-                loop={loop}
-                onBalanceUpdate={handleBalanceUpdate}
-              />
-            ))}
+        <div
+          id="loops-grid"
+          className="mx-auto max-w-screen-xl overflow-visible px-4 pb-8 pt-16 sm:pt-24"
+        >
+          <div className="mb-5 flex justify-start">
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                View
+              </span>
+              <div className="inline-flex rounded-full border border-border/80 bg-background/60 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                {(["cards", "table"] as const).map((mode) => (
+                  <motion.button
+                    key={mode}
+                    type="button"
+                    onClick={() => setViewMode(mode)}
+                    animate={{
+                      scale: viewMode === mode ? [1, 1.06, 1] : 1,
+                    }}
+                    transition={{
+                      scale: {
+                        duration: 0.28,
+                        ease: [0.16, 1, 0.3, 1],
+                      },
+                    }}
+                    whileTap={{ scale: 0.96 }}
+                    className={`relative min-w-20 overflow-hidden rounded-full px-4 py-2 text-sm font-semibold capitalize transition-colors ${
+                      viewMode === mode
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {viewMode === mode && (
+                      <motion.span
+                        layoutId="loop-view-switch-background"
+                        className="absolute inset-0 rounded-full bg-primary shadow-[0_10px_24px_-18px_rgba(28,231,131,0.7)]"
+                        transition={{
+                          type: "spring",
+                          stiffness: 420,
+                          damping: 26,
+                          mass: 0.75,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">{mode}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {viewMode === "cards" ? (
+            <div className="grid gap-6">
+              {filteredLoopCards.map((loop) => (
+                <div key={loop.id} id={`loop-card-${loop.id}`}>
+                  <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <LoopsTable loops={filteredLoopCards} />
+          )}
         </div>
       </div>
     </div>
