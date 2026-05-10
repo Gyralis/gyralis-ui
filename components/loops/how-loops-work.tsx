@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import type { ComponentType } from "react"
+import { useEffect, useRef, useState, type ComponentType } from "react"
 import { motion } from "framer-motion"
 import {
   FaCalendarCheck,
@@ -33,7 +32,7 @@ const periodContent: Record<FlowState, PeriodCard[]> = {
       label: "Previous Period",
       title: "No claim available",
       description:
-        "Claims come from a period where you were already entered.",
+        "Claims come from previous period where you were already entered.",
       tone: "muted",
       icon: FaCalendarCheck,
     },
@@ -41,7 +40,7 @@ const periodContent: Record<FlowState, PeriodCard[]> = {
       label: "Current Period",
       title: "Enter the Loop",
       description:
-        "The loop checks your Human Passport score through the shield and registers you for the next period.",
+        "The loop checks your Human Passport score and elegibility to register you for the next period.",
       tone: "primary",
       icon: FaDoorOpen,
     },
@@ -75,7 +74,7 @@ const periodContent: Record<FlowState, PeriodCard[]> = {
       label: "Next Period",
       title: "Not entered yet",
       description:
-        "Claiming now will automatically enter you for the following period.",
+        "Claiming now will automatically enter you for the next period.",
       tone: "muted",
       icon: FaCalendarCheck,
     },
@@ -190,9 +189,14 @@ export function HowLoopsWork({
     setSimulationMessage(messages[0])
     simulationTimers.current.forEach((timer) => window.clearTimeout(timer))
 
-    const timers = messages.slice(1).map((message, index) =>
-      window.setTimeout(() => setSimulationMessage(message), delay * (index + 1))
-    )
+    const timers = messages
+      .slice(1)
+      .map((message, index) =>
+        window.setTimeout(
+          () => setSimulationMessage(message),
+          delay * (index + 1)
+        )
+      )
 
     const finalTimer = window.setTimeout(() => {
       setFlowState(nextState)
@@ -290,18 +294,14 @@ export function HowLoopsWork({
         contentClassName="space-y-4 py-0"
         headerClassName="pr-8"
       >
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-foreground">
-          You need to be verified in GyraHub and have enough Human Passport
+        {/* <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm leading-6 text-foreground">
+          You must be verified in GyraHub and have enough Human Passport
           score to pass the loop shield. After that, loops work by periods:
-          entering always prepares the next period, while claiming happens only
-          once that entered period becomes current.
-        </div>
+          entering always prepares the next period.
+        </div> */}
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <PeriodTimeline
-            flowState={flowState}
-            isSimulating={isSimulating}
-          />
+          <PeriodTimeline flowState={flowState} isSimulating={isSimulating} />
 
           <ActionPanel
             flowState={flowState}
@@ -314,9 +314,9 @@ export function HowLoopsWork({
         </div>
 
         <div className="rounded-2xl bg-muted/60 p-4 text-sm leading-6 text-muted-foreground">
-          This delay keeps distribution fair. The current period&apos;s claim is
-          based on who was already entered before it started, so rewards can be
-          split predictably among eligible humans.
+          The current period&apos;s claim is based on who was already registered
+          before it started, so rewards can be split predictably and evenly
+          among all humans.
         </div>
       </Modal>
     </>

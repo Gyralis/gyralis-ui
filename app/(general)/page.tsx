@@ -119,7 +119,7 @@ export default function HomePage() {
               </motion.h1>
 
               <motion.p
-                className="max-w-lg font-body text-xl leading-relaxed text-gray-600 dark:text-muted-foreground"
+                className="max-w-lg font-body text-xl leading-relaxed text-accent-foreground"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
