@@ -23,7 +23,7 @@ const eligibilityRequirements = [
     steps: [
       "Go to Gardens app, search for 1Hive community and connect your wallet.",
       "Click Join and complete membership.",
-      "Stake 3 HNY to activate your membership.",
+      "Stake 3 HNY tokens to activate your membership.",
       "Come back to Gyralis and enter the 1Hive loop. Claim daily rewards.",
     ],
     protocolUrl:
@@ -151,7 +151,7 @@ export default function ElegibilityPage() {
                     disabled={requirement.status === "coming-soon"}
                     className="tamagotchi-button-secondary flex min-h-[44px] w-full items-center justify-center px-3 py-2 font-body text-xs disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-4 sm:text-sm"
                   >
-                    How to be eligible
+                    {requirement.id != 3 ? "Be eligible" : "Pass the Shield"}
                   </button>
                 </div>
               </div>
@@ -208,7 +208,9 @@ export default function ElegibilityPage() {
 
               <div>
                 <h3 className="mb-4 text-lg font-bold text-foreground">
-                  How to become eligible:
+                  {selectedEligibility.id != 3
+                    ? "How to be eligible"
+                    : "How to pass the Shield"}
                 </h3>
                 <div className="space-y-3">
                   {selectedEligibility.steps.map((step, index) => (

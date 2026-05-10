@@ -15,7 +15,7 @@ const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 const PASSPORT_SCORE_NOT_SYNCED_ERROR =
-  "Passport score not synced. Open GyraHub to verify your Human Passport score, then enter the loop again."
+  "Your Human Passport score must be at least 15 to enter this loop. Open GyraHub to improve your score, then try again."
 const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
   "Unable to get score for provided scorer."
 const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
