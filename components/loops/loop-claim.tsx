@@ -15,7 +15,7 @@ import {
 
 import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
-import { trimFormattedBalance } from "@/lib/utils"
+import { cn, trimFormattedBalance } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { useToast } from "../ui/use-toast"
@@ -24,6 +24,8 @@ interface LoopClaimProps {
   address: Address
   chainId: number
   eligibilityProvider: LoopEligibilityProvider
+  compact?: boolean
+  showHelper?: boolean
   onSuccess?: () => void
   onStatusChange?: (status: LoopClaimStatus) => void
 }
@@ -46,6 +48,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   address,
   chainId,
   eligibilityProvider,
+  compact = false,
+  showHelper = true,
   onSuccess,
   onStatusChange,
 }) => {
@@ -384,9 +388,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     : claimAmountLabel
     ? `Claim ${claimAmountLabel}`
     : "Claim"
+  const buttonClassName = compact
+    ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
+    : "min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
 
   return (
-    <div className="space-y-1">
+    <div className={cn(showHelper ? "space-y-1" : "inline-flex")}>
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -400,16 +407,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             isEnteredForNextPeriod)
         }
         isLoading={isSubmitting || isConfirming}
-        className="min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
+        className={buttonClassName}
       >
         {actionLabel}
       </Button>
-      {isEnteredForNextPeriod && !hasClaimed && (
+      {showHelper && isEnteredForNextPeriod && !hasClaimed && (
         <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
           You are registered for the next period claim.
         </p>
       )}
-      {hasClaimed && (
+      {showHelper && hasClaimed && (
         <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
           {claimedAmountLabel
             ? `Claimed ${claimedAmountLabel} this period. Come back next period.`

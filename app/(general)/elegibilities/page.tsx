@@ -24,7 +24,7 @@ const eligibilityRequirements = [
       "Go to Gardens app, search for 1Hive community and connect your wallet.",
       "Click Join and complete membership.",
       "Stake 3 HNY to activate your membership.",
-      "Go to Gyralis and enter the 1Hive loop. Claim daily rewards.",
+      "Come back to Gyralis and enter the 1Hive loop. Claim daily rewards.",
     ],
     protocolUrl:
       "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
@@ -46,9 +46,11 @@ const eligibilityRequirements = [
       "Go to the Blockscout Merits Explorer and connect your wallet.You’ll receive 100 Merits.",
       "Open the Spend Merits tab and find the Gyralis Loop Rewards.",
       "Redeem the offer for 50 Merits.",
-      "Go to Gyralis and enter the Blockscout Merits loop. Claim daily rewards.",
+      "Come back to Gyralis and enter the Blockscout Merits loop. Claim daily rewards.",
     ],
-    protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=spend",
+    //dev url
+    // protocolUrl: "https://points.k8s-dev.blockscout.com/?tab=spend",
+    protocolUrl: "https://merits.blockscout.com/?tab=spend",
     coverUrl: "/blockscout-cover.png",
     logoUrl: "/blockscout-logo.png",
     type: "loop",

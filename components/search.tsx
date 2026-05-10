@@ -50,7 +50,6 @@ export function SearchWithTags({
   const chains = [
     { name: "Gnosis", soon: false },
     { name: "Base", soon: true },
-    { name: "Optimism", soon: true },
   ]
   const types = [
     { name: "Loops", soon: false },
