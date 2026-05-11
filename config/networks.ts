@@ -1,7 +1,6 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // Networks
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-import { env } from "@/env.mjs"
 import { http } from "wagmi"
 import {
   arbitrum,
@@ -19,7 +18,7 @@ import {
   sepolia,
 } from "wagmi/chains"
 
-const alchemyApiKey = env.NEXT_PUBLIC_ALCHEMY_API_KEY?.trim()
+const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY?.trim()
 const mainnetRpcUrl = alchemyApiKey
   ? `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`
   : undefined
