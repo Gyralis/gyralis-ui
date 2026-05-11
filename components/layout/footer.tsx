@@ -8,6 +8,7 @@ import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 
 import { NavLogoMark } from "./main-nav"
+import { ReportIssueLink } from "./report-issue-link"
 import { LinkComponent } from "../shared/link-component"
 
 export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
@@ -51,6 +52,7 @@ export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
           >
             <FaDiscord />
           </LinkComponent>
+          <ReportIssueLink />
         </div>
 
         <div className="flex justify-center md:justify-end">
