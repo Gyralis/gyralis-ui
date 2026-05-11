@@ -1,6 +1,7 @@
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 // Networks
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+import { env } from "@/env.mjs"
 import { http } from "wagmi"
 import {
   arbitrum,
@@ -17,6 +18,11 @@ import {
   polygonMumbai,
   sepolia,
 } from "wagmi/chains"
+
+const alchemyApiKey = env.NEXT_PUBLIC_ALCHEMY_API_KEY?.trim()
+const mainnetRpcUrl = alchemyApiKey
+  ? `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`
+  : undefined
 
 export const chains = [
   mainnet,
@@ -37,7 +43,7 @@ export const chains = [
 ] as const
 
 export const transports = {
-  [mainnet.id]: http(),
+  [mainnet.id]: http(mainnetRpcUrl),
   [sepolia.id]: http(),
   [polygonMumbai.id]: http(),
   [gnosisChiado.id]: http(),
