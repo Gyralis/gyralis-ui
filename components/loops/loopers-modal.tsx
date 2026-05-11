@@ -9,7 +9,7 @@ import {
   LuCopy,
 } from "react-icons/lu"
 import { formatUnits, type Address } from "viem"
-import { useBalance, useReadContract } from "wagmi"
+import { useBalance, usePublicClient, useReadContract } from "wagmi"
 
 import deployedContracts from "@/lib/generated/deployed-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
@@ -43,6 +43,8 @@ interface CopyAddressButtonProps {
 
 const formatAddress = (address: Address) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`
+
+const ENS_LOOKUP_BATCH_SIZE = 10
 
 const formatClaimPayout = (payout: bigint, decimals: number) => {
   const formatted = formatUnits(payout, decimals)
@@ -115,6 +117,10 @@ export function LoopersModal({
   refreshKey = 0,
 }: LoopersModalProps) {
   const [periodOffset, setPeriodOffset] = useState(0)
+  const [ensNamesByAddress, setEnsNamesByAddress] = useState<
+    Record<string, string>
+  >({})
+  const mainnetPublicClient = usePublicClient({ chainId: 1 })
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,6 +187,71 @@ export function LoopersModal({
       })),
     [claimedPayouts, claimedUsersSet, registeredUsers, selectedPeriodPayout]
   )
+
+  useEffect(() => {
+    if (!isOpen || !mainnetPublicClient || registeredUsers.length === 0) {
+      return
+    }
+
+    const addressesToResolve = registeredUsers.filter(
+      (address) => !ensNamesByAddress[address.toLowerCase()]
+    )
+
+    if (addressesToResolve.length === 0) {
+      return
+    }
+
+    let cancelled = false
+
+    const resolveEnsNames = async () => {
+      const resolved: Array<[string, string]> = []
+
+      for (let index = 0; index < addressesToResolve.length; index += ENS_LOOKUP_BATCH_SIZE) {
+        if (cancelled) {
+          return
+        }
+
+        const batch = addressesToResolve.slice(
+          index,
+          index + ENS_LOOKUP_BATCH_SIZE
+        )
+        const batchResolved = await Promise.all(
+          batch.map(async (address) => {
+            try {
+              const ensName = await mainnetPublicClient.getEnsName({ address })
+              return ensName ? [address.toLowerCase(), ensName] : null
+            } catch {
+              return null
+            }
+          })
+        )
+
+        resolved.push(
+          ...batchResolved.filter(
+            (entry): entry is [string, string] => entry !== null
+          )
+        )
+      }
+
+      if (cancelled) {
+        return
+      }
+
+      const nextEnsNames = Object.fromEntries(resolved)
+
+      if (Object.keys(nextEnsNames).length === 0) {
+        return
+      }
+
+      setEnsNamesByAddress((current) => ({ ...current, ...nextEnsNames }))
+    }
+
+    void resolveEnsNames()
+
+    return () => {
+      cancelled = true
+    }
+  }, [ensNamesByAddress, isOpen, mainnetPublicClient, registeredUsers])
 
   const claimedCount = rows.filter((row) => row.claimed).length
   const registeredCount = rows.length
@@ -289,8 +360,9 @@ export function LoopersModal({
                       <span className="w-6 text-muted-foreground">
                         {index + 1}
                       </span>
-                      <span className="truncate font-medium">
-                        {formatAddress(row.address)}
+                      <span className="truncate font-medium" title={row.address}>
+                        {ensNamesByAddress[row.address.toLowerCase()] ??
+                          formatAddress(row.address)}
                       </span>
                       <CopyAddressButton address={row.address} />
                       <span
