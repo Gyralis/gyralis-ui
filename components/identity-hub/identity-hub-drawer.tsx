@@ -536,7 +536,7 @@ export const IdentityHubDrawer = ({
                   onClick={() => setGuideOpen(true)}
                   type="button"
                 >
-                  Need help checking your score?
+                  Your score is too low?
                   <span className="inline-flex items-center gap-1">
                     Open guide
                     <HiArrowRight className="size-4" />
