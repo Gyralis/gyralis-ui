@@ -217,6 +217,7 @@ export const IdentityHubDrawer = ({
   const scoreQuery = useGetScore({
     enabled: Boolean(address),
   })
+  const refetchScore = scoreQuery.refetch
   const { submitPassport, isLoading: isSubmittingPassport } =
     useSubmitPassport()
   const triggerScore = scoreQuery.data?.score
@@ -230,6 +231,7 @@ export const IdentityHubDrawer = ({
     try {
       setSubmitSucceeded(false)
       await submitPassport()
+      await refetchScore()
       setSubmitSucceeded(true)
       toast({
         title: "You have been submitted",
@@ -245,11 +247,16 @@ export const IdentityHubDrawer = ({
         description: message,
       })
     }
-  }, [submitPassport, toast])
+  }, [refetchScore, submitPassport, toast])
 
   useEffect(() => {
     setSubmitSucceeded(false)
   }, [address])
+
+  useEffect(() => {
+    if (!open || !address) return
+    void refetchScore()
+  }, [address, open, refetchScore])
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)")

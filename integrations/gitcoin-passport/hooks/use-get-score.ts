@@ -36,7 +36,7 @@ export const useGetScore = (options: UseGetScoreOptions = {}) => {
     },
   })
 
-  const refetch = useCallback(() => void refetchQuery(), [refetchQuery])
+  const refetch = useCallback(() => refetchQuery(), [refetchQuery])
 
   return {
     isLoading: isLoading || isRefetching,
