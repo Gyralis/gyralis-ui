@@ -59,7 +59,7 @@ function MainNavMenu() {
 
   const links = [
     { href: "/loops", label: "Loops", disabled: false },
-    { href: "/elegibilities", label: "Elegibilities", disabled: false },
+    { href: "/eligibilities", label: "Eligibilities", disabled: false },
     { href: "/leaderboard", label: "Leaderboard", disabled: true },
   ]
 
