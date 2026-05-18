@@ -243,7 +243,9 @@ export const IdentityHubDrawer = ({
       await submitPassport()
       localStorage.setItem(submittedPassportStorageKey(address), "true")
       setHasSubmittedPassportForAddress(true)
-      await refetchScore()
+      window.setTimeout(() => {
+        void refetchScore()
+      }, 2500)
       toast({
         title: "Passport score updated",
         description:
@@ -303,7 +305,7 @@ export const IdentityHubDrawer = ({
           title: "Human Passport",
           summary: "Submitting your wallet for Passport scoring.",
           status: "loading" as const,
-          statusLabel: "Submitting...",
+          statusLabel: "Updating...",
           onAction: null,
           actionInProgress: true,
           details:
