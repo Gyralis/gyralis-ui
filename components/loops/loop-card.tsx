@@ -61,7 +61,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   {loop.description}
                 </p>
                 <Link
-                  href="/elegibilities"
+                  href="/eligibilities"
                   className="inline-flex text-sm font-semibold text-secondary-foreground/90 transition-colors hover:text-secondary-foreground"
                 >
                   How to be eligible →
