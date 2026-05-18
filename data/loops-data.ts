@@ -47,7 +47,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "garden_1hive",
-    passportMinScore: -1,
+    passportMinScore: 15,
     enabled: true,
   },
   {
@@ -68,7 +68,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "blockscout",
-    passportMinScore: -1,
+    passportMinScore: 15,
     enabled: true,
   },
 ]

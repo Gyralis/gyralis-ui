@@ -35,6 +35,11 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   blockscout: "/api/blockscout",
 }
 
+const BLOCKSCOUT_TX_BASE_URLS: Record<number, string> = {
+  100: "https://gnosis.blockscout.com/tx",
+  10200: "https://gnosis-chiado.blockscout.com/tx",
+}
+
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
 )
@@ -175,6 +180,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         enabled: !!txHash,
       },
     })
+  const blockscoutTxUrl = txHash
+    ? `${BLOCKSCOUT_TX_BASE_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"}/${txHash}`
+    : undefined
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -253,11 +261,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         pendingAction === "enter"
           ? "Entered the Loop"
           : "Transaction confirmed",
-      description:
+      description: (
         pendingAction === "enter"
           ? "You are registered for the next period claim."
-          : "Claim was confirmed onchain.",
-    })
+          : "Claim was confirmed onchain."
+      ),
+      link: blockscoutTxUrl
+        ? {
+            href: blockscoutTxUrl,
+            label: "View on Blockscout",
+          }
+        : undefined,
+    } as any)
 
     void Promise.all([
       refetchClaimerStatus(),
@@ -279,6 +294,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     refetchCurrentPeriodPayout,
     onSuccess,
     claimableAmount,
+    blockscoutTxUrl,
     toast,
   ])
 
