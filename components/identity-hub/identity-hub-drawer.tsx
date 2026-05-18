@@ -89,6 +89,9 @@ const formatScoreDate = (timestamp: string | null | undefined) => {
 const truncateAddress = (address: string) =>
   `${address.slice(0, 8)}…${address.slice(-6)}`
 
+const submittedPassportStorageKey = (address: string) =>
+  `gyrahub:passport-submitted:${address.toLowerCase()}`
+
 const gyraHubSteps = [
   {
     title: "Go to Human Passport",
@@ -139,10 +142,13 @@ const IdentityHubMethodCard = ({
         </div>
         <span
           className={cn(
-            "shrink-0 rounded-full px-3 py-1 text-xs font-semibold",
+            "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
             statusClassMap[method.status]
           )}
         >
+          {method.status === "loading" && (
+            <HiArrowPath className="size-3.5 animate-spin" />
+          )}
           {method.statusLabel ?? statusLabelMap[method.status]}
         </span>
       </div>
@@ -164,7 +170,7 @@ const IdentityHubMethodCard = ({
           <div className="mx-4 border-t border-border/50" />
           <div className="flex min-h-[72px] items-center justify-between gap-4 bg-background/90 px-4 py-4">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Last updated
+              Last submitted
             </p>
             {method.status === "loading" ? (
               <Skeleton className="h-5 w-32" />
@@ -210,7 +216,8 @@ export const IdentityHubDrawer = ({
   const [open, setOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [sheetSide, setSheetSide] = useState<"right" | "bottom">("right")
-  const [submitSucceeded, setSubmitSucceeded] = useState(false)
+  const [hasSubmittedPassportForAddress, setHasSubmittedPassportForAddress] =
+    useState(false)
   const { toast } = useToast()
   const drawerWidth = guideOpen ? 800 : 500
 
@@ -223,23 +230,26 @@ export const IdentityHubDrawer = ({
   const triggerScore = scoreQuery.data?.score
   const triggerScoreValue =
     triggerScore == null ? Number.NaN : Number.parseFloat(String(triggerScore))
-  const hasTriggerScore = Number.isFinite(triggerScoreValue)
+  const hasTriggerScore =
+    Number.isFinite(triggerScoreValue) &&
+    (triggerScoreValue > 0 || hasSubmittedPassportForAddress)
   const triggerNeedsAttention =
     Boolean(address) && !scoreQuery.isLoading && !hasTriggerScore
 
   const submitPassportForScoring = useCallback(async () => {
+    if (!address) return
+
     try {
-      setSubmitSucceeded(false)
       await submitPassport()
+      localStorage.setItem(submittedPassportStorageKey(address), "true")
+      setHasSubmittedPassportForAddress(true)
       await refetchScore()
-      setSubmitSucceeded(true)
       toast({
-        title: "You have been submitted",
+        title: "Passport score updated",
         description:
-          "GyraHub accepted your wallet and requested the latest Passport score.",
+          "GyraHub requested your latest Passport score for this wallet.",
       })
     } catch (error) {
-      setSubmitSucceeded(false)
       const message =
         error instanceof Error ? error.message : "Failed to submit passport."
       toast({
@@ -247,16 +257,18 @@ export const IdentityHubDrawer = ({
         description: message,
       })
     }
-  }, [refetchScore, submitPassport, toast])
+  }, [address, refetchScore, submitPassport, toast])
 
   useEffect(() => {
-    setSubmitSucceeded(false)
+    if (!address) {
+      setHasSubmittedPassportForAddress(false)
+      return
+    }
+
+    setHasSubmittedPassportForAddress(
+      localStorage.getItem(submittedPassportStorageKey(address)) === "true"
+    )
   }, [address])
-
-  useEffect(() => {
-    if (!open || !address) return
-    void refetchScore()
-  }, [address, open, refetchScore])
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 768px)")
@@ -300,26 +312,6 @@ export const IdentityHubDrawer = ({
       ]
     }
 
-    if (submitSucceeded) {
-      return [
-        {
-          id: "passport",
-          title: "Human Passport",
-          summary: "You have been submitted.",
-          status: "verified" as const,
-          statusLabel: "Submitted",
-          score: scoreQuery.data?.score
-            ? Number.parseFloat(scoreQuery.data.score).toFixed(2)
-            : undefined,
-          lastSubmittedAt: scoreQuery.data?.last_score_timestamp,
-          onAction: null,
-          actionInProgress: false,
-          details:
-            "GyraHub accepted your wallet and requested the latest Passport score.",
-        },
-      ]
-    }
-
     if (scoreQuery.isLoading || scoreQuery.isRefetching) {
       return [
         {
@@ -327,10 +319,10 @@ export const IdentityHubDrawer = ({
           title: "Human Passport",
           summary: "Fetching your latest Human Passport data.",
           status: "loading" as const,
+          statusLabel: "Checking...",
           onAction: null,
           actionInProgress: true,
-          details:
-            "GyraHub is syncing your current score and submission status.",
+          details: null,
         },
       ]
     }
@@ -367,7 +359,12 @@ export const IdentityHubDrawer = ({
     }
 
     const score = scoreQuery.data?.score
-    if (!score) {
+    const scoreValue =
+      score == null ? Number.NaN : Number.parseFloat(String(score))
+    if (
+      !Number.isFinite(scoreValue) ||
+      (scoreValue <= 0 && !hasSubmittedPassportForAddress)
+    ) {
       return [
         {
           id: "passport",
@@ -384,7 +381,6 @@ export const IdentityHubDrawer = ({
       ]
     }
 
-    const scoreValue = Number.parseFloat(score)
     return [
       {
         id: "passport",
@@ -405,8 +401,8 @@ export const IdentityHubDrawer = ({
     scoreQuery.isError,
     scoreQuery.isLoading,
     scoreQuery.isRefetching,
+    hasSubmittedPassportForAddress,
     isSubmittingPassport,
-    submitSucceeded,
     submitPassportForScoring,
   ])
 
@@ -415,7 +411,6 @@ export const IdentityHubDrawer = ({
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen)
-        if (!nextOpen) setSubmitSucceeded(false)
       }}
     >
       <SheetTrigger asChild>
@@ -557,7 +552,6 @@ export const IdentityHubDrawer = ({
                 className="mt-4 inline-flex w-full justify-center rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
                 onClick={() => {
                   setOpen(false)
-                  setSubmitSucceeded(false)
                 }}
               >
                 Close GyraHub
