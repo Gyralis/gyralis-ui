@@ -389,9 +389,11 @@ export const IdentityHubDrawer = ({
         status: Number.isFinite(scoreValue) ? "verified" : "error",
         score: `${scoreValue.toFixed(2)}`,
         lastSubmittedAt: scoreQuery.data?.last_score_timestamp,
-        details: "Your Passport score is available for this connected wallet.",
-        onAction: null,
-        actionInProgress: false,
+        details:
+          "Refresh this score after updating your Human Passport stamps.",
+        actionLabel: "Update score",
+        onAction: submitPassportForScoring,
+        actionInProgress: isSubmittingPassport,
       },
     ]
   }, [
