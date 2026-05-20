@@ -1,8 +1,11 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAccount } from "wagmi"
+
+import { AddressScoreResponse } from "../utils/types"
 
 export const useSubmitPassport = () => {
   const { address } = useAccount()
+  const queryClient = useQueryClient()
 
   const submitPassportMutation = useMutation({
     mutationFn: async () => {
@@ -18,10 +21,14 @@ export const useSubmitPassport = () => {
       })
       const data = await response.json()
       if (response.ok) {
-        return { success: true }
+        return data as AddressScoreResponse
       }
       if (data.detail) throw data.detail
       throw new Error(response.statusText)
+    },
+    onSuccess: (data) => {
+      if (!address) return
+      queryClient.setQueryData(["score", address], data)
     },
   })
 

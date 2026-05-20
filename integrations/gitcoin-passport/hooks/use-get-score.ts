@@ -21,6 +21,7 @@ export const useGetScore = (options: UseGetScoreOptions = {}) => {
     refetch: refetchQuery,
   } = useQuery({
     refetchOnWindowFocus: false,
+    retry: false,
 
     queryKey: ["score", address],
     enabled: enabled && Boolean(address),
