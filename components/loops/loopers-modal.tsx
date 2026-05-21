@@ -2,17 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import {
-  LuCheck,
-  LuChevronLeft,
-  LuChevronRight,
-  LuCopy,
-} from "react-icons/lu"
+import { LuCheck, LuChevronLeft, LuChevronRight, LuCopy } from "react-icons/lu"
 import { formatUnits, type Address } from "viem"
-import { useBalance, usePublicClient, useReadContract } from "wagmi"
+import { usePublicClient, useReadContract } from "wagmi"
 
-import deployedContracts from "@/lib/generated/deployed-contracts"
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  getLoopContractAbi,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
 import {
@@ -30,6 +30,7 @@ interface LoopersModalProps {
   eligibilityLogoUrl?: string
   isOpen: boolean
   loopAddress: Address
+  loopContractType?: LoopContractType
   loopIsSuper?: boolean
   loopToken?: Address
   loopTitle?: string
@@ -110,6 +111,7 @@ export function LoopersModal({
   eligibilityLogoUrl,
   isOpen,
   loopAddress,
+  loopContractType = DEFAULT_LOOP_CONTRACT_TYPE,
   loopIsSuper,
   loopToken,
   loopTitle,
@@ -129,10 +131,8 @@ export function LoopersModal({
   }, [isOpen])
 
   const loopAbi = useMemo(
-    () =>
-      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
-        ?.abi ?? [],
-    [chainId]
+    () => getLoopContractAbi(chainId, loopContractType),
+    [chainId, loopContractType]
   )
 
   const selectedPeriod = useMemo(() => {
@@ -151,13 +151,12 @@ export function LoopersModal({
     payouts: claimedPayouts,
     loading: loadingClaimedUsers,
   } = useClaimedUsers(loopAddress, chainId, selectedPeriod, refreshKey)
-  const { data: loopBalance } = useBalance({
+  const { data: loopBalance } = useLoopTokenBalance({
     address: loopAddress,
-    token: loopToken,
     chainId,
-    query: {
-      enabled: Boolean(loopAddress && loopToken),
-    },
+    contractType: loopContractType,
+    enabled: Boolean(loopAddress && loopToken),
+    token: loopToken,
   })
   const { data: selectedPeriodPayout } = useReadContract({
     address: loopAddress,
@@ -181,9 +180,7 @@ export function LoopersModal({
         address,
         claimed: claimedUsersSet.has(address.toLowerCase()),
         payout:
-          claimedPayouts[address.toLowerCase()] ??
-          selectedPeriodPayout ??
-          0n,
+          claimedPayouts[address.toLowerCase()] ?? selectedPeriodPayout ?? 0n,
       })),
     [claimedPayouts, claimedUsersSet, registeredUsers, selectedPeriodPayout]
   )
@@ -206,7 +203,11 @@ export function LoopersModal({
     const resolveEnsNames = async () => {
       const resolved: Array<[string, string]> = []
 
-      for (let index = 0; index < addressesToResolve.length; index += ENS_LOOKUP_BATCH_SIZE) {
+      for (
+        let index = 0;
+        index < addressesToResolve.length;
+        index += ENS_LOOKUP_BATCH_SIZE
+      ) {
         if (cancelled) {
           return
         }
@@ -360,7 +361,10 @@ export function LoopersModal({
                       <span className="w-6 text-muted-foreground">
                         {index + 1}
                       </span>
-                      <span className="truncate font-medium" title={row.address}>
+                      <span
+                        className="truncate font-medium"
+                        title={row.address}
+                      >
                         {ensNamesByAddress[row.address.toLowerCase()] ??
                           formatAddress(row.address)}
                       </span>
@@ -368,9 +372,7 @@ export function LoopersModal({
                       <span
                         className={cn(
                           "min-w-[6.5rem] text-right text-xs font-semibold",
-                          row.claimed
-                            ? "text-primary"
-                            : "text-muted-foreground"
+                          row.claimed ? "text-primary" : "text-muted-foreground"
                         )}
                       >
                         {loopBalance

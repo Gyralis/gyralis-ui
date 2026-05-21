@@ -36,7 +36,9 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   Deployed on {loop.chainName}
                 </span>
               </span>
-              <LoopTypeBadge isSuper={loop.super} />
+              <LoopTypeBadge
+                isSuper={loop.contractType === "superLoop" || loop.super}
+              />
             </div>
 
             <div className="mt-7 space-y-5">
@@ -81,9 +83,10 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
         <div className="col-span-1 flex h-full flex-col justify-center ">
           <LoopBalance
             address={loop.address}
-            token={loop.token}
             chainId={loop.chainId}
+            contractType={loop.contractType}
             refreshKey={balanceRefreshKey}
+            token={loop.token}
           />
           <div className="mt-4 gap-3 sm:grid-cols-2 flex flex-col">
             <LoopShield shieldScore={loop.shieldScore} />
@@ -96,9 +99,10 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           <LoopSettings
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
+            contractType={loop.contractType}
             eligibilityProvider={loop.eligibilityProvider}
             eligibilityLogoUrl={loop.eligibilityLogoUrl}
-            isSuper={loop.super}
+            isSuper={loop.contractType === "superLoop" || loop.super}
             loopTitle={loop.title}
             onClaimSuccess={() => setBalanceRefreshKey((key) => key + 1)}
           />

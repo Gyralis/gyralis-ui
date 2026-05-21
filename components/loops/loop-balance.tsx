@@ -4,26 +4,33 @@ import React, { useEffect } from "react"
 import { motion, useSpring, useTransform } from "framer-motion"
 import { FaWallet } from "react-icons/fa"
 import { Address, formatUnits } from "viem"
-import { useBalance } from "wagmi"
+
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 
 interface LoopBalanceProps {
   address?: Address
-  token?: Address
   chainId: number
+  contractType?: LoopContractType
   refreshKey?: number
+  token?: Address
 }
 
 export const LoopBalance: React.FC<LoopBalanceProps> = ({
   address,
-  token,
   chainId,
+  contractType = DEFAULT_LOOP_CONTRACT_TYPE,
   refreshKey = 0,
+  token,
 }) => {
-  const { data, isLoading, isError, refetch } = useBalance({
-    address: address!,
-    token: token,
-    chainId: chainId,
-    // query: { enabled: !!address && !!token },
+  const { data, isLoading, isError, refetch } = useLoopTokenBalance({
+    address,
+    chainId,
+    contractType,
+    token,
   })
 
   useEffect(() => {

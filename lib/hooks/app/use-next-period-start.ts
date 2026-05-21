@@ -2,7 +2,11 @@ import { useMemo } from "react"
 import { Address } from "viem"
 import { useReadContracts } from "wagmi"
 
-import deployedContracts from "@/lib/generated/deployed-contracts"
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  getLoopContractAbi,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
 
 export interface LoopSettingsProps {
   token: Address
@@ -20,13 +24,12 @@ interface UseLoopSettingsProps {
 
 export function useLoopSettings(
   loopAddress: Address,
-  chainId: number
+  chainId: number,
+  contractType: LoopContractType = DEFAULT_LOOP_CONTRACT_TYPE
 ): UseLoopSettingsProps {
   const loopAbi = useMemo(
-    () =>
-      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
-        ?.abi ?? [],
-    [chainId]
+    () => getLoopContractAbi(chainId, contractType),
+    [chainId, contractType]
   )
 
   const { data, isLoading, refetch } = useReadContracts({
@@ -54,7 +57,10 @@ export function useLoopSettings(
     return { settings: undefined, currentPeriod: undefined, isLoading, refetch }
   }
 
-  const [settingsRaw, currentPeriod] = data
+  const [settingsRaw, currentPeriod] = data as readonly [
+    readonly [Address, bigint, bigint, bigint],
+    bigint
+  ]
 
   const settings: LoopSettingsProps = {
     token: settingsRaw[0],

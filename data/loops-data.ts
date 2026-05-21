@@ -1,5 +1,7 @@
 import { Address } from "viem"
 
+import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
 
 export interface LoopCardData {
@@ -18,6 +20,7 @@ export interface LoopCardData {
   shieldValue?: string
   registeredAddresses?: { address: string; claimed: boolean }[]
   super?: boolean
+  contractType: LoopContractType
   chainId: number
   chainName: string
   eligibilityProvider: LoopEligibilityProvider
@@ -44,6 +47,7 @@ export const LoopCardsData: LoopCardData[] = [
     shieldAccount: "0xtt...453",
     shieldValue: "26",
     super: false,
+    contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "garden_1hive",
@@ -65,10 +69,32 @@ export const LoopCardsData: LoopCardData[] = [
     shieldAccount: "0xtt...453",
     shieldValue: "26",
     super: false,
+    contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
+    enabled: true,
+  },
+  {
+    id: 5,
+    title: "TEST SUPERLOOPS",
+    by: "RANDOM",
+    address: "0x42664386739EFdD277Fa1eB05658b562c3b804c0",
+    description: "none.",
+    token: "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
+    eligibilityLogoUrl: "",
+    shieldScore: "Passport Score +15",
+    eligibility: "Gyralis offer redemption required",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: true,
+    contractType: "superLoop",
+    chainId: 8453,
+    chainName: "Base",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 0,
     enabled: true,
   },
 ]

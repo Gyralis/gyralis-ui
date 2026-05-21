@@ -4,8 +4,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
-import { useBalance } from "wagmi"
 
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
 import {
@@ -20,6 +24,7 @@ import { LoopersModal } from "@/components/loops/loopers-modal"
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
+  contractType?: LoopContractType
   eligibilityProvider: LoopEligibilityProvider
   eligibilityLogoUrl?: string
   isSuper?: boolean
@@ -30,6 +35,7 @@ interface LoopSettingsComponentProps {
 export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   address,
   chainId,
+  contractType = DEFAULT_LOOP_CONTRACT_TYPE,
   eligibilityProvider,
   eligibilityLogoUrl,
   isSuper,
@@ -38,19 +44,20 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
 }) => {
   const { settings, currentPeriod, isLoading } = useLoopSettings(
     address,
-    chainId
+    chainId,
+    contractType
   )
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
-  const { data: loopBalance, refetch: refetchLoopBalance } = useBalance({
-    address,
-    token: settings?.token,
-    chainId,
-    query: {
+  const { data: loopBalance, refetch: refetchLoopBalance } =
+    useLoopTokenBalance({
+      address,
+      chainId,
+      contractType,
       enabled: Boolean(address && settings?.token),
-    },
-  })
+      token: settings?.token,
+    })
 
   const nextPeriodStart =
     settings && currentPeriod != null
@@ -170,6 +177,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           <LoopClaim
             address={address}
             chainId={chainId}
+            contractType={contractType}
             eligibilityProvider={eligibilityProvider}
             onStatusChange={handleClaimStatusChange}
             onSuccess={handleClaimSuccess}
@@ -182,6 +190,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           eligibilityLogoUrl={eligibilityLogoUrl}
           isOpen={isLoopersModalOpen}
           loopAddress={address}
+          loopContractType={contractType}
           loopIsSuper={isSuper}
           loopToken={settings?.token}
           loopTitle={loopTitle}
