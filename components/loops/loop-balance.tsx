@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect } from "react"
-import { motion, useSpring, useTransform } from "framer-motion"
 import { FaWallet } from "react-icons/fa"
 import { Address, formatUnits } from "viem"
 
@@ -9,7 +8,12 @@ import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
+import {
+  formatMonthlyIncoming,
+  useFlowingBalance,
+} from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
+import { trimFormattedBalance } from "@/lib/utils"
 
 interface LoopBalanceProps {
   address?: Address
@@ -39,6 +43,14 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
     void refetch()
   }, [address, token, refreshKey, refetch])
 
+  const isSuperLoop = contractType === "superLoop"
+  const flowingBalance = useFlowingBalance({
+    balance: data?.value,
+    flowRatePerSecond: data?.flowRatePerSecond,
+    decimals: data?.decimals ?? 18,
+    enabled: isSuperLoop,
+  })
+
   if (!address || !token) {
     return <StatusCard message="Waiting for addresses..." />
   }
@@ -51,22 +63,46 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
     return <StatusCard message="Failed to fetch balance" tone="error" />
   }
 
-  const balance = parseFloat(formatUnits(data.value, data.decimals))
-  const formattedBalance = Number(`${balance.toFixed(4)}`)
+  const formattedBalance = isSuperLoop
+    ? trimFormattedBalance(flowingBalance.formatted, 8)
+    : trimFormattedBalance(formatUnits(data.value, data.decimals), 4)
+  const monthlyIncoming = formatMonthlyIncoming({
+    flowRatePerSecond: data.flowRatePerSecond,
+    decimals: data.decimals,
+    symbol: data.symbol,
+  })
+  const monthlyIncomingLabel = data.flowRateError
+    ? "Flow rate unavailable"
+    : monthlyIncoming
 
   return (
-    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-5">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-        <FaWallet className="size-3.5 text-primary" />
-        <p>Loop Balance</p>
+    <div className="rounded-[1.45rem] border border-border/80 bg-background/35 p-5">
+      <div>
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <FaWallet className="size-3.5 text-primary" />
+          <p>Loop Balance</p>
+        </div>
+
+        <div className="mt-2.5 flex min-w-0 items-end gap-2.5">
+          <span className="block min-w-0 break-all font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-[3.4rem]">
+            {formattedBalance}
+          </span>
+          <span className="mb-1.5 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            {data.symbol}
+          </span>
+        </div>
       </div>
 
-      <div className="mt-2.5 flex items-end gap-2.5">
-        <AnimatedNumber value={formattedBalance} />
-        <span className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          {data.symbol}
-        </span>
-      </div>
+      {isSuperLoop ? (
+        <div className="mt-5 border-t border-border/70 pt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            Monthly incoming
+          </p>
+          <p className="mt-1.5 text-base font-semibold text-foreground">
+            {monthlyIncomingLabel}
+          </p>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -88,34 +124,5 @@ const StatusCard = ({
         {message}
       </p>
     </div>
-  )
-}
-
-type AnimatedNumberProps = {
-  value: number
-}
-
-const AnimatedNumber = ({ value }: AnimatedNumberProps) => {
-  const spring = useSpring(value, {
-    mass: 0.5,
-    stiffness: 50,
-    damping: 10,
-  })
-
-  const display = useTransform(spring, (current) =>
-    Number(current).toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  )
-
-  useEffect(() => {
-    spring.set(value)
-  }, [value, spring])
-
-  return (
-    <motion.span className="block font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-[3.4rem]">
-      {display}
-    </motion.span>
   )
 }

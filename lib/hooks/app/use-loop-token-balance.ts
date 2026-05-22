@@ -22,7 +22,25 @@ const superTokenRealtimeBalanceAbi = [
   },
 ] as const
 
+const cfaV1ForwarderAddress =
+  "0xcfA132E353cB4E398080B9700609bb008eceB125" as const
+
+const cfaV1ForwarderAbi = [
+  {
+    type: "function",
+    name: "getAccountFlowrate",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [{ name: "flowrate", type: "int96" }],
+    stateMutability: "view",
+  },
+] as const
+
 type LoopTokenBalanceData = {
+  flowRateError?: boolean
+  flowRatePerSecond?: bigint
   value: bigint
   decimals: number
   symbol: string
@@ -67,8 +85,19 @@ export function useLoopTokenBalance({
   })
 
   const realtimeBalanceData = realtimeBalance.data
+  const accountFlowRate = useReadContract({
+    address: cfaV1ForwarderAddress,
+    abi: cfaV1ForwarderAbi,
+    functionName: "getAccountFlowrate",
+    args: [token ?? zeroAddress, address ?? zeroAddress],
+    chainId,
+    query: {
+      enabled: queryEnabled && isSuperLoop,
+    },
+  })
   const { refetch: refetchTokenBalance } = tokenBalance
   const { refetch: refetchRealtimeBalance } = realtimeBalance
+  const { refetch: refetchAccountFlowRate } = accountFlowRate
 
   const data = useMemo<LoopTokenBalanceData | undefined>(() => {
     if (!tokenBalance.data) return undefined
@@ -78,23 +107,42 @@ export function useLoopTokenBalance({
         isSuperLoop && typeof realtimeBalanceData?.[0] === "bigint"
           ? realtimeBalanceData[0]
           : tokenBalance.data.value,
+      flowRatePerSecond:
+        isSuperLoop && typeof accountFlowRate.data === "bigint"
+          ? accountFlowRate.data
+          : undefined,
+      flowRateError: isSuperLoop ? accountFlowRate.isError : false,
       decimals: tokenBalance.data.decimals,
       symbol: tokenBalance.data.symbol,
     }
-  }, [isSuperLoop, realtimeBalanceData, tokenBalance.data])
+  }, [
+    accountFlowRate.data,
+    accountFlowRate.isError,
+    isSuperLoop,
+    realtimeBalanceData,
+    tokenBalance.data,
+  ])
 
   const refetch = useCallback(async () => {
     await Promise.all([
       refetchTokenBalance(),
       isSuperLoop ? refetchRealtimeBalance() : Promise.resolve(),
+      isSuperLoop ? refetchAccountFlowRate() : Promise.resolve(),
     ])
-  }, [isSuperLoop, refetchRealtimeBalance, refetchTokenBalance])
+  }, [
+    isSuperLoop,
+    refetchAccountFlowRate,
+    refetchRealtimeBalance,
+    refetchTokenBalance,
+  ])
 
   return {
     data,
     isError: tokenBalance.isError || (isSuperLoop && realtimeBalance.isError),
     isLoading:
-      tokenBalance.isLoading || (isSuperLoop && realtimeBalance.isLoading),
+      tokenBalance.isLoading ||
+      (isSuperLoop &&
+        (realtimeBalance.isLoading || accountFlowRate.isLoading)),
     refetch,
   }
 }
