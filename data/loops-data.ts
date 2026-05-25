@@ -84,7 +84,7 @@ export const LoopCardsData: LoopCardData[] = [
     description: "none.",
     token: "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
     eligibilityLogoUrl: "",
-    shieldScore: "Passport Score +15",
+    shieldScore: "Passport Score 0",
     eligibility:
       "using blockscout as eligibility provider testing superloop features",
     chainBadgeColor: "bg-custom-green",

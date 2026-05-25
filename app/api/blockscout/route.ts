@@ -5,6 +5,10 @@ import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
 import {
+  getLoopContractMethods,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
+import {
   eligibilityRequestSchema,
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
@@ -88,9 +92,15 @@ async function fetchPassportScore(userAddress: string): Promise<number> {
 
 async function fetchNextPeriod(
   chainId: number,
-  loopAddress: string
+  loopAddress: string,
+  contractType: LoopContractType
 ): Promise<number> {
   const viemChain = getViemChain(chainId)
+  const loopMethods = getLoopContractMethods(contractType)
+  const currentPeriodAbi =
+    loopMethods.getCurrentPeriod === "getStreamingCurrentPeriod"
+      ? "function getStreamingCurrentPeriod() public view returns (uint256)"
+      : "function getCurrentPeriod() public view returns (uint256)"
   const walletClient = createWalletClient({
     account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
     chain: viemChain,
@@ -99,13 +109,11 @@ async function fetchNextPeriod(
 
   const loopContract = getContract({
     address: loopAddress as `0x${string}`,
-    abi: parseAbi([
-      "function getCurrentPeriod() public view returns (uint256)",
-    ]),
+    abi: parseAbi([currentPeriodAbi]),
     client: walletClient,
   })
 
-  const currentPeriod = await loopContract.read.getCurrentPeriod()
+  const currentPeriod = await loopContract.read[loopMethods.getCurrentPeriod]()
   return Number(currentPeriod + BigInt(1))
 }
 
@@ -227,7 +235,11 @@ export async function POST(req: Request) {
       )
 
     // 3) Compute next period from the Loop contract
-    const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
+    const nextPeriod = await fetchNextPeriod(
+      chainId,
+      allowlistedLoop.address,
+      allowlistedLoop.contractType
+    )
     console.log(`[${requestId}] Next period fetched`, { nextPeriod })
 
     // 4) Eligibility signature (EIP-712 typed data)

@@ -3,6 +3,7 @@ import {
   LoopCardsData,
   LoopEligibilityProvider,
 } from "@/data/loops-data"
+import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import { z } from "zod"
 
 export const eligibilityRequestSchema = z.object({
@@ -14,6 +15,7 @@ export const eligibilityRequestSchema = z.object({
 export interface AllowlistedLoop {
   address: `0x${string}`
   chainId: number
+  contractType: LoopContractType
   passportMinScore: number
 }
 
@@ -40,6 +42,7 @@ export function findAllowlistedLoop(
   return {
     address: loop.address,
     chainId: loop.chainId,
+    contractType: loop.contractType,
     passportMinScore: loop.passportMinScore,
   }
 }

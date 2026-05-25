@@ -5,6 +5,7 @@ import { useReadContracts } from "wagmi"
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   getLoopContractAbi,
+  getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 
@@ -31,6 +32,10 @@ export function useLoopSettings(
     () => getLoopContractAbi(chainId, contractType),
     [chainId, contractType]
   )
+  const loopMethods = useMemo(
+    () => getLoopContractMethods(contractType),
+    [contractType]
+  )
 
   const { data, isLoading, refetch } = useReadContracts({
     allowFailure: false,
@@ -38,13 +43,13 @@ export function useLoopSettings(
       {
         address: loopAddress,
         abi: loopAbi,
-        functionName: "getLoopDetails",
+        functionName: loopMethods.getDetails,
         chainId,
       },
       {
         address: loopAddress,
         abi: loopAbi,
-        functionName: "getCurrentPeriod",
+        functionName: loopMethods.getCurrentPeriod,
         chainId,
       },
     ],

@@ -15,6 +15,7 @@ import {
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   getLoopContractAbi,
+  getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
@@ -52,6 +53,7 @@ const legacyRegisterEventAbiItem = parseAbiItem(
 const upgradedRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
+const LOG_LOOKBACK_BLOCKS = 100_000n
 
 export type LoopClaimStatus = "default" | "entered" | "claimable" | "claimed"
 
@@ -81,6 +83,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const loopAbi = useMemo(() => {
     return getLoopContractAbi(chainId, contractType)
   }, [chainId, contractType])
+  const loopMethods = useMemo(() => {
+    return getLoopContractMethods(contractType)
+  }, [contractType])
 
   const { settings, refetch: refetchSettings } = useLoopSettings(
     address,
@@ -116,7 +121,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   } = useReadContract({
     address,
     abi: loopAbi,
-    functionName: "getCurrentPeriod",
+    functionName: loopMethods.getCurrentPeriod,
     chainId,
     query: {
       enabled: !!connectedAccount,
@@ -213,6 +218,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchNextPeriodRegistration = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
+        const latestBlock = await publicClient.getBlockNumber()
+        const fromBlock =
+          latestBlock > LOG_LOOKBACK_BLOCKS
+            ? latestBlock - LOG_LOOKBACK_BLOCKS
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
           publicClient.getLogs({
             address,
@@ -221,7 +231,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
               sender: connectedAccount,
               periodNumber: nextPeriod,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
           publicClient.getLogs({
@@ -231,7 +241,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
               sender: connectedAccount,
               periodNumber: nextPeriod,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
         ])
@@ -368,7 +378,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       const hash = await writeContractAsync({
         address,
         abi: loopAbi,
-        functionName: "claimAndRegister",
+        functionName: loopMethods.claimAndRegister,
         args: [payload.signature],
         chainId,
       })
