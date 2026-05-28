@@ -1,16 +1,32 @@
 import { useCallback, useMemo } from "react"
-import { parseUnits, zeroAddress, type Address } from "viem"
+import { zeroAddress, type Address } from "viem"
 import { useBalance, useReadContracts } from "wagmi"
 
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
+  getLoopContractAbi,
+  getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 import { erc20Abi } from "@/lib/generated/blockchain"
 
 const SEC_TO_DAY = 60n * 60n * 24n
-const SUPER_LOOP_TEST_FLOW_RATE_PER_SECOND = "1"
-const SUPER_LOOP_TEST_PERIOD_SECONDS = 120n
+const cfaV1ForwarderAddresses: Partial<Record<number, Address>> = {
+  8453: "0xcfA132E353cB4E398080B9700609bb008eceB125",
+}
+
+const cfaV1ForwarderAbi = [
+  {
+    type: "function",
+    name: "getAccountFlowrate",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "account", type: "address" },
+    ],
+    outputs: [{ name: "flowrate", type: "int96" }],
+    stateMutability: "view",
+  },
+] as const
 
 type LoopTokenBalanceData = {
   flowRateError?: boolean
@@ -40,6 +56,15 @@ export function useLoopTokenBalance({
 }: UseLoopTokenBalanceParams) {
   const queryEnabled = enabled && Boolean(token)
   const isSuperLoop = contractType === "superLoop"
+  const loopAbi = useMemo(
+    () => getLoopContractAbi(chainId, contractType),
+    [chainId, contractType]
+  )
+  const loopMethods = useMemo(
+    () => getLoopContractMethods(contractType),
+    [contractType]
+  )
+  const cfaV1ForwarderAddress = cfaV1ForwarderAddresses[chainId]
 
   const tokenBalance = useBalance({
     address: address ?? zeroAddress,
@@ -51,10 +76,10 @@ export function useLoopTokenBalance({
   })
 
   const {
-    data: superLoopTokenMetadata,
-    isError: isSuperLoopTokenMetadataError,
-    isLoading: isSuperLoopTokenMetadataLoading,
-    refetch: refetchSuperLoopTokenMetadata,
+    data: superLoopData,
+    isError: isSuperLoopDataError,
+    isLoading: isSuperLoopDataLoading,
+    refetch: refetchSuperLoopData,
   } = useReadContracts({
     allowFailure: false,
     contracts: [
@@ -70,9 +95,32 @@ export function useLoopTokenBalance({
         functionName: "symbol",
         chainId,
       },
+      {
+        address: address ?? zeroAddress,
+        abi: loopAbi,
+        functionName: loopMethods.getDetails,
+        chainId,
+      },
+      {
+        address: address ?? zeroAddress,
+        abi: loopAbi,
+        functionName: "realtimeAvailableNow",
+        chainId,
+      },
+      {
+        address: cfaV1ForwarderAddress ?? zeroAddress,
+        abi: cfaV1ForwarderAbi,
+        functionName: "getAccountFlowrate",
+        args: [token ?? zeroAddress, address ?? zeroAddress],
+        chainId,
+      },
     ],
     query: {
-      enabled: queryEnabled && isSuperLoop,
+      enabled:
+        queryEnabled &&
+        isSuperLoop &&
+        Boolean(address) &&
+        Boolean(cfaV1ForwarderAddress),
     },
   })
 
@@ -80,28 +128,27 @@ export function useLoopTokenBalance({
 
   const data = useMemo<LoopTokenBalanceData | undefined>(() => {
     if (isSuperLoop) {
-      if (!superLoopTokenMetadata) return undefined
+      if (!superLoopData) return undefined
 
-      const [decimals, symbol] = superLoopTokenMetadata as readonly [
-        number,
-        string,
-      ]
-      const flowRatePerSecond = parseUnits(
-        SUPER_LOOP_TEST_FLOW_RATE_PER_SECOND,
-        decimals
-      )
-      const flowRatePerPeriod =
-        flowRatePerSecond * SUPER_LOOP_TEST_PERIOD_SECONDS
+      const [decimals, symbol, loopDetails, realtimeAvailableNow, flowRateRaw] =
+        superLoopData as readonly [
+          number,
+          string,
+          readonly [Address, bigint, bigint, bigint],
+          bigint,
+          bigint,
+        ]
+      const periodLengthSeconds = loopDetails[1]
+      const flowRatePerSecond = flowRateRaw
+      const flowRatePerPeriod = flowRatePerSecond * periodLengthSeconds
       const flowRatePerDay = flowRatePerSecond * SEC_TO_DAY
 
       return {
-        // Keep `value` aligned with the meaningful super loop distribution unit:
-        // how many tokens are released per claim period.
-        value: flowRatePerPeriod,
+        value: realtimeAvailableNow,
         flowRatePerSecond,
         flowRatePerPeriod,
         flowRatePerDay,
-        periodLengthSeconds: SUPER_LOOP_TEST_PERIOD_SECONDS,
+        periodLengthSeconds,
         flowRateError: false,
         decimals,
         symbol,
@@ -118,22 +165,16 @@ export function useLoopTokenBalance({
       decimals: tokenBalance.data.decimals,
       symbol: tokenBalance.data.symbol,
     }
-  }, [
-    isSuperLoop,
-    superLoopTokenMetadata,
-    tokenBalance.data,
-  ])
+  }, [isSuperLoop, superLoopData, tokenBalance.data])
 
   const refetch = useCallback(async () => {
-    await (isSuperLoop ? refetchSuperLoopTokenMetadata() : refetchTokenBalance())
-  }, [isSuperLoop, refetchSuperLoopTokenMetadata, refetchTokenBalance])
+    await (isSuperLoop ? refetchSuperLoopData() : refetchTokenBalance())
+  }, [isSuperLoop, refetchSuperLoopData, refetchTokenBalance])
 
   return {
     data,
-    isError: isSuperLoop ? isSuperLoopTokenMetadataError : tokenBalance.isError,
-    isLoading: isSuperLoop
-      ? isSuperLoopTokenMetadataLoading
-      : tokenBalance.isLoading,
+    isError: isSuperLoop ? isSuperLoopDataError : tokenBalance.isError,
+    isLoading: isSuperLoop ? isSuperLoopDataLoading : tokenBalance.isLoading,
     refetch,
   }
 }
