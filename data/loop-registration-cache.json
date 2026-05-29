@@ -16,20 +16,9 @@
         "utc": "Tue, 05 May 2026 22:23:40 GMT"
       },
       "periodLengthSeconds": "86400",
-      "currentPeriod": "22",
-      "lastProcessedPeriod": "22",
+      "currentPeriod": "23",
+      "lastProcessedPeriod": "23",
       "currentPeriodWindow": {
-        "periodStart": {
-          "unix": "1779834220",
-          "utc": "Tue, 26 May 2026 22:23:40 GMT"
-        },
-        "periodEndExclusive": {
-          "unix": "1779920620",
-          "utc": "Wed, 27 May 2026 22:23:40 GMT"
-        }
-      },
-      "pendingRegistrationPeriod": "23",
-      "pendingRegistrationPeriodWindow": {
         "periodStart": {
           "unix": "1779920620",
           "utc": "Wed, 27 May 2026 22:23:40 GMT"
@@ -37,6 +26,17 @@
         "periodEndExclusive": {
           "unix": "1780007020",
           "utc": "Thu, 28 May 2026 22:23:40 GMT"
+        }
+      },
+      "pendingRegistrationPeriod": "24",
+      "pendingRegistrationPeriodWindow": {
+        "periodStart": {
+          "unix": "1780007020",
+          "utc": "Thu, 28 May 2026 22:23:40 GMT"
+        },
+        "periodEndExclusive": {
+          "unix": "1780093420",
+          "utc": "Fri, 29 May 2026 22:23:40 GMT"
         }
       },
       "uniqueUsers": [
@@ -134,10 +134,11 @@
         "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA",
         "0xe0f1a6494ee81864A2BB84E31D7F252342b90476",
         "0xeA3E579dA60CdB97f3870f862Af5DB982C0Ea08c",
+        "0xf2650C2B30Dc835Da174021E178aB0239D188c00",
         "0xf434787e7D5bB5dcaBF008299d4d485e2868f579",
         "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
       ],
-      "uniqueUserCount": 96,
+      "uniqueUserCount": 97,
       "uniqueClaimUsers": [
         "0x000bE6EA15efe5e7dE25314Bf6E818Cd5a64CB20",
         "0x01C2B2756d35e8db931698007985A5AB7fc419d5",
@@ -214,15 +215,15 @@
       ],
       "uniqueClaimUserCount": 72,
       "stats": {
-        "totalRegistrationsCount": 665,
-        "totalClaimsCount": 525,
-        "totalRegisteredAmountRaw": "45780139728604194997",
-        "totalRegisteredAmountFormatted": "45.780139728604194997",
-        "totalClaimedAmountRaw": "37392517212156247706",
-        "totalClaimedAmountFormatted": "37.392517212156247706",
-        "totalUnclaimedAmountRaw": "8387622516447947291",
-        "totalUnclaimedAmountFormatted": "8.387622516447947291",
-        "claimRatePercent": "78.95"
+        "totalRegistrationsCount": 721,
+        "totalClaimsCount": 571,
+        "totalRegisteredAmountRaw": "47142479702291517557",
+        "totalRegisteredAmountFormatted": "47.142479702291517557",
+        "totalClaimedAmountRaw": "38717185256548604810",
+        "totalClaimedAmountFormatted": "38.71718525654860481",
+        "totalUnclaimedAmountRaw": "8425294445742912747",
+        "totalUnclaimedAmountFormatted": "8.425294445742912747",
+        "claimRatePercent": "79.20"
       },
       "periods": {
         "2": {
@@ -2128,32 +2129,64 @@
           "registeredUserCount": 49,
           "claimUsers": [
             "0x01a1De6Cc68c80bc905CB6b1A8cd9CF099A97209",
+            "0x08F7Fd04e76daC7e4d9e343e0B5510379f5bbA48",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
             "0x0d659056e26916e090D4702383371a5451E3dfcC",
+            "0x0f193b940E0E1779f09c3ce34E7f01bc8E80aC6E",
             "0x2225a3aBA4eDF1EBD6012d726F2b57E2c71fD044",
+            "0x2552a06d9242acf134BB184ea561a83597a0f431",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
             "0x3574e417f432c58Ec1138d226ec3b170e4471C0B",
+            "0x3f2dFFBeD8179D9b75a8a6f470685297264d0B50",
             "0x50Da33142CdD903Af82666Df5D4149dc6aB0c59d",
+            "0x545C83E60Bdc60CbC6357C33d817b4bA6FF832a9",
+            "0x5AE307983A0ac410523e9956b204690CAF983580",
             "0x5ba1342f0ED04Cf301f1749a3b2A124fe8D6F0aE",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x6FabeE780C1AF1Dc5242860884Fe2e83e2AC8efD",
+            "0x7582F2b4Bb874CF725652F7645a911Cbfbe5b16d",
             "0x79BF47BB54c81c943bF965770d7B68c8fb3f25b8",
+            "0x7D9bfD6e688f94E6F2C6dDb1f8BDa63b6550e964",
             "0x7E05382A7463bffD77fd09B44Ed261Dd72D74AA1",
+            "0x7d477EA91aBc560c1E5f36821C140B96cADa766e",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x8562e4199743671322652dd7955920D7bB0FD372",
+            "0x897089Db1353B871efdBd3107B2E6369f662D712",
+            "0x8e2dCF9FF1FD5B2F39D9F66Cab1A98684b1aB802",
+            "0x95f6328A532cef7E9c508298Ef9761C482B1c674",
             "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0x9D6999Ef6a1f13703562981cefB087a166cfe0A1",
+            "0xA7bD971aC55340D4a92E9F830c4601B74e3a2493",
+            "0xC13ccf23E4e4709E41fC468a8C7e353c69bf94EF",
+            "0xCb1b704cE494B73E2F9f67f876A464b507D2c97a",
+            "0xD9a0a16E5A634bF5a02962b667f17C65bAE14086",
             "0xDA262cB03FF293c37b6aD4767B49b4350047BD79",
             "0xE53AdE7D9a62ADC6e5ec926272D508CE8729f056",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
             "0xa1Fc2D8D412766A3c22C3B7b1e658928f9F5ccEB",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xac92D6DB8938fb35bcF9D454DB7741aB3E42b02d",
             "0xb4eAcF57FE639BdAE0103bb0a61E60B5AE3e9Aeb",
+            "0xc3DF8EFD486BC1F8B403c0cAE43Cdf124e042B5F",
             "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xd9EF6aff734e6D779B0a3BDDcB0049F3AfE1957e",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA",
+            "0xe0f1a6494ee81864A2BB84E31D7F252342b90476",
+            "0xf434787e7D5bB5dcaBF008299d4d485e2868f579",
             "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
           ],
-          "claimUserCount": 15,
-          "claimEventCount": 15,
+          "claimUserCount": 47,
+          "claimEventCount": 47,
           "payoutPerUserRaw": "30752595342828952",
           "payoutPerUserFormatted": "0.030752595342828952",
-          "claimedAmountRaw": "461288930142434280",
-          "claimedAmountFormatted": "0.46128893014243428",
+          "claimedAmountRaw": "1445371981112960744",
+          "claimedAmountFormatted": "1.445371981112960744",
           "totalRegisteredAmountRaw": "1506877171798618648",
           "totalRegisteredAmountFormatted": "1.506877171798618648",
-          "unclaimedAmountRaw": "1045588241656184368",
-          "unclaimedAmountFormatted": "1.045588241656184368",
-          "claimRatePercent": "30.61",
+          "unclaimedAmountRaw": "61505190685657904",
+          "unclaimedAmountFormatted": "0.061505190685657904",
+          "claimRatePercent": "95.92",
           "newUsers": [
             "0x2225a3aBA4eDF1EBD6012d726F2b57E2c71fD044",
             "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
@@ -2162,6 +2195,7 @@
           "cumulativeUniqueUserCount": 96
         },
         "23": {
+          "periodNumber": "23",
           "periodStart": {
             "unix": "1779920620",
             "utc": "Wed, 27 May 2026 22:23:40 GMT"
@@ -2172,25 +2206,127 @@
           },
           "registeredUsers": [
             "0x01a1De6Cc68c80bc905CB6b1A8cd9CF099A97209",
+            "0x02746d2FB0d3033A4f7F7cC0176005C1f88fb2D7",
             "0x064Bc320CB30aa2C63D7b99C95b37Fe5c7ACAa61",
+            "0x08F7Fd04e76daC7e4d9e343e0B5510379f5bbA48",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
             "0x0d659056e26916e090D4702383371a5451E3dfcC",
+            "0x0f193b940E0E1779f09c3ce34E7f01bc8E80aC6E",
+            "0x2225a3aBA4eDF1EBD6012d726F2b57E2c71fD044",
+            "0x2552a06d9242acf134BB184ea561a83597a0f431",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x3574e417f432c58Ec1138d226ec3b170e4471C0B",
+            "0x3f2dFFBeD8179D9b75a8a6f470685297264d0B50",
+            "0x4065de123cF18E9C4aB7DA18DB21518285eA164E",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x50Da33142CdD903Af82666Df5D4149dc6aB0c59d",
+            "0x545C83E60Bdc60CbC6357C33d817b4bA6FF832a9",
+            "0x5AE307983A0ac410523e9956b204690CAF983580",
+            "0x5ba1342f0ED04Cf301f1749a3b2A124fe8D6F0aE",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x6FabeE780C1AF1Dc5242860884Fe2e83e2AC8efD",
+            "0x703cF6401d04A06378C6F59dbd9117203Ba9892D",
+            "0x7582F2b4Bb874CF725652F7645a911Cbfbe5b16d",
+            "0x79BF47BB54c81c943bF965770d7B68c8fb3f25b8",
+            "0x7D9bfD6e688f94E6F2C6dDb1f8BDa63b6550e964",
+            "0x7E05382A7463bffD77fd09B44Ed261Dd72D74AA1",
+            "0x7d477EA91aBc560c1E5f36821C140B96cADa766e",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x8562e4199743671322652dd7955920D7bB0FD372",
+            "0x897089Db1353B871efdBd3107B2E6369f662D712",
+            "0x8e2dCF9FF1FD5B2F39D9F66Cab1A98684b1aB802",
+            "0x95f6328A532cef7E9c508298Ef9761C482B1c674",
+            "0x9678FC9040b60AE8b4872DA4540a9967807B2c5a",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0x9D6999Ef6a1f13703562981cefB087a166cfe0A1",
+            "0xA7bD971aC55340D4a92E9F830c4601B74e3a2493",
+            "0xC13ccf23E4e4709E41fC468a8C7e353c69bf94EF",
+            "0xCb1b704cE494B73E2F9f67f876A464b507D2c97a",
+            "0xD9a0a16E5A634bF5a02962b667f17C65bAE14086",
+            "0xDA262cB03FF293c37b6aD4767B49b4350047BD79",
+            "0xDc07d3a57B313c5180653A4D6A5A8273E5f2028C",
+            "0xE53AdE7D9a62ADC6e5ec926272D508CE8729f056",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xF631f45E0786a1f3e074fa1063de48d001dBAa9a",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
+            "0xa1Fc2D8D412766A3c22C3B7b1e658928f9F5ccEB",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xac92D6DB8938fb35bcF9D454DB7741aB3E42b02d",
+            "0xb4eAcF57FE639BdAE0103bb0a61E60B5AE3e9Aeb",
+            "0xc3DF8EFD486BC1F8B403c0cAE43Cdf124e042B5F",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xd9EF6aff734e6D779B0a3BDDcB0049F3AfE1957e",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA",
+            "0xe0f1a6494ee81864A2BB84E31D7F252342b90476",
+            "0xf2650C2B30Dc835Da174021E178aB0239D188c00",
+            "0xf434787e7D5bB5dcaBF008299d4d485e2868f579",
+            "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
+          ],
+          "registeredUserCount": 56,
+          "claimUsers": [
+            "0x064Bc320CB30aa2C63D7b99C95b37Fe5c7ACAa61",
             "0x2225a3aBA4eDF1EBD6012d726F2b57E2c71fD044",
             "0x3574e417f432c58Ec1138d226ec3b170e4471C0B",
             "0x50Da33142CdD903Af82666Df5D4149dc6aB0c59d",
             "0x5ba1342f0ED04Cf301f1749a3b2A124fe8D6F0aE",
-            "0x79BF47BB54c81c943bF965770d7B68c8fb3f25b8",
+            "0x6FabeE780C1AF1Dc5242860884Fe2e83e2AC8efD",
             "0x7E05382A7463bffD77fd09B44Ed261Dd72D74AA1",
+            "0x8562e4199743671322652dd7955920D7bB0FD372",
+            "0x8e2dCF9FF1FD5B2F39D9F66Cab1A98684b1aB802",
             "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
-            "0xDA262cB03FF293c37b6aD4767B49b4350047BD79",
-            "0xE53AdE7D9a62ADC6e5ec926272D508CE8729f056",
-            "0xa1Fc2D8D412766A3c22C3B7b1e658928f9F5ccEB",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
             "0xb4eAcF57FE639BdAE0103bb0a61E60B5AE3e9Aeb",
-            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
-            "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 14,
+          "claimEventCount": 14,
+          "payoutPerUserRaw": "24327499530130760",
+          "payoutPerUserFormatted": "0.02432749953013076",
+          "claimedAmountRaw": "340584993421830640",
+          "claimedAmountFormatted": "0.34058499342183064",
+          "totalRegisteredAmountRaw": "1362339973687322560",
+          "totalRegisteredAmountFormatted": "1.36233997368732256",
+          "unclaimedAmountRaw": "1021754980265491920",
+          "unclaimedAmountFormatted": "1.02175498026549192",
+          "claimRatePercent": "25.00",
+          "newUsers": [
+            "0xf2650C2B30Dc835Da174021E178aB0239D188c00"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 97
+        },
+        "24": {
+          "periodStart": {
+            "unix": "1780007020",
+            "utc": "Thu, 28 May 2026 22:23:40 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1780093420",
+            "utc": "Fri, 29 May 2026 22:23:40 GMT"
+          },
+          "registeredUsers": [
+            "0x064Bc320CB30aa2C63D7b99C95b37Fe5c7ACAa61",
+            "0x2225a3aBA4eDF1EBD6012d726F2b57E2c71fD044",
+            "0x3574e417f432c58Ec1138d226ec3b170e4471C0B",
+            "0x50Da33142CdD903Af82666Df5D4149dc6aB0c59d",
+            "0x5ba1342f0ED04Cf301f1749a3b2A124fe8D6F0aE",
+            "0x6FabeE780C1AF1Dc5242860884Fe2e83e2AC8efD",
+            "0x76E059C6FF6bf9FFFD5f33AFdf4AB2FD511C9DF4",
+            "0x7E05382A7463bffD77fd09B44Ed261Dd72D74AA1",
+            "0x8562e4199743671322652dd7955920D7bB0FD372",
+            "0x8e2dCF9FF1FD5B2F39D9F66Cab1A98684b1aB802",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xA02549cD0b2ED268dAB4B1D8e98Bb6F4a076262B",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xEB2BE9A4ce815C1328957f09CDC63826D55317c4",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
+            "0xb4eAcF57FE639BdAE0103bb0a61E60B5AE3e9Aeb",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
           ]
         }
       },
-      "updatedAt": "2026-05-28T04:11:39.134Z"
+      "updatedAt": "2026-05-29T04:15:02.068Z"
     },
     "1hive": {
       "loopName": "1Hive Gardens",
@@ -2207,20 +2343,9 @@
         "utc": "Tue, 05 May 2026 22:23:35 GMT"
       },
       "periodLengthSeconds": "86400",
-      "currentPeriod": "22",
-      "lastProcessedPeriod": "22",
+      "currentPeriod": "23",
+      "lastProcessedPeriod": "23",
       "currentPeriodWindow": {
-        "periodStart": {
-          "unix": "1779834215",
-          "utc": "Tue, 26 May 2026 22:23:35 GMT"
-        },
-        "periodEndExclusive": {
-          "unix": "1779920615",
-          "utc": "Wed, 27 May 2026 22:23:35 GMT"
-        }
-      },
-      "pendingRegistrationPeriod": "23",
-      "pendingRegistrationPeriodWindow": {
         "periodStart": {
           "unix": "1779920615",
           "utc": "Wed, 27 May 2026 22:23:35 GMT"
@@ -2228,6 +2353,17 @@
         "periodEndExclusive": {
           "unix": "1780007015",
           "utc": "Thu, 28 May 2026 22:23:35 GMT"
+        }
+      },
+      "pendingRegistrationPeriod": "24",
+      "pendingRegistrationPeriodWindow": {
+        "periodStart": {
+          "unix": "1780007015",
+          "utc": "Thu, 28 May 2026 22:23:35 GMT"
+        },
+        "periodEndExclusive": {
+          "unix": "1780093415",
+          "utc": "Fri, 29 May 2026 22:23:35 GMT"
         }
       },
       "uniqueUsers": [
@@ -2286,15 +2422,15 @@
       ],
       "uniqueClaimUserCount": 23,
       "stats": {
-        "totalRegistrationsCount": 245,
-        "totalClaimsCount": 204,
-        "totalRegisteredAmountRaw": "47149182578997888308",
-        "totalRegisteredAmountFormatted": "47.149182578997888308",
-        "totalClaimedAmountRaw": "40995051985735164245",
-        "totalClaimedAmountFormatted": "40.995051985735164245",
-        "totalUnclaimedAmountRaw": "6154130593262724063",
-        "totalUnclaimedAmountFormatted": "6.154130593262724063",
-        "claimRatePercent": "83.27"
+        "totalRegistrationsCount": 262,
+        "totalClaimsCount": 220,
+        "totalRegisteredAmountRaw": "48450924541862248036",
+        "totalRegisteredAmountFormatted": "48.450924541862248036",
+        "totalClaimedAmountRaw": "42365445654551802582",
+        "totalClaimedAmountFormatted": "42.365445654551802582",
+        "totalUnclaimedAmountRaw": "6085478887310445454",
+        "totalUnclaimedAmountFormatted": "6.085478887310445454",
+        "claimRatePercent": "83.97"
       },
       "periods": {
         "2": {
@@ -3396,21 +3532,32 @@
           "registeredUserCount": 16,
           "claimUsers": [
             "0x01a1De6Cc68c80bc905CB6b1A8cd9CF099A97209",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x76E059C6FF6bf9FFFD5f33AFdf4AB2FD511C9DF4",
+            "0x897089Db1353B871efdBd3107B2E6369f662D712",
             "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xCb1b704cE494B73E2F9f67f876A464b507D2c97a",
             "0xDA262cB03FF293c37b6aD4767B49b4350047BD79",
-            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xd9EF6aff734e6D779B0a3BDDcB0049F3AfE1957e",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
           ],
-          "claimUserCount": 4,
-          "claimEventCount": 4,
+          "claimUserCount": 15,
+          "claimEventCount": 15,
           "payoutPerUserRaw": "89775307783748947",
           "payoutPerUserFormatted": "0.089775307783748947",
-          "claimedAmountRaw": "359101231134995788",
-          "claimedAmountFormatted": "0.359101231134995788",
+          "claimedAmountRaw": "1346629616756234205",
+          "claimedAmountFormatted": "1.346629616756234205",
           "totalRegisteredAmountRaw": "1436404924539983152",
           "totalRegisteredAmountFormatted": "1.436404924539983152",
-          "unclaimedAmountRaw": "1077303693404987364",
-          "unclaimedAmountFormatted": "1.077303693404987364",
-          "claimRatePercent": "25.00",
+          "unclaimedAmountRaw": "89775307783748947",
+          "unclaimedAmountFormatted": "0.089775307783748947",
+          "claimRatePercent": "93.75",
           "newUsers": [
             "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
           ],
@@ -3418,6 +3565,7 @@
           "cumulativeUniqueUserCount": 26
         },
         "23": {
+          "periodNumber": "23",
           "periodStart": {
             "unix": "1779920615",
             "utc": "Wed, 27 May 2026 22:23:35 GMT"
@@ -3428,14 +3576,65 @@
           },
           "registeredUsers": [
             "0x01a1De6Cc68c80bc905CB6b1A8cd9CF099A97209",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
             "0x2E1bCe43302218d12CE9FF20D404f7E7eeFC27dd",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x703cF6401d04A06378C6F59dbd9117203Ba9892D",
+            "0x76E059C6FF6bf9FFFD5f33AFdf4AB2FD511C9DF4",
+            "0x897089Db1353B871efdBd3107B2E6369f662D712",
             "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xCb1b704cE494B73E2F9f67f876A464b507D2c97a",
             "0xDA262cB03FF293c37b6aD4767B49b4350047BD79",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xd9EF6aff734e6D779B0a3BDDcB0049F3AfE1957e",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 17,
+          "claimUsers": [
+            "0x76E059C6FF6bf9FFFD5f33AFdf4AB2FD511C9DF4",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 5,
+          "claimEventCount": 5,
+          "payoutPerUserRaw": "76573056639079984",
+          "payoutPerUserFormatted": "0.076573056639079984",
+          "claimedAmountRaw": "382865283195399920",
+          "claimedAmountFormatted": "0.38286528319539992",
+          "totalRegisteredAmountRaw": "1301741962864359728",
+          "totalRegisteredAmountFormatted": "1.301741962864359728",
+          "unclaimedAmountRaw": "918876679668959808",
+          "unclaimedAmountFormatted": "0.918876679668959808",
+          "claimRatePercent": "29.41",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 26
+        },
+        "24": {
+          "periodStart": {
+            "unix": "1780007015",
+            "utc": "Thu, 28 May 2026 22:23:35 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1780093415",
+            "utc": "Fri, 29 May 2026 22:23:35 GMT"
+          },
+          "registeredUsers": [
+            "0x76E059C6FF6bf9FFFD5f33AFdf4AB2FD511C9DF4",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xFBEc05B5C320E32a0404063E422C4a544b6A77c8",
             "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
           ]
         }
       },
-      "updatedAt": "2026-05-28T04:10:21.315Z"
+      "updatedAt": "2026-05-29T04:15:24.059Z"
     }
   },
   "global": {
@@ -3542,10 +3741,11 @@
       "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA",
       "0xe0f1a6494ee81864A2BB84E31D7F252342b90476",
       "0xeA3E579dA60CdB97f3870f862Af5DB982C0Ea08c",
+      "0xf2650C2B30Dc835Da174021E178aB0239D188c00",
       "0xf434787e7D5bB5dcaBF008299d4d485e2868f579",
       "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
     ],
-    "uniqueUserCount": 100,
+    "uniqueUserCount": 101,
     "uniqueClaimUsers": [
       "0x000bE6EA15efe5e7dE25314Bf6E818Cd5a64CB20",
       "0x01C2B2756d35e8db931698007985A5AB7fc419d5",
@@ -3626,23 +3826,23 @@
     ],
     "uniqueClaimUserCount": 76,
     "stats": {
-      "totalRegistrationsCount": 910,
-      "totalClaimsCount": 729,
-      "claimRatePercent": "80.11"
+      "totalRegistrationsCount": 983,
+      "totalClaimsCount": 791,
+      "claimRatePercent": "80.47"
     },
     "tokenTotals": [
       {
         "tokenAddress": "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
         "tokenSymbol": "HNY",
         "tokenDecimals": 18,
-        "totalRegisteredAmountRaw": "92929322307602083305",
-        "totalRegisteredAmountFormatted": "92.929322307602083305",
-        "totalClaimedAmountRaw": "78387569197891411951",
-        "totalClaimedAmountFormatted": "78.387569197891411951",
-        "totalUnclaimedAmountRaw": "14541753109710671354",
-        "totalUnclaimedAmountFormatted": "14.541753109710671354"
+        "totalRegisteredAmountRaw": "95593404244153765593",
+        "totalRegisteredAmountFormatted": "95.593404244153765593",
+        "totalClaimedAmountRaw": "81082630911100407392",
+        "totalClaimedAmountFormatted": "81.082630911100407392",
+        "totalUnclaimedAmountRaw": "14510773333053358201",
+        "totalUnclaimedAmountFormatted": "14.510773333053358201"
       }
     ],
-    "updatedAt": "2026-05-28T04:11:39.134Z"
+    "updatedAt": "2026-05-29T04:15:24.060Z"
   }
 }

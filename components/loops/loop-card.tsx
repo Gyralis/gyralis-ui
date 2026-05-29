@@ -69,7 +69,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                   <h2 className="max-w-[14ch] text-[1.65rem] text-foreground">
                     {loop.title}
                   </h2>
-                  <div className="mt-2 flex">
+                  <div className="mt-1 flex">
                     <LoopTypeBadge isSuper={isSuperLoop} />
                   </div>
                 </div>
