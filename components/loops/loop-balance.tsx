@@ -9,6 +9,7 @@ import {
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 import {
+  formatFlowingDisplayValue,
   formatMonthlyIncoming,
   useFlowingBalance,
 } from "@/lib/hooks/app/use-flowing-balance"
@@ -64,8 +65,8 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
   }
 
   const formattedBalance = isSuperLoop
-    ? trimFormattedBalance(flowingBalance.formatted, 8)
-    : trimFormattedBalance(formatUnits(data.value, data.decimals), 4)
+    ? formatFlowingDisplayValue(flowingBalance.formatted, 7)
+    : trimFormattedBalance(formatUnits(data.value, data.decimals), 1)
   const monthlyIncoming = formatMonthlyIncoming({
     flowRatePerSecond: data.flowRatePerSecond,
     decimals: data.decimals,
@@ -83,11 +84,13 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
           <p>Loop Balance</p>
         </div>
 
-        <div className="mt-2.5 flex min-w-0 items-end gap-2.5">
-          <span className="block min-w-0 break-all font-heading text-4xl font-bold leading-none text-primary sm:text-5xl md:text-[3.4rem]">
-            {formattedBalance}
-          </span>
-          <span className="mb-1.5 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="mt-2 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2.5">
+          <div className="min-w-0">
+            <span className="block min-w-0 font-heading text-4xl font-bold leading-none tabular-nums text-primary sm:text-5xl md:text-[3.4rem]">
+              {formattedBalance}
+            </span>
+          </div>
+          <span className="mb-1 shrink-0 text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             {data.symbol}
           </span>
         </div>
