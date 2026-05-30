@@ -27,6 +27,17 @@ import type {
 
 const DEFAULT_CACHE_FILE_PATH = resolve(process.cwd(), "data/loop-registration-cache.json")
 const DEFAULT_PERIODS_BACK = 6
+const periodEndedShortFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+})
+const periodEndedLongFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+})
 
 function parseInteger(value: string | number | undefined | null): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value
@@ -71,6 +82,29 @@ function filterLoopKeys(loopKeys?: DashboardLoopKey[]): DashboardLoopKey[] {
   return requested.filter((loopKey) => loopDashboardMeta[loopKey]?.isVisibleInDashboard)
 }
 
+function formatPeriodEndedLabels(periodEndUnix: string | null) {
+  if (!periodEndUnix) {
+    return {
+      periodEndedShortLabel: null,
+      periodEndedLongLabel: null,
+    }
+  }
+
+  const timestampMs = Number.parseInt(periodEndUnix, 10) * 1000
+  if (!Number.isFinite(timestampMs)) {
+    return {
+      periodEndedShortLabel: null,
+      periodEndedLongLabel: null,
+    }
+  }
+
+  const date = new Date(timestampMs)
+  return {
+    periodEndedShortLabel: periodEndedShortFormatter.format(date),
+    periodEndedLongLabel: periodEndedLongFormatter.format(date),
+  }
+}
+
 function toPeriodStats(
   period: number,
   periodEntry: RawLoopPeriodEntry | undefined,
@@ -78,10 +112,17 @@ function toPeriodStats(
 ): DashboardPeriodStats | null {
   if (!periodEntry || !includeForDashboard) return null
 
+  const periodEndedAtUnix = periodEntry.periodEndExclusive?.unix ?? null
+  const { periodEndedShortLabel, periodEndedLongLabel } =
+    formatPeriodEndedLabels(periodEndedAtUnix)
+
   return {
     period,
     periodStartUtc: periodEntry.periodStart?.utc ?? null,
     periodEndUtc: periodEntry.periodEndExclusive?.utc ?? null,
+    periodEndedAtUnix,
+    periodEndedShortLabel,
+    periodEndedLongLabel,
     registeredUserCount: parseCount(
       periodEntry.registeredUserCount ?? periodEntry.registeredUsers?.length
     ),
@@ -144,6 +185,37 @@ function buildLoopSummary(loopKey: DashboardLoopKey, rawLoop: RawLoopCacheEntry)
       rawLoop.stats?.totalClaimedAmountRaw,
       rawLoop.stats?.totalRegisteredAmountRaw
     ),
+    tokenSnapshots: {
+      balanceAtPeriod1: rawLoop.token?.snapshots?.balanceAtPeriod1
+        ? {
+            periodNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtPeriod1.periodNumber
+            ),
+            blockNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtPeriod1.blockNumber
+            ),
+            raw: rawLoop.token.snapshots.balanceAtPeriod1.raw ?? null,
+            formatted:
+              rawLoop.token.snapshots.balanceAtPeriod1.formatted ?? null,
+          }
+        : null,
+      balanceAtLastProcessedPeriod: rawLoop.token?.snapshots
+        ?.balanceAtLastProcessedPeriod
+        ? {
+            periodNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.periodNumber
+            ),
+            blockNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.blockNumber
+            ),
+            raw:
+              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.raw ?? null,
+            formatted:
+              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.formatted ??
+              null,
+          }
+        : null,
+    },
     periods,
     currentPeriodStats,
     updatedAt: rawLoop.updatedAt ?? null,
@@ -230,6 +302,9 @@ function buildCurrentPeriodOverview(
 
   return {
     period: currentPeriod,
+    periodEndedAtUnix: periods[0]?.periodEndedAtUnix ?? null,
+    periodEndedShortLabel: periods[0]?.periodEndedShortLabel ?? null,
+    periodEndedLongLabel: periods[0]?.periodEndedLongLabel ?? null,
     registrations,
     claims,
     claimRatePercent: formatNumberPercent(claims, registrations),
@@ -251,20 +326,38 @@ function buildWindowPeriods(loopSummaries: DashboardLoopSummary[], periodsBack: 
   return Array.from({ length: maxPeriod - startPeriod + 1 }, (_, index) => startPeriod + index)
 }
 
+function findReferencePeriod(
+  loopSummaries: DashboardLoopSummary[],
+  period: number
+): DashboardPeriodStats {
+  return (
+    loopSummaries
+      .flatMap((loop) => loop.periods)
+      .find((periodEntry) => periodEntry.period === period) ?? nullPeriod(period)
+  )
+}
+
 function buildMetricRows(
   loopSummaries: DashboardLoopSummary[],
   periods: number[],
   selector: (period: DashboardPeriodStats) => number | null
 ): DashboardMetricByPeriodRow[] {
-  return periods.map((period) => ({
-    period,
-    values: Object.fromEntries(
-      loopSummaries.map((loop) => [
-        loop.loopKey,
-        selector(loop.periods.find((loopPeriod) => loopPeriod.period === period) ?? nullPeriod(period)),
-      ])
-    ) as Partial<Record<DashboardLoopKey, number | null>>,
-  }))
+  return periods.map((period) => {
+    const referencePeriod = findReferencePeriod(loopSummaries, period)
+
+    return {
+      period,
+      periodEndedAtUnix: referencePeriod.periodEndedAtUnix,
+      periodEndedShortLabel: referencePeriod.periodEndedShortLabel,
+      periodEndedLongLabel: referencePeriod.periodEndedLongLabel,
+      values: Object.fromEntries(
+        loopSummaries.map((loop) => [
+          loop.loopKey,
+          selector(loop.periods.find((loopPeriod) => loopPeriod.period === period) ?? nullPeriod(period)),
+        ])
+      ) as Partial<Record<DashboardLoopKey, number | null>>,
+    }
+  })
 }
 
 function nullPeriod(period: number): DashboardPeriodStats {
@@ -272,6 +365,9 @@ function nullPeriod(period: number): DashboardPeriodStats {
     period,
     periodStartUtc: null,
     periodEndUtc: null,
+    periodEndedAtUnix: null,
+    periodEndedShortLabel: null,
+    periodEndedLongLabel: null,
     registeredUserCount: 0,
     claimEventCount: 0,
     claimRatePercent: null,
@@ -293,6 +389,9 @@ function buildDistributionRows(
 
       return {
         period,
+        periodEndedAtUnix: loopPeriod.periodEndedAtUnix,
+        periodEndedShortLabel: loopPeriod.periodEndedShortLabel,
+        periodEndedLongLabel: loopPeriod.periodEndedLongLabel,
         loopKey: loop.loopKey,
         loopName: loop.meta.title,
         distributedAmount: loopPeriod.totalRegisteredAmount,
@@ -330,6 +429,9 @@ function buildPeriodTableRows(
 
       return {
         period,
+        periodEndedAtUnix: loopPeriod.periodEndedAtUnix,
+        periodEndedShortLabel: loopPeriod.periodEndedShortLabel,
+        periodEndedLongLabel: loopPeriod.periodEndedLongLabel,
         loopKey: loop.loopKey,
         loopName: loop.meta.title,
         registrations: loopPeriod.registeredUserCount,

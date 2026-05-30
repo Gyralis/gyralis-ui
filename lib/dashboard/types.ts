@@ -59,6 +59,27 @@ export interface RawLoopTokenInfo {
   address?: string
   symbol?: string | null
   decimals?: number
+  snapshots?: {
+    balanceAtPeriod1?: {
+      periodNumber?: string
+      blockNumber?: string
+      raw?: string
+      formatted?: string
+    }
+    balanceAtLastProcessedPeriod?: {
+      periodNumber?: string
+      blockNumber?: string
+      raw?: string
+      formatted?: string
+    }
+  }
+}
+
+export interface DashboardLoopTokenSnapshot {
+  periodNumber: number | null
+  blockNumber: number | null
+  raw: string | null
+  formatted: string | null
 }
 
 export interface RawLoopCacheEntry {
@@ -111,6 +132,9 @@ export interface DashboardPeriodStats {
   period: number
   periodStartUtc: string | null
   periodEndUtc: string | null
+  periodEndedAtUnix: string | null
+  periodEndedShortLabel: string | null
+  periodEndedLongLabel: string | null
   registeredUserCount: number
   claimEventCount: number
   claimRatePercent: number | null
@@ -136,6 +160,10 @@ export interface DashboardLoopSummary {
   totalClaimedAmount: string | null
   totalUnclaimedAmount: string | null
   claimedAmountRatePercent: number | null
+  tokenSnapshots: {
+    balanceAtPeriod1: DashboardLoopTokenSnapshot | null
+    balanceAtLastProcessedPeriod: DashboardLoopTokenSnapshot | null
+  }
   periods: DashboardPeriodStats[]
   currentPeriodStats: DashboardPeriodStats | null
   updatedAt: string | null
@@ -158,6 +186,9 @@ export interface DashboardOverviewCards {
 
 export interface DashboardCurrentPeriodOverview {
   period: number
+  periodEndedAtUnix: string | null
+  periodEndedShortLabel: string | null
+  periodEndedLongLabel: string | null
   registrations: number
   claims: number
   claimRatePercent: number | null
@@ -168,11 +199,17 @@ export interface DashboardCurrentPeriodOverview {
 
 export interface DashboardMetricByPeriodRow {
   period: number
+  periodEndedAtUnix: string | null
+  periodEndedShortLabel: string | null
+  periodEndedLongLabel: string | null
   values: Partial<Record<DashboardLoopKey, number | null>>
 }
 
 export interface DashboardDistributionByPeriodRow {
   period: number
+  periodEndedAtUnix: string | null
+  periodEndedShortLabel: string | null
+  periodEndedLongLabel: string | null
   loopKey: DashboardLoopKey
   loopName: string
   distributedAmount: string | null
@@ -182,6 +219,9 @@ export interface DashboardDistributionByPeriodRow {
 
 export interface DashboardPeriodTableRow {
   period: number
+  periodEndedAtUnix: string | null
+  periodEndedShortLabel: string | null
+  periodEndedLongLabel: string | null
   loopKey: DashboardLoopKey
   loopName: string
   registrations: number

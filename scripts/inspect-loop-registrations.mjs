@@ -49,6 +49,7 @@ const periodPayoutAbi = parseAbi([
 const erc20MetadataAbi = parseAbi([
   "function symbol() view returns (string)",
   "function decimals() view returns (uint8)",
+  "function balanceOf(address account) view returns (uint256)",
 ])
 
 const legacyRegisterEvent = parseAbiItem(
@@ -241,6 +242,83 @@ async function fetchTokenInfo(client, tokenAddress) {
   }
 }
 
+async function findBlockNumberAtOrAfterTimestamp(client, targetTimestamp) {
+  const latestBlock = await client.getBlock({ blockTag: "latest" })
+  if (latestBlock.timestamp <= targetTimestamp) return latestBlock.number
+
+  let low = 0n
+  let high = latestBlock.number
+
+  while (low < high) {
+    const mid = (low + high) / 2n
+    const block = await client.getBlock({ blockNumber: mid })
+
+    if (block.timestamp < targetTimestamp) low = mid + 1n
+    else high = mid
+  }
+
+  return low
+}
+
+async function fetchLoopTokenBalanceSnapshot(
+  client,
+  tokenAddress,
+  loopAddress,
+  decimals,
+  periodNumber,
+  schedule
+) {
+  const snapshotTimestamp =
+    schedule.firstPeriodStart + BigInt(periodNumber) * schedule.periodLength
+  const blockNumber = await findBlockNumberAtOrAfterTimestamp(client, snapshotTimestamp)
+  const balance = await client.readContract({
+    address: tokenAddress,
+    abi: erc20MetadataAbi,
+    functionName: "balanceOf",
+    args: [loopAddress],
+    blockNumber,
+  })
+
+  return {
+    periodNumber: periodNumber.toString(),
+    blockNumber: blockNumber.toString(),
+    raw: balance.toString(),
+    formatted: formatTokenAmount(balance, decimals),
+  }
+}
+
+async function fetchLoopTokenSnapshots(
+  client,
+  loop,
+  schedule,
+  tokenInfo,
+  lastProcessedPeriod
+) {
+  if (lastProcessedPeriod < 1n) return null
+
+  const periodNumbers = [1n]
+  if (lastProcessedPeriod !== 1n) periodNumbers.push(lastProcessedPeriod)
+
+  const snapshots = await Promise.all(
+    periodNumbers.map((periodNumber) =>
+      fetchLoopTokenBalanceSnapshot(
+        client,
+        schedule.token,
+        loop.address,
+        tokenInfo.decimals,
+        periodNumber,
+        schedule
+      )
+    )
+  )
+
+  return {
+    balanceAtPeriod1: snapshots[0],
+    balanceAtLastProcessedPeriod:
+      periodNumbers.length === 1 ? snapshots[0] : snapshots[snapshots.length - 1],
+  }
+}
+
 async function fetchPayoutsByPeriod(client, loop, lastEndedPeriod) {
   const payoutsByPeriod = new Map()
   if (loop.contractType !== "loop" || lastEndedPeriod < 1n) return payoutsByPeriod
@@ -357,6 +435,16 @@ function buildStoredPeriods(usersByPeriod, schedule) {
   return storedPeriods
 }
 
+function pruneStoredPeriods(storedPeriods, maxPeriod) {
+  const prunedPeriods = {}
+
+  for (const [periodKey, periodData] of Object.entries(storedPeriods ?? {})) {
+    if (BigInt(periodKey) <= maxPeriod) prunedPeriods[periodKey] = periodData
+  }
+
+  return prunedPeriods
+}
+
 function buildSummary(
   loop,
   currentPeriod,
@@ -364,6 +452,7 @@ function buildSummary(
   storedPeriods,
   schedule,
   tokenInfo,
+  tokenSnapshots,
   claimStatsByPeriod,
   payoutsByPeriod
 ) {
@@ -433,32 +522,20 @@ function buildSummary(
     })
   }
 
-  const currentPeriodWindow = getPeriodWindow(
-    currentPeriod,
-    schedule.firstPeriodStart,
-    schedule.periodLength
-  )
-  const pendingRegistrationPeriod = currentPeriod + 1n
-  const pendingRegistrationPeriodWindow = getPeriodWindow(
-    pendingRegistrationPeriod,
-    schedule.firstPeriodStart,
-    schedule.periodLength
-  )
-
   return {
     loopKey: loop.key,
     loopName: loop.name,
     loopAddress: loop.address,
     chainId: loop.chain.id,
     contractType: loop.contractType,
-    token: tokenInfo,
+    token: {
+      ...tokenInfo,
+      snapshots: tokenSnapshots,
+    },
     firstPeriodStart: formatTimestamp(schedule.firstPeriodStart),
     periodLengthSeconds: schedule.periodLength.toString(),
     currentPeriod: currentPeriod.toString(),
-    currentPeriodWindow,
     lastEndedPeriod: lastEndedPeriod.toString(),
-    pendingRegistrationPeriod: pendingRegistrationPeriod.toString(),
-    pendingRegistrationPeriodWindow,
     uniqueUsers: Array.from(allUniqueUsers).sort(),
     uniqueUserCount: allUniqueUsers.size,
     uniqueClaimUsers: Array.from(allUniqueClaimers).sort(),
@@ -535,9 +612,6 @@ function buildCacheLoopEntry(loop, currentPeriod, lastEndedPeriod, storedPeriods
     periodLengthSeconds: summary.periodLengthSeconds,
     currentPeriod: currentPeriod.toString(),
     lastProcessedPeriod: lastEndedPeriod.toString(),
-    currentPeriodWindow: summary.currentPeriodWindow,
-    pendingRegistrationPeriod: (currentPeriod + 1n).toString(),
-    pendingRegistrationPeriodWindow: summary.pendingRegistrationPeriodWindow,
     uniqueUsers: summary.uniqueUsers,
     uniqueUserCount: summary.uniqueUserCount,
     uniqueClaimUsers: summary.uniqueClaimUsers,
@@ -670,9 +744,9 @@ async function inspectLoop(loop, args, cache) {
   const configuredUpperBound =
     args.upToPeriod == null ? null : parsePeriod(args.upToPeriod, "--up-to-period")
 
-  // We exclude the pending registration period (currentPeriod + 1) and default
-  // to scanning through the current live period, whose registrants are already fixed.
-  const discoveredLastPeriod = currentPeriod
+  // The cache tracks only completed periods, so the latest processed period is
+  // always the previous period relative to the live current period.
+  const discoveredLastPeriod = currentPeriod > 0n ? currentPeriod - 1n : 0n
   const lastEndedPeriod =
     configuredUpperBound == null
       ? discoveredLastPeriod
@@ -690,7 +764,10 @@ async function inspectLoop(loop, args, cache) {
 
   if (args.refreshAll || !cachedLoop) {
     const logs = await fetchRegisterLogs(client, loop.address)
-    storedPeriods = buildStoredPeriods(buildPeriodUserMap(logs), schedule)
+    storedPeriods = pruneStoredPeriods(
+      buildStoredPeriods(buildPeriodUserMap(logs), schedule),
+      lastEndedPeriod
+    )
     periodsFetchedThisRun = ["full-scan"]
   } else {
     const missingPeriods = []
@@ -722,29 +799,14 @@ async function inspectLoop(loop, args, cache) {
       }
       periodsFetchedThisRun = missingPeriods.map((period) => period.toString())
     }
-
-    const pendingPeriodLogs = await fetchRegisterLogsForPeriod(
-      client,
-      loop.address,
-      currentPeriod + 1n
-    )
-    const pendingUsers = Array.from(
-      new Set(
-        pendingPeriodLogs
-          .map((log) => log.args.sender)
-          .filter(Boolean)
-          .map((address) => getAddress(address))
-      )
-    ).sort()
-    storedPeriods[(currentPeriod + 1n).toString()] = {
-      ...getPeriodWindow(currentPeriod + 1n, schedule.firstPeriodStart, schedule.periodLength),
-      registeredUsers: pendingUsers,
-    }
   }
 
-  const [claimLogs, payoutsByPeriod] = await Promise.all([
+  storedPeriods = pruneStoredPeriods(storedPeriods, lastEndedPeriod)
+
+  const [claimLogs, payoutsByPeriod, tokenSnapshots] = await Promise.all([
     fetchClaimLogs(client, loop.address),
     fetchPayoutsByPeriod(client, loop, lastEndedPeriod),
+    fetchLoopTokenSnapshots(client, loop, schedule, tokenInfo, lastEndedPeriod),
   ])
   const claimStatsByPeriod = buildClaimStatsByPeriod(claimLogs)
 
@@ -755,6 +817,7 @@ async function inspectLoop(loop, args, cache) {
     storedPeriods,
     schedule,
     tokenInfo,
+    tokenSnapshots,
     claimStatsByPeriod,
     payoutsByPeriod
   )
@@ -770,6 +833,7 @@ async function inspectLoop(loop, args, cache) {
     storedPeriods,
     schedule,
     tokenInfo,
+    tokenSnapshots,
     claimStatsByPeriod,
     payoutsByPeriod
   )
@@ -780,7 +844,7 @@ async function inspectLoop(loop, args, cache) {
       currentPeriod,
       cacheHighWaterMark,
       buildCachedPeriods(
-        mergeStoredPeriods(cachedLoop?.periods, storedPeriods),
+        pruneStoredPeriods(mergeStoredPeriods(cachedLoop?.periods, storedPeriods), cacheHighWaterMark),
         cacheSummary.periods
       ),
       cacheSummary
