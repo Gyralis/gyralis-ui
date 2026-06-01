@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ModeToggle } from "../shared/mode-toggle"
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
-import { NavLogoMark } from "./main-nav"
+import { NavItemTag, NavLogoMark } from "./main-nav"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
@@ -50,6 +50,17 @@ export function MobileNav() {
             <MobileLink href="/elegibilities" onOpenChange={setOpen}>
               Elegibilities
             </MobileLink>
+            <MobileLink href="/dashboard" onOpenChange={setOpen}>
+              <span>Dashboard</span>
+              <NavItemTag>New</NavItemTag>
+            </MobileLink>
+            <span
+              className={`${linkClassName} cursor-not-allowed text-muted-foreground opacity-60`}
+              aria-disabled="true"
+            >
+              <span>Leaderboard</span>
+              <NavItemTag tone="muted">Soon</NavItemTag>
+            </span>
 
             <Separator className="my-0.5" />
 
@@ -67,7 +78,7 @@ export function MobileNav() {
 }
 
 const linkClassName =
-  "block select-none rounded-md px-2 py-2 text-sm leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+  "flex select-none items-center rounded-md px-2 py-2 text-sm leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
 
 function MobileLink({
   href,

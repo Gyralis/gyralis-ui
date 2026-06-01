@@ -1,11 +1,37 @@
 import { unstable_noStore as noStore } from "next/cache"
 import Image from "next/image"
+import { FaChartLine, FaCoins, FaUsers } from "react-icons/fa"
+import type { IconType } from "react-icons"
 
 import { getDashboardPageData } from "@/lib/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
 import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card"
+import { LoopTypeBadge } from "@/components/loops/loop-type-badge"
+
+type OverviewStatGroupProps = {
+  title: string
+  mainValue: string
+  mainSuffix?: string | null
+  tone: "primary" | "secondary"
+  icon: IconType
+  rate?: {
+    label: string
+    value: number | null
+  }
+  substats: {
+    label: string
+    value: string
+    tone?: "positive" | "muted"
+  }[]
+}
+
+type OverviewEngagementCardProps = {
+  totalRegistrations: string
+  totalClaims: string
+  claimRate: number | null
+}
 
 export const dynamic = "force-dynamic"
 
@@ -25,19 +51,46 @@ function formatPercent(value: number | null) {
   return `${value.toFixed(2)}%`
 }
 
-function formatTokenAmount(value: string | null, symbol?: string | null) {
+function formatTokenAmount(
+  value: string | null,
+  symbol?: string | null,
+  maxDecimals = 4
+) {
   if (!value) return "N/A"
 
   const [integerPart, decimalPart = ""] = value.split(".")
   const formattedInteger = new Intl.NumberFormat("en-US").format(
     Number.parseInt(integerPart, 10)
   )
-  const trimmedDecimal = decimalPart.slice(0, 4).replace(/0+$/, "")
+  const trimmedDecimal = decimalPart.slice(0, maxDecimals).replace(/0+$/, "")
   const formattedValue = trimmedDecimal
     ? `${formattedInteger}.${trimmedDecimal}`
     : formattedInteger
 
   return symbol ? `${formattedValue} ${symbol}` : formattedValue
+}
+
+function formatTokenAmountParts(
+  value: string | null,
+  symbol?: string | null,
+  maxDecimals = 4
+) {
+  if (!value) {
+    return { value: "N/A", symbol: null }
+  }
+
+  const [integerPart, decimalPart = ""] = value.split(".")
+  const formattedInteger = new Intl.NumberFormat("en-US").format(
+    Number.parseInt(integerPart, 10)
+  )
+  const trimmedDecimal = decimalPart.slice(0, maxDecimals).replace(/0+$/, "")
+
+  return {
+    value: trimmedDecimal
+      ? `${formattedInteger}.${trimmedDecimal}`
+      : formattedInteger,
+    symbol: symbol ?? null,
+  }
 }
 
 function formatUpdatedAt(value: string | null) {
@@ -47,10 +100,7 @@ function formatUpdatedAt(value: string | null) {
     month: "long",
     day: "numeric",
     year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
     timeZone: "UTC",
-    timeZoneName: "short",
   }).format(new Date(value))
 }
 
@@ -65,11 +115,172 @@ function formatSidebarUpdatedAt(value: string | null) {
   }).format(new Date(value))
 }
 
+function OverviewStatGroup({
+  title,
+  mainValue,
+  mainSuffix,
+  tone,
+  icon: Icon,
+  rate,
+  substats,
+}: OverviewStatGroupProps) {
+  const isPrimary = tone === "primary"
+  const rateValue = Math.max(0, Math.min(rate?.value ?? 0, 100))
+
+  return (
+    <Card className="tamagotchi-card h-full p-0">
+      <div
+        className={`pointer-events-none absolute inset-0 ${
+          isPrimary
+            ? "bg-[radial-gradient(circle_at_18%_18%,rgba(28,231,131,0.1),transparent_42%)]"
+            : "bg-[radial-gradient(circle_at_18%_18%,rgba(140,75,255,0.12),transparent_42%)]"
+        }`}
+      />
+      <Icon
+        className={`pointer-events-none absolute right-6 top-6 size-20 opacity-10 ${
+          isPrimary ? "text-primary" : "text-secondary"
+        }`}
+      />
+      <CardContent className="relative z-10 flex h-full flex-col gap-3 p-0">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            {title}
+          </p>
+          <div
+            className={`flex flex-wrap items-baseline gap-x-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
+              isPrimary ? "text-primary" : "text-secondary"
+            }`}
+          >
+            <span>{mainValue}</span>
+            {mainSuffix ? (
+              <span className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-base">
+                {mainSuffix}
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-auto grid gap-2.5">
+          {substats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-border/60 bg-muted/20 p-3"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {stat.label}
+              </p>
+              <p
+                className={`mt-1 text-lg font-semibold tracking-tight ${
+                  stat.tone === "positive"
+                    ? isPrimary
+                      ? "text-primary"
+                      : "text-secondary"
+                    : stat.tone === "muted"
+                      ? "text-muted-foreground"
+                      : "text-card-foreground"
+                }`}
+              >
+                {stat.value}
+              </p>
+            </div>
+          ))}
+          {rate ? (
+            <div className="space-y-3 pt-1">
+              <div className="flex items-end justify-between gap-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {rate.label}
+                </p>
+                <p className="text-lg font-semibold tracking-tight text-card-foreground">
+                  {formatPercent(rate.value)}
+                </p>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full rounded-full ${
+                    isPrimary
+                      ? "bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]"
+                      : "bg-[linear-gradient(135deg,#8c4bff_0%,#a855f7_100%)]"
+                  }`}
+                  style={{ width: `${rateValue}%` }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function OverviewEngagementCard({
+  totalRegistrations,
+  totalClaims,
+  claimRate,
+}: OverviewEngagementCardProps) {
+  const rateValue = Math.max(0, Math.min(claimRate ?? 0, 100))
+
+  return (
+    <Card className="tamagotchi-card h-full p-0">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(28,231,131,0.08),transparent_38%),radial-gradient(circle_at_86%_20%,rgba(140,75,255,0.1),transparent_34%)]" />
+      <FaChartLine className="pointer-events-none absolute right-6 top-6 size-20 text-primary opacity-10" />
+      <CardContent className="relative z-10 flex h-full flex-col gap-6 p-0">
+        <div className="space-y-4">
+          <p className="text-2xl font-semibold tracking-tight text-card-foreground">
+            Engagement Metrics
+          </p>
+          <div className="h-px bg-border/70" />
+        </div>
+
+        <div className="grid gap-3">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Total Registrations
+            </p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-card-foreground">
+              {totalRegistrations}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Total Claims
+            </p>
+            <p className="mt-1 text-2xl font-semibold tracking-tight text-card-foreground">
+              {totalClaims}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-auto space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              Overall Claim Rate
+            </p>
+            <p className="text-3xl font-semibold tracking-tight text-card-foreground">
+              {formatPercent(claimRate)}
+            </p>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]"
+              style={{ width: `${rateValue}%` }}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default async function DashboardPage() {
   noStore()
 
   const data = await getDashboardPageData({ periodsBack: 7 })
   const tokenSummary = data.tokenSummaries[0]
+  const totalDistributedOverview = formatTokenAmountParts(
+    data.overview.totalDistributedAmount,
+    tokenSummary?.tokenSymbol,
+    2
+  )
   const firstVisiblePeriod = data.tables.periodSummary[0]
   const lastVisiblePeriod =
     data.tables.periodSummary[data.tables.periodSummary.length - 1]
@@ -95,34 +306,34 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <header className="rounded-[2rem] border border-border/70 bg-[linear-gradient(135deg,hsl(var(--card)/0.96),hsl(var(--card)/0.92)_42%,hsl(var(--primary)/0.14)_140%)] p-6 shadow-[0_38px_110px_-58px_hsl(var(--foreground)/0.22)] backdrop-blur xl:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)] xl:items-end">
-            <div className="space-y-5">
-              <div className="space-y-3">
-                <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                  Loop Activity, shaped around participation history and ended
-                  dates.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                  A server-rendered view of registrations, claims, and token
-                  distribution across loops, built from the cached JSON data and
-                  presented the way users actually experience the loop: by date.
+        <header className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-transparent sm:min-h-[380px] dark:bg-slate-950">
+          <Image
+            src="/dashboard-header.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1536px) 1360px, (min-width: 1024px) calc(100vw - 11rem), calc(100vw - 2rem)"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+            <div className="space-y-3">
+              <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
+                Gyralis{" "}
+                <span className="bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)] bg-clip-text text-transparent">
+                  Dashboard
+                </span>
+              </h1>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
+                  Live loops analytics for tracking participation, claims, and
+                  token distribution across the Gyralis ecosystem.
                 </p>
+                <div className="inline-flex w-fit shrink-0 rounded-full bg-black/45 px-4 py-2 text-sm font-medium text-slate-200 ring-1 ring-white/10 backdrop-blur">
+                  Last updated {formatUpdatedAt(data.generatedAt)}
+                </div>
               </div>
             </div>
-
-            <Card className="rounded-[1.75rem] border-border/70 bg-card/80 text-card-foreground shadow-[0_24px_70px_-48px_hsl(var(--foreground)/0.18)] backdrop-blur-xl">
-              <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                    Last Updated
-                  </p>
-                  <p className="text-sm text-card-foreground">
-                    {formatUpdatedAt(data.generatedAt)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </header>
 
@@ -132,59 +343,70 @@ export default async function DashboardPage() {
               <h2>Overview</h2>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <DashboardStatCard
-                label="Unique Registered Users"
-                value={formatNumber(data.overview.globalUniqueRegisteredUsers)}
-              />
-              <DashboardStatCard
-                label="Unique Claim Users"
-                value={formatNumber(data.overview.globalUniqueClaimUsers)}
-              />
-              <DashboardStatCard
-                label="Registered But Never Claimed"
-                value={formatNumber(
-                  data.overview.globalRegisteredButNeverClaimedUsers
+            <div className="grid gap-4 lg:grid-cols-3">
+              <OverviewStatGroup
+                title="Unique Registered Users"
+                tone="primary"
+                icon={FaUsers}
+                mainValue={formatNumber(
+                  data.overview.globalUniqueRegisteredUsers
                 )}
+                rate={{
+                  label: "Registered Users Claimed",
+                  value: data.overview.claimParticipationRatePercent,
+                }}
+                substats={[
+                  {
+                    label: "Unique Claim Users",
+                    value: formatNumber(data.overview.globalUniqueClaimUsers),
+                    tone: "positive",
+                  },
+                  {
+                    label: "Registered But Never Claimed",
+                    value: formatNumber(
+                      data.overview.globalRegisteredButNeverClaimedUsers
+                    ),
+                    tone: "muted",
+                  },
+                ]}
               />
-              <DashboardStatCard
-                label="Total Registrations"
-                value={formatNumber(data.overview.totalRegistrations)}
+              <OverviewStatGroup
+                title="Total Distributed"
+                tone="secondary"
+                icon={FaCoins}
+                mainValue={totalDistributedOverview.value}
+                mainSuffix={totalDistributedOverview.symbol}
+                rate={{
+                  label: "Distributed Tokens Claimed",
+                  value: data.overview.claimedAmountRatePercent,
+                }}
+                substats={[
+                  {
+                    label: "Total Claimed",
+                    value: formatTokenAmount(
+                      data.overview.totalClaimedAmount,
+                      tokenSummary?.tokenSymbol,
+                      2
+                    ),
+                    tone: "positive",
+                  },
+                  {
+                    label: "Total Unclaimed",
+                    value: formatTokenAmount(
+                      data.overview.totalUnclaimedAmount,
+                      tokenSummary?.tokenSymbol,
+                      2
+                    ),
+                    tone: "muted",
+                  },
+                ]}
               />
-              <DashboardStatCard
-                label="Total Claims"
-                value={formatNumber(data.overview.totalClaims)}
-              />
-              <DashboardStatCard
-                label="Claim Participation Rate"
-                value={formatPercent(
-                  data.overview.claimParticipationRatePercent
+              <OverviewEngagementCard
+                totalRegistrations={formatNumber(
+                  data.overview.totalRegistrations
                 )}
-              />
-              <DashboardStatCard
-                label="Total Distributed"
-                value={formatTokenAmount(
-                  data.overview.totalDistributedAmount,
-                  tokenSummary?.tokenSymbol
-                )}
-              />
-              <DashboardStatCard
-                label="Total Claimed"
-                value={formatTokenAmount(
-                  data.overview.totalClaimedAmount,
-                  tokenSummary?.tokenSymbol
-                )}
-              />
-              <DashboardStatCard
-                label="Total Unclaimed"
-                value={formatTokenAmount(
-                  data.overview.totalUnclaimedAmount,
-                  tokenSummary?.tokenSymbol
-                )}
-              />
-              <DashboardStatCard
-                label="Claimed Amount Rate"
-                value={formatPercent(data.overview.claimedAmountRatePercent)}
+                totalClaims={formatNumber(data.overview.totalClaims)}
+                claimRate={data.overview.claimParticipationRatePercent}
               />
             </div>
           </section>
@@ -212,25 +434,14 @@ export default async function DashboardPage() {
                             className="size-8 object-contain"
                           />
                         </div>
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                           <CardTitle className="text-2xl text-card-foreground">
                             {loop.meta.title}
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {loop.meta.chainName} • by {loop.meta.by}
-                          </p>
+                          <LoopTypeBadge
+                            isSuper={loop.meta.contractType === "superLoop"}
+                          />
                         </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/50 px-3 py-1 text-xs font-semibold text-foreground">
-                          Ended through{" "}
-                          {loop.currentPeriodStats?.periodEndedLongLabel ??
-                            "N/A"}
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                          {loop.meta.tokenSymbol}
-                        </span>
                       </div>
                     </div>
                   </CardHeader>

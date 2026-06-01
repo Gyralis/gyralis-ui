@@ -8,6 +8,7 @@ export const defaultDashboardLoopKeys = [
 export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
   "1hive": {
     loopKey: "1hive",
+    contractType: "loop",
     title: "1Hive Gardens",
     shortTitle: "1Hive",
     by: "1Hive",
@@ -22,6 +23,7 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
   },
   blockscout: {
     loopKey: "blockscout",
+    contractType: "loop",
     title: "Blockscout Merits",
     shortTitle: "Blockscout",
     by: "Blockscout",
@@ -35,6 +37,7 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
   },
   "test-superloops": {
     loopKey: "test-superloops",
+    contractType: "superLoop",
     title: "TEST SUPERLOOPS",
     shortTitle: "Superloops",
     by: "Gyralis Team",

@@ -1,7 +1,10 @@
+import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+
 export type DashboardLoopKey = "1hive" | "blockscout" | "test-superloops"
 
 export interface DashboardLoopMeta {
   loopKey: DashboardLoopKey
+  contractType: LoopContractType
   title: string
   shortTitle: string
   by: string
