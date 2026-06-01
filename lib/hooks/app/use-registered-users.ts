@@ -11,6 +11,8 @@ const upgradedRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
 
+const LOG_LOOKBACK_BLOCKS = 100_000n
+
 interface UseRegisteredUsersResult {
   users: Address[]
   loading: boolean
@@ -20,14 +22,15 @@ export function useRegisteredUsers(
   loopAddress: Address,
   chainId: number,
   periodNumber?: bigint,
-  refreshKey = 0
+  refreshKey = 0,
+  enabled = true
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!publicClient || periodNumber == null) {
+    if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
       setLoading(false)
       return
@@ -39,6 +42,11 @@ export function useRegisteredUsers(
       setLoading(true)
 
       try {
+        const latestBlock = await publicClient.getBlockNumber()
+        const fromBlock =
+          latestBlock > LOG_LOOKBACK_BLOCKS
+            ? latestBlock - LOG_LOOKBACK_BLOCKS
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
           publicClient.getLogs({
             address: loopAddress,
@@ -46,7 +54,7 @@ export function useRegisteredUsers(
             args: {
               periodNumber,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
           publicClient.getLogs({
@@ -55,7 +63,7 @@ export function useRegisteredUsers(
             args: {
               periodNumber,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
         ])
@@ -85,7 +93,7 @@ export function useRegisteredUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, loopAddress, periodNumber, publicClient, refreshKey])
+  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
 
   return { users, loading }
 }
