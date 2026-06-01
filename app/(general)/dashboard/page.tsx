@@ -1,7 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache"
 import Image from "next/image"
-import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 import type { IconType } from "react-icons"
+import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 
 import { getDashboardPageData } from "@/lib/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -203,8 +203,8 @@ function OverviewStatGroup({
                       ? "text-primary"
                       : "text-secondary"
                     : stat.tone === "muted"
-                      ? "text-muted-foreground"
-                      : "text-card-foreground"
+                    ? "text-muted-foreground"
+                    : "text-card-foreground"
                 }`}
               >
                 {stat.value}
@@ -388,7 +388,7 @@ export default async function DashboardPage() {
         <div className="space-y-12">
           <section id="overview" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>Overview</h2>
+              <h2 className="text-xl pl-2 font-semibold">Overview</h2>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
@@ -461,7 +461,7 @@ export default async function DashboardPage() {
 
           <section id="loops" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>Loop Activity</h2>
+              <h2 className="text-xl pl-2 font-semibold">Loop Activity</h2>
             </div>
 
             <div className="grid gap-5 xl:grid-cols-2">
@@ -472,8 +472,7 @@ export default async function DashboardPage() {
                 const startingBalancePeriodNumber =
                   startingBalanceSnapshot?.periodNumber
                 const latestBalancePeriodNumber =
-                  loop.tokenSnapshots.balanceAtLastProcessedPeriod
-                    ?.periodNumber
+                  loop.tokenSnapshots.balanceAtLastProcessedPeriod?.periodNumber
                 const startingBalancePeriod = loop.periods.find(
                   (period) => period.period === startingBalancePeriodNumber
                 )
@@ -642,7 +641,7 @@ export default async function DashboardPage() {
 
           <section id="trends" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>Charts</h2>
+              <h2 className="text-xl pl-2 font-semibold">Charts</h2>
             </div>
 
             <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
@@ -681,7 +680,7 @@ export default async function DashboardPage() {
 
           <section id="details" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>Period Details</h2>
+              <h2 className="text-xl pl-2 font-semibold">Period Details</h2>
             </div>
 
             <Card className="overflow-hidden rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl">
