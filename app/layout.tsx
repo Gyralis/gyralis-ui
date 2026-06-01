@@ -20,7 +20,6 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  themeColor: "#feefc4",
   openGraph: {
     title: siteConfig.name,
     description: siteConfig.description,
@@ -33,6 +32,10 @@ export const metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
   },
+}
+
+export const viewport = {
+  themeColor: "#feefc4",
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

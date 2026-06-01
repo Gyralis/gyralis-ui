@@ -1,7 +1,10 @@
+import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+
 export type DashboardLoopKey = "1hive" | "blockscout" | "test-superloops"
 
 export interface DashboardLoopMeta {
   loopKey: DashboardLoopKey
+  contractType: LoopContractType
   title: string
   shortTitle: string
   by: string
@@ -61,6 +64,12 @@ export interface RawLoopTokenInfo {
   decimals?: number
   snapshots?: {
     balanceAtPeriod1?: {
+      periodNumber?: string
+      blockNumber?: string
+      raw?: string
+      formatted?: string
+    }
+    balanceAtPeriod2?: {
       periodNumber?: string
       blockNumber?: string
       raw?: string
@@ -162,6 +171,7 @@ export interface DashboardLoopSummary {
   claimedAmountRatePercent: number | null
   tokenSnapshots: {
     balanceAtPeriod1: DashboardLoopTokenSnapshot | null
+    balanceAtPeriod2: DashboardLoopTokenSnapshot | null
     balanceAtLastProcessedPeriod: DashboardLoopTokenSnapshot | null
   }
   periods: DashboardPeriodStats[]

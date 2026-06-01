@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -15,6 +17,77 @@ function DashboardStatSkeleton() {
   )
 }
 
+function OverviewStatGroupSkeleton() {
+  return (
+    <Card className="tamagotchi-card h-full p-0">
+      <CardContent className="relative z-10 flex h-full flex-col gap-3 p-0">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-36 rounded-full" />
+          <div className="space-y-2">
+            <div className="flex items-baseline gap-2">
+              <Skeleton className="h-14 w-40 rounded-xl" />
+              <Skeleton className="h-4 w-12 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-24 rounded-full" />
+          </div>
+        </div>
+
+        <div className="mt-auto grid gap-2.5">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3"
+            >
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-xl" />
+            </div>
+          ))}
+          <div className="space-y-3 pt-1">
+            <div className="flex items-end justify-between gap-4">
+              <Skeleton className="h-3 w-36 rounded-full" />
+              <Skeleton className="h-6 w-16 rounded-xl" />
+            </div>
+            <Skeleton className="h-3 w-full rounded-full" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function OverviewEngagementSkeleton() {
+  return (
+    <Card className="tamagotchi-card h-full p-0">
+      <CardContent className="relative z-10 flex h-full flex-col gap-6 p-0">
+        <div className="space-y-4">
+          <Skeleton className="h-7 w-48 rounded-full" />
+          <Skeleton className="h-px w-full rounded-full" />
+        </div>
+
+        <div className="grid gap-3">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3"
+            >
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <Skeleton className="h-7 w-20 rounded-xl" />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-auto space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <Skeleton className="h-3 w-36 rounded-full" />
+            <Skeleton className="h-9 w-24 rounded-xl" />
+          </div>
+          <Skeleton className="h-3 w-full rounded-full" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function LoopCardSkeleton() {
   return (
     <Card className="overflow-hidden rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl">
@@ -24,12 +97,8 @@ function LoopCardSkeleton() {
             <Skeleton className="size-14 rounded-2xl" />
             <div className="space-y-2">
               <Skeleton className="h-6 w-40 rounded-full" />
-              <Skeleton className="h-4 w-28 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-7 w-40 rounded-full" />
-            <Skeleton className="h-7 w-14 rounded-full" />
           </div>
         </div>
       </CardHeader>
@@ -86,10 +155,19 @@ function ChartCardSkeleton({
 function SectionHeaderSkeleton() {
   return (
     <div className="space-y-2">
-      <Skeleton className="h-4 w-28 rounded-full" />
       <Skeleton className="h-9 w-72 rounded-full" />
-      <Skeleton className="h-5 w-full max-w-2xl rounded-full" />
-      <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+    </div>
+  )
+}
+
+function ChartInfoSkeleton() {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4">
+      <Skeleton className="mt-1 size-4 shrink-0 rounded-full" />
+      <div className="w-full max-w-4xl space-y-2">
+        <Skeleton className="h-4 w-full rounded-full" />
+        <Skeleton className="h-4 w-3/4 rounded-full" />
+      </div>
     </div>
   )
 }
@@ -125,40 +203,38 @@ export default function DashboardLoading() {
           </div>
         </div>
 
-        <header className="rounded-[2rem] border border-border/70 bg-[linear-gradient(135deg,hsl(var(--card)/0.96),hsl(var(--card)/0.92)_42%,hsl(var(--primary)/0.14)_140%)] p-6 shadow-[0_38px_110px_-58px_hsl(var(--foreground)/0.22)] backdrop-blur xl:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)] xl:items-end">
-            <div className="space-y-5">
-              <div className="flex gap-3">
-                <Skeleton className="h-7 w-24 rounded-full" />
-                <Skeleton className="h-7 w-36 rounded-full" />
-              </div>
-              <div className="space-y-3">
-                <Skeleton className="h-12 w-full max-w-3xl rounded-2xl" />
-                <Skeleton className="h-5 w-full max-w-2xl rounded-full" />
-                <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+        <header className="relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-transparent sm:min-h-[380px] dark:bg-slate-950">
+          <Image
+            src="/dashboard-header.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1536px) 1360px, (min-width: 1024px) calc(100vw - 11rem), calc(100vw - 2rem)"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+            <div className="space-y-3">
+              <Skeleton className="h-14 w-full max-w-3xl rounded-2xl bg-white/16 sm:h-16" />
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="w-full max-w-2xl space-y-3">
+                  <Skeleton className="h-6 w-full rounded-full bg-white/16" />
+                  <Skeleton className="h-6 w-4/5 rounded-full bg-white/16" />
+                </div>
+                <Skeleton className="h-9 w-56 shrink-0 rounded-full bg-white/16" />
               </div>
             </div>
-
-            <Card className="rounded-[1.75rem] border-border/70 bg-card/80 shadow-[0_24px_70px_-48px_hsl(var(--foreground)/0.18)] backdrop-blur-xl">
-              <CardContent className="grid gap-4 p-5 sm:grid-cols-2">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="space-y-2">
-                    <Skeleton className="h-3 w-20 rounded-full" />
-                    <Skeleton className="h-5 w-28 rounded-full" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
           </div>
         </header>
 
         <div className="space-y-12">
           <section className="space-y-5">
             <SectionHeaderSkeleton />
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <DashboardStatSkeleton key={index} />
+            <div className="grid gap-4 lg:grid-cols-3">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <OverviewStatGroupSkeleton key={index} />
               ))}
+              <OverviewEngagementSkeleton />
             </div>
           </section>
 
@@ -172,14 +248,15 @@ export default function DashboardLoading() {
 
           <section className="space-y-5">
             <SectionHeaderSkeleton />
-            <div className="grid gap-5 lg:grid-cols-[1.1fr,0.9fr]">
-              <ChartCardSkeleton titleWidth="w-40" heightClass="h-[250px]" />
-              <ChartCardSkeleton titleWidth="w-36" heightClass="h-[250px]" />
-            </div>
+            <ChartInfoSkeleton />
             <div className="space-y-5">
               <div className="grid gap-5 xl:grid-cols-2">
                 <ChartCardSkeleton titleWidth="w-52" heightClass="h-[320px]" />
                 <ChartCardSkeleton titleWidth="w-44" heightClass="h-[320px]" />
+              </div>
+              <div className="grid gap-5 xl:grid-cols-2">
+                <ChartCardSkeleton titleWidth="w-56" heightClass="h-[340px]" />
+                <ChartCardSkeleton titleWidth="w-48" heightClass="h-[340px]" />
               </div>
               <ChartCardSkeleton titleWidth="w-48" heightClass="h-[340px]" />
             </div>

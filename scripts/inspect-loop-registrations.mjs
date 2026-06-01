@@ -297,7 +297,8 @@ async function fetchLoopTokenSnapshots(
   if (lastProcessedPeriod < 1n) return null
 
   const periodNumbers = [1n]
-  if (lastProcessedPeriod !== 1n) periodNumbers.push(lastProcessedPeriod)
+  if (lastProcessedPeriod >= 2n) periodNumbers.push(2n)
+  if (lastProcessedPeriod > 2n) periodNumbers.push(lastProcessedPeriod)
 
   const snapshots = await Promise.all(
     periodNumbers.map((periodNumber) =>
@@ -314,6 +315,7 @@ async function fetchLoopTokenSnapshots(
 
   return {
     balanceAtPeriod1: snapshots[0],
+    balanceAtPeriod2: lastProcessedPeriod >= 2n ? snapshots[1] : null,
     balanceAtLastProcessedPeriod:
       periodNumbers.length === 1 ? snapshots[0] : snapshots[snapshots.length - 1],
   }
@@ -744,9 +746,9 @@ async function inspectLoop(loop, args, cache) {
   const configuredUpperBound =
     args.upToPeriod == null ? null : parsePeriod(args.upToPeriod, "--up-to-period")
 
-  // The cache tracks only completed periods, so the latest processed period is
-  // always the previous period relative to the live current period.
-  const discoveredLastPeriod = currentPeriod > 0n ? currentPeriod - 1n : 0n
+  // getCurrentPeriod returns the latest completed period. The app APIs add one
+  // to this value when they need the next claim period.
+  const discoveredLastPeriod = currentPeriod
   const lastEndedPeriod =
     configuredUpperBound == null
       ? discoveredLastPeriod

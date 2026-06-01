@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { FaChartLine, FaLayerGroup, FaRegCircle, FaTable } from "react-icons/fa"
 import { LuLayoutDashboard } from "react-icons/lu"
+import { FaChartLine, FaRegCircle, FaTable } from "react-icons/fa"
+import { SiLoop } from "react-icons/si"
 
 import { NavLogoMark } from "@/components/layout/main-nav"
 import { cn } from "@/lib/utils"
@@ -27,7 +28,7 @@ type DashboardSectionNavProps = {
 
 const sectionIconMap = {
   overview: LuLayoutDashboard,
-  loops: FaLayerGroup,
+  loops: SiLoop,
   trends: FaChartLine,
   details: FaTable,
 } as const
@@ -46,31 +47,33 @@ export function DashboardSectionNav({
   useEffect(() => {
     if (itemIds.length === 0) return
 
-    const sections = itemIds
-      .map((id) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section != null)
+    function updateActiveSection() {
+      const sections = itemIds
+        .map((id) => document.getElementById(id))
+        .filter((section): section is HTMLElement => section != null)
 
-    if (sections.length === 0) return
+      if (sections.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+      const activationLine = window.innerHeight * 0.32
+      const sectionsAboveLine = sections.filter(
+        (section) => section.getBoundingClientRect().top <= activationLine
+      )
+      const activeSection =
+        sectionsAboveLine[sectionsAboveLine.length - 1] ?? sections[0]
 
-        if (visibleEntries[0]?.target?.id) {
-          setActiveId(visibleEntries[0].target.id)
-        }
-      },
-      {
-        rootMargin: "-18% 0px -62% 0px",
-        threshold: [0.1, 0.25, 0.5, 0.75],
+      if (activeSection.id) {
+        setActiveId(activeSection.id)
       }
-    )
+    }
 
-    sections.forEach((section) => observer.observe(section))
+    updateActiveSection()
+    window.addEventListener("scroll", updateActiveSection, { passive: true })
+    window.addEventListener("resize", updateActiveSection)
 
-    return () => observer.disconnect()
+    return () => {
+      window.removeEventListener("scroll", updateActiveSection)
+      window.removeEventListener("resize", updateActiveSection)
+    }
   }, [itemIds])
 
   function handleSectionClick(sectionId: string) {

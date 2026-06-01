@@ -199,6 +199,19 @@ function buildLoopSummary(loopKey: DashboardLoopKey, rawLoop: RawLoopCacheEntry)
               rawLoop.token.snapshots.balanceAtPeriod1.formatted ?? null,
           }
         : null,
+      balanceAtPeriod2: rawLoop.token?.snapshots?.balanceAtPeriod2
+        ? {
+            periodNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtPeriod2.periodNumber
+            ),
+            blockNumber: parseInteger(
+              rawLoop.token.snapshots.balanceAtPeriod2.blockNumber
+            ),
+            raw: rawLoop.token.snapshots.balanceAtPeriod2.raw ?? null,
+            formatted:
+              rawLoop.token.snapshots.balanceAtPeriod2.formatted ?? null,
+          }
+        : null,
       balanceAtLastProcessedPeriod: rawLoop.token?.snapshots
         ?.balanceAtLastProcessedPeriod
         ? {
