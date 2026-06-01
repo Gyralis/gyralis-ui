@@ -81,7 +81,7 @@ function formatNumber(value: number) {
 }
 
 function formatPercent(value: number) {
-  return `${value.toFixed(2)}%`
+  return `${(Math.ceil(value * 10) / 10).toFixed(1)}%`
 }
 
 function formatToken(value: number, tokenSymbol?: string | null) {

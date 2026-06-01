@@ -69,6 +69,12 @@ export interface RawLoopTokenInfo {
       raw?: string
       formatted?: string
     }
+    balanceAtPeriod2?: {
+      periodNumber?: string
+      blockNumber?: string
+      raw?: string
+      formatted?: string
+    }
     balanceAtLastProcessedPeriod?: {
       periodNumber?: string
       blockNumber?: string
@@ -165,6 +171,7 @@ export interface DashboardLoopSummary {
   claimedAmountRatePercent: number | null
   tokenSnapshots: {
     balanceAtPeriod1: DashboardLoopTokenSnapshot | null
+    balanceAtPeriod2: DashboardLoopTokenSnapshot | null
     balanceAtLastProcessedPeriod: DashboardLoopTokenSnapshot | null
   }
   periods: DashboardPeriodStats[]

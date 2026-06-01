@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache"
 import Image from "next/image"
-import { FaChartLine, FaCoins, FaUsers } from "react-icons/fa"
+import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 import type { IconType } from "react-icons"
 
 import { getDashboardPageData } from "@/lib/dashboard"
@@ -33,14 +33,41 @@ type OverviewEngagementCardProps = {
   claimRate: number | null
 }
 
+type LoopRateStatCardProps = {
+  label: string
+  value: number | null
+}
+
 export const dynamic = "force-dynamic"
 
 const sectionItems = [
   { id: "overview", label: "Overview" },
-  { id: "loops", label: "Loops" },
-  { id: "trends", label: "Trends" },
-  { id: "details", label: "Details" },
+  { id: "loops", label: "Loop Activity" },
+  { id: "trends", label: "Charts" },
+  { id: "details", label: "Period Details" },
 ]
+
+const loopChartColors: Record<
+  string,
+  {
+    color: string
+    softColor: string
+  }
+> = {
+  "1hive": {
+    color: "hsl(var(--primary))",
+    softColor: "hsl(var(--primary) / 0.35)",
+  },
+  blockscout: {
+    color: "#2B6CB0",
+    softColor: "rgb(43 108 176 / 0.35)",
+  },
+}
+
+const fallbackLoopChartColors = {
+  color: "hsl(var(--secondary))",
+  softColor: "hsl(var(--secondary) / 0.35)",
+}
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value)
@@ -48,7 +75,7 @@ function formatNumber(value: number) {
 
 function formatPercent(value: number | null) {
   if (value == null) return "N/A"
-  return `${value.toFixed(2)}%`
+  return `${(Math.ceil(value * 10) / 10).toFixed(1)}%`
 }
 
 function formatTokenAmount(
@@ -271,6 +298,31 @@ function OverviewEngagementCard({
   )
 }
 
+function LoopRateStatCard({ label, value }: LoopRateStatCardProps) {
+  const rateValue = Math.max(0, Math.min(value ?? 0, 100))
+
+  return (
+    <Card className="rounded-2xl border-border/70 bg-card/80 shadow-none backdrop-blur-xl">
+      <CardContent className="space-y-3 p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          {label}
+        </p>
+        <div className="space-y-3">
+          <p className="text-2xl font-semibold tracking-tight text-card-foreground sm:text-3xl">
+            {formatPercent(value)}
+          </p>
+          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]"
+              style={{ width: `${rateValue}%` }}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default async function DashboardPage() {
   noStore()
 
@@ -281,10 +333,6 @@ export default async function DashboardPage() {
     tokenSummary?.tokenSymbol,
     2
   )
-  const firstVisiblePeriod = data.tables.periodSummary[0]
-  const lastVisiblePeriod =
-    data.tables.periodSummary[data.tables.periodSummary.length - 1]
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0">
@@ -413,255 +461,213 @@ export default async function DashboardPage() {
 
           <section id="loops" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>2. Loop Totals</h2>
+              <h2>Loop Activity</h2>
             </div>
 
             <div className="grid gap-5 xl:grid-cols-2">
-              {data.loopSummaries.map((loop) => (
-                <Card
-                  key={loop.loopKey}
-                  className="overflow-hidden rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl"
-                >
-                  <CardHeader className="gap-5 border-b border-border/70 bg-muted/20 p-6">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex size-14 items-center justify-center rounded-2xl border border-border/70 bg-muted/55">
-                          <Image
-                            src={loop.meta.logoSrc}
-                            alt={`${loop.meta.title} logo`}
-                            width={34}
-                            height={34}
-                            className="size-8 object-contain"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <CardTitle className="text-2xl text-card-foreground">
-                            {loop.meta.title}
-                          </CardTitle>
-                          <LoopTypeBadge
-                            isSuper={loop.meta.contractType === "superLoop"}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
+              {data.loopSummaries.map((loop) => {
+                const startingBalanceSnapshot =
+                  loop.tokenSnapshots.balanceAtPeriod2 ??
+                  loop.tokenSnapshots.balanceAtPeriod1
+                const startingBalancePeriodNumber =
+                  startingBalanceSnapshot?.periodNumber
+                const latestBalancePeriodNumber =
+                  loop.tokenSnapshots.balanceAtLastProcessedPeriod
+                    ?.periodNumber
+                const startingBalancePeriod = loop.periods.find(
+                  (period) => period.period === startingBalancePeriodNumber
+                )
+                const latestBalancePeriod = loop.periods.find(
+                  (period) => period.period === latestBalancePeriodNumber
+                )
+                const startingBalanceDate =
+                  startingBalancePeriod?.periodEndedShortLabel ??
+                  "Date unavailable"
+                const latestBalanceDate =
+                  latestBalancePeriod?.periodEndedShortLabel ??
+                  "Date unavailable"
 
-                  <CardContent className="space-y-6 p-6">
-                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                      <DashboardStatCard
-                        label="Unique Registered"
-                        value={formatNumber(loop.uniqueUserCount)}
-                        className="shadow-none"
-                      />
-                      <DashboardStatCard
-                        label="Unique Claimed"
-                        value={formatNumber(loop.uniqueClaimUserCount)}
-                        className="shadow-none"
-                      />
-                      <DashboardStatCard
-                        label="Never Claimed"
-                        value={formatNumber(
-                          loop.registeredButNeverClaimedCount
-                        )}
-                        className="shadow-none"
-                      />
-                      <DashboardStatCard
-                        label="Claim Participation"
-                        value={formatPercent(
-                          loop.claimParticipationRatePercent
-                        )}
-                        className="shadow-none"
-                      />
-                    </div>
-
-                    <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
-                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                          Total Token Flow
-                        </p>
-                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Distributed
-                            </p>
-                            <p className="mt-1 text-lg font-semibold text-card-foreground">
-                              {formatTokenAmount(
-                                loop.totalDistributedAmount,
-                                loop.meta.tokenSymbol
-                              )}
-                            </p>
+                return (
+                  <Card
+                    key={loop.loopKey}
+                    className="overflow-hidden rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl"
+                  >
+                    <CardHeader className="gap-5 border-b border-border/70 bg-muted/20 p-6">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="flex size-14 items-center justify-center rounded-2xl border border-border/70 bg-muted/55">
+                            <Image
+                              src={loop.meta.logoSrc}
+                              alt={`${loop.meta.title} logo`}
+                              width={34}
+                              height={34}
+                              className="size-8 object-contain"
+                            />
                           </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Claimed
-                            </p>
-                            <p className="mt-1 text-lg font-semibold text-primary">
-                              {formatTokenAmount(
-                                loop.totalClaimedAmount,
-                                loop.meta.tokenSymbol
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Unclaimed
-                            </p>
-                            <p className="mt-1 text-lg font-semibold text-secondary">
-                              {formatTokenAmount(
-                                loop.totalUnclaimedAmount,
-                                loop.meta.tokenSymbol
-                              )}
-                            </p>
+                          <div className="space-y-2">
+                            <CardTitle className="text-2xl text-card-foreground">
+                              {loop.meta.title}
+                            </CardTitle>
+                            <LoopTypeBadge
+                              isSuper={loop.meta.contractType === "superLoop"}
+                            />
                           </div>
                         </div>
                       </div>
+                    </CardHeader>
 
-                      <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                          Token Balance Snapshots
-                        </p>
-                        <div className="mt-4 space-y-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Balance at Period 1
+                    <CardContent className="space-y-6 p-6">
+                      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <DashboardStatCard
+                          label="Unique Users"
+                          value={formatNumber(loop.uniqueUserCount)}
+                          className="shadow-none"
+                        />
+                        <DashboardStatCard
+                          label="Total Registrations"
+                          value={formatNumber(loop.totalRegistrationsCount)}
+                          className="shadow-none"
+                        />
+                        <DashboardStatCard
+                          label="Total Claims"
+                          value={formatNumber(loop.totalClaimsCount)}
+                          className="shadow-none"
+                        />
+                        <LoopRateStatCard
+                          label="Claim Rate"
+                          value={loop.claimParticipationRatePercent}
+                        />
+                      </div>
+
+                      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
+                        <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+                          <div className="flex items-center justify-between gap-4">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              Total Token Flow
+                            </p>
+                            <span className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              {loop.meta.tokenSymbol}
+                            </span>
+                          </div>
+                          <div className="mt-4 grid grid-cols-3 divide-x divide-border/60 rounded-2xl border border-border/60 bg-background/35">
+                            <div className="flex flex-col items-center justify-center px-3 py-4 text-center">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Distributed
                               </p>
                               <p className="mt-1 text-lg font-semibold text-card-foreground">
                                 {formatTokenAmount(
-                                  loop.tokenSnapshots?.balanceAtPeriod1
-                                    ?.formatted ?? null,
-                                  loop.meta.tokenSymbol
+                                  loop.totalDistributedAmount,
+                                  null,
+                                  2
                                 )}
                               </p>
                             </div>
-                            <span className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                              Start
-                            </span>
-                          </div>
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Balance at Latest Ended Period
+                            <div className="flex flex-col items-center justify-center px-3 py-4 text-center">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Claimed
                               </p>
+                              <p className="mt-1 text-lg font-semibold text-secondary">
+                                {formatTokenAmount(
+                                  loop.totalClaimedAmount,
+                                  null,
+                                  2
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-center justify-center px-3 py-4 text-center">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                                Unclaimed
+                              </p>
+                              <p className="mt-1 text-lg font-semibold text-muted-foreground">
+                                {formatTokenAmount(
+                                  loop.totalUnclaimedAmount,
+                                  null,
+                                  2
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                            Token Balance Snapshots
+                          </p>
+                          <div className="mt-4 space-y-4">
+                            <div>
+                              <div className="flex items-center justify-between gap-4">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Starting Balance
+                                </p>
+                                <p className="text-right text-xs text-muted-foreground">
+                                  {startingBalanceDate}
+                                </p>
+                              </div>
+                              <p className="mt-1 text-lg font-semibold text-card-foreground">
+                                {formatTokenAmount(
+                                  startingBalanceSnapshot?.formatted ?? null,
+                                  loop.meta.tokenSymbol,
+                                  2
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between gap-4">
+                                <p className="text-sm font-medium text-muted-foreground">
+                                  Latest Balance
+                                </p>
+                                <p className="text-right text-xs text-muted-foreground">
+                                  {latestBalanceDate}
+                                </p>
+                              </div>
                               <p className="mt-1 text-lg font-semibold text-card-foreground">
                                 {formatTokenAmount(
                                   loop.tokenSnapshots
                                     ?.balanceAtLastProcessedPeriod?.formatted ??
                                     null,
-                                  loop.meta.tokenSymbol
+                                  loop.meta.tokenSymbol,
+                                  2
                                 )}
                               </p>
                             </div>
-                            <span className="inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground">
-                              Latest Ended
-                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </section>
 
           <section id="trends" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>3. Trend Window</h2>
+              <h2>Charts</h2>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[1.1fr,0.9fr]">
-              <Card className="rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl">
-                <CardHeader className="border-b border-border/70 bg-muted/20">
-                  <CardTitle className="text-xl text-card-foreground">
-                    Visible Date Window
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5 p-6">
-                  <div className="flex flex-wrap gap-2">
-                    {data.charts.registrationsByPeriod.map((row) => (
-                      <span
-                        key={row.period}
-                        className="inline-flex items-center rounded-full border border-border/70 bg-muted/50 px-3 py-1 text-xs font-semibold text-muted-foreground"
-                      >
-                        {row.periodEndedShortLabel ?? "Date unavailable"}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <DashboardStatCard
-                      label="Window Start"
-                      value={firstVisiblePeriod?.periodEndedLongLabel ?? "N/A"}
-                      className="shadow-none"
-                    />
-                    <DashboardStatCard
-                      label="Window End"
-                      value={lastVisiblePeriod?.periodEndedLongLabel ?? "N/A"}
-                      className="shadow-none"
-                    />
-                    <DashboardStatCard
-                      label="Rows in Window"
-                      value={formatNumber(data.tables.periodSummary.length)}
-                      className="shadow-none"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl">
-                <CardHeader className="border-b border-border/70 bg-muted/20">
-                  <CardTitle className="text-xl text-card-foreground">
-                    Window Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-3 p-6">
-                  <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Ended-Date Model
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Every chart is pinned to the day the period ended, not the
-                      internal period number, so the dashboard reads the way
-                      users remember claiming activity.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Current Range
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      The charts below render the latest seven completed dates
-                      from the cache and are ready for window navigation next.
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Loop Coverage
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Comparing {data.loopSummaries.length} Gnosis loops with
-                      shared token accounting and synchronized ended-date
-                      labels.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
+              <FaInfoCircle className="mt-1 size-4 shrink-0 text-primary" />
+              <p>
+                Charts use the day each period ended, show the latest seven
+                completed dates from the cache, and compare{" "}
+                {data.loopSummaries.length} Gnosis loops with synchronized
+                labels and shared token accounting.
+              </p>
             </div>
 
             <DashboardCharts
-              loops={data.loopSummaries.map((loop, index) => ({
-                loopKey: loop.loopKey,
-                title: loop.meta.title,
-                shortTitle: loop.meta.shortTitle,
-                color:
-                  index % 2 === 0
-                    ? "hsl(var(--primary))"
-                    : "hsl(var(--secondary))",
-                softColor:
-                  index % 2 === 0
-                    ? "hsl(var(--primary) / 0.35)"
-                    : "hsl(var(--secondary) / 0.35)",
-              }))}
+              loops={data.loopSummaries.map((loop) => {
+                const chartColors =
+                  loopChartColors[loop.loopKey] ?? fallbackLoopChartColors
+
+                return {
+                  loopKey: loop.loopKey,
+                  title: loop.meta.title,
+                  shortTitle: loop.meta.shortTitle,
+                  color: chartColors.color,
+                  softColor: chartColors.softColor,
+                }
+              })}
               tokenSymbol={tokenSummary?.tokenSymbol ?? null}
               registrationsByPeriod={data.charts.registrationsByPeriod}
               claimsByPeriod={data.charts.claimsByPeriod}
@@ -675,7 +681,7 @@ export default async function DashboardPage() {
 
           <section id="details" className="scroll-mt-24 space-y-5">
             <div className="space-y-2">
-              <h2>Latest Periods Details</h2>
+              <h2>Period Details</h2>
             </div>
 
             <Card className="overflow-hidden rounded-[26px] border border-border/70 bg-card/80 shadow-[0_30px_80px_-56px_hsl(var(--foreground)/0.2)] backdrop-blur-xl">

@@ -155,10 +155,19 @@ function ChartCardSkeleton({
 function SectionHeaderSkeleton() {
   return (
     <div className="space-y-2">
-      <Skeleton className="h-4 w-28 rounded-full" />
       <Skeleton className="h-9 w-72 rounded-full" />
-      <Skeleton className="h-5 w-full max-w-2xl rounded-full" />
-      <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+    </div>
+  )
+}
+
+function ChartInfoSkeleton() {
+  return (
+    <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4">
+      <Skeleton className="mt-1 size-4 shrink-0 rounded-full" />
+      <div className="w-full max-w-4xl space-y-2">
+        <Skeleton className="h-4 w-full rounded-full" />
+        <Skeleton className="h-4 w-3/4 rounded-full" />
+      </div>
     </div>
   )
 }
@@ -239,14 +248,15 @@ export default function DashboardLoading() {
 
           <section className="space-y-5">
             <SectionHeaderSkeleton />
-            <div className="grid gap-5 lg:grid-cols-[1.1fr,0.9fr]">
-              <ChartCardSkeleton titleWidth="w-40" heightClass="h-[250px]" />
-              <ChartCardSkeleton titleWidth="w-36" heightClass="h-[250px]" />
-            </div>
+            <ChartInfoSkeleton />
             <div className="space-y-5">
               <div className="grid gap-5 xl:grid-cols-2">
                 <ChartCardSkeleton titleWidth="w-52" heightClass="h-[320px]" />
                 <ChartCardSkeleton titleWidth="w-44" heightClass="h-[320px]" />
+              </div>
+              <div className="grid gap-5 xl:grid-cols-2">
+                <ChartCardSkeleton titleWidth="w-56" heightClass="h-[340px]" />
+                <ChartCardSkeleton titleWidth="w-48" heightClass="h-[340px]" />
               </div>
               <ChartCardSkeleton titleWidth="w-48" heightClass="h-[340px]" />
             </div>
