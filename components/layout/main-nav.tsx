@@ -60,14 +60,15 @@ function MainNavMenu() {
   const links = [
     { href: "/loops", label: "Loops", disabled: false },
     { href: "/eligibilities", label: "Eligibilities", disabled: false },
-    { href: "/leaderboard", label: "Leaderboard", disabled: true },
+    { href: "/dashboard", label: "Dashboard", disabled: false, tag: "New" },
+    { href: "/leaderboard", label: "Leaderboard", disabled: true, tag: "Soon" },
   ]
 
   return (
     <NavigationMenu>
       <NavigationMenuList>
         {/* Simple links */}
-        {links.map(({ href, label, disabled }) => {
+        {links.map(({ href, label, disabled, tag }) => {
           const isActive = pathname === href
           return (
             <NavigationMenuItem key={href}>
@@ -77,20 +78,25 @@ function MainNavMenu() {
                   aria-disabled="true"
                 >
                   <span>{label}</span>
-                  <span className="ml-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Soon
-                  </span>
+                  {tag ? <NavItemTag tone="muted">{tag}</NavItemTag> : null}
                 </NavigationMenuLink>
               ) : (
                 <LinkComponent href={href}>
                   <NavigationMenuLink
                     className={`${navigationMenuTriggerStyle()} ${
-                      isActive
-                        ? "underline decoration-primary underline-offset-4"
-                        : "text-foreground"
+                      isActive ? "" : "text-foreground"
                     }`}
                   >
-                    {label}
+                    <span
+                      className={
+                        isActive
+                          ? "underline decoration-primary underline-offset-8"
+                          : undefined
+                      }
+                    >
+                      {label}
+                    </span>
+                    {tag ? <NavItemTag>{tag}</NavItemTag> : null}
                   </NavigationMenuLink>
                 </LinkComponent>
               )}
@@ -99,6 +105,26 @@ function MainNavMenu() {
         })}
       </NavigationMenuList>
     </NavigationMenu>
+  )
+}
+
+export function NavItemTag({
+  children,
+  tone = "accent",
+}: {
+  children: React.ReactNode
+  tone?: "accent" | "muted"
+}) {
+  return (
+    <span
+      className={`ml-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-bold leading-none ${
+        tone === "muted"
+          ? "bg-muted text-muted-foreground"
+          : "bg-primary tabular-nums text-primary-foreground"
+      }`}
+    >
+      {children}
+    </span>
   )
 }
 

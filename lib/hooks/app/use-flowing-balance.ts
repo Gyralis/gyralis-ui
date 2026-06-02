@@ -74,6 +74,18 @@ export function useFlowingBalance({
   }
 }
 
+export function formatFlowingDisplayValue(
+  value: string | undefined,
+  decimals = 7
+) {
+  if (!value) return "0"
+
+  const [whole, fraction = ""] = value.split(".")
+  const trimmedFraction = fraction.slice(0, decimals).replace(/0+$/, "")
+
+  return trimmedFraction ? `${whole}.${trimmedFraction}` : whole
+}
+
 export function formatMonthlyIncoming({
   flowRatePerSecond,
   decimals,

@@ -22,41 +22,57 @@ interface LoopCardProps {
 const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   void onBalanceUpdate
   const [balanceRefreshKey, setBalanceRefreshKey] = useState(0)
+  const isSuperLoop = loop.contractType === "superLoop" || loop.super
 
   return (
-    <div className="tamagotchi-card font-body relative p-7 md:p-8">
+    <div
+      className={[
+        "tamagotchi-card font-body relative p-7 md:p-8",
+        isSuperLoop ? "tamagotchi-card-superloop" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-center">
         {/* Loop metadata */}
         <div className="col-span-1 flex min-h-[248px] flex-col justify-between py-2 pr-2">
           <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                <span className="size-2 rounded-full bg-primary" />
-                <span className="truncate text-foreground">
-                  Deployed on {loop.chainName}
-                </span>
-              </span>
-              <LoopTypeBadge
-                isSuper={loop.contractType === "superLoop" || loop.super}
-              />
-            </div>
-
-            <div className="mt-7 space-y-5">
-              <div className="flex items-center gap-1 ">
-                {loop.eligibilityLogoUrl && (
-                  <div className="mt-1 flex size-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/70 p-2">
-                    <Image
-                      src={loop.eligibilityLogoUrl}
-                      alt={`${loop.eligibility} logo`}
-                      width={28}
-                      height={28}
-                      className="size-7 object-contain"
-                    />
+            <div className="space-y-5">
+              <div className="flex items-center gap-3">
+                {(loop.eligibilityLogoUrl || isSuperLoop) && (
+                  <div className="relative flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border bg-background/70 p-2">
+                    {loop.eligibilityLogoUrl ? (
+                      <Image
+                        src={loop.eligibilityLogoUrl}
+                        alt={`${loop.eligibility} logo`}
+                        width={28}
+                        height={28}
+                        className="size-7 object-contain"
+                      />
+                    ) : (
+                      <span className="size-3 rounded-full bg-primary" />
+                    )}
+                    {isSuperLoop ? (
+                      <div className="absolute -bottom-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-card p-1 shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+                        <Image
+                          src="/superfluid-logo.png"
+                          alt="Superfluid logo"
+                          width={16}
+                          height={16}
+                          className="size-4 object-contain"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 )}
-                <h2 className="max-w-[14ch] text-foreground  text-[1.65rem]">
-                  {loop.title}
-                </h2>
+                <div className="min-w-0 self-center">
+                  <h2 className="max-w-[14ch] text-[1.65rem] text-foreground">
+                    {loop.title}
+                  </h2>
+                  <div className="mt-1 flex">
+                    <LoopTypeBadge isSuper={isSuperLoop} />
+                  </div>
+                </div>
               </div>
               <div className="max-w-[34ch] space-y-1.5">
                 <p className="text-base text-muted-foreground">
@@ -72,9 +88,12 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             </div>
           </div>
 
-          <div className="pt-8">
+          <div className="flex flex-wrap items-center gap-3 pt-8">
             <span className="inline-flex rounded-lg bg-muted/60 px-3 py-1.5 text-xs font-semibold text-secondary-foreground">
               by {loop.by}
+            </span>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              {loop.chainName}
             </span>
           </div>
         </div>
@@ -102,7 +121,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             contractType={loop.contractType}
             eligibilityProvider={loop.eligibilityProvider}
             eligibilityLogoUrl={loop.eligibilityLogoUrl}
-            isSuper={loop.contractType === "superLoop" || loop.super}
+            isSuper={isSuperLoop}
             loopTitle={loop.title}
             onClaimSuccess={() => setBalanceRefreshKey((key) => key + 1)}
           />

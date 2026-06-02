@@ -47,6 +47,7 @@ export function LoopsTable({ loops }: LoopsTableProps) {
 
 function LoopTableRow({ loop }: { loop: LoopCardData }) {
   const address = loop.address
+  const isSuperLoop = loop.contractType === "superLoop" || loop.super
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
@@ -108,7 +109,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
     <>
       <div className="grid grid-cols-[1.45fr_1.1fr_1.15fr_0.9fr_1.05fr_1.35fr] items-center gap-4 border-b border-border/70 px-6 py-5 last:border-b-0">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70">
+          <div className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70">
             {loop.eligibilityLogoUrl ? (
               <Image
                 src={loop.eligibilityLogoUrl}
@@ -120,6 +121,17 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
             ) : (
               <span className="size-2 rounded-full bg-primary" />
             )}
+            {isSuperLoop ? (
+              <div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border border-border bg-card p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+                <Image
+                  src="/superfluid-logo.png"
+                  alt="Superfluid logo"
+                  width={12}
+                  height={12}
+                  className="size-3 object-contain"
+                />
+              </div>
+            ) : null}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-5 text-foreground">
@@ -202,7 +214,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
           isOpen={isLoopersModalOpen}
           loopAddress={address}
           loopContractType={loop.contractType}
-          loopIsSuper={loop.contractType === "superLoop" || loop.super}
+          loopIsSuper={isSuperLoop}
           loopToken={settings?.token}
           loopTitle={loop.title}
           onOpenChange={setIsLoopersModalOpen}
