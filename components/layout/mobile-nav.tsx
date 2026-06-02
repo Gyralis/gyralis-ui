@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ModeToggle } from "../shared/mode-toggle"
+
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
+import { ModeToggle } from "../shared/mode-toggle"
 import { NavItemTag, NavLogoMark } from "./main-nav"
 
 export function MobileNav() {
@@ -47,8 +48,8 @@ export function MobileNav() {
             <MobileLink href="/loops" onOpenChange={setOpen}>
               Loops
             </MobileLink>
-            <MobileLink href="/elegibilities" onOpenChange={setOpen}>
-              Elegibilities
+            <MobileLink href="/eligibilities" onOpenChange={setOpen}>
+              Eligibilities
             </MobileLink>
             <MobileLink href="/dashboard" onOpenChange={setOpen}>
               <span>Dashboard</span>
