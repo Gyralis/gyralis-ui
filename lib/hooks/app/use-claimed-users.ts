@@ -11,6 +11,8 @@ const upgradedClaimEventAbiItem = parseAbiItem(
   "event Claim(address indexed claimer, address indexed token, uint256 indexed periodNumber, uint256 payout)"
 )
 
+const LOG_LOOKBACK_BLOCKS = 100_000n
+
 interface UseClaimedUsersResult {
   users: Address[]
   payouts: Record<string, bigint>
@@ -21,7 +23,8 @@ export function useClaimedUsers(
   loopAddress: Address,
   chainId: number,
   periodNumber?: bigint,
-  refreshKey = 0
+  refreshKey = 0,
+  enabled = true
 ): UseClaimedUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
@@ -29,7 +32,7 @@ export function useClaimedUsers(
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!publicClient || periodNumber == null) {
+    if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
       setPayouts({})
       setLoading(false)
@@ -42,17 +45,22 @@ export function useClaimedUsers(
       setLoading(true)
 
       try {
+        const latestBlock = await publicClient.getBlockNumber()
+        const fromBlock =
+          latestBlock > LOG_LOOKBACK_BLOCKS
+            ? latestBlock - LOG_LOOKBACK_BLOCKS
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
           publicClient.getLogs({
             address: loopAddress,
             event: legacyClaimEventAbiItem,
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
           publicClient.getLogs({
             address: loopAddress,
             event: upgradedClaimEventAbiItem,
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
         ])
@@ -105,7 +113,7 @@ export function useClaimedUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, loopAddress, periodNumber, publicClient, refreshKey])
+  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
 
   return { users, payouts, loading }
 }

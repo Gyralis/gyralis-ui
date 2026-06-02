@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { LoopCardData } from "@/data/loops-data"
 import { formatUnits } from "viem"
-import { useBalance } from "wagmi"
 
-import { LoopClaim } from "@/components/loops/loop-claim"
-import { LoopersModal } from "@/components/loops/loopers-modal"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
+import { LoopClaim } from "@/components/loops/loop-claim"
+import { LoopersModal } from "@/components/loops/loopers-modal"
 
 interface LoopsTableProps {
   loops: LoopCardData[]
@@ -47,6 +47,7 @@ export function LoopsTable({ loops }: LoopsTableProps) {
 
 function LoopTableRow({ loop }: { loop: LoopCardData }) {
   const address = loop.address
+  const isSuperLoop = loop.contractType === "superLoop" || loop.super
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
@@ -58,15 +59,15 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
     currentPeriod,
     isLoading,
     refetch: refetchSettings,
-  } = useLoopSettings(address ?? "0x", loop.chainId)
-  const { data: loopBalance, refetch: refetchLoopBalance } = useBalance({
-    address,
-    token: settings?.token,
-    chainId: loop.chainId,
-    query: {
+  } = useLoopSettings(address ?? "0x", loop.chainId, loop.contractType)
+  const { data: loopBalance, refetch: refetchLoopBalance } =
+    useLoopTokenBalance({
+      address,
+      chainId: loop.chainId,
+      contractType: loop.contractType,
       enabled: Boolean(address && settings?.token),
-    },
-  })
+      token: settings?.token,
+    })
 
   const balanceLabel = useMemo(() => {
     if (!loopBalance) return "--"
@@ -107,91 +108,103 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
   return (
     <>
       <div className="grid grid-cols-[1.45fr_1.1fr_1.15fr_0.9fr_1.05fr_1.35fr] items-center gap-4 border-b border-border/70 px-6 py-5 last:border-b-0">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70">
-          {loop.eligibilityLogoUrl ? (
-            <Image
-              src={loop.eligibilityLogoUrl}
-              alt={`${loop.eligibility} logo`}
-              width={26}
-              height={26}
-              className="size-6 object-contain"
-            />
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70">
+            {loop.eligibilityLogoUrl ? (
+              <Image
+                src={loop.eligibilityLogoUrl}
+                alt={`${loop.eligibility} logo`}
+                width={26}
+                height={26}
+                className="size-6 object-contain"
+              />
+            ) : (
+              <span className="size-2 rounded-full bg-primary" />
+            )}
+            {isSuperLoop ? (
+              <div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border border-border bg-card p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+                <Image
+                  src="/superfluid-logo.png"
+                  alt="Superfluid logo"
+                  width={12}
+                  height={12}
+                  className="size-3 object-contain"
+                />
+              </div>
+            ) : null}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold leading-5 text-foreground">
+              {loop.title}
+            </p>
+            <span className="mt-1.5 inline-flex rounded-lg bg-muted/60 px-2.5 py-1 text-xs font-semibold leading-none text-secondary-foreground">
+              {loop.by}
+            </span>
+          </div>
+        </div>
+
+        <div className="inline-flex min-w-0 items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Passport Score</span>
+          {shieldThreshold ? (
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold tabular-nums text-primary-foreground">
+              {shieldThreshold}+
+            </span>
           ) : (
-            <span className="size-2 rounded-full bg-primary" />
+            <span className="font-semibold leading-5 text-foreground">
+              {loop.shieldScore}
+            </span>
           )}
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-semibold leading-5 text-foreground">
-            {loop.title}
-          </p>
-          <span className="mt-1.5 inline-flex rounded-lg bg-muted/60 px-2.5 py-1 text-xs font-semibold leading-none text-secondary-foreground">
-            {loop.by}
+
+        <div className="inline-flex min-w-0 items-center gap-2 text-sm">
+          <span className="font-semibold leading-5 text-foreground">
+            {eligibilityLabel}
           </span>
         </div>
-      </div>
 
-      <div className="inline-flex min-w-0 items-center gap-2 text-sm">
-        <span className="text-muted-foreground">Passport Score</span>
-        {shieldThreshold ? (
-          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold tabular-nums text-primary-foreground">
-            {shieldThreshold}+
-          </span>
-        ) : (
-          <span className="font-semibold leading-5 text-foreground">
-            {loop.shieldScore}
-          </span>
-        )}
-      </div>
+        <div className="text-sm font-semibold text-foreground">
+          {balanceLabel}
+        </div>
 
-      <div className="inline-flex min-w-0 items-center gap-2 text-sm">
-        <span className="font-semibold leading-5 text-foreground">
-          {eligibilityLabel}
-        </span>
-      </div>
+        <div>
+          <p className="font-mono text-sm font-semibold text-primary">
+            <CountdownLabel nextPeriodStart={nextPeriodStart} />
+          </p>
+          <p className="mt-1 text-xs font-medium text-muted-foreground">
+            {distributionLabel}
+          </p>
+          {address ? (
+            <button
+              type="button"
+              onClick={() => setIsLoopersModalOpen(true)}
+              className="mt-1.5 text-xs font-semibold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              View loopers
+            </button>
+          ) : null}
+        </div>
 
-      <div className="text-sm font-semibold text-foreground">
-        {balanceLabel}
-      </div>
-
-      <div>
-        <p className="font-mono text-sm font-semibold text-primary">
-          <CountdownLabel nextPeriodStart={nextPeriodStart} />
-        </p>
-        <p className="mt-1 text-xs font-medium text-muted-foreground">
-          {distributionLabel}
-        </p>
-        {address ? (
-          <button
-            type="button"
-            onClick={() => setIsLoopersModalOpen(true)}
-            className="mt-1.5 text-xs font-semibold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            View loopers
-          </button>
-        ) : null}
-      </div>
-
-      <div className="flex justify-start">
-        {address ? (
-          <LoopClaim
-            address={address}
-            chainId={loop.chainId}
-            eligibilityProvider={loop.eligibilityProvider}
-            compact
-            showHelper={false}
-            onSuccess={() => {
-              void refetchLoopBalance()
-              void refetchSettings()
-              setModalRefreshKey((key) => key + 1)
-            }}
-          />
-        ) : (
-          <span className="text-sm font-medium text-muted-foreground">
-            Unavailable
-          </span>
-        )}
-      </div>
+        <div className="flex justify-start">
+          {address ? (
+            <LoopClaim
+              address={address}
+              chainId={loop.chainId}
+              contractType={loop.contractType}
+              eligibilityProvider={loop.eligibilityProvider}
+              compact
+              showHelper={false}
+              onSuccess={() => {
+                void refetchLoopBalance()
+                void refetchSettings()
+                setModalRefreshKey((key) => key + 1)
+              }}
+            />
+          ) : (
+            <span className="text-sm font-medium text-muted-foreground">
+              Unavailable
+            </span>
+          )}
+        </div>
       </div>
       {address ? (
         <LoopersModal
@@ -200,7 +213,8 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
           eligibilityLogoUrl={loop.eligibilityLogoUrl}
           isOpen={isLoopersModalOpen}
           loopAddress={address}
-          loopIsSuper={loop.super}
+          loopContractType={loop.contractType}
+          loopIsSuper={isSuperLoop}
           loopToken={settings?.token}
           loopTitle={loop.title}
           onOpenChange={setIsLoopersModalOpen}

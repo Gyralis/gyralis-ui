@@ -5,7 +5,6 @@ import { LoopEligibilityProvider } from "@/data/loops-data"
 import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
-  useBalance,
   useChainId,
   usePublicClient,
   useReadContract,
@@ -13,7 +12,13 @@ import {
   useWriteContract,
 } from "wagmi"
 
-import deployedContracts from "@/lib/generated/deployed-contracts"
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  getLoopContractAbi,
+  getLoopContractMethods,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { cn, trimFormattedBalance } from "@/lib/utils"
 
@@ -23,6 +28,7 @@ import { useToast } from "../ui/use-toast"
 interface LoopClaimProps {
   address: Address
   chainId: number
+  contractType?: LoopContractType
   eligibilityProvider: LoopEligibilityProvider
   compact?: boolean
   showHelper?: boolean
@@ -38,6 +44,7 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
 const BLOCKSCOUT_TX_BASE_URLS: Record<number, string> = {
   100: "https://gnosis.blockscout.com/tx",
   10200: "https://gnosis-chiado.blockscout.com/tx",
+  8453: "https://basescan.org/tx",
 }
 
 const legacyRegisterEventAbiItem = parseAbiItem(
@@ -46,12 +53,14 @@ const legacyRegisterEventAbiItem = parseAbiItem(
 const upgradedRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
+const LOG_LOOKBACK_BLOCKS = 100_000n
 
 export type LoopClaimStatus = "default" | "entered" | "claimable" | "claimed"
 
 export const LoopClaim: React.FC<LoopClaimProps> = ({
   address,
   chainId,
+  contractType = DEFAULT_LOOP_CONTRACT_TYPE,
   eligibilityProvider,
   compact = false,
   showHelper = true,
@@ -72,23 +81,23 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const { writeContractAsync } = useWriteContract()
 
   const loopAbi = useMemo(() => {
-    return (
-      deployedContracts?.[chainId as keyof typeof deployedContracts]?.loop
-        ?.abi ?? []
-    )
-  }, [chainId])
+    return getLoopContractAbi(chainId, contractType)
+  }, [chainId, contractType])
+  const loopMethods = useMemo(() => {
+    return getLoopContractMethods(contractType)
+  }, [contractType])
 
   const { settings, refetch: refetchSettings } = useLoopSettings(
     address,
-    chainId
-  )
-  const { data: loopBalance } = useBalance({
-    address,
-    token: settings?.token,
     chainId,
-    query: {
-      enabled: Boolean(address && settings?.token),
-    },
+    contractType
+  )
+  const { data: loopBalance } = useLoopTokenBalance({
+    address,
+    chainId,
+    contractType,
+    enabled: Boolean(address && settings?.token),
+    token: settings?.token,
   })
 
   const { data: claimerStatus, refetch: refetchClaimerStatus } =
@@ -112,7 +121,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   } = useReadContract({
     address,
     abi: loopAbi,
-    functionName: "getCurrentPeriod",
+    functionName: loopMethods.getCurrentPeriod,
     chainId,
     query: {
       enabled: !!connectedAccount,
@@ -120,6 +129,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       refetchOnWindowFocus: false,
     },
   })
+
+  const currentPeriodValue =
+    typeof currentPeriod === "bigint" ? currentPeriod : undefined
 
   const {
     data: currentPeriodPayout,
@@ -129,19 +141,23 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     address,
     abi: loopAbi,
     functionName: "getPeriodIndividualPayout",
-    args: [currentPeriod ?? 0n],
+    args: [currentPeriodValue ?? 0n],
     account: connectedAccount,
     chainId,
     query: {
-      enabled: !!connectedAccount && currentPeriod != null,
+      enabled: !!connectedAccount && currentPeriodValue != null,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
   })
 
-  const isRegistered = Boolean(claimerStatus?.[0])
-  const hasClaimed = Boolean(claimerStatus?.[1])
-  const claimableAmount = currentPeriodPayout ?? 0n
+  const claimerStatusTuple = claimerStatus as
+    | readonly [boolean, boolean]
+    | undefined
+  const isRegistered = Boolean(claimerStatusTuple?.[0])
+  const hasClaimed = Boolean(claimerStatusTuple?.[1])
+  const claimableAmount =
+    typeof currentPeriodPayout === "bigint" ? currentPeriodPayout : 0n
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod = isRegistered && !hasClaimed && !isClaimableNow
   const isEnteredForNextPeriod =
@@ -181,16 +197,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       },
     })
   const blockscoutTxUrl = txHash
-    ? `${BLOCKSCOUT_TX_BASE_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"}/${txHash}`
+    ? `${
+        BLOCKSCOUT_TX_BASE_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"
+      }/${txHash}`
     : undefined
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
     setLastClaimedAmount(undefined)
-  }, [address, chainId, connectedAccount, currentPeriod])
+  }, [address, chainId, connectedAccount, currentPeriodValue])
 
   useEffect(() => {
-    if (!publicClient || !connectedAccount || currentPeriod == null) {
+    if (!publicClient || !connectedAccount || currentPeriodValue == null) {
       setIsRegisteredForNextPeriod(false)
       return
     }
@@ -199,7 +217,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
     const fetchNextPeriodRegistration = async () => {
       try {
-        const nextPeriod = currentPeriod + 1n
+        const nextPeriod = currentPeriodValue + 1n
+        const latestBlock = await publicClient.getBlockNumber()
+        const fromBlock =
+          latestBlock > LOG_LOOKBACK_BLOCKS
+            ? latestBlock - LOG_LOOKBACK_BLOCKS
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
           publicClient.getLogs({
             address,
@@ -208,7 +231,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
               sender: connectedAccount,
               periodNumber: nextPeriod,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
           publicClient.getLogs({
@@ -218,7 +241,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
               sender: connectedAccount,
               periodNumber: nextPeriod,
             },
-            fromBlock: 0n,
+            fromBlock,
             toBlock: "latest",
           }),
         ])
@@ -241,7 +264,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     return () => {
       cancelled = true
     }
-  }, [address, connectedAccount, currentPeriod, publicClient])
+  }, [address, connectedAccount, currentPeriodValue, publicClient])
 
   useEffect(() => {
     onStatusChange?.(claimStatus)
@@ -261,15 +284,14 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         pendingAction === "enter"
           ? "Entered the Loop"
           : "Transaction confirmed",
-      description: (
+      description:
         pendingAction === "enter"
           ? "You are registered for the next period claim."
-          : "Claim was confirmed onchain."
-      ),
+          : "Claim was confirmed onchain.",
       link: blockscoutTxUrl
         ? {
             href: blockscoutTxUrl,
-            label: "View on Blockscout",
+            label: "View transaction",
           }
         : undefined,
     } as any)
@@ -356,7 +378,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       const hash = await writeContractAsync({
         address,
         abi: loopAbi,
-        functionName: "claimAndRegister",
+        functionName: loopMethods.claimAndRegister,
         args: [payload.signature],
         chainId,
       })
@@ -428,12 +450,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         {actionLabel}
       </Button>
       {showHelper && isEnteredForNextPeriod && !hasClaimed && (
-        <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
+        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           You are registered for the next period claim.
         </p>
       )}
       {showHelper && hasClaimed && (
-        <p className="rounded-[1rem] py-1 text-center text-xs font-medium text-primary">
+        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           {claimedAmountLabel
             ? `Claimed ${claimedAmountLabel} this period. Come back next period.`
             : "Claimed this period. Come back next period."}

@@ -1,5 +1,7 @@
 import { Address } from "viem"
 
+import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
 
 export interface LoopCardData {
@@ -18,6 +20,7 @@ export interface LoopCardData {
   shieldValue?: string
   registeredAddresses?: { address: string; claimed: boolean }[]
   super?: boolean
+  contractType: LoopContractType
   chainId: number
   chainName: string
   eligibilityProvider: LoopEligibilityProvider
@@ -44,6 +47,7 @@ export const LoopCardsData: LoopCardData[] = [
     shieldAccount: "0xtt...453",
     shieldValue: "26",
     super: false,
+    contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "garden_1hive",
@@ -65,10 +69,33 @@ export const LoopCardsData: LoopCardData[] = [
     shieldAccount: "0xtt...453",
     shieldValue: "26",
     super: false,
+    contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
+    enabled: true,
+  },
+  {
+    id: 5,
+    title: "Blockscout Merits",
+    by: "Gyralis Team",
+    address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
+    description:
+      "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
+    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    eligibilityLogoUrl: "/blockscout-logo.png",
+    shieldScore: "Passport Score 15+",
+    eligibility: "Gyralis offer redemption required",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: true,
+    contractType: "superLoop",
+    chainId: 8453,
+    chainName: "Base",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 0,
     enabled: true,
   },
 ]

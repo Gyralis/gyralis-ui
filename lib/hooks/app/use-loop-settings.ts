@@ -1,8 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { Address } from "viem"
-import { useChainId, useReadContract } from "wagmi"
+import { useReadContract } from "wagmi"
 
-import deployedContracts from "@/lib/generated/deployed-contracts"
+import {
+  DEFAULT_LOOP_CONTRACT_TYPE,
+  getLoopContractAbi,
+  getLoopContractMethods,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
 
 interface LoopDetails {
   token: Address
@@ -12,13 +17,17 @@ interface LoopDetails {
   currentPeriod: number
 }
 
-export const useLoopSettings = (address: Address, chain: number) => {
+export const useLoopSettings = (
+  address: Address,
+  chain: number,
+  contractType: LoopContractType = DEFAULT_LOOP_CONTRACT_TYPE
+) => {
   const loopAbi = useMemo(() => {
-    return (
-      deployedContracts?.[chain as keyof typeof deployedContracts]?.loop?.abi ??
-      []
-    )
-  }, [chain])
+    return getLoopContractAbi(chain, contractType)
+  }, [chain, contractType])
+  const loopMethods = useMemo(() => {
+    return getLoopContractMethods(contractType)
+  }, [contractType])
 
   const {
     data: readContractData,
@@ -27,7 +36,7 @@ export const useLoopSettings = (address: Address, chain: number) => {
   } = useReadContract({
     abi: loopAbi,
     address: address,
-    functionName: "getLoopDetails",
+    functionName: loopMethods.getDetails,
     chainId: chain,
   })
 
@@ -38,7 +47,7 @@ export const useLoopSettings = (address: Address, chain: number) => {
   } = useReadContract({
     abi: loopAbi,
     address: address,
-    functionName: "getCurrentPeriod",
+    functionName: loopMethods.getCurrentPeriod,
     chainId: chain,
   })
 
