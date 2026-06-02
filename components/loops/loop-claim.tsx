@@ -18,6 +18,7 @@ import {
   getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
+import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { cn, trimFormattedBalance } from "@/lib/utils"
@@ -104,7 +105,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     useReadContract({
       address,
       abi: loopAbi,
-      functionName: "getClaimerStatus",
+      functionName: loopMethods.getClaimerStatus,
       args: [connectedAccount ?? "0x"],
       chainId,
       query: {
@@ -140,7 +141,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   } = useReadContract({
     address,
     abi: loopAbi,
-    functionName: "getPeriodIndividualPayout",
+    functionName: loopMethods.getPeriodIndividualPayout,
     args: [currentPeriodValue ?? 0n],
     account: connectedAccount,
     chainId,
@@ -224,7 +225,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             ? latestBlock - LOG_LOOKBACK_BLOCKS
             : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          publicClient.getLogs({
+          getLogsChunked(publicClient, {
             address,
             event: legacyRegisterEventAbiItem,
             args: {
@@ -234,7 +235,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             fromBlock,
             toBlock: "latest",
           }),
-          publicClient.getLogs({
+          getLogsChunked(publicClient, {
             address,
             event: upgradedRegisterEventAbiItem,
             args: {

@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { parseAbiItem, type Address } from "viem"
+import { parseAbiItem, type Address, type Log } from "viem"
 import { usePublicClient } from "wagmi"
+
+import { getLogsChunked } from "./get-logs-chunked"
 
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
@@ -12,6 +14,13 @@ const upgradedRegisterEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
+type RegisterLog = Log<bigint, number, false, typeof legacyRegisterEventAbiItem>
+type UpgradedRegisterLog = Log<
+  bigint,
+  number,
+  false,
+  typeof upgradedRegisterEventAbiItem
+>
 
 interface UseRegisteredUsersResult {
   users: Address[]
@@ -48,7 +57,7 @@ export function useRegisteredUsers(
             ? latestBlock - LOG_LOOKBACK_BLOCKS
             : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          publicClient.getLogs({
+          getLogsChunked(publicClient, {
             address: loopAddress,
             event: legacyRegisterEventAbiItem,
             args: {
@@ -56,8 +65,8 @@ export function useRegisteredUsers(
             },
             fromBlock,
             toBlock: "latest",
-          }),
-          publicClient.getLogs({
+          }).then((logs) => logs as RegisterLog[]),
+          getLogsChunked(publicClient, {
             address: loopAddress,
             event: upgradedRegisterEventAbiItem,
             args: {
@@ -65,7 +74,7 @@ export function useRegisteredUsers(
             },
             fromBlock,
             toBlock: "latest",
-          }),
+          }).then((logs) => logs as UpgradedRegisterLog[]),
         ])
 
         if (cancelled) {

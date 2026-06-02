@@ -9,6 +9,7 @@ import { usePublicClient, useReadContract } from "wagmi"
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   getLoopContractAbi,
+  getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
@@ -138,6 +139,10 @@ export function LoopersModal({
     () => getLoopContractAbi(chainId, loopContractType),
     [chainId, loopContractType]
   )
+  const loopMethods = useMemo(
+    () => getLoopContractMethods(loopContractType),
+    [loopContractType]
+  )
 
   const selectedPeriod = useMemo(() => {
     if (currentPeriod == null) {
@@ -165,7 +170,7 @@ export function LoopersModal({
   const { data: selectedPeriodPayout } = useReadContract({
     address: loopAddress,
     abi: loopAbi,
-    functionName: "getPeriodIndividualPayout",
+    functionName: loopMethods.getPeriodIndividualPayout,
     args: [selectedPeriod ?? 0n],
     chainId,
     query: {
