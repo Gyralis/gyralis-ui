@@ -61,7 +61,7 @@ function MainNavMenu() {
     { href: "/loops", label: "Loops", disabled: false },
     { href: "/eligibilities", label: "Eligibilities", disabled: false },
     { href: "/dashboard", label: "Dashboard", disabled: false, tag: "New" },
-    { href: "/leaderboard", label: "Leaderboard", disabled: true, tag: "Soon" },
+    { href: "/leaderboard", label: "Leaderboard", disabled: false },
   ]
 
   return (
