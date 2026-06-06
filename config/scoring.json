@@ -1,0 +1,9 @@
+{
+  "claimPoints": 1,
+  "streakBonuses": [
+    { "streak": 3, "points": 2 },
+    { "streak": 7, "points": 5 },
+    { "streak": 14, "points": 12 },
+    { "streak": 30, "points": 30 }
+  ]
+}

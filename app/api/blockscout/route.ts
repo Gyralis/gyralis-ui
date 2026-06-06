@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { env } from "@/env.mjs"
-import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
+import { createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import * as chains from "viem/chains"
 
 import {
   getLoopContractMethods,
@@ -13,6 +12,7 @@ import {
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
+import { getSupportedServerChain } from "@/lib/web3/supported-server-chains"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
@@ -54,13 +54,6 @@ interface BlockscoutRedemptionsResponse {
   next_page_params: Record<string, string> | null
 }
 
-function getViemChain(chainId: string | number): Chain {
-  for (const chain of Object.values(chains)) {
-    if ("id" in chain && chain.id == chainId) return chain
-  }
-  throw new Error(`Chain with id ${chainId} not found`)
-}
-
 async function fetchPassportScore(userAddress: string): Promise<number> {
   if (!GITCOIN_PASSPORT_API_KEY)
     throw new Error("Gitcoin Passport API key missing")
@@ -95,7 +88,7 @@ async function fetchNextPeriod(
   loopAddress: string,
   contractType: LoopContractType
 ): Promise<number> {
-  const viemChain = getViemChain(chainId)
+  const viemChain = getSupportedServerChain(chainId)
   const loopMethods = getLoopContractMethods(contractType)
   const currentPeriodAbi =
     loopMethods.getCurrentPeriod === "getStreamingCurrentPeriod"

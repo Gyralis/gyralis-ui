@@ -14,6 +14,84 @@ model User {
   address   String
 }
 
+model UserProfile {
+  id                          String    @id @map("_id")
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+  address                     String    @unique
+  ensName                     String?
+  ensAvatar                   String?
+  humanPassportScore          Float?
+  humanPassportScoreCheckedAt DateTime?
+}
+
+model UserLoopStats {
+  id                  String   @id @map("_id")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  userAddress         String
+  loopAddress         String
+  chainId             Int
+  totalClaims         Int      @default(0)
+  claimPoints         Int      @default(0)
+  streakBonusPoints   Int      @default(0)
+  totalPoints         Int      @default(0)
+  currentStreak       Int      @default(0)
+  longestStreak       Int      @default(0)
+  lastClaimedPeriod   Int?
+  earnedStreakBonuses Json
+
+  @@unique([userAddress, chainId, loopAddress])
+  @@index([totalPoints])
+}
+
+model UserGlobalStats {
+  id                  String   @id @map("_id")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  userAddress         String   @unique
+  totalClaims         Int      @default(0)
+  claimPoints         Int      @default(0)
+  streakBonusPoints   Int      @default(0)
+  totalPoints         Int      @default(0)
+  activeLoopStreaks   Int      @default(0)
+  longestStreak       Int      @default(0)
+  loopCount           Int      @default(0)
+  earnedStreakBonuses Json
+
+  @@index([totalPoints])
+}
+
+model LeaderboardEntry {
+  id                  String   @id @map("_id")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  scope               String
+  userAddress         String
+  chainId             Int?
+  loopAddress         String?
+  totalPoints         Int      @default(0)
+  claimPoints         Int      @default(0)
+  streakBonusPoints   Int      @default(0)
+  totalClaims         Int      @default(0)
+  currentStreak       Int      @default(0)
+  activeLoopStreaks   Int      @default(0)
+  longestStreak       Int      @default(0)
+  earnedStreakBonuses Json
+
+  @@unique([scope, userAddress, chainId, loopAddress])
+  @@index([scope, totalPoints])
+}
+
+model ScoringSyncState {
+  id              String    @id @map("_id")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastBlockNumber Int       @default(0)
+  lastEventId     String?
+  lastSyncedAt    DateTime?
+}
+
 model LitProtocolMessage {
   id              String              @id @default(uuid()) @map("_id")
   encryptedString String

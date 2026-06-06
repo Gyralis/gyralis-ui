@@ -1,13 +1,7 @@
-import { Chain, createWalletClient, http } from "viem"
+import { createWalletClient, http } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
-import * as chains from "viem/chains"
 
-function getViemChain(chainId: string | number): Chain {
-  for (const chain of Object.values(chains)) {
-    if ("id" in chain && chain.id == chainId) return chain
-  }
-  throw new Error(`Chain with id ${chainId} not found`)
-}
+import { getSupportedServerChain } from "@/lib/web3/supported-server-chains"
 
 interface GenerateEligibilitySignatureParams {
   userAddress: `0x${string}`
@@ -25,7 +19,7 @@ export async function generateEligibilitySignature({
   privateKey,
 }: GenerateEligibilitySignatureParams): Promise<`0x${string}`> {
   const account = privateKeyToAccount(privateKey)
-  const chain = getViemChain(chainId)
+  const chain = getSupportedServerChain(chainId)
   const rpcUrl = chain.rpcUrls.default.http[0]
   if (!rpcUrl) {
     throw new Error(`No RPC URL configured for chain ${chainId}`)
