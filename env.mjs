@@ -1,13 +1,13 @@
 import { createEnv } from "@t3-oss/env-nextjs"
 import { z } from "zod"
 
+export const DEFAULT_NEXTAUTH_SECRET =
+  "complex_password_at_least_32_characters_long"
+
 export const env = createEnv({
   server: {
     // Iron session requires a secret of at least 32 characters
-    NEXTAUTH_SECRET: z
-      .string()
-      .min(32)
-      .default("complex_password_at_least_32_characters_long"),
+    NEXTAUTH_SECRET: z.string().min(32).default(DEFAULT_NEXTAUTH_SECRET),
     DATABASE_URL: z.string().url().optional(),
     GYRALIS_SUBGRAPH_URL: z.string().url().optional(),
     GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),

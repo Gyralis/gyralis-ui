@@ -20,56 +20,50 @@ interface ClaimEventsResponse {
   errors?: Array<{ message: string }>
 }
 
-const CLAIM_EVENTS_QUERY = `
-  query ClaimEvents($first: Int!, $skip: Int!, $fromBlock: BigInt!) {
-    claimEvents(
-      first: $first
-      skip: $skip
-      orderBy: blockNumber
-      orderDirection: asc
-      where: { blockNumber_gte: $fromBlock }
-    ) {
-      id
-      periodNumber
-      payout
-      blockNumber
-      timestamp
-      txHash
-      loop { id }
-      account { id }
-    }
-  }
-`
+interface ClaimEventsQueryFilters {
+  fromBlock?: boolean
+  blockNumber?: boolean
+  afterEventId?: boolean
+  loopAddress?: boolean
+  userAddress?: boolean
+}
 
-const CLAIM_EVENTS_BY_LOOP_QUERY = `
-  query ClaimEventsByLoop($first: Int!, $skip: Int!, $fromBlock: BigInt!, $loopAddress: ID!) {
-    claimEvents(
-      first: $first
-      skip: $skip
-      orderBy: blockNumber
-      orderDirection: asc
-      where: { blockNumber_gte: $fromBlock, loop: $loopAddress }
-    ) {
-      id
-      periodNumber
-      payout
-      blockNumber
-      timestamp
-      txHash
-      loop { id }
-      account { id }
-    }
-  }
-`
+export function buildClaimEventsQuery(
+  filters: ClaimEventsQueryFilters
+): string {
+  const variables = ["$first: Int!"]
+  const where = []
 
-const CLAIM_EVENTS_BY_USER_LOOP_QUERY = `
-  query ClaimEventsByUserLoop($first: Int!, $skip: Int!, $loopAddress: ID!, $userAddress: ID!) {
+  if (filters.fromBlock) {
+    variables.push("$fromBlock: BigInt!")
+    where.push("blockNumber_gte: $fromBlock")
+  }
+  if (filters.blockNumber) {
+    variables.push("$blockNumber: BigInt!")
+    where.push("blockNumber: $blockNumber")
+  }
+  if (filters.afterEventId) {
+    variables.push("$afterEventId: ID!")
+    where.push("id_gt: $afterEventId")
+  }
+  if (filters.loopAddress) {
+    variables.push("$loopAddress: ID!")
+    where.push("loop: $loopAddress")
+  }
+  if (filters.userAddress) {
+    variables.push("$userAddress: ID!")
+    where.push("account: $userAddress")
+  }
+
+  const whereClause = where.length ? `where: { ${where.join(", ")} }` : ""
+
+  return `
+  query ClaimEvents(${variables.join(", ")}) {
     claimEvents(
       first: $first
-      skip: $skip
-      orderBy: periodNumber
+      orderBy: id
       orderDirection: asc
-      where: { loop: $loopAddress, account: $userAddress }
+      ${whereClause}
     ) {
       id
       periodNumber
@@ -82,19 +76,31 @@ const CLAIM_EVENTS_BY_USER_LOOP_QUERY = `
     }
   }
 `
+}
 
 export async function fetchClaimEventsFromSubgraph(input: {
-  fromBlock: number
+  fromBlock?: number
+  blockNumber?: number
+  afterEventId?: string
   first: number
-  skip: number
   loopAddress?: string
 }): Promise<ClaimScoringEvent[]> {
+  if (input.fromBlock != null && input.blockNumber != null) {
+    throw new Error("Use either fromBlock or blockNumber, not both")
+  }
+
   return fetchClaimEventPage({
-    query: input.loopAddress ? CLAIM_EVENTS_BY_LOOP_QUERY : CLAIM_EVENTS_QUERY,
+    query: buildClaimEventsQuery({
+      fromBlock: input.fromBlock != null,
+      blockNumber: input.blockNumber != null,
+      afterEventId: input.afterEventId != null,
+      loopAddress: input.loopAddress != null,
+    }),
     variables: {
       first: input.first,
-      skip: input.skip,
       fromBlock: input.fromBlock,
+      blockNumber: input.blockNumber,
+      afterEventId: input.afterEventId,
       loopAddress: input.loopAddress?.toLowerCase(),
     },
   })
@@ -106,21 +112,25 @@ export async function fetchAllClaimEventsForUserLoop(input: {
   batchSize: number
 }): Promise<ClaimScoringEvent[]> {
   const events: ClaimScoringEvent[] = []
-  let skip = 0
+  let afterEventId: string | undefined
 
   while (true) {
     const batch = await fetchClaimEventPage({
-      query: CLAIM_EVENTS_BY_USER_LOOP_QUERY,
+      query: buildClaimEventsQuery({
+        afterEventId: afterEventId != null,
+        loopAddress: true,
+        userAddress: true,
+      }),
       variables: {
         first: input.batchSize,
-        skip,
+        afterEventId,
         loopAddress: input.loopAddress.toLowerCase(),
         userAddress: input.userAddress.toLowerCase(),
       },
     })
     events.push(...batch)
     if (batch.length < input.batchSize) break
-    skip += input.batchSize
+    afterEventId = batch[batch.length - 1]?.id
   }
 
   return events

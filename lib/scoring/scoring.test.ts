@@ -9,6 +9,8 @@ import {
   createEmptyLoopStats,
   normalizeClaimEvents,
 } from "./rules"
+import { buildClaimEventsQuery } from "./subgraph-client"
+import { advanceScoringSyncCursor } from "./sync"
 import { ClaimScoringEvent, ScoringConfig } from "./types"
 
 const userAddress = "0x00000000000000000000000000000000000000aa"
@@ -371,5 +373,44 @@ describe("leaderboard scoring responses", () => {
       totalPoints: 5,
       earnedStreakBonuses: [{ streak: 3, points: 2 }],
     })
+  })
+})
+
+describe("scoring sync cursors", () => {
+  it("tracks the highest event id for the highest synced block", () => {
+    const cursor = [
+      { blockNumber: 10, id: "0xbbb-1" },
+      { blockNumber: 11, id: "0xaaa-1" },
+      { blockNumber: 11, id: "0xccc-1" },
+      { blockNumber: 10, id: "0xfff-1" },
+    ].reduce(advanceScoringSyncCursor, { lastBlockNumber: 0 })
+
+    expect(cursor).toEqual({
+      lastBlockNumber: 11,
+      lastEventId: "0xccc-1",
+    })
+  })
+
+  it("does not move backwards when an older block has a larger event id", () => {
+    expect(
+      advanceScoringSyncCursor(
+        { lastBlockNumber: 20, lastEventId: "0x100-1" },
+        { blockNumber: 19, id: "0xfff-1" }
+      )
+    ).toEqual({ lastBlockNumber: 20, lastEventId: "0x100-1" })
+  })
+
+  it("builds stable id cursor queries instead of skip pagination", () => {
+    const query = buildClaimEventsQuery({
+      fromBlock: true,
+      afterEventId: true,
+      loopAddress: true,
+    })
+
+    expect(query).toContain("orderBy: id")
+    expect(query).toContain("id_gt: $afterEventId")
+    expect(query).toContain("blockNumber_gte: $fromBlock")
+    expect(query).toContain("loop: $loopAddress")
+    expect(query).not.toContain("skip")
   })
 })

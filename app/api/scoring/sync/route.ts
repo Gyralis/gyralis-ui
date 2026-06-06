@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { env } from "@/env.mjs"
+import { DEFAULT_NEXTAUTH_SECRET, env } from "@/env.mjs"
 import { z } from "zod"
 
 import { runScoringSync } from "@/lib/scoring/sync"
@@ -18,6 +18,13 @@ function getProvidedApiKey(req: Request) {
 }
 
 export async function POST(req: Request) {
+  if (env.NEXTAUTH_SECRET === DEFAULT_NEXTAUTH_SECRET) {
+    return NextResponse.json(
+      { success: false, error: "Scoring sync secret is not configured" },
+      { status: 500 }
+    )
+  }
+
   if (getProvidedApiKey(req) !== env.NEXTAUTH_SECRET) {
     return NextResponse.json(
       { success: false, error: "Unauthorized" },

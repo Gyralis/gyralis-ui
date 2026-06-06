@@ -44,6 +44,11 @@ interface AffectedLoopKey {
   chainId: number
 }
 
+interface ScoringSyncCursor {
+  lastBlockNumber: number
+  lastEventId?: string
+}
+
 function keyForAffectedLoop(key: AffectedLoopKey): string {
   return [
     key.chainId,
@@ -91,6 +96,30 @@ async function clearScoringProjections() {
   await resetScoringSyncState()
 }
 
+export function advanceScoringSyncCursor(
+  cursor: ScoringSyncCursor,
+  event: { blockNumber: number; id: string }
+): ScoringSyncCursor {
+  if (event.blockNumber > cursor.lastBlockNumber) {
+    return {
+      lastBlockNumber: event.blockNumber,
+      lastEventId: event.id,
+    }
+  }
+
+  if (
+    event.blockNumber === cursor.lastBlockNumber &&
+    (cursor.lastEventId == null || event.id > cursor.lastEventId)
+  ) {
+    return {
+      lastBlockNumber: cursor.lastBlockNumber,
+      lastEventId: event.id,
+    }
+  }
+
+  return cursor
+}
+
 export async function runScoringSync(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
   if (mode === "full" && input.loopAddress) {
@@ -108,24 +137,17 @@ export async function runScoringSync(input: SyncInput = {}) {
 
   const syncState = mode === "incremental" ? await getScoringSyncState() : null
   const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
-  const fromBlock = mode === "incremental" ? lastSyncedBlock + 1 : 0
   const batchSize = env.SCORING_SYNC_BATCH_SIZE
   const affectedLoops = new Map<string, AffectedLoopKey>()
-  let skip = 0
   let processedEvents = 0
-  let maxBlockNumber = mode === "incremental" ? lastSyncedBlock : 0
-  let lastEventId: string | undefined
+  let cursor: ScoringSyncCursor = {
+    lastBlockNumber: mode === "incremental" ? lastSyncedBlock : 0,
+    lastEventId: syncState?.lastEventId ?? undefined,
+  }
 
-  while (true) {
-    const events = await fetchClaimEventsFromSubgraph({
-      fromBlock,
-      first: batchSize,
-      skip,
-      loopAddress: input.loopAddress,
-    })
-
-    if (events.length === 0) break
-
+  function trackEvents(
+    events: Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+  ) {
     for (const event of events) {
       const key = {
         userAddress: event.userAddress,
@@ -133,14 +155,44 @@ export async function runScoringSync(input: SyncInput = {}) {
         chainId: event.chainId,
       }
       affectedLoops.set(keyForAffectedLoop(key), key)
-      maxBlockNumber = Math.max(maxBlockNumber, event.blockNumber)
-      lastEventId = event.id
+      cursor = advanceScoringSyncCursor(cursor, event)
       processedEvents += 1
     }
-
-    if (events.length < batchSize) break
-    skip += batchSize
   }
+
+  async function fetchCursorPages(pageInput: {
+    fromBlock?: number
+    blockNumber?: number
+    afterEventId?: string
+  }) {
+    let afterEventId = pageInput.afterEventId
+
+    while (true) {
+      const events = await fetchClaimEventsFromSubgraph({
+        fromBlock: pageInput.fromBlock,
+        blockNumber: pageInput.blockNumber,
+        afterEventId,
+        first: batchSize,
+        loopAddress: input.loopAddress,
+      })
+
+      if (events.length === 0) break
+      trackEvents(events)
+      if (events.length < batchSize) break
+      afterEventId = events[events.length - 1]?.id
+    }
+  }
+
+  if (mode === "incremental" && syncState?.lastEventId) {
+    await fetchCursorPages({
+      blockNumber: lastSyncedBlock,
+      afterEventId: syncState.lastEventId,
+    })
+  }
+
+  await fetchCursorPages({
+    fromBlock: mode === "incremental" ? lastSyncedBlock + 1 : 0,
+  })
 
   const affectedUsers = new Set<string>()
   for (const key of affectedLoops.values()) {
@@ -171,8 +223,8 @@ export async function runScoringSync(input: SyncInput = {}) {
 
   if (!input.loopAddress) {
     await updateScoringSyncState({
-      lastBlockNumber: maxBlockNumber,
-      lastEventId,
+      lastBlockNumber: cursor.lastBlockNumber,
+      lastEventId: cursor.lastEventId,
     })
   }
 
@@ -181,6 +233,6 @@ export async function runScoringSync(input: SyncInput = {}) {
     processedEvents,
     affectedLoops: affectedLoops.size,
     affectedUsers: affectedUsers.size,
-    lastBlockNumber: maxBlockNumber,
+    lastBlockNumber: cursor.lastBlockNumber,
   }
 }
