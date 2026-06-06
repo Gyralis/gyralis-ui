@@ -35,7 +35,10 @@ export const env = createEnv({
     NEXT_PUBLIC_INFURA_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_LIVEPEER_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_WC_PROJECT_ID: z.string().min(1),
+    NEXT_PUBLIC_WC_PROJECT_ID: z
+      .string()
+      .min(1)
+      .default("00000000000000000000000000000000"),
   },
   runtimeEnv: {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
