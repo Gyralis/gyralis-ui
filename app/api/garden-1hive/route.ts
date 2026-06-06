@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server"
 import { env } from "@/env.mjs"
-import { createWalletClient, getContract, http, parseAbi } from "viem"
+import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import * as chains from "viem/chains"
 
 import {
   eligibilityRequestSchema,
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
-import { getSupportedServerChain } from "@/lib/web3/supported-server-chains"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
@@ -30,6 +30,13 @@ class PassportScoreNotSyncedError extends Error {
     super(PASSPORT_SCORE_NOT_SYNCED_ERROR)
     this.name = "PassportScoreNotSyncedError"
   }
+}
+
+function getViemChain(chainId: string | number): Chain {
+  for (const chain of Object.values(chains)) {
+    if ("id" in chain && chain.id == chainId) return chain
+  }
+  throw new Error(`Chain with id ${chainId} not found`)
 }
 
 async function fetchPassportScore(userAddress: string): Promise<number> {
@@ -65,7 +72,7 @@ async function fetchNextPeriod(
   chainId: number,
   loopAddress: string
 ): Promise<number> {
-  const viemChain = getSupportedServerChain(chainId)
+  const viemChain = getViemChain(chainId)
   const walletClient = createWalletClient({
     account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
     chain: viemChain,

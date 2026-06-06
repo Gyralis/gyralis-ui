@@ -2,11 +2,7 @@
 
 // import { SERVER_SESSION_SETTINGS } from "@/lib/session"
 
-export async function GET() {
-  return Response.json({ isLoggedIn: false })
-}
-
-// export async function GET_WITH_SESSION(req: Request) {
+// export async function GET(req: Request) {
 //   const res = new Response()
 //   const session = await getIronSession(req, res, SERVER_SESSION_SETTINGS)
 
