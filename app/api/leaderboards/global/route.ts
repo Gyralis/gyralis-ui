@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { databaseUnavailableResponse } from "@/lib/api/database-error"
 import { parsePagination } from "@/lib/api/pagination"
 import { getGlobalLeaderboard } from "@/lib/db/clients/leaderboard.client"
 import { toRankedLeaderboardEntry } from "@/lib/scoring/responses"
@@ -8,14 +9,21 @@ export const dynamic = "force-dynamic"
 
 export async function GET(req: Request) {
   const { limit, offset } = parsePagination(req.url)
-  const entries = await getGlobalLeaderboard({ limit, offset })
 
-  return NextResponse.json({
-    success: true,
-    limit,
-    offset,
-    entries: entries.map((entry, index) =>
-      toRankedLeaderboardEntry(entry, offset + index + 1)
-    ),
-  })
+  try {
+    const entries = await getGlobalLeaderboard({ limit, offset })
+
+    return NextResponse.json({
+      success: true,
+      limit,
+      offset,
+      entries: entries.map((entry, index) =>
+        toRankedLeaderboardEntry(entry, offset + index + 1)
+      ),
+    })
+  } catch (error) {
+    const response = databaseUnavailableResponse(error, "global-leaderboard")
+    if (response) return response
+    throw error
+  }
 }

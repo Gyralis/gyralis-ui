@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 
+import { databaseUnavailableResponse } from "@/lib/api/database-error"
 import { parsePagination } from "@/lib/api/pagination"
 import { getLoopLeaderboard } from "@/lib/db/clients/leaderboard.client"
 import { toRankedLeaderboardEntry } from "@/lib/scoring/responses"
@@ -19,21 +20,27 @@ export async function GET(
     )
   }
 
-  const entries = await getLoopLeaderboard({
-    chainId,
-    loopAddress: params.loopAddress,
-    limit,
-    offset,
-  })
+  try {
+    const entries = await getLoopLeaderboard({
+      chainId,
+      loopAddress: params.loopAddress,
+      limit,
+      offset,
+    })
 
-  return NextResponse.json({
-    success: true,
-    limit,
-    offset,
-    chainId,
-    loopAddress: params.loopAddress.toLowerCase(),
-    entries: entries.map((entry, index) =>
-      toRankedLeaderboardEntry(entry, offset + index + 1)
-    ),
-  })
+    return NextResponse.json({
+      success: true,
+      limit,
+      offset,
+      chainId,
+      loopAddress: params.loopAddress.toLowerCase(),
+      entries: entries.map((entry, index) =>
+        toRankedLeaderboardEntry(entry, offset + index + 1)
+      ),
+    })
+  } catch (error) {
+    const response = databaseUnavailableResponse(error, "loop-leaderboard")
+    if (response) return response
+    throw error
+  }
 }
