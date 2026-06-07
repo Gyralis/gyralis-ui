@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/scoring/sync",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
