@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "generatedFromCacheFile": "data/loop-registration-cache.json",
+  "snapshots": [
+    {
+      "date": "2026-06-08",
+      "recordedAt": "2026-06-08T14:51:43.385Z",
+      "cacheFile": "data/loop-registration-cache.json",
+      "cacheUpdatedAt": "2026-06-08T14:51:43.385Z",
+      "loops": {
+        "blockscout": {
+          "loopKey": "blockscout",
+          "loopName": "Blockscout Merits",
+          "updatedAt": "2026-06-08T14:51:43.385Z",
+          "lastProcessedPeriod": "33",
+          "uniqueUserCount": 125,
+          "uniqueClaimUserCount": 91,
+          "totalRegistrationsCount": 1310,
+          "totalClaimsCount": 1086,
+          "totalDistributedAmountRaw": "62213158403490113326",
+          "totalDistributedAmountFormatted": "62.213158403490113326",
+          "tokenSymbol": "HNY"
+        },
+        "1hive": {
+          "loopKey": "1hive",
+          "loopName": "1Hive Gardens",
+          "updatedAt": "2026-06-08T14:51:12.328Z",
+          "lastProcessedPeriod": "33",
+          "uniqueUserCount": 29,
+          "uniqueClaimUserCount": 26,
+          "totalRegistrationsCount": 422,
+          "totalClaimsCount": 358,
+          "totalDistributedAmountRaw": "63160037159296164197",
+          "totalDistributedAmountFormatted": "63.160037159296164197",
+          "tokenSymbol": "HNY"
+        }
+      },
+      "global": {
+        "updatedAt": "2026-06-08T14:51:43.385Z",
+        "loopsIncluded": [
+          "1hive",
+          "blockscout"
+        ],
+        "uniqueUserCount": 130,
+        "uniqueClaimUserCount": 96,
+        "totalRegistrationsCount": 1732,
+        "totalClaimsCount": 1444,
+        "totalDistributedAmountRaw": "125373195562786277523",
+        "totalDistributedAmountFormatted": "125.373195562786277523",
+        "tokenSymbol": "HNY",
+        "tokenTotals": [
+          {
+            "tokenAddress": "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+            "tokenSymbol": "HNY",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "125373195562786277523",
+            "totalDistributedAmountFormatted": "125.373195562786277523",
+            "totalClaimedAmountRaw": "106599484757945312232",
+            "totalClaimedAmountFormatted": "106.599484757945312232",
+            "totalUnclaimedAmountRaw": "18773710804840965291",
+            "totalUnclaimedAmountFormatted": "18.773710804840965291"
+          }
+        ]
+      }
+    }
+  ]
+}
