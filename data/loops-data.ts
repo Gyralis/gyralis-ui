@@ -80,7 +80,7 @@ export const LoopCardsData: LoopCardData[] = [
     id: 5,
     title: "Blockscout Merits",
     by: "Gyralis Team",
-    address: "0xE32da07a1B6D8776c186A777A23069efbC34D734",
+    address: "0xaf9a04DD6fcDA69DAe4Baf77EA16a1dbdaD4AcE9",
     description:
       "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",

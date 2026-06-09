@@ -32,7 +32,8 @@ export function useRegisteredUsers(
   chainId: number,
   periodNumber?: bigint,
   refreshKey = 0,
-  enabled = true
+  enabled = true,
+  blockRange?: { fromBlock: bigint; toBlock: bigint }
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
@@ -53,28 +54,39 @@ export function useRegisteredUsers(
       try {
         const latestBlock = await publicClient.getBlockNumber()
         const fromBlock =
-          latestBlock > LOG_LOOKBACK_BLOCKS
+          blockRange?.fromBlock ??
+          (latestBlock > LOG_LOOKBACK_BLOCKS
             ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n
+            : 0n)
+        const toBlock = blockRange?.toBlock ?? latestBlock
+        const chunkSize = blockRange ? 9n : undefined
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          getLogsChunked(publicClient, {
-            address: loopAddress,
-            event: legacyRegisterEventAbiItem,
-            args: {
-              periodNumber,
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: legacyRegisterEventAbiItem,
+              args: {
+                periodNumber,
+              },
+              fromBlock,
+              toBlock,
             },
-            fromBlock,
-            toBlock: "latest",
-          }).then((logs) => logs as RegisterLog[]),
-          getLogsChunked(publicClient, {
-            address: loopAddress,
-            event: upgradedRegisterEventAbiItem,
-            args: {
-              periodNumber,
+            chunkSize
+          ).then((logs) => logs as RegisterLog[]),
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: upgradedRegisterEventAbiItem,
+              args: {
+                periodNumber,
+              },
+              fromBlock,
+              toBlock,
             },
-            fromBlock,
-            toBlock: "latest",
-          }).then((logs) => logs as UpgradedRegisterLog[]),
+            chunkSize
+          ).then((logs) => logs as UpgradedRegisterLog[]),
         ])
 
         if (cancelled) {
@@ -102,7 +114,16 @@ export function useRegisteredUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
+  }, [
+    blockRange?.fromBlock,
+    blockRange?.toBlock,
+    chainId,
+    enabled,
+    loopAddress,
+    periodNumber,
+    publicClient,
+    refreshKey,
+  ])
 
   return { users, loading }
 }

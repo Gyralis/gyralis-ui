@@ -195,6 +195,8 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           loopToken={settings?.token}
           loopTitle={loopTitle}
           onOpenChange={setIsLoopersModalOpen}
+          firstPeriodStart={settings?.firstPeriodStart}
+          periodLength={settings?.periodLength}
           refreshKey={modalRefreshKey}
         />
       </div>

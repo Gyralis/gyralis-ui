@@ -218,6 +218,8 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
           loopToken={settings?.token}
           loopTitle={loop.title}
           onOpenChange={setIsLoopersModalOpen}
+          firstPeriodStart={settings?.firstPeriodStart}
+          periodLength={settings?.periodLength}
           refreshKey={modalRefreshKey}
         />
       ) : null}
