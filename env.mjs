@@ -1,14 +1,18 @@
 import { createEnv } from "@t3-oss/env-nextjs"
 import { z } from "zod"
 
+export const DEFAULT_NEXTAUTH_SECRET =
+  "complex_password_at_least_32_characters_long"
+
 export const env = createEnv({
   server: {
     // Iron session requires a secret of at least 32 characters
-    NEXTAUTH_SECRET: z
-      .string()
-      .min(32)
-      .default("complex_password_at_least_32_characters_long"),
+    NEXTAUTH_SECRET: z.string().min(32).default(DEFAULT_NEXTAUTH_SECRET),
     DATABASE_URL: z.string().url().optional(),
+    GYRALIS_SUBGRAPH_URL: z.string().url().optional(),
+    GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),
+    SCORING_SYNC_BATCH_SIZE: z.coerce.number().int().positive().default(500),
+    CRON_SECRET: z.string().min(32).optional(),
     // Comma separated list of Ethereum addresses, accepts optinal whitespace after comma
     APP_ADMINS: z
       .string()
@@ -32,11 +36,18 @@ export const env = createEnv({
     NEXT_PUBLIC_INFURA_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_LIVEPEER_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
-    NEXT_PUBLIC_WC_PROJECT_ID: z.string().min(1),
+    NEXT_PUBLIC_WC_PROJECT_ID: z
+      .string()
+      .min(1)
+      .default("00000000000000000000000000000000"),
   },
   runtimeEnv: {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
+    GYRALIS_SUBGRAPH_URL: process.env.GYRALIS_SUBGRAPH_URL,
+    GYRALIS_SUBGRAPH_CHAIN_ID: process.env.GYRALIS_SUBGRAPH_CHAIN_ID,
+    SCORING_SYNC_BATCH_SIZE: process.env.SCORING_SYNC_BATCH_SIZE,
+    CRON_SECRET: process.env.CRON_SECRET,
     APP_ADMINS: process.env.APP_ADMINS,
     DISCO_API_KEY: process.env.DISCO_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
