@@ -349,6 +349,25 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     setIsSubmitting(true)
 
     try {
+      if (contractType === "loop" && isClaimableNow) {
+        setPendingAction("claim")
+
+        const hash = await writeContractAsync({
+          address,
+          abi: loopAbi,
+          functionName: "claim",
+          args: [],
+          chainId,
+        })
+        setTxHash(hash)
+
+        toast({
+          title: "Transaction sent",
+          description: "Claim submitted. Waiting for confirmation...",
+        })
+        return
+      }
+
       const endpoint = ELIGIBILITY_ENDPOINTS[eligibilityProvider]
       const response = await fetch(endpoint, {
         method: "POST",

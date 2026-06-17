@@ -10,6 +10,7 @@ export const DEFAULT_LOOP_CONTRACT_TYPE: LoopContractType = "loop"
 
 export const loopContractMethods = {
   loop: {
+    claim: "claim",
     claimAndRegister: "claimAndRegister",
     getCurrentPeriod: "getCurrentPeriod",
     getDetails: "getLoopDetails",
@@ -22,6 +23,7 @@ export const loopContractMethods = {
 } as const satisfies Record<
   LoopContractType,
   {
+    claim?: string
     claimAndRegister: string
     getCurrentPeriod: string
     getDetails: string
