@@ -115,9 +115,9 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
       case "active":
-        return "Active period ends in"
+        return isSuper ? "Next claim opens in" : "Active period ends in"
       case "entered":
-        return "Claim opens in"
+        return isSuper ? "Active period starts in" : "Claim opens in"
       case "claimable":
         return "Claim period ends in"
       case "claimed":

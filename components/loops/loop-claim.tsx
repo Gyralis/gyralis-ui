@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { Address, formatUnits, parseAbi, parseAbiItem } from "viem"
+import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
   useChainId,
@@ -54,9 +54,6 @@ const legacyRegisterEventAbiItem = parseAbiItem(
 const upgradedRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
-const superLoopOwedToMeAbi = parseAbi([
-  "function owedToMe(address user) view returns (uint256)",
-])
 const LOG_LOOKBACK_BLOCKS = 100_000n
 
 export type LoopClaimStatus =
@@ -145,6 +142,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
   const currentPeriodValue =
     typeof currentPeriod === "bigint" ? currentPeriod : undefined
+  const previousPeriodValue =
+    currentPeriodValue != null && currentPeriodValue > 0n
+      ? currentPeriodValue - 1n
+      : undefined
 
   const {
     data: currentPeriodPayout,
@@ -164,22 +165,23 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     },
   })
   const {
-    data: superLoopOwedToMe,
-    refetch: refetchSuperLoopOwedToMe,
-    isLoading: isLoadingSuperLoopOwedToMe,
+    data: superLoopPreviousPeriodPayout,
+    refetch: refetchSuperLoopPreviousPeriodPayout,
+    isLoading: isLoadingSuperLoopPreviousPeriodPayout,
   } = useReadContract({
     address,
-    abi: superLoopOwedToMeAbi,
-    functionName: "owedToMe",
-    args: [connectedAccount ?? "0x"],
+    abi: loopAbi,
+    functionName: loopMethods.getPeriodIndividualPayout,
+    args: [previousPeriodValue ?? 0n],
+    account: connectedAccount,
     chainId,
     query: {
-      enabled: isSuperLoop && !!connectedAccount,
+      enabled:
+        isSuperLoop && !!connectedAccount && previousPeriodValue != null,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
   })
-
   const claimerStatusTuple = claimerStatus as
     | readonly [boolean, boolean]
     | undefined
@@ -187,10 +189,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const hasClaimed = Boolean(claimerStatusTuple?.[1])
   const periodPayoutAmount =
     typeof currentPeriodPayout === "bigint" ? currentPeriodPayout : 0n
-  const owedAmount =
-    typeof superLoopOwedToMe === "bigint" ? superLoopOwedToMe : 0n
+  const previousPeriodPayoutAmount =
+    typeof superLoopPreviousPeriodPayout === "bigint"
+      ? superLoopPreviousPeriodPayout
+      : 0n
   const claimableAmount =
-    isSuperLoop ? owedAmount : periodPayoutAmount
+    isSuperLoop ? previousPeriodPayoutAmount : periodPayoutAmount
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isActiveThisPeriod =
     isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
@@ -202,7 +206,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const isLoadingOnchainState =
     isLoadingCurrentPeriod ||
     isLoadingCurrentPeriodPayout ||
-    (isSuperLoop && isLoadingSuperLoopOwedToMe)
+    (isSuperLoop && isLoadingSuperLoopPreviousPeriodPayout)
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
   const wrongNetwork = currentChainId !== chainId
   const claimAmountLabel = loopBalance
@@ -317,6 +321,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     if (pendingAction === "enter" || pendingAction === "remain") {
       setHasEnteredNextPeriod(true)
     } else {
+      setHasEnteredNextPeriod(true)
       setLastClaimedAmount(claimableAmount)
     }
 
@@ -332,6 +337,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           ? "You are registered for the next period claim."
           : pendingAction === "remain"
           ? "You are registered for the next period."
+          : isSuperLoop
+          ? "Claim confirmed. You are registered for the next active period."
           : "Claim was confirmed onchain.",
       link: blockscoutTxUrl
         ? {
@@ -346,7 +353,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       refetchSettings(),
       refetchCurrentPeriod(),
       refetchCurrentPeriodPayout(),
-      refetchSuperLoopOwedToMe(),
+      refetchSuperLoopPreviousPeriodPayout(),
     ]).finally(() => {
       onSuccess?.()
     })
@@ -360,9 +367,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     refetchSettings,
     refetchCurrentPeriod,
     refetchCurrentPeriodPayout,
-    refetchSuperLoopOwedToMe,
+    refetchSuperLoopPreviousPeriodPayout,
     onSuccess,
     claimableAmount,
+    isSuperLoop,
     blockscoutTxUrl,
     toast,
   ])
@@ -524,7 +532,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       )}
       {showHelper && isEnteredForNextPeriod && !isActiveThisPeriod && !hasClaimed && (
         <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
-          You are registered for the next period claim.
+          {isSuperLoop
+            ? "You are registered for the next active period."
+            : "You are registered for the next period claim."}
         </p>
       )}
       {showHelper && hasClaimed && (
