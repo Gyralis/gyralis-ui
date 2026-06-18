@@ -80,8 +80,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const [pendingAction, setPendingAction] =
     useState<PendingAction>("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
+  const [isRegisteredForCurrentPeriod, setIsRegisteredForCurrentPeriod] =
+    useState(false)
   const [isRegisteredForNextPeriod, setIsRegisteredForNextPeriod] =
     useState(false)
+  const [registrationRefreshKey, setRegistrationRefreshKey] = useState(0)
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
   const { address: connectedAccount } = useAccount()
   const currentChainId = useChainId()
@@ -196,13 +199,26 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount =
     isSuperLoop ? previousPeriodPayoutAmount : periodPayoutAmount
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
-  const isActiveThisPeriod =
-    isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
   const isRegisteredAhead = hasEnteredNextPeriod || isRegisteredForNextPeriod
+  const isWaitingForAccumulationPeriod =
+    isSuperLoop &&
+    isRegistered &&
+    !isRegisteredForCurrentPeriod &&
+    !hasClaimed &&
+    !isClaimableNow
+  const isActiveThisPeriod =
+    isSuperLoop &&
+    isRegistered &&
+    !hasClaimed &&
+    !isClaimableNow &&
+    isRegisteredForCurrentPeriod
   const isEnteredForNextPeriod =
-    isRegisteredAhead || isWaitingNextPeriod
+    (isSuperLoop
+      ? isWaitingForAccumulationPeriod || isRegisteredAhead
+      : isRegisteredAhead) ||
+    isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod ||
     isLoadingCurrentPeriodPayout ||
@@ -249,67 +265,89 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
+    setIsRegisteredForCurrentPeriod(false)
+    setIsRegisteredForNextPeriod(false)
     setLastClaimedAmount(undefined)
   }, [address, chainId, connectedAccount, currentPeriodValue])
 
   useEffect(() => {
     if (!publicClient || !connectedAccount || currentPeriodValue == null) {
+      setIsRegisteredForCurrentPeriod(false)
       setIsRegisteredForNextPeriod(false)
       return
     }
 
     let cancelled = false
 
-    const fetchNextPeriodRegistration = async () => {
+    const fetchPeriodRegistration = async (periodNumber: bigint) => {
+      const latestBlock = await publicClient.getBlockNumber()
+      const fromBlock =
+        latestBlock > LOG_LOOKBACK_BLOCKS
+          ? latestBlock - LOG_LOOKBACK_BLOCKS
+          : 0n
+      const [legacyLogs, upgradedLogs] = await Promise.all([
+        getLogsChunked(publicClient, {
+          address,
+          event: legacyRegisterEventAbiItem,
+          args: {
+            sender: connectedAccount,
+            periodNumber,
+          },
+          fromBlock,
+          toBlock: "latest",
+        }),
+        getLogsChunked(publicClient, {
+          address,
+          event: upgradedRegisterEventAbiItem,
+          args: {
+            sender: connectedAccount,
+            periodNumber,
+          },
+          fromBlock,
+          toBlock: "latest",
+        }),
+      ])
+
+      return legacyLogs.length > 0 || upgradedLogs.length > 0
+    }
+
+    const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const latestBlock = await publicClient.getBlockNumber()
-        const fromBlock =
-          latestBlock > LOG_LOOKBACK_BLOCKS
-            ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n
-        const [legacyLogs, upgradedLogs] = await Promise.all([
-          getLogsChunked(publicClient, {
-            address,
-            event: legacyRegisterEventAbiItem,
-            args: {
-              sender: connectedAccount,
-              periodNumber: nextPeriod,
-            },
-            fromBlock,
-            toBlock: "latest",
-          }),
-          getLogsChunked(publicClient, {
-            address,
-            event: upgradedRegisterEventAbiItem,
-            args: {
-              sender: connectedAccount,
-              periodNumber: nextPeriod,
-            },
-            fromBlock,
-            toBlock: "latest",
-          }),
-        ])
+        const [registeredForCurrent, registeredForNext] =
+          await Promise.all([
+            isSuperLoop
+              ? fetchPeriodRegistration(currentPeriodValue)
+              : Promise.resolve(false),
+            fetchPeriodRegistration(nextPeriod),
+          ])
 
         if (!cancelled) {
-          setIsRegisteredForNextPeriod(
-            legacyLogs.length > 0 || upgradedLogs.length > 0
-          )
+          setIsRegisteredForCurrentPeriod(registeredForCurrent)
+          setIsRegisteredForNextPeriod(registeredForNext)
         }
       } catch (error) {
         if (!cancelled) {
-          console.error("Error fetching next period Register logs:", error)
+          console.error("Error fetching period Register logs:", error)
+          setIsRegisteredForCurrentPeriod(false)
           setIsRegisteredForNextPeriod(false)
         }
       }
     }
 
-    void fetchNextPeriodRegistration()
+    void fetchPeriodRegistrations()
 
     return () => {
       cancelled = true
     }
-  }, [address, connectedAccount, currentPeriodValue, publicClient])
+  }, [
+    address,
+    connectedAccount,
+    currentPeriodValue,
+    isSuperLoop,
+    publicClient,
+    registrationRefreshKey,
+  ])
 
   useEffect(() => {
     onStatusChange?.(claimStatus)
@@ -334,9 +372,13 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           : "Transaction confirmed",
       description:
         pendingAction === "enter"
-          ? "You are registered for the next period claim."
+          ? isSuperLoop
+            ? "You are in the loop. Accumulation starts next period."
+            : "You are registered for the next period claim."
           : pendingAction === "remain"
-          ? "You are registered for the next period."
+          ? isSuperLoop
+            ? "You will remain active next period."
+            : "You are registered for the next period."
           : isSuperLoop
           ? "Claim confirmed. You are registered for the next active period."
           : "Claim was confirmed onchain.",
@@ -355,6 +397,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       refetchCurrentPeriodPayout(),
       refetchSuperLoopPreviousPeriodPayout(),
     ]).finally(() => {
+      setRegistrationRefreshKey((key) => key + 1)
       onSuccess?.()
     })
 
@@ -470,7 +513,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       : isClaimableNow
       ? "Claiming..."
       : isActiveThisPeriod
-      ? "Remaining active..."
+      ? "Staying in the loop..."
       : "Entering the Loop..."
     : isConfirming
     ? pendingAction === "claim"
@@ -486,8 +529,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       : "Claim"
     : isActiveThisPeriod
     ? isRegisteredAhead
-      ? "Active this period"
-      : "Remain Active"
+      ? "Accumulating rewards"
+      : "Stay in the loop"
     : !isRegistered
     ? isEnteredForNextPeriod
       ? "You are in the loop"
@@ -526,22 +569,22 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       {showHelper && isActiveThisPeriod && !hasClaimed && (
         <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           {isRegisteredAhead
-            ? "Active this period. Registered for the next one."
-            : "Active this period. Register again to remain active."}
+            ? "Rewards are accumulating now. You are registered for the next accumulation period."
+            : "Stay active to accumulate rewards claimable next period."}
         </p>
       )}
       {showHelper && isEnteredForNextPeriod && !isActiveThisPeriod && !hasClaimed && (
         <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           {isSuperLoop
-            ? "You are registered for the next active period."
+            ? "You are registered for the next accumulation period."
             : "You are registered for the next period claim."}
         </p>
       )}
       {showHelper && hasClaimed && (
         <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           {claimedAmountLabel
-            ? `Claimed ${claimedAmountLabel} this period. Come back next period.`
-            : "Claimed this period. Come back next period."}
+            ? `You claimed ${claimedAmountLabel} this period. Come back next period.`
+            : "You claimed this period. Come back next period."}
         </p>
       )}
     </div>
