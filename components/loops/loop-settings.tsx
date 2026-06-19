@@ -114,8 +114,10 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
+      case "active":
+        return isSuper ? "Claim opens in" : "Active period ends in"
       case "entered":
-        return "Claim opens in"
+        return isSuper ? "Accumulation starts in" : "Claim opens in"
       case "claimable":
         return "Claim period ends in"
       case "claimed":
@@ -195,6 +197,8 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           loopToken={settings?.token}
           loopTitle={loopTitle}
           onOpenChange={setIsLoopersModalOpen}
+          firstPeriodStart={settings?.firstPeriodStart}
+          periodLength={settings?.periodLength}
           refreshKey={modalRefreshKey}
         />
       </div>
