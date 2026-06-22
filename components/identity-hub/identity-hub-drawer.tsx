@@ -420,12 +420,12 @@ export const IdentityHubDrawer = ({
       <SheetTrigger asChild>
         <button
           className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border px-4 text-sm font-semibold shadow-sm transition-colors",
+            "inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-transparent px-4 text-sm font-semibold shadow-[0_10px_28px_-18px_rgba(28,231,131,0.75)] transition-colors",
             hasTriggerScore
-              ? "border-primary/50 bg-primary/10 text-foreground ring-1 ring-primary/10 hover:border-primary/70 hover:bg-primary/15"
+              ? "bg-primary/[0.12] text-foreground ring-1 ring-primary/[0.15] hover:bg-primary/[0.18]"
               : triggerNeedsAttention
-              ? "border-amber-300 bg-amber-50 text-amber-900 ring-1 ring-amber-200/70 hover:border-amber-400 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-900/70 dark:hover:bg-amber-950"
-              : "border-border bg-background hover:bg-accent hover:text-accent-foreground",
+              ? "bg-amber-50 text-amber-900 ring-1 ring-amber-200/70 hover:bg-amber-100 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-900/70 dark:hover:bg-amber-950"
+              : "bg-primary/[0.08] ring-1 ring-primary/10 hover:bg-primary/[0.14] hover:text-accent-foreground",
             compact ? "h-10 text-xs" : "h-10",
             className
           )}

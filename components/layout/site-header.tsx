@@ -20,7 +20,7 @@ export function SiteHeader() {
         scrolled && "bg-background/50 "
       )}
     >
-      <div className="container flex h-20 items-center justify-between">
+      <div className="mx-auto flex h-20 w-full max-w-[1600px] items-center justify-between px-4 sm:px-5 lg:px-6">
         <MainNav />
         <MobileNav />
         <div className="hidden items-center justify-end space-x-2 md:flex">
