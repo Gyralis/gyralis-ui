@@ -7,9 +7,9 @@ import { FaXTwitter } from "react-icons/fa6"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 
+import { LinkComponent } from "../shared/link-component"
 import { NavLogoMark } from "./main-nav"
 import { ReportIssueLink } from "./report-issue-link"
-import { LinkComponent } from "../shared/link-component"
 
 export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
   const classes = cn(

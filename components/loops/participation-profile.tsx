@@ -23,7 +23,7 @@ export interface EcosystemMetricData {
 
 interface ParticipationProfileProps {
   profile: ParticipationProfileData
-  ecosystemMetrics: [
+  ecosystemMetrics: readonly [
     EcosystemMetricData,
     EcosystemMetricData,
     EcosystemMetricData,
@@ -69,16 +69,12 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-[920px] rounded-[2.25rem] border border-white/10 bg-[linear-gradient(145deg,rgba(15,20,33,0.9),rgba(8,12,22,0.96))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.44)] backdrop-blur-2xl"
+            className="relative mx-auto w-full max-w-[920px] rounded-[2.25rem] border border-border bg-card p-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)]"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",
             }}
           >
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(28,231,131,0.08),transparent_32%),radial-gradient(circle_at_90%_0%,rgba(140,75,255,0.08),transparent_28%)]" />
-            </div>
-
             <div className="relative grid grid-cols-2 items-stretch md:grid-cols-[1fr_1fr_1.5fr_1fr_1fr]">
               <OverallMetric metric={claims} />
               <OverallMetric metric={loopers} bordered />
@@ -109,10 +105,10 @@ export function ParticipationProfile({
                       initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-                      className="relative flex min-h-[104px] w-full items-center justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/25 bg-[linear-gradient(145deg,rgba(24,38,38,0.96),rgba(11,20,25,0.98))] px-5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_14px_34px_-20px_rgba(28,231,131,0.72)] transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+                      className="relative flex min-h-[104px] w-full items-center justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card px-5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_14px_34px_-20px_rgba(28,231,131,0.42)] transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
                     >
                       {preview ? (
-                        <span className="absolute right-3 top-2 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/[0.35]">
+                        <span className="absolute right-3 top-2 text-[8px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                           Preview
                         </span>
                       ) : null}
@@ -121,12 +117,12 @@ export function ParticipationProfile({
                         <span className="block font-heading text-3xl font-bold leading-none">
                           #{profile.rank}
                         </span>
-                        <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-white/55">
+                        <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                           {profile.identityLabel}
                         </span>
                       </div>
 
-                      <div className="h-12 w-px bg-white/10" />
+                      <div className="h-12 w-px bg-border" />
 
                       <div className="text-center">
                         <motion.span
@@ -148,7 +144,7 @@ export function ParticipationProfile({
                         <span className="mt-1 block font-heading text-3xl font-bold leading-none text-primary drop-shadow-[0_0_14px_rgba(28,231,131,0.32)]">
                           {profile.streak}
                         </span>
-                        <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-white/55">
+                        <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                           Current streak
                         </span>
                       </div>
@@ -177,13 +173,13 @@ function OverallMetric({
   return (
     <div
       className={`flex min-h-[88px] flex-col items-center justify-center px-3 text-center md:min-h-[92px] ${
-        bordered ? "border-l border-white/10" : ""
+        bordered ? "border-l border-border" : ""
       }`}
     >
-      <span className="font-heading text-2xl font-bold leading-none tabular-nums text-white sm:text-3xl">
+      <span className="font-heading text-2xl font-bold leading-none tabular-nums text-card-foreground sm:text-3xl">
         {metric.value}
       </span>
-      <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/[0.45] sm:text-[10px]">
+      <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground sm:text-[10px]">
         {metric.label}
       </span>
     </div>
@@ -206,7 +202,7 @@ function CenterAction({
       initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
-      className="flex min-h-[104px] items-center justify-center rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,rgba(20,28,39,0.96),rgba(10,16,26,0.98))] px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.65)]"
+      className="flex min-h-[104px] items-center justify-center rounded-[1.75rem] border border-border bg-card px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.32)]"
     >
       <button
         type="button"

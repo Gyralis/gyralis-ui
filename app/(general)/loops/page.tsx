@@ -95,15 +95,21 @@ export default function HomePage() {
     <div className="min-h-screen">
       <div className="relative overflow-hidden">
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
-          <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-5 sm:gap-6">
+          <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 sm:gap-10">
             <nav
               aria-label="Loops participation"
               className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(28,231,131,0.75)] backdrop-blur-2xl"
             >
+              <Link
+                href="/loops"
+                aria-current="page"
+                className="rounded-full bg-primary/[0.12] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_24px_-7px_rgba(28,231,131,0.95)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+              >
+                Loops
+              </Link>
               <a
                 href="#participation-profile"
-                aria-current="page"
-                className="rounded-full bg-white/[0.06] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white shadow-[0_0_20px_-8px_rgba(28,231,131,0.9)] ring-1 ring-primary/25 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+                className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white sm:px-5 sm:text-xs sm:tracking-[0.12em]"
               >
                 Profile
               </a>
@@ -113,13 +119,6 @@ export default function HomePage() {
               >
                 Leaderboard
               </Link>
-              <span
-                aria-disabled="true"
-                title="Documentation coming soon"
-                className="cursor-not-allowed rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/35 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Docs
-              </span>
             </nav>
 
             <LoopsMarkee />
