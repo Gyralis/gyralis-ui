@@ -16,11 +16,11 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b backdrop-blur transition-all",
+        "z-50 w-full border-b backdrop-blur transition-all",
         scrolled && "bg-background/50 "
       )}
     >
-      <div className="mx-auto flex h-20 w-full max-w-[1600px] items-center justify-between px-4 sm:px-5 lg:px-6">
+      <div className="mx-auto flex py-3 w-full max-w-[1600px] items-center justify-between px-4 sm:px-2 lg:px-4">
         <MainNav />
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center text-base font-medium md:flex">
           <MainNavMenu />
