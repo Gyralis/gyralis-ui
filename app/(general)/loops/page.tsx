@@ -133,7 +133,7 @@ export default function HomePage() {
 
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
         >
           <div className="mb-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -281,7 +281,7 @@ export default function HomePage() {
           </div>
 
           {viewMode === "cards" ? (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
               {filteredLoopCards.map((loop) => (
                 <div key={loop.id} id={`loop-card-${loop.id}`}>
                   <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />

@@ -77,8 +77,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
-  const [pendingAction, setPendingAction] =
-    useState<PendingAction>("enter")
+  const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
   const [isRegisteredForCurrentPeriod, setIsRegisteredForCurrentPeriod] =
     useState(false)
@@ -179,8 +178,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     account: connectedAccount,
     chainId,
     query: {
-      enabled:
-        isSuperLoop && !!connectedAccount && previousPeriodValue != null,
+      enabled: isSuperLoop && !!connectedAccount && previousPeriodValue != null,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -196,8 +194,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     typeof superLoopPreviousPeriodPayout === "bigint"
       ? superLoopPreviousPeriodPayout
       : 0n
-  const claimableAmount =
-    isSuperLoop ? previousPeriodPayoutAmount : periodPayoutAmount
+  const claimableAmount = isSuperLoop
+    ? previousPeriodPayoutAmount
+    : periodPayoutAmount
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
@@ -217,8 +216,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const isEnteredForNextPeriod =
     (isSuperLoop
       ? isWaitingForAccumulationPeriod || isRegisteredAhead
-      : isRegisteredAhead) ||
-    isWaitingNextPeriod
+      : isRegisteredAhead) || isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod ||
     isLoadingCurrentPeriodPayout ||
@@ -314,13 +312,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const [registeredForCurrent, registeredForNext] =
-          await Promise.all([
-            isSuperLoop
-              ? fetchPeriodRegistration(currentPeriodValue)
-              : Promise.resolve(false),
-            fetchPeriodRegistration(nextPeriod),
-          ])
+        const [registeredForCurrent, registeredForNext] = await Promise.all([
+          isSuperLoop
+            ? fetchPeriodRegistration(currentPeriodValue)
+            : Promise.resolve(false),
+          fetchPeriodRegistration(nextPeriod),
+        ])
 
         if (!cancelled) {
           setIsRegisteredForCurrentPeriod(registeredForCurrent)
@@ -553,7 +550,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       : isEnteredForNextPeriod)
   const buttonClassName = compact
     ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
-    : "min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
+    : "min-h-12 w-full rounded-full px-5 py-3 text-sm font-semibold tracking-[0.01em]"
 
   return (
     <div className={cn(showHelper ? "space-y-1" : "inline-flex")}>
@@ -573,13 +570,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             : "Stay active to accumulate rewards claimable next period."}
         </p>
       )}
-      {showHelper && isEnteredForNextPeriod && !isActiveThisPeriod && !hasClaimed && (
-        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
-          {isSuperLoop
-            ? "You are registered for the next accumulation period."
-            : "You are registered for the next period claim."}
-        </p>
-      )}
+      {showHelper &&
+        isEnteredForNextPeriod &&
+        !isActiveThisPeriod &&
+        !hasClaimed && (
+          <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
+            {isSuperLoop
+              ? "You are registered for the next accumulation period."
+              : "You are registered for the next period claim."}
+          </p>
+        )}
       {showHelper && hasClaimed && (
         <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
           {claimedAmountLabel
