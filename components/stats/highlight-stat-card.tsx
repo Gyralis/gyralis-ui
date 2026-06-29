@@ -1,0 +1,193 @@
+import type { IconType } from "react-icons"
+
+import { cn } from "@/lib/utils"
+import { Card, CardContent } from "@/components/ui/card"
+
+type HighlightStatTone = "primary" | "secondary"
+
+type HighlightStatCardProps = {
+  title: string
+  value: string
+  icon?: IconType
+  tone?: HighlightStatTone
+  size?: "default" | "compact"
+  bordered?: boolean
+  suffix?: string | null
+  substats?: {
+    label: string
+    value: string
+    tone?: "positive" | "muted"
+  }[]
+  progress?: {
+    label: string
+    value: string
+    percent: number
+  }
+  helperText?: string
+  className?: string
+}
+
+const toneClasses: Record<
+  HighlightStatTone,
+  {
+    glow: string
+    icon: string
+    value: string
+    progress: string
+  }
+> = {
+  primary: {
+    glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(28,231,131,0.1),transparent_42%)]",
+    icon: "text-primary",
+    value: "text-primary",
+    progress: "bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]",
+  },
+  secondary: {
+    glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(140,75,255,0.12),transparent_42%)]",
+    icon: "text-secondary",
+    value: "text-secondary",
+    progress: "bg-[linear-gradient(135deg,#8c4bff_0%,#a855f7_100%)]",
+  },
+}
+
+export function HighlightStatCard({
+  title,
+  value,
+  icon: Icon,
+  tone = "primary",
+  size = "default",
+  bordered,
+  suffix,
+  substats = [],
+  progress,
+  helperText,
+  className,
+}: HighlightStatCardProps) {
+  const classes = toneClasses[tone]
+  const showBorder = bordered ?? size !== "compact"
+
+  if (size === "compact") {
+    return (
+      <Card
+        className={cn(
+          "relative h-full overflow-hidden rounded-[1.35rem] border-border/60 bg-muted/20 p-0",
+          showBorder
+            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.24)]"
+            : "border-transparent shadow-none",
+          className
+        )}
+      >
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 opacity-90",
+            classes.glow
+          )}
+        />
+        <CardContent className="relative z-10 flex min-h-[80px] flex-col justify-center px-2 py-1.5 text-left md:min-h-[84px]">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            {title}
+          </p>
+          <div className="mt-0.5 flex items-baseline gap-1">
+            <span
+              className={cn(
+                "font-heading text-2xl font-bold leading-none tabular-nums sm:text-3xl",
+                classes.value
+              )}
+            >
+              {value}
+            </span>
+            {suffix ? (
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {suffix}
+              </span>
+            ) : null}
+          </div>
+          {helperText ? (
+            <p className="mt-1 text-[10px] font-medium text-muted-foreground">
+              {helperText}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className={cn("tamagotchi-card h-full p-0", className)}>
+      <div className={cn("pointer-events-none absolute inset-0", classes.glow)} />
+      {Icon ? (
+        <Icon
+          className={cn(
+            "pointer-events-none absolute right-6 top-6 size-20 opacity-10",
+            classes.icon
+          )}
+        />
+      ) : null}
+      <CardContent className="relative z-10 flex h-full flex-col gap-3 p-0">
+        <div className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            {title}
+          </p>
+          <div
+            className={cn(
+              "flex flex-wrap items-baseline gap-x-2 text-5xl font-semibold tracking-tight sm:text-6xl",
+              classes.value
+            )}
+          >
+            <span>{value}</span>
+            {suffix ? (
+              <span className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-base">
+                {suffix}
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-auto grid gap-2.5">
+          {substats.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-border/60 bg-muted/20 p-3"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {stat.label}
+              </p>
+              <p
+                className={cn(
+                  "mt-1 text-lg font-semibold tracking-tight",
+                  stat.tone === "positive"
+                    ? classes.value
+                    : stat.tone === "muted"
+                      ? "text-muted-foreground"
+                      : "text-card-foreground"
+                )}
+              >
+                {stat.value}
+              </p>
+            </div>
+          ))}
+          {progress ? (
+            <div className="space-y-3 pt-1">
+              <div className="flex items-end justify-between gap-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {progress.label}
+                </p>
+                <p className="text-lg font-semibold tracking-tight text-card-foreground">
+                  {progress.value}
+                </p>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn("h-full rounded-full", classes.progress)}
+                  style={{
+                    width: `${Math.max(0, Math.min(progress.percent, 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

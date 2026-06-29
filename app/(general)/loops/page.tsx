@@ -45,7 +45,7 @@ const ecosystemMetrics: [
   EcosystemMetricData
 ] = [
   { value: "1,444", label: "Total claims" },
-  { value: "96", label: "True loopers" },
+  { value: "96", label: "Unique users" },
   { value: "83%", label: "Claim rate" },
   { value: String(LoopCardsData.length), label: "Active loops" },
 ]
