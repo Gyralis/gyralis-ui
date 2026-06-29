@@ -65,6 +65,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           <LoopDistributionStat
             value={details.distributionLabel}
             detail={details.distributionDetail}
+            balanceDetail={details.balanceDetail}
             tooltip={details.distributionTooltip}
           />
         </div>
@@ -162,8 +163,17 @@ export function useLoopSettingsDetails({
   }, [isLoading, settings, loopBalance])
 
   const distributionDetail = distributionAmountLabel
-    ? `${distributionAmountLabel} this period`
-    : undefined
+  const balanceDetail = useMemo(() => {
+    if (isLoading || !loopBalance) return undefined
+
+    const balance = trimFormattedBalance(
+      formatUnits(loopBalance.value, loopBalance.decimals),
+      4
+    )
+    const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
+
+    return `${balance}${symbol} balance`
+  }, [isLoading, loopBalance])
   const distributionTooltip =
     settings && settings.percentPerPeriod > 0n
       ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
@@ -196,6 +206,7 @@ export function useLoopSettingsDetails({
 
   return {
     currentPeriod,
+    balanceDetail,
     distributionDetail,
     distributionLabel,
     distributionTooltip,
@@ -212,11 +223,13 @@ export function useLoopSettingsDetails({
 }
 
 export const LoopDistributionStat = ({
+  balanceDetail,
   compact = false,
   value,
   detail,
   tooltip,
 }: {
+  balanceDetail?: string
   compact?: boolean
   value: string
   detail?: string
@@ -234,13 +247,22 @@ export const LoopDistributionStat = ({
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
               Distribution
             </p>
-            <p className="mt-6 font-mono text-[1.75rem] font-bold leading-none text-primary">
-              {value}
-            </p>
-            {detail ? (
-              <p className="mt-2 text-[11px] font-semibold leading-4 text-primary/70">
-                {detail}
+            <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary">
+              <p className="font-mono text-[1.6rem] font-bold leading-none">
+                {value}
               </p>
+              {detail ? (
+                <p className="text-[11px] font-semibold leading-4 text-primary/70">
+                  {detail}
+                </p>
+              ) : null}
+            </div>
+            {balanceDetail ? (
+              <div className="mt-2 border-t border-border/80 pt-1.5">
+                <p className="text-[10px] font-semibold leading-none text-muted-foreground">
+                  {balanceDetail}
+                </p>
+              </div>
             ) : null}
           </div>
         </TooltipTrigger>
@@ -266,6 +288,7 @@ export const LoopPeriodStat = ({
   nextPeriodStart,
   timerTitle,
   onViewLoopers,
+  showLoopersTrigger = true,
 }: {
   className?: string
   compact?: boolean
@@ -273,21 +296,23 @@ export const LoopPeriodStat = ({
   nextPeriodStart?: bigint
   timerTitle: string
   onViewLoopers: () => void
+  showLoopersTrigger?: boolean
 }) => {
   if (compact) {
     return (
-      <div className={`relative ${className ?? ""}`}>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Period
-          </p>
-          <span className="text-xs font-bold text-muted-foreground">3</span>
-        </div>
-        <p className="mt-8 text-sm font-semibold text-primary">Open</p>
+      <div
+        className={`relative flex flex-col text-left ${className ?? ""}`}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          Period
+        </p>
+        <p className="mt-3 text-sm font-semibold leading-4 text-foreground">
+          {timerTitle}
+        </p>
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
           <CountdownInline nextPeriodStart={nextPeriodStart} />
         ) : (
-          <p className="mt-3 text-xs font-medium text-muted-foreground">
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
             {isLoading ? "Loading..." : "Timer unavailable."}
           </p>
         )}
@@ -311,7 +336,9 @@ export const LoopPeriodStat = ({
         </p>
       )}
 
-      <LoopersTrigger className="mt-4" onClick={onViewLoopers} />
+      {showLoopersTrigger ? (
+        <LoopersTrigger className="mt-4" onClick={onViewLoopers} />
+      ) : null}
     </div>
   )
 }
@@ -509,12 +536,15 @@ const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
 
-  const { days, hours, minutes } = formatTime(remaining)
+  const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours
 
   return (
-    <p className="mt-3 text-xs font-semibold text-muted-foreground">
-      {totalHours}h {minutes}m
+    <p className="mt-2.5 font-mono font-bold leading-none text-muted-foreground">
+      <span className="text-xl">
+        {totalHours}h {minutes}m
+      </span>
+      <span className="ml-1.5 text-sm">{seconds}s</span>
     </p>
   )
 }

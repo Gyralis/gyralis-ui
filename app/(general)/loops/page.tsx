@@ -135,7 +135,7 @@ export default function HomePage() {
           id="loops-grid"
           className="mx-auto max-w-screen-2xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
         >
-          <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="mx-auto mb-5 flex max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 View
@@ -184,7 +184,7 @@ export default function HomePage() {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-2xl border bg-card px-5 text-sm font-semibold uppercase tracking-wide text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-18px_rgba(15,23,42,0.24)] transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-2xl border bg-card px-5 text-sm font-semibold uppercase tracking-wide text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-18px_rgba(15,23,42,0.24)] transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:shrink-0 ${
                     hasActiveFilters ? "border-primary/40" : "border-border/70"
                   }`}
                 >
