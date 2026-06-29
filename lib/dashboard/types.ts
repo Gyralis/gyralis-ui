@@ -192,6 +192,20 @@ export interface DashboardOverviewCards {
   claimedAmountRatePercent: number | null
   currentPeriod: number | null
   newUsersThisPeriod: number
+  weekOverWeek: {
+    uniqueRegisteredUsers: DashboardGrowthStat | null
+    totalDistributedAmount: DashboardGrowthStat | null
+    totalRegistrations: DashboardGrowthStat | null
+    totalClaims: DashboardGrowthStat | null
+  }
+}
+
+export interface DashboardGrowthStat {
+  currentValue: string
+  previousValue: string
+  deltaValue: string
+  deltaPercent: number | null
+  previousDate: string | null
 }
 
 export interface DashboardCurrentPeriodOverview {
@@ -307,4 +321,46 @@ export interface GetDashboardDataOptions {
   loopKeys?: DashboardLoopKey[]
   periodsBack?: number
   cacheFilePath?: string
+  historyFilePath?: string
+}
+
+export interface RawHistoryLoopSnapshot {
+  loopKey?: string
+  loopName?: string
+  updatedAt?: string | null
+  lastProcessedPeriod?: string | null
+  uniqueUserCount?: number
+  uniqueClaimUserCount?: number
+  totalRegistrationsCount?: number
+  totalClaimsCount?: number
+  totalDistributedAmountRaw?: string | null
+  totalDistributedAmountFormatted?: string | null
+  tokenSymbol?: string | null
+}
+
+export interface RawHistoryGlobalSnapshot {
+  updatedAt?: string | null
+  loopsIncluded?: string[]
+  uniqueUserCount?: number
+  uniqueClaimUserCount?: number
+  totalRegistrationsCount?: number
+  totalClaimsCount?: number
+  totalDistributedAmountRaw?: string | null
+  totalDistributedAmountFormatted?: string | null
+  tokenSymbol?: string | null
+}
+
+export interface RawHistorySnapshotEntry {
+  date?: string
+  recordedAt?: string
+  cacheFile?: string
+  cacheUpdatedAt?: string
+  loops?: Record<string, RawHistoryLoopSnapshot>
+  global?: RawHistoryGlobalSnapshot
+}
+
+export interface RawLoopStatsHistory {
+  version?: number
+  generatedFromCacheFile?: string
+  snapshots?: RawHistorySnapshotEntry[]
 }
