@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import LoopCard from "@/components/loops/loop-card"
-import { LoopsMarkee } from "@/components/loops/loops-markee"
 import { LoopsTable } from "@/components/loops/loops-table"
 import {
   EcosystemMetricData,
@@ -93,35 +92,39 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="relative overflow-hidden">
+      <div className="relative">
+        <div className="sticky top-3 z-40 flex justify-center px-4 pt-8">
+          <nav
+            aria-label="Loops participation"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-1.5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(15,23,42,0.24)] backdrop-blur-2xl"
+          >
+            <Link
+              href="/loops"
+              aria-current="page"
+              className="rounded-full bg-primary/[0.14] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_0_1px_rgba(28,231,131,0.32),0_0_24px_-6px_rgba(28,231,131,0.95),0_0_38px_-16px_rgba(28,231,131,0.85)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Loops
+            </Link>
+            <div className="h-5 w-px bg-border" aria-hidden="true" />
+            <Link
+              href="/leaderboard"
+              className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-card-foreground sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Leaderboard
+            </Link>
+            <div className="h-5 w-px bg-border" aria-hidden="true" />
+            <a
+              href="#participation-profile"
+              className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-card-foreground sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Profile
+            </a>
+          </nav>
+        </div>
+
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
           <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 sm:gap-10">
-            <nav
-              aria-label="Loops participation"
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(28,231,131,0.75)] backdrop-blur-2xl"
-            >
-              <Link
-                href="/loops"
-                aria-current="page"
-                className="rounded-full bg-primary/[0.12] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_24px_-7px_rgba(28,231,131,0.95)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Loops
-              </Link>
-              <a
-                href="#participation-profile"
-                className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Profile
-              </a>
-              <Link
-                href="/leaderboard"
-                className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Leaderboard
-              </Link>
-            </nav>
-
-            <LoopsMarkee />
+            {/* <LoopsMarkee /> */}
 
             <ParticipationProfile
               profile={participationPreview}
