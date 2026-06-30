@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
+import { LuCheck } from "react-icons/lu"
 import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
@@ -21,7 +22,7 @@ import {
 import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
-import { cn, trimFormattedBalance } from "@/lib/utils"
+import { trimFormattedBalance } from "@/lib/utils"
 
 import { Button } from "../ui/button"
 import { useToast } from "../ui/use-toast"
@@ -71,14 +72,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   contractType = DEFAULT_LOOP_CONTRACT_TYPE,
   eligibilityProvider,
   compact = false,
-  showHelper = true,
   onSuccess,
   onStatusChange,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
-  const [pendingAction, setPendingAction] =
-    useState<PendingAction>("enter")
+  const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
   const [isRegisteredForCurrentPeriod, setIsRegisteredForCurrentPeriod] =
     useState(false)
@@ -179,8 +178,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     account: connectedAccount,
     chainId,
     query: {
-      enabled:
-        isSuperLoop && !!connectedAccount && previousPeriodValue != null,
+      enabled: isSuperLoop && !!connectedAccount && previousPeriodValue != null,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -196,8 +194,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     typeof superLoopPreviousPeriodPayout === "bigint"
       ? superLoopPreviousPeriodPayout
       : 0n
-  const claimableAmount =
-    isSuperLoop ? previousPeriodPayoutAmount : periodPayoutAmount
+  const claimableAmount = isSuperLoop
+    ? previousPeriodPayoutAmount
+    : periodPayoutAmount
   const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
@@ -217,8 +216,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const isEnteredForNextPeriod =
     (isSuperLoop
       ? isWaitingForAccumulationPeriod || isRegisteredAhead
-      : isRegisteredAhead) ||
-    isWaitingNextPeriod
+      : isRegisteredAhead) || isWaitingNextPeriod
   const isLoadingOnchainState =
     isLoadingCurrentPeriod ||
     isLoadingCurrentPeriodPayout ||
@@ -314,13 +312,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const [registeredForCurrent, registeredForNext] =
-          await Promise.all([
-            isSuperLoop
-              ? fetchPeriodRegistration(currentPeriodValue)
-              : Promise.resolve(false),
-            fetchPeriodRegistration(nextPeriod),
-          ])
+        const [registeredForCurrent, registeredForNext] = await Promise.all([
+          isSuperLoop
+            ? fetchPeriodRegistration(currentPeriodValue)
+            : Promise.resolve(false),
+          fetchPeriodRegistration(nextPeriod),
+        ])
 
         if (!cancelled) {
           setIsRegisteredForCurrentPeriod(registeredForCurrent)
@@ -522,7 +519,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       ? "Confirming activity..."
       : "Confirming entry..."
     : hasClaimed
-    ? "Claimed this period"
+    ? claimedAmountLabel
+      ? `Claimed ${claimedAmountLabel}`
+      : "Claimed"
     : isClaimableNow
     ? claimAmountLabel
       ? `Claim ${claimAmountLabel}`
@@ -553,10 +552,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       : isEnteredForNextPeriod)
   const buttonClassName = compact
     ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
-    : "min-h-[56px] w-full rounded-[1.1rem] px-5 py-3.5 text-base font-semibold tracking-[0.01em]"
+    : "min-h-12 w-full rounded-full px-5 py-3 text-sm font-semibold tracking-[0.01em]"
 
   return (
-    <div className={cn(showHelper ? "space-y-1" : "inline-flex")}>
+    <div className={compact ? "inline-flex" : "w-full"}>
       <Button
         chainId={chainId}
         onClick={handleClaim}
@@ -565,28 +564,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         className={buttonClassName}
       >
         {actionLabel}
+        {hasClaimed ? <LuCheck className="size-4 shrink-0" /> : null}
       </Button>
-      {showHelper && isActiveThisPeriod && !hasClaimed && (
-        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
-          {isRegisteredAhead
-            ? "Rewards are accumulating now. You are registered for the next accumulation period."
-            : "Stay active to accumulate rewards claimable next period."}
-        </p>
-      )}
-      {showHelper && isEnteredForNextPeriod && !isActiveThisPeriod && !hasClaimed && (
-        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
-          {isSuperLoop
-            ? "You are registered for the next accumulation period."
-            : "You are registered for the next period claim."}
-        </p>
-      )}
-      {showHelper && hasClaimed && (
-        <p className="rounded-2xl py-1 text-center text-xs font-medium text-primary">
-          {claimedAmountLabel
-            ? `You claimed ${claimedAmountLabel} this period. Come back next period.`
-            : "You claimed this period. Come back next period."}
-        </p>
-      )}
     </div>
   )
 }

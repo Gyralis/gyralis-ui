@@ -78,7 +78,7 @@ export const LoopCardsData: LoopCardData[] = [
   },
   {
     id: 5,
-    title: "SuperLoop Blockscout Merits",
+    title: "Super Blockscout Merits",
     by: "Test Team",
     address: "0x715f75481d0bDbdEB0Be9f00973270162d09AAaa",
     description:
