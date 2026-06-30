@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import { unstable_noStore as noStore } from "next/cache"
 import Image from "next/image"
 import type { IconType } from "react-icons"
@@ -68,6 +69,35 @@ const loopChartColors: Record<
 const fallbackLoopChartColors = {
   color: "hsl(var(--secondary))",
   softColor: "hsl(var(--secondary) / 0.35)",
+}
+
+const periodDetailRowStyles: Record<
+  string,
+  {
+    background: string
+    accent: string
+  }
+> = {
+  "1hive": {
+    background:
+      "linear-gradient(90deg, hsl(var(--primary) / 0.14), hsl(var(--primary) / 0.04) 42%, transparent)",
+    accent: "hsl(var(--primary))",
+  },
+  blockscout: {
+    background:
+      "linear-gradient(90deg, rgb(43 108 176 / 0.16), rgb(43 108 176 / 0.05) 42%, transparent)",
+    accent: "#2B6CB0",
+  },
+}
+
+function getPeriodDetailRowStyle(loopKey: string): CSSProperties {
+  const rowStyle = periodDetailRowStyles[loopKey]
+  if (!rowStyle) return {}
+
+  return {
+    background: rowStyle.background,
+    boxShadow: `inset 3px 0 0 ${rowStyle.accent}`,
+  }
 }
 
 function formatNumber(value: number) {
@@ -175,7 +205,7 @@ function OverviewStatGroup({
             {title}
           </p>
           <div
-            className={`flex flex-wrap items-baseline gap-x-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
+            className={`flex flex-wrap items-center gap-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
               isPrimary ? "text-primary" : "text-secondary"
             }`}
           >
@@ -714,7 +744,8 @@ export default async function DashboardPage() {
                       {data.tables.periodSummary.map((row) => (
                         <tr
                           key={`${row.loopKey}-${row.period}`}
-                          className="bg-transparent"
+                          className="transition-[background,box-shadow,filter] hover:brightness-[1.03]"
+                          style={getPeriodDetailRowStyle(row.loopKey)}
                         >
                           <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                             {row.periodEndedLongLabel ?? `Period ${row.period}`}
