@@ -5,7 +5,6 @@ import type { IconType } from "react-icons"
 import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 
 import { getDashboardPageData } from "@/lib/dashboard"
-import type { DashboardGrowthStat } from "@/lib/dashboard/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
@@ -22,7 +21,6 @@ type OverviewStatGroupProps = {
     label: string
     value: number | null
   }
-  growth?: DashboardGrowthStat | null
   substats: {
     label: string
     value: string
@@ -34,8 +32,6 @@ type OverviewEngagementCardProps = {
   totalRegistrations: string
   totalClaims: string
   claimRate: number | null
-  registrationsGrowth?: DashboardGrowthStat | null
-  claimsGrowth?: DashboardGrowthStat | null
 }
 
 type LoopRateStatCardProps = {
@@ -112,26 +108,6 @@ function formatPercent(value: number | null) {
   return `${(Math.ceil(value * 10) / 10).toFixed(1)}%`
 }
 
-function formatSignedCompactNumber(value: string) {
-  const parsed = Number.parseFloat(value)
-  if (!Number.isFinite(parsed)) return value
-
-  const rounded =
-    Math.abs(parsed) >= 10 ? Math.round(parsed) : Number(parsed.toFixed(2))
-  const absolute = new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: Math.abs(rounded) >= 10 ? 0 : 2,
-  }).format(Math.abs(rounded))
-
-  if (rounded > 0) return `+${absolute}`
-  if (rounded < 0) return `-${absolute}`
-  return absolute
-}
-
-function formatGrowthDeltaValue(growth: DashboardGrowthStat, suffix?: string | null) {
-  const formattedValue = formatSignedCompactNumber(growth.deltaValue)
-  return suffix ? `${formattedValue} ${suffix}` : formattedValue
-}
-
 function formatTokenAmount(
   value: string | null,
   symbol?: string | null,
@@ -196,38 +172,6 @@ function formatSidebarUpdatedAt(value: string | null) {
   }).format(new Date(value))
 }
 
-function GrowthBadge({
-  growth,
-  valueSuffix,
-}: {
-  growth?: DashboardGrowthStat | null
-  valueSuffix?: string | null
-}) {
-  if (!growth || growth.deltaPercent == null) return null
-
-  const isPositive = growth.deltaPercent >= 0
-  const percentLabel = `${isPositive ? "+" : ""}${growth.deltaPercent.toFixed(1)}%`
-  const deltaLabel = formatGrowthDeltaValue(growth, valueSuffix)
-
-  return (
-    <div
-      className={`inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ${
-        isPositive
-          ? "border-primary/30 bg-primary/10 text-primary"
-          : "border-secondary/30 bg-secondary/10 text-secondary"
-      }`}
-    >
-      <span>{percentLabel}</span>
-      <span className="text-current/80">{deltaLabel}</span>
-      {growth.previousDate ? (
-        <span className="normal-case tracking-normal text-current/65">
-          vs {growth.previousDate}
-        </span>
-      ) : null}
-    </div>
-  )
-}
-
 function OverviewStatGroup({
   title,
   mainValue,
@@ -235,7 +179,6 @@ function OverviewStatGroup({
   tone,
   icon: Icon,
   rate,
-  growth,
   substats,
 }: OverviewStatGroupProps) {
   const isPrimary = tone === "primary"
@@ -260,9 +203,8 @@ function OverviewStatGroup({
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             {title}
           </p>
-          <GrowthBadge growth={growth} valueSuffix={mainSuffix} />
           <div
-            className={`flex flex-wrap items-baseline gap-x-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
+            className={`flex flex-wrap items-center gap-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
               isPrimary ? "text-primary" : "text-secondary"
             }`}
           >
@@ -331,8 +273,6 @@ function OverviewEngagementCard({
   totalRegistrations,
   totalClaims,
   claimRate,
-  registrationsGrowth,
-  claimsGrowth,
 }: OverviewEngagementCardProps) {
   const rateValue = Math.max(0, Math.min(claimRate ?? 0, 100))
 
@@ -356,9 +296,6 @@ function OverviewEngagementCard({
             <p className="mt-1 text-2xl font-semibold tracking-tight text-card-foreground">
               {totalRegistrations}
             </p>
-            <div className="mt-2">
-              <GrowthBadge growth={registrationsGrowth} />
-            </div>
           </div>
           <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -367,9 +304,6 @@ function OverviewEngagementCard({
             <p className="mt-1 text-2xl font-semibold tracking-tight text-card-foreground">
               {totalClaims}
             </p>
-            <div className="mt-2">
-              <GrowthBadge growth={claimsGrowth} />
-            </div>
           </div>
         </div>
 
@@ -492,7 +426,6 @@ export default async function DashboardPage() {
                 title="Unique Registered Users"
                 tone="primary"
                 icon={FaUsers}
-                growth={data.overview.weekOverWeek.uniqueRegisteredUsers}
                 mainValue={formatNumber(
                   data.overview.globalUniqueRegisteredUsers
                 )}
@@ -519,7 +452,6 @@ export default async function DashboardPage() {
                 title="Total Distributed"
                 tone="secondary"
                 icon={FaCoins}
-                growth={data.overview.weekOverWeek.totalDistributedAmount}
                 mainValue={totalDistributedOverview.value}
                 mainSuffix={totalDistributedOverview.symbol}
                 rate={{
@@ -553,8 +485,6 @@ export default async function DashboardPage() {
                 )}
                 totalClaims={formatNumber(data.overview.totalClaims)}
                 claimRate={data.overview.claimParticipationRatePercent}
-                registrationsGrowth={data.overview.weekOverWeek.totalRegistrations}
-                claimsGrowth={data.overview.weekOverWeek.totalClaims}
               />
             </div>
           </section>

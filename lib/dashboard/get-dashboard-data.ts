@@ -567,7 +567,7 @@ function formatHistoryDateLabel(value: string | null | undefined) {
   const parsed = new Date(`${value}T00:00:00Z`)
   if (Number.isNaN(parsed.getTime())) return value
 
-  return periodEndedLongFormatter.format(parsed)
+  return periodEndedShortFormatter.format(parsed)
 }
 
 function computeGrowthPercent(current: number, previous: number): number | null {
