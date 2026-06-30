@@ -74,13 +74,13 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-[920px] rounded-[1.35rem] border border-border bg-card px-5 py-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)]"
+            className="relative mx-auto w-full max-w-[920px] rounded-[1.35rem] border border-border bg-card px-6 py-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)]"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",
             }}
           >
-            <div className="relative grid grid-cols-2 gap-2 items-stretch md:grid-cols-[1fr_1fr_1.5fr_1fr_1fr] md:gap-3">
+            <div className="relative grid grid-cols-2 gap-3 items-stretch md:grid-cols-[1.12fr_1.12fr_1.05fr_1.12fr_1.12fr] md:gap-4">
               <div>
                 <HighlightStatCard
                   title={uniqueUsers.label}

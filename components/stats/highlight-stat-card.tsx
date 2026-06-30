@@ -83,14 +83,14 @@ export function HighlightStatCard({
             classes.glow
           )}
         />
-        <CardContent className="relative z-10 flex min-h-[80px] flex-col justify-center px-2 py-1.5 text-left md:min-h-[84px]">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        <CardContent className="relative z-10 flex min-h-[72px] flex-col items-center justify-center px-3.5 py-1.5 text-center md:min-h-[76px]">
+          <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             {title}
           </p>
-          <div className="mt-0.5 flex items-baseline gap-1">
+          <div className="mt-0.5 flex items-baseline justify-center gap-1">
             <span
               className={cn(
-                "font-heading text-2xl font-bold leading-none tabular-nums sm:text-3xl",
+                "font-sans text-2xl font-bold leading-none tabular-nums sm:text-3xl",
                 classes.value
               )}
             >
