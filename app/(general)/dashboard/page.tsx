@@ -9,6 +9,7 @@ import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
 import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card"
 import { LoopTypeBadge } from "@/components/loops/loop-type-badge"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
 type OverviewStatGroupProps = {
   title: string
@@ -392,16 +393,16 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <OverviewStatGroup
+              <HighlightStatCard
                 title="Unique Registered Users"
-                tone="primary"
                 icon={FaUsers}
-                mainValue={formatNumber(
-                  data.overview.globalUniqueRegisteredUsers
-                )}
-                rate={{
+                value={formatNumber(data.overview.globalUniqueRegisteredUsers)}
+                progress={{
                   label: "Registered Users Claimed",
-                  value: data.overview.claimParticipationRatePercent,
+                  value: formatPercent(
+                    data.overview.claimParticipationRatePercent
+                  ),
+                  percent: data.overview.claimParticipationRatePercent ?? 0,
                 }}
                 substats={[
                   {

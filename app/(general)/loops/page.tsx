@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import LoopCard from "@/components/loops/loop-card"
-import { LoopsMarkee } from "@/components/loops/loops-markee"
 import { LoopsTable } from "@/components/loops/loops-table"
 import {
   EcosystemMetricData,
@@ -46,7 +45,7 @@ const ecosystemMetrics: [
   EcosystemMetricData
 ] = [
   { value: "1,444", label: "Total claims" },
-  { value: "96", label: "True loopers" },
+  { value: "96", label: "Unique users" },
   { value: "83%", label: "Claim rate" },
   { value: String(LoopCardsData.length), label: "Active loops" },
 ]
@@ -93,35 +92,39 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="relative overflow-hidden">
+      <div className="relative">
+        <div className="sticky top-3 z-40 flex justify-center px-4 pt-8">
+          <nav
+            aria-label="Loops participation"
+            className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-1.5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(15,23,42,0.24)] backdrop-blur-2xl"
+          >
+            <Link
+              href="/loops"
+              aria-current="page"
+              className="rounded-full bg-primary/[0.14] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_0_1px_rgba(28,231,131,0.32),0_0_24px_-6px_rgba(28,231,131,0.95),0_0_38px_-16px_rgba(28,231,131,0.85)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Loops
+            </Link>
+            <div className="h-5 w-px bg-border" aria-hidden="true" />
+            <Link
+              href="/leaderboard"
+              className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-card-foreground sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Leaderboard
+            </Link>
+            <div className="h-5 w-px bg-border" aria-hidden="true" />
+            <a
+              href="#participation-profile"
+              className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-card-foreground sm:px-5 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Profile
+            </a>
+          </nav>
+        </div>
+
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
           <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 sm:gap-10">
-            <nav
-              aria-label="Loops participation"
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(28,231,131,0.75)] backdrop-blur-2xl"
-            >
-              <Link
-                href="/loops"
-                aria-current="page"
-                className="rounded-full bg-primary/[0.12] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_24px_-7px_rgba(28,231,131,0.95)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Loops
-              </Link>
-              <a
-                href="#participation-profile"
-                className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Profile
-              </a>
-              <Link
-                href="/leaderboard"
-                className="rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-white/50 transition-colors hover:text-white sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Leaderboard
-              </Link>
-            </nav>
-
-            <LoopsMarkee />
+            {/* <LoopsMarkee /> */}
 
             <ParticipationProfile
               profile={participationPreview}
@@ -133,9 +136,9 @@ export default function HomePage() {
 
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
         >
-          <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="mx-auto mb-5 flex max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 View
@@ -184,7 +187,7 @@ export default function HomePage() {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-2xl border bg-card px-5 text-sm font-semibold uppercase tracking-wide text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-18px_rgba(15,23,42,0.24)] transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-2xl border bg-card px-5 text-sm font-semibold uppercase tracking-wide text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_24px_-18px_rgba(15,23,42,0.24)] transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:shrink-0 ${
                     hasActiveFilters ? "border-primary/40" : "border-border/70"
                   }`}
                 >
@@ -281,7 +284,7 @@ export default function HomePage() {
           </div>
 
           {viewMode === "cards" ? (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
               {filteredLoopCards.map((loop) => (
                 <div key={loop.id} id={`loop-card-${loop.id}`}>
                   <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
