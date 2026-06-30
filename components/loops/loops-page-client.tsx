@@ -120,7 +120,7 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
         </div>
 
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
-          <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-8 sm:gap-10">
+          <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 sm:gap-10 border2">
             <ParticipationProfile
               profile={participationPreview}
               ecosystemMetrics={ecosystemMetrics}

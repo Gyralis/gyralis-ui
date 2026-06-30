@@ -70,7 +70,7 @@ export function HighlightStatCard({
     return (
       <Card
         className={cn(
-          "relative h-full overflow-hidden rounded-[1.35rem] border-border/60 bg-muted/20 p-0",
+          "relative flex h-full overflow-hidden rounded-[1.35rem] border-border/60 bg-muted/20 p-0",
           showBorder
             ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.24)]"
             : "border-transparent shadow-none",
@@ -83,7 +83,7 @@ export function HighlightStatCard({
             classes.glow
           )}
         />
-        <CardContent className="relative z-10 flex min-h-[72px] flex-col items-center justify-center px-3.5 py-1.5 text-center md:min-h-[76px]">
+        <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
           <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             {title}
           </p>
@@ -114,7 +114,9 @@ export function HighlightStatCard({
 
   return (
     <Card className={cn("tamagotchi-card h-full p-0", className)}>
-      <div className={cn("pointer-events-none absolute inset-0", classes.glow)} />
+      <div
+        className={cn("pointer-events-none absolute inset-0", classes.glow)}
+      />
       {Icon ? (
         <Icon
           className={cn(
@@ -158,8 +160,8 @@ export function HighlightStatCard({
                   stat.tone === "positive"
                     ? classes.value
                     : stat.tone === "muted"
-                      ? "text-muted-foreground"
-                      : "text-card-foreground"
+                    ? "text-muted-foreground"
+                    : "text-card-foreground"
                 )}
               >
                 {stat.value}

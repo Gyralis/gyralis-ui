@@ -61,8 +61,8 @@ export default function LoopsBoxyPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
+    <div className="min-h-screen bg-background w-full">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10 ">
         <div className="space-y-8">
           <div className="rounded-4xl border border-border/80 bg-card/70 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)] backdrop-blur-xl">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">

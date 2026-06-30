@@ -1,9 +1,11 @@
 "use client"
 
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { FaChartLine, FaLayerGroup, FaUsers } from "react-icons/fa"
+import { FaAward, FaChartLine, FaLayerGroup, FaUsers } from "react-icons/fa"
 
+import { cn } from "@/lib/utils"
 import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
 export interface ParticipationProfileData {
@@ -48,10 +50,9 @@ export function ParticipationProfile({
   preview = false,
 }: ParticipationProfileProps) {
   const reduceMotion = useReducedMotion()
-  const flameCount = getStreakFlameCount(profile.streak)
   const [claims, uniqueUsers, claimRate, activeLoops] = ecosystemMetrics
   const walletSectionClassName =
-    "order-first col-span-2 mb-2 md:order-none md:col-span-1 md:-my-1 md:mb-0 md:px-1"
+    "order-first col-span-2 mb-3 md:order-none md:col-span-1 md:mb-0"
 
   return (
     <ConnectButton.Custom>
@@ -74,30 +75,26 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-[920px] rounded-[1.35rem] border border-border bg-card px-6 py-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)]"
+            className="relative mx-auto w-full max-w-7xl rounded-[1.35rem] bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)]"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",
             }}
           >
-            <div className="relative grid grid-cols-2 gap-3 items-stretch md:grid-cols-[1.12fr_1.12fr_1.05fr_1.12fr_1.12fr] md:gap-4">
-              <div>
-                <HighlightStatCard
-                  title={uniqueUsers.label}
-                  value={uniqueUsers.value}
-                  icon={FaUsers}
-                  size="compact"
-                  className="rounded-[1.35rem]"
-                />
-              </div>
-              <div>
-                <HighlightStatCard
-                  title={claims.label}
-                  value={claims.value}
-                  icon={FaLayerGroup}
-                  size="compact"
-                />
-              </div>
+            <div className="relative grid grid-cols-2 items-stretch gap-3 md:grid-cols-[0.92fr_0.92fr_2.95fr_0.92fr_0.92fr] md:gap-4 border2">
+              <HighlightStatCard
+                title={uniqueUsers.label}
+                value={uniqueUsers.value}
+                icon={FaUsers}
+                size="compact"
+                className="rounded-[1.35rem]"
+              />
+              <HighlightStatCard
+                title={claims.label}
+                value={claims.value}
+                icon={FaLayerGroup}
+                size="compact"
+              />
 
               <AnimatePresence mode="wait" initial={false}>
                 {!connected ? (
@@ -118,80 +115,223 @@ export function ParticipationProfile({
                     className={walletSectionClassName}
                   />
                 ) : (
-                  <motion.button
+                  <TrueLooperStatusButton
                     key="connected"
-                    type="button"
                     onClick={openAccountModal}
-                    title={account.address}
+                    address={account.address}
                     initial={reduceMotion ? false : { opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-                    className={`${walletSectionClassName} relative flex min-h-[96px] w-full items-center justify-center gap-5 overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card px-5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_14px_34px_-20px_rgba(28,231,131,0.42)] transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70`}
-                  >
-                    {preview ? (
-                      <span className="absolute right-3 top-2 text-[8px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        Preview
-                      </span>
-                    ) : null}
-
-                    <div className="text-center">
-                      <span className="block font-heading text-3xl font-bold leading-none">
-                        #{profile.rank}
-                      </span>
-                      <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                        {profile.identityLabel}
-                      </span>
-                    </div>
-
-                    <div className="h-12 w-px bg-border" />
-
-                    <div className="text-center">
-                      <motion.span
-                        aria-label={`${flameCount} flame streak level`}
-                        className="block whitespace-nowrap text-lg leading-none"
-                        animate={
-                          reduceMotion ? undefined : { scale: [1, 1.06, 1] }
-                        }
-                        transition={{
-                          duration: 2.4,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                      >
-                        {Array.from({ length: flameCount }, () => "🔥").join("")}
-                      </motion.span>
-                      <span className="mt-1 block font-heading text-3xl font-bold leading-none text-primary drop-shadow-[0_0_14px_rgba(28,231,131,0.32)]">
-                        {profile.streak}
-                      </span>
-                      <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                        Current streak
-                      </span>
-                    </div>
-                  </motion.button>
+                    className={walletSectionClassName}
+                    preview={preview}
+                  />
                 )}
               </AnimatePresence>
 
-              <div>
-                <HighlightStatCard
-                  title={claimRate.label}
-                  value={claimRate.value}
-                  icon={FaChartLine}
-                  size="compact"
-                />
-              </div>
-              <div>
-                <HighlightStatCard
-                  title={activeLoops.label}
-                  value={activeLoops.value}
-                  icon={FaLayerGroup}
-                  size="compact"
-                />
-              </div>
+              <HighlightStatCard
+                title={claimRate.label}
+                value={claimRate.value}
+                icon={FaChartLine}
+                size="compact"
+              />
+              <HighlightStatCard
+                title={activeLoops.label}
+                value={activeLoops.value}
+                icon={FaLayerGroup}
+                size="compact"
+              />
             </div>
           </div>
         )
       }}
     </ConnectButton.Custom>
+  )
+}
+
+const TRUE_LOOPER_TARGET = 20
+
+type UserScoringResponse = {
+  success: boolean
+  globalStats: {
+    totalClaims: number
+  } | null
+}
+
+function formatAddress(address: string) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+function TrueLooperStatusButton({
+  address,
+  onClick,
+  className,
+  ...motionProps
+}: {
+  address: string
+  onClick: () => void
+  className?: string
+  initial?: false | { opacity: number; y: number }
+  animate?: { opacity: number; y: number }
+  exit?: { opacity: number; y: number }
+}) {
+  const { data, isLoading } = useQuery<UserScoringResponse | null>({
+    queryKey: ["user-scoring", address.toLowerCase()],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${address}/scoring`)
+
+      if (response.status === 404) return null
+      if (!response.ok) {
+        throw new Error(`Failed to fetch scoring for ${address}`)
+      }
+
+      return response.json()
+    },
+    enabled: Boolean(address),
+  })
+
+  const claims = data?.globalStats?.totalClaims ?? 0
+  const isTrueLooper = claims >= TRUE_LOOPER_TARGET
+  const claimsRemaining = Math.max(TRUE_LOOPER_TARGET - claims, 0)
+  const supportingCopy = isLoading
+    ? "Loading claim history"
+    : `${claimsRemaining} claim${
+        claimsRemaining === 1 ? "" : "s"
+      } left to unlock`
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      title={address}
+      className={cn(
+        className,
+        "relative grid min-h-[92px] w-full grid-cols-[84px_minmax(0,1fr)_84px] items-center gap-4 overflow-hidden rounded-[1.35rem] border border-border/70 bg-muted/20 px-5 py-2.5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_14px_34px_-20px_rgba(28,231,131,0.22)] transition-colors hover:border-primary/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70"
+      )}
+      {...motionProps}
+    >
+      <TrueLooperBadge enabled={isTrueLooper} />
+
+      <div className="min-w-0 text-center">
+        {isTrueLooper ? (
+          <>
+            <span className="block font-baloo text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              You are a
+            </span>
+            <span className="mt-0.5 block whitespace-nowrap font-baloo text-[18px] font-semibold uppercase  text-card-foreground">
+              True Looper
+            </span>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+              <span className="font-baloo text-[13px] font-semibold uppercase tracking-[0.08em] text-card-foreground">
+                Become True Looper
+              </span>
+              {/* <span className="truncate font-sans text-[13px] font-semibold text-muted-foreground">
+                {formatAddress(address)}
+              </span> */}
+            </div>
+            <span className="mt-1 block truncate text-[11px] leading-none text-muted-foreground">
+              {supportingCopy}
+            </span>
+          </>
+        )}
+      </div>
+
+      {isLoading ? (
+        <TrueLooperClaimsSummary claims={null} label="Loading" />
+      ) : isTrueLooper ? (
+        <TrueLooperClaimsSummary claims={claims} />
+      ) : (
+        <TrueLooperProgressRing claims={claims} />
+      )}
+    </motion.button>
+  )
+}
+
+function TrueLooperBadge({ enabled }: { enabled: boolean }) {
+  return (
+    <div
+      className={cn(
+        "relative flex size-[58px] items-center justify-center rounded-full border",
+        enabled
+          ? "border-primary/45 bg-primary/[0.08] text-primary shadow-[0_0_28px_-18px_rgba(28,231,131,0.8)]"
+          : "border-border/80 bg-background/50 text-muted-foreground"
+      )}
+    >
+      <div className="flex flex-col items-center justify-center">
+        <FaAward className="size-4" />
+        <span className="mt-0.5 font-baloo text-[8px] font-semibold uppercase tracking-widest">
+          {enabled ? "True" : "Loop"}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function TrueLooperClaimsSummary({
+  claims,
+  label = "Claims",
+}: {
+  claims: number | null
+  label?: string
+}) {
+  return (
+    <div className="text-center">
+      <span className="block font-sans text-[28px] font-bold leading-none tabular-nums text-primary">
+        {claims == null ? "--" : claims}
+      </span>
+      <span className="mt-0.5 block font-baloo text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function TrueLooperProgressRing({ claims }: { claims: number }) {
+  const progressValue = Math.max(
+    0,
+    Math.min(100, Math.round((claims / TRUE_LOOPER_TARGET) * 100))
+  )
+  const radius = 24
+  const circumference = 2 * Math.PI * radius
+  const strokeOffset = circumference - (progressValue / 100) * circumference
+
+  return (
+    <div className="relative flex size-[64px] items-center justify-center">
+      <svg
+        className="absolute inset-0 size-full -rotate-90"
+        viewBox="0 0 64 64"
+        aria-hidden="true"
+      >
+        <circle
+          cx="32"
+          cy="32"
+          fill="none"
+          r={radius}
+          stroke="hsl(var(--border))"
+          strokeWidth="5"
+        />
+        <circle
+          cx="32"
+          cy="32"
+          fill="none"
+          r={radius}
+          stroke="hsl(var(--primary))"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeOffset}
+          strokeLinecap="round"
+          strokeWidth="5"
+          className="transition-[stroke-dashoffset] duration-500 ease-out"
+        />
+      </svg>
+      <span className="relative flex flex-col items-center justify-center font-sans leading-none">
+        <span className="text-base font-bold text-primary">{claims}</span>
+        <span className="mt-0.5 text-[9px] text-muted-foreground">
+          /{TRUE_LOOPER_TARGET}
+        </span>
+      </span>
+    </div>
   )
 }
 
@@ -213,7 +353,9 @@ function CenterAction({
       initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
-      className={`${className ?? ""} flex min-h-[96px] items-center justify-center rounded-[1.75rem] border border-border bg-card px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.32)]`}
+      className={`${
+        className ?? ""
+      } flex min-h-[96px] items-center justify-center rounded-[1.75rem] px-4`}
     >
       <button
         type="button"

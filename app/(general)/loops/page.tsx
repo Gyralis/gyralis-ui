@@ -1,8 +1,6 @@
-import "server-only"
-
-import { unstable_noStore as noStore } from "next/cache"
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
+import { unstable_noStore as noStore } from "next/cache"
 
 import { LoopsPageClient } from "@/components/loops/loops-page-client"
 import type { EcosystemMetricData } from "@/components/loops/participation-profile"
@@ -20,7 +18,10 @@ type RawLoopRegistrationCache = {
   }
 }
 
-const CACHE_FILE_PATH = resolve(process.cwd(), "data/loop-registration-cache.json")
+const CACHE_FILE_PATH = resolve(
+  process.cwd(),
+  "data/loop-registration-cache.json"
+)
 
 function parseCount(value: string | number | null | undefined): number {
   if (typeof value === "number" && Number.isFinite(value)) return value
@@ -30,7 +31,9 @@ function parseCount(value: string | number | null | undefined): number {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
-function parsePercent(value: string | number | null | undefined): number | null {
+function parsePercent(
+  value: string | number | null | undefined
+): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value !== "string" || value.trim() === "") return null
 
@@ -48,18 +51,28 @@ function formatPercent(value: number | null): string {
 }
 
 async function getLoopsHeaderMetrics(): Promise<
-  [EcosystemMetricData, EcosystemMetricData, EcosystemMetricData, EcosystemMetricData]
+  [
+    EcosystemMetricData,
+    EcosystemMetricData,
+    EcosystemMetricData,
+    EcosystemMetricData
+  ]
 > {
   const raw = await readFile(CACHE_FILE_PATH, "utf8")
   const cache = JSON.parse(raw) as RawLoopRegistrationCache
 
   const totalClaims = parseCount(cache.global?.stats?.totalClaimsCount)
-  const totalRegistrations = parseCount(cache.global?.stats?.totalRegistrationsCount)
+  const totalRegistrations = parseCount(
+    cache.global?.stats?.totalRegistrationsCount
+  )
   const claimRate =
     parsePercent(cache.global?.stats?.claimRatePercent) ??
     (totalRegistrations > 0 ? (totalClaims / totalRegistrations) * 100 : null)
-  const uniqueUsers = parseCount(cache.global?.uniqueClaimUserCount) ||
-    (Array.isArray(cache.global?.uniqueClaimUsers) ? cache.global.uniqueClaimUsers.length : 0)
+  const uniqueUsers =
+    parseCount(cache.global?.uniqueClaimUserCount) ||
+    (Array.isArray(cache.global?.uniqueClaimUsers)
+      ? cache.global.uniqueClaimUsers.length
+      : 0)
   const activeLoops = Object.keys(cache.loops ?? {}).length
 
   return [
