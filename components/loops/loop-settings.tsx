@@ -244,15 +244,15 @@ export const LoopDistributionStat = ({
             role="button"
             tabIndex={0}
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
               Distribution
             </p>
-            <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-primary">
-              <p className="font-mono text-[1.6rem] font-bold leading-none">
+            <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
+              <p className="font-mono text-[1.6rem] font-bold leading-none text-foreground">
                 {value}
               </p>
               {detail ? (
-                <p className="text-[11px] font-semibold leading-4 text-primary/70">
+                <p className="text-[11px] font-semibold leading-4 text-foreground">
                   {detail}
                 </p>
               ) : null}

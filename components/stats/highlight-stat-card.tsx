@@ -39,13 +39,13 @@ const toneClasses: Record<
   primary: {
     glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(28,231,131,0.1),transparent_42%)]",
     icon: "text-primary",
-    value: "text-primary",
+    value: "text-card-foreground",
     progress: "bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]",
   },
   secondary: {
     glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(140,75,255,0.12),transparent_42%)]",
     icon: "text-secondary",
-    value: "text-secondary",
+    value: "text-card-foreground",
     progress: "bg-[linear-gradient(135deg,#8c4bff_0%,#a855f7_100%)]",
   },
 }
@@ -70,28 +70,27 @@ export function HighlightStatCard({
     return (
       <Card
         className={cn(
-          "relative h-full overflow-hidden rounded-[1.35rem] border-border/60 bg-muted/20 p-0",
+          "relative flex h-full overflow-hidden rounded-[1.35rem] bg-card/60 p-0 backdrop-blur-xl supports-[backdrop-filter]:bg-card/52",
           showBorder
-            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.24)]"
+            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_24px_48px_-30px_rgba(15,23,42,0.34)]"
             : "border-transparent shadow-none",
           className
         )}
       >
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 opacity-90",
+            "pointer-events-none absolute inset-0 opacity-100",
             classes.glow
           )}
         />
-        <CardContent className="relative z-10 flex min-h-[80px] flex-col justify-center px-2 py-1.5 text-left md:min-h-[84px]">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
+          <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-foreground">
             {title}
           </p>
-          <div className="mt-0.5 flex items-baseline gap-1">
+          <div className="mt-0.5 flex items-baseline justify-center gap-1">
             <span
               className={cn(
-                "font-heading text-2xl font-bold leading-none tabular-nums sm:text-3xl",
-                classes.value
+                "font-sans text-xl font-medium leading-none tabular-nums text-muted-foreground sm:text-2xl"
               )}
             >
               {value}
@@ -114,7 +113,9 @@ export function HighlightStatCard({
 
   return (
     <Card className={cn("tamagotchi-card h-full p-0", className)}>
-      <div className={cn("pointer-events-none absolute inset-0", classes.glow)} />
+      <div
+        className={cn("pointer-events-none absolute inset-0", classes.glow)}
+      />
       {Icon ? (
         <Icon
           className={cn(
@@ -158,8 +159,8 @@ export function HighlightStatCard({
                   stat.tone === "positive"
                     ? classes.value
                     : stat.tone === "muted"
-                      ? "text-muted-foreground"
-                      : "text-card-foreground"
+                    ? "text-muted-foreground"
+                    : "text-card-foreground"
                 )}
               >
                 {stat.value}
