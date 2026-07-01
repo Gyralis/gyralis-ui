@@ -26,8 +26,8 @@ export function LoopsTable({ loops }: LoopsTableProps) {
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
-      <div className="min-w-[68rem] xl:min-w-0">
-        <div className="grid grid-cols-[1.45fr_1.1fr_1.15fr_0.9fr_1.05fr_1.35fr] items-center gap-4 border-b border-border/70 bg-muted/35 px-6 py-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+      <div className="w-full">
+        <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1.1fr)] items-center gap-4 border-b border-border/70 bg-muted/35 px-6 py-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           <span>Loop</span>
           <span>Shield</span>
           <span>Eligibility</span>
@@ -107,7 +107,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
 
   return (
     <>
-      <div className="grid grid-cols-[1.45fr_1.1fr_1.15fr_0.9fr_1.05fr_1.35fr] items-center gap-4 border-b border-border/70 px-6 py-5 last:border-b-0">
+      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,0.95fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1.1fr)] items-center gap-4 border-b border-border/70 px-6 py-5 last:border-b-0">
         <div className="flex min-w-0 items-center gap-3">
           <div className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70">
             {loop.eligibilityLogoUrl ? (

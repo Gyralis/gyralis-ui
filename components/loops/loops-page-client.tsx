@@ -4,17 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import { motion } from "framer-motion"
-import { HiOutlineAdjustments as HiSlidersHorizontal } from "react-icons/hi"
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { LuLayoutGrid, LuList } from "react-icons/lu"
 import LoopCard from "@/components/loops/loop-card"
 import { LoopsTable } from "@/components/loops/loops-table"
 import {
@@ -23,7 +13,7 @@ import {
   ParticipationProfileData,
 } from "@/components/loops/participation-profile"
 
-type ViewMode = "cards" | "table"
+type ViewMode = "grid" | "list"
 
 type LoopsPageClientProps = {
   ecosystemMetrics: [
@@ -49,29 +39,7 @@ const participationPreview: ParticipationProfileData = {
 
 export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
-  const [activeTag, setActiveTag] = useState<string | null>(null)
-  const [selectedChain, setSelectedChain] = useState<string | null>(null)
-  const [selectedType, setSelectedType] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>("cards")
-
-  const tags = Array.from(new Set(cards.map((loop) => loop.by)))
-  const chains = Array.from(new Set(cards.map((loop) => loop.chainName)))
-  const loopTypes = [
-    { value: "loop", label: "Loops" },
-    { value: "superLoop", label: "Superloops" },
-  ]
-  const hasActiveFilters = Boolean(activeTag || selectedChain || selectedType)
-
-  const filteredLoopCards = cards.filter((card) => {
-    const matchesTag =
-      activeTag === null || card.by.toLowerCase() === activeTag.toLowerCase()
-    const matchesChain =
-      selectedChain === null || card.chainName === selectedChain
-    const matchesType =
-      selectedType === null || card.contractType === selectedType
-
-    return matchesTag && matchesChain && matchesType
-  })
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
 
   const handleBalanceUpdate = (
     cardId: number,
@@ -139,11 +107,17 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
                 View
               </span>
               <div className="inline-flex rounded-full border border-border/80 bg-background/60 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                {(["cards", "table"] as const).map((mode) => (
+                {(
+                  [
+                    { mode: "grid", label: "Grid", icon: LuLayoutGrid },
+                    { mode: "list", label: "List", icon: LuList },
+                  ] as const
+                ).map(({ mode, label, icon: Icon }) => (
                   <motion.button
                     key={mode}
                     type="button"
                     onClick={() => setViewMode(mode)}
+                    aria-label={label}
                     animate={{
                       scale: viewMode === mode ? [1, 1.06, 1] : 1,
                     }}
@@ -154,7 +128,7 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
                       },
                     }}
                     whileTap={{ scale: 0.96 }}
-                    className={`relative min-w-20 overflow-hidden rounded-full px-4 py-2 text-sm font-semibold capitalize transition-colors ${
+                    className={`group relative overflow-hidden rounded-full p-2.5 transition-colors ${
                       viewMode === mode
                         ? "text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground"
@@ -172,13 +146,18 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
                         }}
                       />
                     )}
-                    <span className="relative z-10">{mode}</span>
+                    <span className="relative z-10 flex items-center justify-center">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 rounded-md border border-border/70 bg-background/95 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground opacity-0 shadow-[0_10px_24px_-18px_rgba(15,23,42,0.4)] transition-opacity group-hover:opacity-100">
+                      {label}
+                    </span>
                   </motion.button>
                 ))}
               </div>
             </div>
 
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
@@ -275,30 +254,24 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
                   ))}
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </div>
 
-          {viewMode === "cards" ? (
+          {viewMode === "grid" ? (
             <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
-              {filteredLoopCards.map((loop) => (
+              {cards.map((loop) => (
                 <div key={loop.id} id={`loop-card-${loop.id}`}>
                   <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
                 </div>
               ))}
             </div>
           ) : (
-            <LoopsTable loops={filteredLoopCards} />
+            <div className="mx-auto w-full max-w-[1120px]">
+              <LoopsTable loops={cards} />
+            </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
-
-function FilterGroupLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <DropdownMenuLabel className="px-2 pb-1.5 pt-0 text-sm font-semibold text-foreground">
-      {children}
-    </DropdownMenuLabel>
   )
 }

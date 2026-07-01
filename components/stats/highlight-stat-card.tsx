@@ -39,13 +39,13 @@ const toneClasses: Record<
   primary: {
     glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(28,231,131,0.1),transparent_42%)]",
     icon: "text-primary",
-    value: "text-primary",
+    value: "text-card-foreground",
     progress: "bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]",
   },
   secondary: {
     glow: "bg-[radial-gradient(circle_at_18%_18%,rgba(140,75,255,0.12),transparent_42%)]",
     icon: "text-secondary",
-    value: "text-secondary",
+    value: "text-card-foreground",
     progress: "bg-[linear-gradient(135deg,#8c4bff_0%,#a855f7_100%)]",
   },
 }
@@ -70,19 +70,20 @@ export function HighlightStatCard({
     return (
       <Card
         className={cn(
-          "relative flex h-full overflow-hidden rounded-[1.35rem] border-border/60 bg-muted/20 p-0",
+          "relative flex h-full overflow-hidden rounded-[1.35rem] border-white/20 bg-card/60 p-0 backdrop-blur-xl supports-[backdrop-filter]:bg-card/52",
           showBorder
-            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_14px_34px_-22px_rgba(28,231,131,0.24)]"
+            ? "border shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_24px_48px_-30px_rgba(15,23,42,0.34)]"
             : "border-transparent shadow-none",
           className
         )}
       >
         <div
           className={cn(
-            "pointer-events-none absolute inset-0 opacity-90",
+            "pointer-events-none absolute inset-0 opacity-100",
             classes.glow
           )}
         />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/30" />
         <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
           <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
             {title}
