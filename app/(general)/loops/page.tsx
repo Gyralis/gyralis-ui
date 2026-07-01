@@ -8,6 +8,8 @@ import type { EcosystemMetricData } from "@/components/loops/participation-profi
 type RawLoopRegistrationCache = {
   loops?: Record<string, unknown>
   global?: {
+    uniqueUsers?: unknown[]
+    uniqueUserCount?: string | number | null
     uniqueClaimUserCount?: string | number | null
     uniqueClaimUsers?: unknown[]
     stats?: {
@@ -69,17 +71,21 @@ async function getLoopsHeaderMetrics(): Promise<
     parsePercent(cache.global?.stats?.claimRatePercent) ??
     (totalRegistrations > 0 ? (totalClaims / totalRegistrations) * 100 : null)
   const uniqueUsers =
+    parseCount(cache.global?.uniqueUserCount) ||
+    (Array.isArray(cache.global?.uniqueUsers)
+      ? cache.global.uniqueUsers.length
+      : 0)
+  const uniqueClaimUsers =
     parseCount(cache.global?.uniqueClaimUserCount) ||
     (Array.isArray(cache.global?.uniqueClaimUsers)
       ? cache.global.uniqueClaimUsers.length
       : 0)
-  const activeLoops = Object.keys(cache.loops ?? {}).length
 
   return [
-    { value: formatCount(uniqueUsers), label: "Users" },
-    { value: formatCount(totalClaims), label: "Claims" },
+    { value: formatCount(uniqueUsers), label: "Unique Users" },
+    { value: formatCount(uniqueClaimUsers), label: "Claims" },
     { value: formatPercent(claimRate), label: "Claim rate" },
-    { value: formatCount(activeLoops), label: "Active" },
+    { value: "2", label: "Active Loop" },
   ]
 }
 

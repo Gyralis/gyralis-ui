@@ -70,9 +70,9 @@ export function HighlightStatCard({
     return (
       <Card
         className={cn(
-          "relative flex h-full overflow-hidden rounded-[1.35rem] border-white/20 bg-card/60 p-0 backdrop-blur-xl supports-[backdrop-filter]:bg-card/52",
+          "relative flex h-full overflow-hidden rounded-[1.35rem] bg-card/60 p-0 backdrop-blur-xl supports-[backdrop-filter]:bg-card/52",
           showBorder
-            ? "border shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_24px_48px_-30px_rgba(15,23,42,0.34)]"
+            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_24px_48px_-30px_rgba(15,23,42,0.34)]"
             : "border-transparent shadow-none",
           className
         )}
@@ -85,14 +85,13 @@ export function HighlightStatCard({
         />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/30" />
         <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
-          <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-foreground">
             {title}
           </p>
           <div className="mt-0.5 flex items-baseline justify-center gap-1">
             <span
               className={cn(
-                "font-sans text-2xl font-bold leading-none tabular-nums sm:text-3xl",
-                classes.value
+                "font-sans text-xl font-medium leading-none tabular-nums text-muted-foreground sm:text-2xl"
               )}
             >
               {value}

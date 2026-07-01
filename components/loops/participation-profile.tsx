@@ -40,7 +40,7 @@ export function ParticipationProfile({
   ecosystemMetrics,
   preview: _preview = false,
 }: ParticipationProfileProps) {
-  const [claims, uniqueUsers, claimRate, activeLoops] = ecosystemMetrics
+  const [uniqueUsers, claims, claimRate, activeLoops] = ecosystemMetrics
 
   return (
     <ConnectButton.Custom>
@@ -74,7 +74,6 @@ export function ParticipationProfile({
                 value={uniqueUsers.value}
                 icon={FaUsers}
                 size="compact"
-                className="rounded-[1.35rem]"
               />
               <HighlightStatCard
                 title={claims.label}
@@ -85,7 +84,7 @@ export function ParticipationProfile({
 
               <ParticipationUserPanel
                 address={account?.address}
-                connected={connected}
+                connected={connected ?? false}
                 unsupported={Boolean(chain?.unsupported)}
                 onConnect={openConnectModal}
                 onSwitchNetwork={openChainModal}
