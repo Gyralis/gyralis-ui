@@ -40,7 +40,7 @@ export function ParticipationProfile({
   ecosystemMetrics,
   preview: _preview = false,
 }: ParticipationProfileProps) {
-  const [uniqueUsers, claims, claimRate, activeLoops] = ecosystemMetrics
+  const [claims, uniqueUsers, claimRate, activeLoops] = ecosystemMetrics
 
   return (
     <ConnectButton.Custom>
@@ -62,13 +62,13 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-7xl rounded-[1.35rem] bg-card p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)] md:px-6 md:py-5"
+            className="relative mx-auto w-full max-w-7xl rounded-[1.35rem] border border-border bg-card p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_24px_70px_-42px_rgba(28,231,131,0.28)] md:px-6 md:py-5"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",
             }}
           >
-            <div className="relative grid grid-cols-2 items-stretch gap-3.5 md:grid-cols-[0.92fr_0.92fr_2.95fr_0.92fr_0.92fr] md:gap-4.5">
+            <div className="relative grid grid-cols-2 items-stretch gap-3.5 md:grid-cols-[1.08fr_1.08fr_2.2fr_1.08fr_1.08fr] md:gap-4.5">
               <HighlightStatCard
                 title={uniqueUsers.label}
                 value={uniqueUsers.value}

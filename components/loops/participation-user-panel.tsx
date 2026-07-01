@@ -101,14 +101,16 @@ function TrueLooperStatusPanel({
   const claimsRemaining = Math.max(TRUE_LOOPER_TARGET - claims, 0)
   const supportingCopy = isLoading
     ? "Loading claim history"
-    : `${claimsRemaining} claim${claimsRemaining === 1 ? "" : "s"} left to unlock`
+    : `${claimsRemaining} claim${
+        claimsRemaining === 1 ? "" : "s"
+      } left to unlock`
 
   return (
     <motion.div
       title={address}
       className={cn(
         className,
-        "relative grid w-full grid-cols-[58px_minmax(0,1fr)_58px] items-center gap-0 overflow-hidden rounded-[1.35rem] border border-white/20 bg-card/60 p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_22px_44px_-28px_rgba(15,23,42,0.34)] backdrop-blur-xl md:px-4.5 md:py-3.5"
+        "relative w-full flex items-center gap-2 overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_22px_44px_-28px_rgba(15,23,42,0.34)] backdrop-blur-xl "
       )}
       {...motionProps}
     >
@@ -253,7 +255,9 @@ function CenterAction({
       initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}
-      className={`${className ?? ""} flex min-h-[96px] items-center justify-center rounded-[1.75rem] px-4`}
+      className={`${
+        className ?? ""
+      } flex min-h-[96px] items-center justify-center rounded-[1.75rem] px-4`}
     >
       <button
         type="button"

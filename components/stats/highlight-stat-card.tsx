@@ -83,7 +83,6 @@ export function HighlightStatCard({
             classes.glow
           )}
         />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/30" />
         <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
           <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-foreground">
             {title}

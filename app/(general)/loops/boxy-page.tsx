@@ -61,15 +61,13 @@ export default function LoopsBoxyPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background w-full border2">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
-        <div className="space-y-2">
-          <ParticipationProfile
-            profile={participationPreview}
-            ecosystemMetrics={ecosystemMetrics}
-            preview
-          />
-        </div>
+    <div className="min-h-screen bg-background w-full">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+        <ParticipationProfile
+          profile={participationPreview}
+          ecosystemMetrics={ecosystemMetrics}
+          preview
+        />
       </div>
     </div>
   )

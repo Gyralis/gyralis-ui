@@ -75,15 +75,9 @@ async function getLoopsHeaderMetrics(): Promise<
     (Array.isArray(cache.global?.uniqueUsers)
       ? cache.global.uniqueUsers.length
       : 0)
-  const uniqueClaimUsers =
-    parseCount(cache.global?.uniqueClaimUserCount) ||
-    (Array.isArray(cache.global?.uniqueClaimUsers)
-      ? cache.global.uniqueClaimUsers.length
-      : 0)
-
   return [
     { value: formatCount(uniqueUsers), label: "Unique Users" },
-    { value: formatCount(uniqueClaimUsers), label: "Claims" },
+    { value: formatCount(totalClaims), label: "Claims" },
     { value: formatPercent(claimRate), label: "Claim rate" },
     { value: "2", label: "Active Loop" },
   ]
