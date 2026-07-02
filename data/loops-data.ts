@@ -1,6 +1,7 @@
 import { Address } from "viem"
 
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
 
@@ -23,6 +24,7 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
+  historyLoopKey: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   passportMinScore: number
   enabled: boolean
@@ -50,6 +52,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
+    historyLoopKey: "1hive",
     eligibilityProvider: "garden_1hive",
     passportMinScore: 15,
     enabled: true,
@@ -72,6 +75,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
+    historyLoopKey: "blockscout",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
@@ -94,6 +98,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "superLoop",
     chainId: 8453,
     chainName: "Base",
+    historyLoopKey: "test-superloops",
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
     enabled: true,

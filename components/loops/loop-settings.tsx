@@ -172,7 +172,7 @@ export function useLoopSettingsDetails({
     )
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
-    return `${balance}${symbol} balance`
+    return `${balance}${symbol}`
   }, [isLoading, loopBalance])
   const distributionTooltip =
     settings && settings.percentPerPeriod > 0n
@@ -248,7 +248,7 @@ export const LoopDistributionStat = ({
               Distribution
             </p>
             <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
-              <p className="font-mono text-[1.6rem] font-bold leading-none text-foreground">
+              <p className="text-[1.6rem] font-bold leading-none text-foreground">
                 {value}
               </p>
               {detail ? (
@@ -260,7 +260,8 @@ export const LoopDistributionStat = ({
             {balanceDetail ? (
               <div className="mt-2 border-t border-border/80 pt-1.5">
                 <p className="text-[10px] font-semibold leading-none text-muted-foreground">
-                  {balanceDetail}
+                  Balance:{" "}
+                  <span className="text-foreground">{balanceDetail}</span>
                 </p>
               </div>
             ) : null}
@@ -300,9 +301,7 @@ export const LoopPeriodStat = ({
 }) => {
   if (compact) {
     return (
-      <div
-        className={`relative flex flex-col text-left ${className ?? ""}`}
-      >
+      <div className={`relative flex flex-col text-left ${className ?? ""}`}>
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
           Period
         </p>
@@ -540,11 +539,11 @@ const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   const totalHours = days * 24 + hours
 
   return (
-    <p className="mt-2.5 font-mono font-bold leading-none text-muted-foreground">
-      <span className="text-xl">
+    <p className="mt-2.5 font-bold leading-none text-muted-foreground">
+      <span className="text-[1.6rem]">
         {totalHours}h {minutes}m
       </span>
-      <span className="ml-1.5 text-sm">{seconds}s</span>
+      <span className="ml-1.5 text-[15px]">{seconds}s</span>
     </p>
   )
 }
