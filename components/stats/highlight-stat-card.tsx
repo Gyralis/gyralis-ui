@@ -70,19 +70,13 @@ export function HighlightStatCard({
     return (
       <Card
         className={cn(
-          "relative flex h-full overflow-hidden rounded-[1.35rem] bg-card/60 p-0 backdrop-blur-xl supports-[backdrop-filter]:bg-card/52",
+          "relative flex h-full overflow-hidden rounded-[1.35rem] bg-background p-0 backdrop-blur-2xl",
           showBorder
-            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.24),0_24px_48px_-30px_rgba(15,23,42,0.34)]"
+            ? "border border-border shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(15,23,42,0.24)]"
             : "border-transparent shadow-none",
           className
         )}
       >
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 opacity-100",
-            classes.glow
-          )}
-        />
         <CardContent className="relative z-10 flex size-full min-h-[72px] flex-col items-center justify-center px-8 py-1.5 text-center md:min-h-[76px]">
           <p className="font-baloo text-[9px] font-semibold uppercase tracking-[0.15em] text-foreground">
             {title}

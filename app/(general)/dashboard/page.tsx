@@ -365,10 +365,10 @@ export default async function DashboardPage() {
     2
   )
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-hidden text-foreground">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.14),transparent_28%),radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.16),transparent_26%),linear-gradient(180deg,hsl(var(--background)/0.98),hsl(var(--background)))]" />
-        <div className="absolute inset-y-0 left-0 w-40 bg-[linear-gradient(90deg,hsl(var(--muted)/0.65),transparent)] lg:w-64" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,hsl(var(--primary)/0.08),transparent_24%),radial-gradient(circle_at_82%_14%,hsl(var(--secondary)/0.1),transparent_22%)]" />
+        <div className="absolute inset-y-0 left-0 w-40 bg-[linear-gradient(90deg,hsl(var(--muted)/0.58),transparent)] lg:w-64" />
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-16 pt-6 sm:px-6 lg:pl-32 lg:pr-8 lg:pt-8 xl:pl-36 xl:pr-10">

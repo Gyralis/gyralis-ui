@@ -83,8 +83,116 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer base {
+  .app-shell-background {
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(
+        circle at top left,
+        hsl(var(--primary) / 0.34),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at top right,
+        hsl(var(--primary) / 0.22),
+        transparent 22%
+      ),
+      radial-gradient(
+        circle at left center,
+        hsl(var(--primary) / 0.16),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at right center,
+        hsl(var(--primary) / 0.14),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at bottom left,
+        hsl(var(--primary) / 0.24),
+        transparent 24%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        hsl(var(--primary) / 0.18),
+        transparent 22%
+      ),
+      linear-gradient(
+        90deg,
+        hsl(var(--primary) / 0.08) 0%,
+        transparent 18%,
+        transparent 82%,
+        hsl(var(--primary) / 0.08) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--primary) / 0.06) 0%,
+        transparent 16%,
+        transparent 84%,
+        hsl(var(--primary) / 0.05) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--background) / 0.96),
+        hsl(var(--background))
+      );
+    background-attachment: fixed;
+  }
+
+  .dark .app-shell-background {
+    background-image: radial-gradient(
+        circle at top left,
+        hsl(var(--primary) / 0.3),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at top right,
+        hsl(var(--primary) / 0.22),
+        transparent 22%
+      ),
+      radial-gradient(
+        circle at left center,
+        hsl(var(--primary) / 0.15),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at right center,
+        hsl(var(--primary) / 0.14),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at bottom left,
+        hsl(var(--primary) / 0.22),
+        transparent 24%
+      ),
+      radial-gradient(
+        circle at bottom right,
+        hsl(var(--primary) / 0.16),
+        transparent 22%
+      ),
+      linear-gradient(
+        90deg,
+        hsl(var(--primary) / 0.1) 0%,
+        transparent 18%,
+        transparent 82%,
+        hsl(var(--primary) / 0.1) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--primary) / 0.07) 0%,
+        transparent 16%,
+        transparent 84%,
+        hsl(var(--primary) / 0.06) 100%
+      ),
+      linear-gradient(
+        180deg,
+        hsl(var(--background) / 0.96),
+        hsl(var(--background))
+      );
   }
 }
 
