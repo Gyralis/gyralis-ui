@@ -106,7 +106,7 @@ function TrueLooperStatusPanel({
       title={address}
       className={cn(
         className,
-        "relative -translate-y-2 w-full flex items-center gap-2 overflow-hidden rounded-full bg-card px-6 py-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_22px_40px_-26px_rgba(15,23,42,0.24),0_26px_34px_-24px_rgba(28,231,131,0.38)] backdrop-blur-xl md:-translate-y-2.5"
+        "relative -translate-y-2 w-full flex items-center gap-2 overflow-hidden rounded-full bg-card px-6 py-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_22px_40px_-26px_rgba(15,23,42,0.24),0_26px_34px_-24px_rgba(28,231,131,0.38)] backdrop-blur-xl md:-translate-y-2.5 "
       )}
       {...motionProps}
     >
@@ -153,7 +153,7 @@ function TrueLooperStatusPanel({
 function TrueLooperLoadingSkeleton() {
   return (
     <div className="flex w-full items-center gap-3">
-      <Skeleton className="size-[58px] rounded-full border border-muted-foreground/20 bg-muted-foreground/20" />
+      <Skeleton className="size-[55px] rounded-full border border-muted-foreground bg-muted-foreground" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <Skeleton className="h-4 w-28 rounded-full bg-muted-foreground/20" />
         <Skeleton className="h-3 w-44 max-w-full rounded-full bg-muted-foreground/15" />

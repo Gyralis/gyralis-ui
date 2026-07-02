@@ -20,7 +20,7 @@ export function SiteHeader() {
         scrolled && "bg-background/50 "
       )}
     >
-      <div className="mx-auto flex py-3 w-full max-w-[1600px] items-center justify-between px-4 sm:px-2 lg:px-4">
+      <div className="mx-auto flex py-3 w-full max-w-[1600px] items-center justify-between px-4 sm:px-2 lg:py-4 lg:px-4">
         <MainNav />
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center text-base font-medium md:flex">
           <MainNavMenu />

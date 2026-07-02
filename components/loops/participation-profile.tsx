@@ -62,7 +62,7 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-7xl rounded-full border border-border bg-card px-3 py-3 text-card-foreground md:px-5 md:py-4"
+            className="relative mx-auto w-full max-w-7xl rounded-full border border-border bg-card px-3 py-2  text-card-foreground md:px-5 md:py-2.5"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",
