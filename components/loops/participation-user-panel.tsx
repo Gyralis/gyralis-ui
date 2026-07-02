@@ -153,10 +153,10 @@ function TrueLooperStatusPanel({
 function TrueLooperLoadingSkeleton() {
   return (
     <div className="flex w-full items-center gap-3">
-      <Skeleton className="size-[58px] rounded-full border bg-muted" />
+      <Skeleton className="size-[58px] rounded-full border border-muted-foreground/20 bg-muted-foreground/20" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Skeleton className="h-4 w-28 rounded-full bg-muted" />
-        <Skeleton className="h-3 w-44 max-w-full rounded-full bg-muted" />
+        <Skeleton className="h-4 w-28 rounded-full bg-muted-foreground/20" />
+        <Skeleton className="h-3 w-44 max-w-full rounded-full bg-muted-foreground/15" />
       </div>
     </div>
   )
