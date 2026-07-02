@@ -94,7 +94,10 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-blue-50 to-green-50 dark:from-background dark:via-background dark:to-background">
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(251,146,60,0.16),transparent_24%),radial-gradient(circle_at_86%_16%,rgba(96,165,250,0.16),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(34,197,94,0.12),transparent_24%)] dark:bg-[radial-gradient(circle_at_12%_18%,hsl(var(--primary)/0.08),transparent_24%),radial-gradient(circle_at_86%_16%,hsl(var(--secondary)/0.08),transparent_26%),radial-gradient(circle_at_50%_100%,hsl(var(--primary)/0.05),transparent_24%)]" />
+      </div>
       {/* Hero Section */}
       <div className="relative z-10 overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 py-16 md:py-24">

@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en" suppressHydrationWarning>
         <body
           className={cn(
-            "min-h-screen bg-gradient-to-br from-[hsl(150,81%,51%,0.06)] via-[hsl(5,100%,69%,0.07)] to-[hsl(150,81%,51%,0.10)] font-sans antialiased",
+            "app-shell-background min-h-screen font-sans antialiased",
             fontSans.variable,
             fontBaloo.variable
           )}

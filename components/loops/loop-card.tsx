@@ -196,7 +196,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Eligibility
               </p>
-              <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-primary">
+              <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-foreground">
                 {eligibilityLabel}
               </p>
             </div>
