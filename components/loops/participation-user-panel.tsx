@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { FaAward } from "react-icons/fa"
 
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const TRUE_LOOPER_TARGET = 20
 
@@ -99,53 +100,65 @@ function TrueLooperStatusPanel({
   const claims = data?.globalStats?.totalClaims ?? 0
   const isTrueLooper = claims >= TRUE_LOOPER_TARGET
   const claimsRemaining = Math.max(TRUE_LOOPER_TARGET - claims, 0)
-  const supportingCopy = isLoading
-    ? "Loading claim history"
-    : `${claimsRemaining} claim${
-        claimsRemaining === 1 ? "" : "s"
-      } left to unlock`
 
   return (
     <motion.div
       title={address}
       className={cn(
         className,
-        "relative w-full flex items-center gap-2 overflow-hidden rounded-[1.35rem] border border-border bg-card p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_22px_44px_-28px_rgba(15,23,42,0.34)] backdrop-blur-xl "
+        "relative -translate-y-2 w-full flex items-center gap-2 overflow-hidden rounded-full bg-card px-6 py-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_22px_40px_-26px_rgba(15,23,42,0.24),0_26px_34px_-24px_rgba(28,231,131,0.38)] backdrop-blur-xl md:-translate-y-2.5"
       )}
       {...motionProps}
     >
-      <TrueLooperBadge enabled={isTrueLooper} />
-
-      <div className="mx-auto flex min-w-0 w-fit flex-col items-center text-center">
-        {isTrueLooper ? (
-          <>
-            <span className="block whitespace-nowrap font-baloo text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              You are a
-            </span>
-            <span className="mt-0.5 block whitespace-nowrap font-baloo text-[17px] font-semibold uppercase leading-none text-card-foreground">
-              True Looper
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="block whitespace-nowrap font-baloo text-[13px] font-semibold uppercase tracking-[0.06em] text-card-foreground">
-              Become True Looper
-            </span>
-            <span className="mt-1 block truncate text-[11px] leading-none text-muted-foreground">
-              {supportingCopy}
-            </span>
-          </>
-        )}
-      </div>
-
       {isLoading ? (
-        <TrueLooperClaimsSummary claims={null} label="Loading" />
-      ) : isTrueLooper ? (
-        <TrueLooperClaimsSummary claims={claims} />
+        <TrueLooperLoadingSkeleton />
       ) : (
-        <TrueLooperProgressRing claims={claims} />
+        <>
+          <TrueLooperBadge enabled={isTrueLooper} />
+
+          <div className="mx-auto flex min-w-0 w-fit flex-col items-center text-center">
+            {isTrueLooper ? (
+              <>
+                <span className="block whitespace-nowrap font-baloo text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  You are a
+                </span>
+                <span className="mt-0.5 block whitespace-nowrap font-baloo text-[17px] font-semibold uppercase leading-none text-card-foreground">
+                  True Looper
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block whitespace-nowrap font-baloo text-[13px] font-semibold uppercase tracking-[0.06em] text-card-foreground">
+                  Become True Looper
+                </span>
+                <span className="mt-1 block truncate text-[11px] leading-none text-muted-foreground">
+                  {claimsRemaining} claim{claimsRemaining === 1 ? "" : "s"} left
+                  to unlock
+                </span>
+              </>
+            )}
+          </div>
+
+          {isTrueLooper ? (
+            <TrueLooperClaimsSummary claims={claims} />
+          ) : (
+            <TrueLooperProgressRing claims={claims} />
+          )}
+        </>
       )}
     </motion.div>
+  )
+}
+
+function TrueLooperLoadingSkeleton() {
+  return (
+    <div className="flex w-full items-center gap-3">
+      <Skeleton className="size-[58px] rounded-full border bg-muted" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <Skeleton className="h-4 w-28 rounded-full bg-muted" />
+        <Skeleton className="h-3 w-44 max-w-full rounded-full bg-muted" />
+      </div>
+    </div>
   )
 }
 
@@ -153,7 +166,7 @@ function TrueLooperBadge({ enabled }: { enabled: boolean }) {
   return (
     <div
       className={cn(
-        "relative flex size-[58px] items-center justify-center rounded-full border",
+        "relative flex size-[55px] items-center justify-center rounded-full border",
         enabled
           ? "border-primary/45 bg-primary/[0.08] text-primary shadow-[0_0_28px_-18px_rgba(28,231,131,0.8)]"
           : "border-border/80 bg-background/50 text-muted-foreground"
@@ -169,20 +182,14 @@ function TrueLooperBadge({ enabled }: { enabled: boolean }) {
   )
 }
 
-function TrueLooperClaimsSummary({
-  claims,
-  label = "Claims",
-}: {
-  claims: number | null
-  label?: string
-}) {
+function TrueLooperClaimsSummary({ claims }: { claims: number }) {
   return (
     <div className="text-center">
       <span className="block font-sans text-[28px] font-bold leading-none tabular-nums text-primary">
-        {claims == null ? "--" : claims}
+        {claims}
       </span>
       <span className="mt-0.5 block font-baloo text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
+        Claims
       </span>
     </div>
   )
@@ -265,8 +272,8 @@ function CenterAction({
         disabled={disabled}
         className={
           warning
-            ? "inline-flex min-h-12 items-center justify-center rounded-2xl bg-rose-500/90 px-6 text-sm font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 disabled:pointer-events-none disabled:opacity-60"
-            : "inline-flex min-h-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1ce783_0%,#65df83_100%)] px-7 text-sm font-bold text-[#07140d] shadow-[0_12px_28px_-16px_rgba(28,231,131,0.8)] transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
+            ? "inline-flex min-h-12 items-center justify-center rounded-full bg-rose-500/90 px-6 text-sm font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 disabled:pointer-events-none disabled:opacity-60"
+            : "inline-flex min-h-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1ce783_0%,#65df83_100%)] px-7 text-sm font-bold text-[#07140d] shadow-[0_12px_28px_-16px_rgba(28,231,131,0.8)] transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60"
         }
       >
         {label}

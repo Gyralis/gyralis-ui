@@ -24,9 +24,9 @@ const participationPreview: ParticipationProfileData = {
 }
 
 const ecosystemMetrics = [
-  { value: "1,444", label: "Total claims" },
-  { value: "96", label: "True loopers" },
-  { value: "83%", label: "Claim rate" },
+  { value: "", label: "Total claims" },
+  { value: "", label: "True loopers" },
+  { value: "", label: "Claim rate" },
   { value: String(LoopCardsData.length), label: "Active loops" },
 ] as const
 
@@ -61,15 +61,11 @@ export default function LoopsBoxyPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background w-full">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
-        <ParticipationProfile
-          profile={participationPreview}
-          ecosystemMetrics={ecosystemMetrics}
-          preview
-        />
-      </div>
-    </div>
+    <ParticipationProfile
+      profile={participationPreview}
+      ecosystemMetrics={ecosystemMetrics}
+      preview
+    />
   )
 }
 
