@@ -11,6 +11,7 @@ type LoopHistorySnapshot = {
   loopName?: string
   uniqueUserCount?: number
   totalClaimsCount?: number
+  totalRegistrationsCount?: number
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null
 }
@@ -75,6 +76,7 @@ export async function GET(
       loopName: loopSnapshot.loopName ?? null,
       uniqueUsers: loopSnapshot.uniqueUserCount ?? 0,
       claims: loopSnapshot.totalClaimsCount ?? 0,
+      registrations: loopSnapshot.totalRegistrationsCount ?? 0,
       distributedAmount:
         loopSnapshot.totalDistributedAmountFormatted ?? null,
       tokenSymbol: loopSnapshot.tokenSymbol ?? null,

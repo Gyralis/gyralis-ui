@@ -8,6 +8,7 @@ import { LoopCardData } from "@/data/loops-data"
 import {
   LuExternalLink,
   LuFlame,
+  LuInfo,
   LuRepeat2,
   LuShield,
   LuShieldCheck,
@@ -26,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import {
   Tooltip,
   TooltipContent,
@@ -620,6 +622,7 @@ function SponsorModal({
       loopName: string | null
       uniqueUsers: number
       claims: number
+      registrations: number
       distributedAmount: string | null
       tokenSymbol: string | null
     }
@@ -644,11 +647,15 @@ function SponsorModal({
     data?.stats.distributedAmount,
     data?.stats.tokenSymbol
   )
+  const claimRateLabel = formatClaimRateStat(
+    data?.stats.claims,
+    data?.stats.registrations
+  )
   const snapshotDateLabel = formatSnapshotDate(data?.snapshotDate)
   const stats = [
     { label: "Unique Users", value: uniqueUsersLabel },
     { label: "Claims", value: claimsLabel },
-    { label: "Distributed", value: distributedLabel },
+    { label: "Claim Rate", value: claimRateLabel },
   ]
 
   return (
@@ -665,7 +672,7 @@ function SponsorModal({
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
-                  1Hive
+                  <span>1Hive</span>
                   <LuExternalLink className="size-4 text-muted-foreground" />
                 </Link>
               </DialogTitle>
@@ -677,52 +684,29 @@ function SponsorModal({
 
           <div className="rounded-2xl border border-border/80 bg-background/45 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              Latest history snapshot
+              Total Distributed
             </p>
             {isLoading ? (
               <div className="mt-3 flex flex-col items-center gap-2">
                 <Skeleton className="h-10 w-36 rounded-full bg-muted-foreground/15" />
-                <Skeleton className="h-3 w-28 rounded-full bg-muted-foreground/15" />
               </div>
             ) : (
-              <>
-                <p className="mt-2 font-mono text-[2.35rem] font-bold leading-none text-primary">
-                  {distributedLabel}
-                </p>
-                <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  {snapshotDateLabel}
-                </p>
-              </>
+              <p className="mt-2 font-mono text-[2.35rem] font-bold leading-none text-primary">
+                {distributedLabel}
+              </p>
             )}
           </div>
 
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-border/80 bg-background/35">
-            {stats.map((stat, index) => (
-              <div
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {stats.map((stat) => (
+              <HighlightStatCard
                 key={stat.label}
-                className={[
-                  "px-3 py-3",
-                  index < stats.length - 1 ? "border-r border-border/70" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {isLoading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-full rounded-full bg-muted-foreground/15" />
-                    <Skeleton className="h-3 w-16 rounded-full bg-muted-foreground/15" />
-                  </div>
-                ) : (
-                  <>
-                    <p className="font-mono text-lg font-bold leading-none text-foreground">
-                      {stat.value}
-                    </p>
-                    <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      {stat.label}
-                    </p>
-                  </>
-                )}
-              </div>
+                title={stat.label}
+                value={isLoading ? "..." : stat.value}
+                size="compact"
+                bordered
+                className="min-h-[84px]"
+              />
             ))}
           </div>
 
@@ -730,7 +714,13 @@ function SponsorModal({
             <p className="text-xs text-muted-foreground">
               We couldn&apos;t load the latest sponsor stats right now.
             </p>
-          ) : null}
+          ) : (
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <LuInfo className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Latest history snapshot</span>
+              <span>{snapshotDateLabel}</span>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -751,6 +741,23 @@ function formatDistributedStat(
 
   const trimmed = trimFormattedBalance(amount, 3)
   return tokenSymbol ? `${trimmed} ${tokenSymbol}` : trimmed
+}
+
+function formatClaimRateStat(
+  claims: number | undefined,
+  registrations: number | undefined
+) {
+  if (
+    typeof claims !== "number" ||
+    !Number.isFinite(claims) ||
+    typeof registrations !== "number" ||
+    !Number.isFinite(registrations) ||
+    registrations <= 0
+  ) {
+    return "0%"
+  }
+
+  return `${((claims / registrations) * 100).toFixed(1)}%`
 }
 
 function formatSnapshotDate(snapshotDate: string | null | undefined) {
