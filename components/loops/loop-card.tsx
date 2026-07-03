@@ -1,34 +1,40 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import React, { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import scoringConfig from "@/config/scoring.json"
 import { LoopCardData } from "@/data/loops-data"
-import type { IconType } from "react-icons"
-import { BsFire } from "react-icons/bs"
-import { HiMiniFire } from "react-icons/hi2"
-import { ImFire } from "react-icons/im"
-import { LuExternalLink, LuRepeat2, LuShield, LuZap } from "react-icons/lu"
-import { RiFireLine } from "react-icons/ri"
+import {
+  LuExternalLink,
+  LuFlame,
+  LuInfo,
+  LuRepeat2,
+  LuShield,
+  LuShieldCheck,
+  LuZap,
+} from "react-icons/lu"
 import { useAccount } from "wagmi"
 
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { usePeriodLogBlockRange } from "@/lib/hooks/app/use-period-log-block-range"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
-import { cn } from "@/lib/utils"
+import { cn, trimFormattedBalance } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score"
 
 import { LoopClaim } from "./loop-claim"
 import {
@@ -51,18 +57,12 @@ const CHAIN_ICON_SRC: Record<string, string> = {
   Base: "/icons/NetworkBaseTest.svg",
   Gnosis: "/icons/NetworkGnosis.svg",
 }
-const STREAK_MILESTONES = scoringConfig.streakBonuses
-  .map((bonus) => bonus.streak)
-  .sort((a, b) => a - b)
-const STREAK_BONUSES_BY_STREAK = new Map(
-  scoringConfig.streakBonuses.map((bonus) => [bonus.streak, bonus.points])
-)
-const PLACEHOLDER_CURRENT_STREAK = 1
 
 const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   void onBalanceUpdate
   const [isSponsorModalOpen, setIsSponsorModalOpen] = useState(false)
   const { isConnected } = useAccount()
+  const passportScoreQuery = useGetScore({ enabled: isConnected })
   const isSuperLoop = loop.contractType === "superLoop" || Boolean(loop.super)
   const settingsDetails = useLoopSettingsDetails({
     address: loop.address ?? "0x",
@@ -82,6 +82,16 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
   const shieldThreshold = loop.shieldScore
     .match(/\+?\d+(\.\d+)?/)?.[0]
     ?.replace(/^\+/, "")
+  const shieldThresholdValue =
+    shieldThreshold == null ? Number.NaN : Number.parseFloat(shieldThreshold)
+  const passportScoreValue =
+    passportScoreQuery.data?.score == null
+      ? Number.NaN
+      : Number.parseFloat(String(passportScoreQuery.data.score))
+  const hasPassedShield =
+    Number.isFinite(shieldThresholdValue) &&
+    Number.isFinite(passportScoreValue) &&
+    passportScoreValue >= shieldThresholdValue
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
 
   return (
@@ -202,7 +212,13 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <PassportScoreBadge
-                value={shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore}
+                hasPassed={hasPassedShield}
+                thresholdLabel={
+                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                }
+                value={
+                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                }
               />
             </div>
           </div>
@@ -216,11 +232,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             onSuccess={settingsDetails.handleClaimSuccess}
           />
 
-          {isConnected ? <div className="h-px bg-border/80" /> : null}
-
-          {isConnected ? (
-            <LoopStreakBadge currentStreak={PLACEHOLDER_CURRENT_STREAK} />
-          ) : null}
+          {isConnected ? <LoopStreakSection /> : null}
         </div>
 
         <LoopersModal
@@ -241,6 +253,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
 
         <SponsorModal
           isOpen={isSponsorModalOpen}
+          historyLoopKey={loop.historyLoopKey}
           loopTitle={loop.title}
           onOpenChange={setIsSponsorModalOpen}
         />
@@ -427,134 +440,54 @@ function LoopersColumnStat({
   )
 }
 
-function PassportScoreBadge({ value }: { value: string }) {
+function PassportScoreBadge({
+  hasPassed,
+  thresholdLabel,
+  value,
+}: {
+  hasPassed: boolean
+  thresholdLabel: string
+  value: string
+}) {
+  const ShieldIcon = hasPassed ? LuShieldCheck : LuShield
+  const label = hasPassed
+    ? "Shield Passed"
+    : `Requires Passport score ${thresholdLabel}`
+
   return (
-    <div
-      className="relative inline-flex size-10 shrink-0 items-center justify-center text-primary"
-      aria-label={`Passport score ${value}`}
-      title={`Passport score ${value}`}
-    >
-      <LuShield className="absolute inset-0 size-full fill-primary/10 stroke-[1.8]" />
-      <span className="relative pt-0.5 font-mono text-[10px] font-black leading-none tabular-nums">
-        {value}
-      </span>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          className="relative inline-flex size-10 shrink-0 items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)]"
+          aria-label={label}
+        >
+          <ShieldIcon className="absolute inset-0 size-full fill-none stroke-[1.8]" />
+          {hasPassed ? null : (
+            <span className="relative translate-y-[-0.5px] font-mono text-[10px] font-black leading-none tabular-nums">
+              {value}
+            </span>
+          )}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   )
 }
 
-function LoopStreakBadge({ currentStreak }: { currentStreak: number }) {
-  const nextMilestone =
-    STREAK_MILESTONES.find((milestone) => currentStreak < milestone) ??
-    STREAK_MILESTONES[STREAK_MILESTONES.length - 1] ??
-    currentStreak
-  const progressValue =
-    nextMilestone > 0
-      ? Math.min(100, Math.round((currentStreak / nextMilestone) * 100))
-      : 100
-  const nextMilestonePoints =
-    STREAK_BONUSES_BY_STREAK.get(nextMilestone) ?? 0
-  const tier = getStreakTier(currentStreak)
-  const goalTier = getStreakTier(nextMilestone)
-  const FlameIcon = tier.icon
-  const GoalIcon = goalTier.icon
-
+function LoopStreakSection() {
   return (
-    <div className="rounded-2xl bg-primary/5 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <div className="flex items-center gap-3">
-        <div className="flex shrink-0 items-center gap-2">
-          <FlameIcon
-            className={cn(
-              "size-5 text-primary transition-all duration-300",
-              tier.glowClass
-            )}
-            aria-hidden="true"
-          />
-          <div className="leading-none">
-            <span className="block font-mono text-2xl font-bold leading-none text-primary tabular-nums">
-              {currentStreak}
-            </span>
-            <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.12em] text-primary">
-              Current
-              <span className="block">Streak</span>
-            </span>
-          </div>
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <div className="h-2.5 overflow-hidden rounded-full bg-primary/12">
-            <div
-              className="h-full rounded-full bg-[linear-gradient(90deg,hsl(var(--primary)),#4ade80)] transition-[width] duration-500"
-              style={{ width: `${progressValue}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-col items-center text-center leading-none">
-          <div className="flex items-center gap-1.5">
-            <span className="block font-mono text-xl font-bold text-muted-foreground tabular-nums">
-              {nextMilestone}
-            </span>
-            <GoalIcon
-              className="size-5 text-muted-foreground/70 transition-all duration-300"
-              aria-hidden="true"
-            />
-          </div>
-          <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground/80">
-            +{nextMilestonePoints} points
-          </span>
-        </div>
+    <div className="flex min-h-11 items-center rounded-2xl bg-primary/5 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="flex items-center gap-2">
+        <LuFlame className="size-4 text-muted-foreground" aria-hidden="true" />
+        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          Loop Streaks
+        </span>
+        <span className="rounded-full border border-border/80 bg-background/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+          Soon
+        </span>
       </div>
     </div>
   )
-}
-
-function getStreakTier(streak: number): { icon: IconType; glowClass: string } {
-  if (streak >= 30) {
-    return {
-      icon: ImFire,
-      glowClass: "drop-shadow-[0_0_9px_rgba(251,146,60,0.75)]",
-    }
-  }
-
-  if (streak >= 14) {
-    return {
-      icon: BsFire,
-      glowClass: "scale-110 drop-shadow-[0_0_7px_rgba(122,223,58,0.58)]",
-    }
-  }
-
-  if (streak >= 7) {
-    return {
-      icon: BsFire,
-      glowClass: "drop-shadow-[0_0_5px_rgba(28,231,131,0.48)]",
-    }
-  }
-
-  if (streak >= 3) {
-    return {
-      icon: HiMiniFire,
-      glowClass: "drop-shadow-[0_0_4px_rgba(28,231,131,0.36)]",
-    }
-  }
-
-  if (streak >= 2) {
-    return {
-      icon: RiFireLine,
-      glowClass: "opacity-85 drop-shadow-[0_0_4px_rgba(28,231,131,0.3)]",
-    }
-  }
-
-  if (streak >= 1) {
-    return {
-      icon: RiFireLine,
-      glowClass: "opacity-65 drop-shadow-[0_0_3px_rgba(28,231,131,0.2)]",
-    }
-  }
-
-  return {
-    icon: RiFireLine,
-    glowClass: "opacity-40",
-  }
 }
 
 function HeaderIconBadges({
@@ -671,18 +604,58 @@ function SponsorBadgeMark({ large = false }: { large?: boolean }) {
 }
 
 function SponsorModal({
+  historyLoopKey,
   isOpen,
   loopTitle,
   onOpenChange,
 }: {
+  historyLoopKey: LoopCardData["historyLoopKey"]
   isOpen: boolean
   loopTitle: string
   onOpenChange: (open: boolean) => void
 }) {
+  const { data, isLoading, isError } = useQuery<{
+    success: boolean
+    snapshotDate: string | null
+    recordedAt: string | null
+    stats: {
+      loopName: string | null
+      uniqueUsers: number
+      claims: number
+      registrations: number
+      distributedAmount: string | null
+      tokenSymbol: string | null
+    }
+  }>({
+    queryKey: ["loop-history-sponsor-stats", historyLoopKey],
+    queryFn: async () => {
+      const response = await fetch(`/api/loops/history/${historyLoopKey}`)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sponsor stats for ${historyLoopKey}`)
+      }
+
+      return response.json()
+    },
+    enabled: isOpen,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const uniqueUsersLabel = formatIntegerStat(data?.stats.uniqueUsers)
+  const claimsLabel = formatIntegerStat(data?.stats.claims)
+  const distributedLabel = formatDistributedStat(
+    data?.stats.distributedAmount,
+    data?.stats.tokenSymbol
+  )
+  const claimRateLabel = formatClaimRateStat(
+    data?.stats.claims,
+    data?.stats.registrations
+  )
+  const snapshotDateLabel = formatSnapshotDate(data?.snapshotDate)
   const stats = [
-    { label: "Unique", value: "184" },
-    { label: "Claims", value: "326" },
-    { label: "Distributed", value: "1,125 HNY" },
+    { label: "Unique Users", value: uniqueUsersLabel },
+    { label: "Claims", value: claimsLabel },
+    { label: "Claim Rate", value: claimRateLabel },
   ]
 
   return (
@@ -699,7 +672,7 @@ function SponsorModal({
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
-                  1Hive
+                  <span>1Hive</span>
                   <LuExternalLink className="size-4 text-muted-foreground" />
                 </Link>
               </DialogTitle>
@@ -711,37 +684,94 @@ function SponsorModal({
 
           <div className="rounded-2xl border border-border/80 bg-background/45 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              Total sponsored
+              Total Distributed
             </p>
-            <p className="mt-2 font-mono text-[2.35rem] font-bold leading-none text-primary">
-              2,500 HNY
-            </p>
+            {isLoading ? (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <Skeleton className="h-10 w-36 rounded-full bg-muted-foreground/15" />
+              </div>
+            ) : (
+              <p className="mt-2 font-mono text-[2.35rem] font-bold leading-none text-primary">
+                {distributedLabel}
+              </p>
+            )}
           </div>
 
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-border/80 bg-background/35">
-            {stats.map((stat, index) => (
-              <div
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            {stats.map((stat) => (
+              <HighlightStatCard
                 key={stat.label}
-                className={[
-                  "px-3 py-3",
-                  index < stats.length - 1 ? "border-r border-border/70" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                <p className="font-mono text-lg font-bold leading-none text-foreground">
-                  {stat.value}
-                </p>
-                <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                  {stat.label}
-                </p>
-              </div>
+                title={stat.label}
+                value={isLoading ? "..." : stat.value}
+                size="compact"
+                bordered
+                className="min-h-[84px]"
+              />
             ))}
           </div>
+
+          {isError ? (
+            <p className="text-xs text-muted-foreground">
+              We couldn&apos;t load the latest sponsor stats right now.
+            </p>
+          ) : (
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <LuInfo className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>Latest history snapshot</span>
+              <span>{snapshotDateLabel}</span>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
   )
+}
+
+function formatIntegerStat(value: number | undefined) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "0"
+
+  return new Intl.NumberFormat("en-US").format(value)
+}
+
+function formatDistributedStat(
+  amount: string | null | undefined,
+  tokenSymbol: string | null | undefined
+) {
+  if (!amount) return tokenSymbol ? `0 ${tokenSymbol}` : "0"
+
+  const trimmed = trimFormattedBalance(amount, 3)
+  return tokenSymbol ? `${trimmed} ${tokenSymbol}` : trimmed
+}
+
+function formatClaimRateStat(
+  claims: number | undefined,
+  registrations: number | undefined
+) {
+  if (
+    typeof claims !== "number" ||
+    !Number.isFinite(claims) ||
+    typeof registrations !== "number" ||
+    !Number.isFinite(registrations) ||
+    registrations <= 0
+  ) {
+    return "0%"
+  }
+
+  return `${((claims / registrations) * 100).toFixed(1)}%`
+}
+
+function formatSnapshotDate(snapshotDate: string | null | undefined) {
+  if (!snapshotDate) return "No snapshot date"
+
+  const parsed = new Date(`${snapshotDate}T00:00:00Z`)
+  if (Number.isNaN(parsed.getTime())) return snapshotDate
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  })
 }
 
 export default LoopCard
