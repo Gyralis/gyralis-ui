@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import type { IconType } from "react-icons"
 
 import { cn } from "@/lib/utils"
@@ -7,7 +8,7 @@ type HighlightStatTone = "primary" | "secondary"
 
 type HighlightStatCardProps = {
   title: string
-  value: string
+  value: ReactNode
   icon?: IconType
   tone?: HighlightStatTone
   size?: "default" | "compact"

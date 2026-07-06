@@ -6,7 +6,6 @@ import {
   motion,
   useMotionValueEvent,
   useScroll,
-  useTransform,
 } from "framer-motion"
 import Link from "next/link"
 import {
@@ -209,6 +208,41 @@ function SurfaceIcon({
   )
 }
 
+function SectionLabel({
+  children,
+  className = "",
+  textClassName = "",
+  lineClassName = "",
+}: {
+  children: ReactNode
+  className?: string
+  textClassName?: string
+  lineClassName?: string
+}) {
+  return (
+    <div className={`inline-flex w-fit flex-col items-start ${className}`}>
+      <div className="overflow-hidden">
+        <motion.span
+          initial={{ opacity: 0, x: -18 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className={`block font-mono text-[0.94rem] tracking-[0.18em] text-primary ${textClassName}`}
+        >
+          {children}
+        </motion.span>
+      </div>
+      <motion.span
+        initial={{ scaleX: 0.2, opacity: 0.45 }}
+        whileInView={{ scaleX: 1, opacity: 1 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ delay: 0.14, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className={`mt-2 block h-px w-full origin-center bg-primary shadow-[0_0_14px_rgba(28,231,131,0.55)] ${lineClassName}`}
+      />
+    </div>
+  )
+}
+
 function HowItWorksHorizontalStepper() {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [activeStep, setActiveStep] = useState(0)
@@ -301,6 +335,79 @@ function HowItWorksHorizontalStepper() {
   )
 }
 
+function AnimatedStatValue({
+  value,
+  decimals = 0,
+  durationMs = 650,
+}: {
+  value: number
+  decimals?: number
+  durationMs?: number
+}) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  const [isInView, setIsInView] = useState(false)
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    const node = ref.current
+
+    if (!node || isInView) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.45 }
+    )
+
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [isInView])
+
+  useEffect(() => {
+    if (!isInView) {
+      return
+    }
+
+    const startValue = 0
+    const animationStart = performance.now()
+    let frame = 0
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - animationStart) / durationMs, 1)
+      const eased = 1 - Math.pow(1 - progress, 4)
+      const nextValue = startValue + (value - startValue) * eased
+
+      setDisplayValue(nextValue)
+
+      if (progress < 1) {
+        frame = window.requestAnimationFrame(tick)
+      }
+    }
+
+    frame = window.requestAnimationFrame(tick)
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [durationMs, isInView, value])
+
+  return (
+    <span ref={ref} className="tabular-nums">
+      {displayValue.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+    </span>
+  )
+}
+
 export default function HomePage() {
   const [heroSummary, setHeroSummary] = useState<HeroHistorySummary>({
     totalClaims: 2858,
@@ -372,11 +479,6 @@ export default function HomePage() {
         year: "numeric",
       }).format(new Date(heroSummary.recordedAt))
     : heroSummary.snapshotDate ?? "--"
-  const totalDistributedLabel = heroSummary.totalDistributedAmount
-    ? `${Number(heroSummary.totalDistributedAmount).toLocaleString("en-US", {
-        maximumFractionDigits: 2,
-      })}`
-    : "--"
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -394,13 +496,17 @@ export default function HomePage() {
           <div className="relative z-10 mx-auto flex min-h-[calc(100vh-76px)] w-full max-w-[1600px] flex-col px-4 pb-8 pt-14 sm:px-6 sm:pt-16 lg:px-10 lg:pt-18">
             <div className="flex flex-1 flex-col items-center justify-center text-center">
               <div className="mx-auto max-w-5xl">
-                <p className="font-heading text-[clamp(1.05rem,2vw,1.65rem)] font-medium uppercase tracking-[0.08em] text-primary">
-                  The participation layer protocol
-                </p>
-                <h1 className="mt-8 font-heading text-[clamp(1.8rem,4.15vw,5.6rem)] font-semibold leading-[0.96] tracking-[0.01em] text-foreground">
-                  PROVE PARTICIPATION,{" "}
-                  <span className="text-primary">EARN REWARDS</span>,{" "}
-                  <span className="text-secondary">BUILD TRUST</span>
+                <SectionLabel
+                  className="mx-auto items-center"
+                  textClassName="font-heading text-[clamp(1.05rem,2vw,1.65rem)] font-medium uppercase tracking-[0.08em]"
+                >
+                  The participation layer
+                </SectionLabel>
+                <h1 className="mt-8 font-heading text-[clamp(1.8rem,4.15vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.01em] text-foreground">
+                  <span className="italic text-primary">Prove</span>{" "}
+                  participation.{" "}
+                  <span className="italic text-primary">Earn</span> rewards.{" "}
+                  <span className="italic text-primary">Build</span> trust.
                 </h1>
                 <p className="mx-auto mt-10 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-[1.15rem]">
                   Gyralis helps protocols and communities reward verified humans
@@ -408,25 +514,26 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="mt-12 flex flex-col items-center gap-4">
+              <div className="mt-[3.25rem] flex flex-col items-center gap-4">
                 <Link
                   href="/loops"
-                  className="tamagotchi-button inline-flex items-center px-8 py-4 text-base"
+                  className="tamagotchi-button inline-flex items-center justify-center gap-2 px-4 py-2 text-sm"
                 >
                   Launch App
+                  <FaArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </div>
             </div>
 
-            <div className="relative z-20 mt-10 w-full border-t border-border/70 pt-6">
-              <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-16">
+            <div className="relative z-20 mt-10 w-full pt-6">
+              <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-16">
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">
                       Total Claims
                     </div>
                     <div className="mt-1 font-mono text-[2rem] font-semibold tracking-tight text-foreground sm:text-[2.4rem]">
-                      {heroSummary.totalClaims.toLocaleString()}
+                      <AnimatedStatValue value={heroSummary.totalClaims} />
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
                       Latest snapshot {heroSummary.snapshotDate ?? "--"}
@@ -437,7 +544,17 @@ export default function HomePage() {
                       Claim Rate
                     </div>
                     <div className="mt-1 font-mono text-[2rem] font-semibold tracking-tight text-foreground sm:text-[2.4rem]">
-                      {heroClaimRateLabel}
+                      {heroSummary.claimRatePercent == null ? (
+                        "--"
+                      ) : (
+                        <>
+                          <AnimatedStatValue
+                            value={heroSummary.claimRatePercent}
+                            decimals={2}
+                          />
+                          %
+                        </>
+                      )}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
                       From {heroSummary.totalRegistrations.toLocaleString()} total
@@ -448,10 +565,20 @@ export default function HomePage() {
 
                 <a
                   href="#loops"
-                  className="inline-flex items-center gap-3 self-start text-sm text-muted-foreground transition-colors hover:text-foreground lg:self-end"
+                  className="inline-flex items-center gap-3 self-start text-sm text-muted-foreground transition-colors hover:text-foreground lg:self-center"
                 >
                   <span>Scroll to explore</span>
-                  <LuArrowDown className="size-4" aria-hidden="true" />
+                  <motion.span
+                    animate={{ y: [0, 4, 0] }}
+                    transition={{
+                      duration: 1.25,
+                      repeat: Number.POSITIVE_INFINITY,
+                      ease: "easeInOut",
+                    }}
+                    className="inline-flex"
+                  >
+                    <LuArrowDown className="size-4" aria-hidden="true" />
+                  </motion.span>
                 </a>
               </div>
             </div>
@@ -462,9 +589,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-18 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
-                <p className="mb-3 font-mono text-[0.8125rem] tracking-[0.18em] text-primary">
-                  {"// LOOPS"}
-                </p>
+                <SectionLabel className="mb-3">LOOPS</SectionLabel>
                 <h2 className="max-w-3xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                   Everything you need to build momentum.
                 </h2>
@@ -550,9 +675,7 @@ export default function HomePage() {
         <section id="how" className="relative bg-muted/50 py-24 sm:py-32">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-16">
-              <p className="mb-3 font-mono text-[0.8125rem] tracking-[0.18em] text-primary">
-                {"// HOW LOOPS WORK"}
-              </p>
+              <SectionLabel className="mb-3">HOW LOOPS WORK</SectionLabel>
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                 Register, claim, streak.
               </h2>
@@ -689,9 +812,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <p className="mb-3 font-mono text-[0.8125rem] tracking-[0.18em] text-primary">
-                  {"// LIVE ON-CHAIN"}
-                </p>
+                <SectionLabel className="mb-3">LIVE ON-CHAIN</SectionLabel>
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                   Participation, in real time.
                 </h2>
@@ -708,7 +829,7 @@ export default function HomePage() {
                 <div className="bg-card p-6">
                   <HighlightStatCard
                     title="Total Claims"
-                    value={heroSummary.totalClaims.toLocaleString()}
+                    value={<AnimatedStatValue value={heroSummary.totalClaims} />}
                     icon={FaWallet}
                     className="min-h-[250px]"
                     helperText="Across all tracked loops"
@@ -724,7 +845,7 @@ export default function HomePage() {
                 <div className="bg-card p-6">
                   <HighlightStatCard
                     title="Unique Registered Users"
-                    value={heroSummary.uniqueUsers.toLocaleString()}
+                    value={<AnimatedStatValue value={heroSummary.uniqueUsers} />}
                     icon={FaUsers}
                     tone="secondary"
                     className="min-h-[250px]"
@@ -744,7 +865,12 @@ export default function HomePage() {
                     value={
                       heroSummary.claimRatePercent == null
                         ? "--"
-                        : heroSummary.claimRatePercent.toFixed(2)
+                        : (
+                            <AnimatedStatValue
+                              value={heroSummary.claimRatePercent}
+                              decimals={2}
+                            />
+                          )
                     }
                     suffix={heroSummary.claimRatePercent == null ? null : "%"}
                     icon={FaCheck}
@@ -760,7 +886,16 @@ export default function HomePage() {
                 <div className="bg-card p-6">
                   <HighlightStatCard
                     title="Total Distributed"
-                    value={totalDistributedLabel}
+                    value={
+                      heroSummary.totalDistributedAmount == null ? (
+                        "--"
+                      ) : (
+                        <AnimatedStatValue
+                          value={Number(heroSummary.totalDistributedAmount)}
+                          decimals={2}
+                        />
+                      )
+                    }
                     suffix={heroSummary.totalDistributedSymbol}
                     icon={FaCoins}
                     tone="secondary"
@@ -785,9 +920,7 @@ export default function HomePage() {
             <div className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-[0_10px_34px_rgba(0,0,0,0.06)]">
               <div className="grid gap-10 px-6 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-12">
                 <div>
-                  <p className="mb-3 font-mono text-[0.8125rem] tracking-[0.18em] text-primary">
-                    {"// ELIGIBILITY"}
-                  </p>
+                  <SectionLabel className="mb-3">ELIGIBILITY</SectionLabel>
                   <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                     Eligibility
                   </h2>
@@ -810,9 +943,7 @@ export default function HomePage() {
                 </div>
 
                 <div>
-                  <p className="mb-4 font-mono text-[0.8125rem] tracking-[0.18em] text-primary">
-                    {"// TRUSTED PARTNERS"}
-                  </p>
+                  <SectionLabel className="mb-4">TRUSTED PARTNERS</SectionLabel>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {eligibilityPartners.map((partner) => (
                       <div
