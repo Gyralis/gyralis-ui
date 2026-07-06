@@ -93,6 +93,7 @@ const stepsData = [
     icon: <FaShieldAlt className="size-5" aria-hidden="true" />,
     description:
       "Join a Loop and prove eligibility once - a Passport score, DAO membership, or any credential the creator sets.",
+    action: "Enter the Loop",
   },
   {
     num: "02",
@@ -100,6 +101,7 @@ const stepsData = [
     icon: <FaWallet className="size-5" aria-hidden="true" />,
     description:
       "Claim your reward every period. One tap, on-chain, non-custodial - the tokens land straight in your wallet.",
+    action: "Claim X tokens",
   },
   {
     num: "03",
@@ -107,6 +109,7 @@ const stepsData = [
     icon: <FaFireAlt className="size-5" aria-hidden="true" />,
     description:
       "Come back next period to keep the streak alive, earn Season Points, and climb the leaderboard.",
+    action: "Streak",
   },
 ]
 
@@ -261,9 +264,9 @@ function HowItWorksHorizontalStepper() {
   return (
     <div
       ref={wrapperRef}
-      className="relative mx-auto h-[470px] max-w-4xl snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-[2rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className="relative mx-auto h-[520px] max-w-4xl snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-[2rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
-      <div className="flex flex-col gap-5 px-4 py-3">
+      <div className="relative z-20 flex flex-col gap-8 px-4 py-3">
         {stepsData.map((step, index) => {
           const active = activeStep === index
           const completed = index < activeStep
@@ -272,58 +275,46 @@ function HowItWorksHorizontalStepper() {
             <motion.article
               key={step.num}
               layout
-              className={`snap-start relative flex min-h-[230px] w-full flex-col justify-between overflow-hidden rounded-[2rem] border bg-card p-8 text-left transition-all duration-500 lg:min-h-[220px] lg:px-10 ${
+              className={`tamagotchi-card snap-start relative flex min-h-[230px] w-full flex-col justify-between overflow-hidden p-8 text-left transition-all duration-500 lg:min-h-[220px] lg:px-10 ${
                 active
                   ? "border-primary shadow-[0_18px_44px_rgba(28,231,131,0.16)]"
                   : completed
                     ? "border-primary/45 shadow-[0_10px_28px_rgba(28,231,131,0.08)]"
-                    : "border-border shadow-[0_10px_28px_rgba(0,0,0,0.05)]"
+                    : ""
               }`}
             >
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="flex items-start gap-5">
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center gap-4">
                   <div
                     className={`flex size-14 shrink-0 items-center justify-center rounded-2xl ${
-                      active || completed
-                        ? "bg-primary/12 text-primary"
-                        : "bg-muted text-muted-foreground"
+                      active
+                        ? "bg-primary/14 text-primary shadow-[0_0_20px_rgba(28,231,131,0.24)]"
+                        : completed
+                          ? "bg-primary/8 text-primary/65"
+                          : "bg-muted text-muted-foreground opacity-60"
                     }`}
                   >
                     {step.icon}
                   </div>
-                  <div className="max-w-2xl">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-heading text-[1.8rem] font-semibold leading-tight text-foreground">
-                        {step.title}
-                      </h3>
-                      <span className="font-mono text-xs tracking-[0.2em] text-muted-foreground">
-                        {step.num}
-                      </span>
-                    </div>
-                    <p className="mt-4 max-w-[52ch] text-base leading-8 text-muted-foreground">
-                      {step.description}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-heading text-[1.8rem] font-semibold leading-tight text-foreground">
+                      {step.title}
+                    </h3>
                   </div>
                 </div>
 
-                <div className="w-full max-w-[220px] space-y-4 lg:pl-6">
-                  <div className="h-[3px] overflow-hidden rounded-full bg-border">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        active
-                          ? "w-full bg-primary"
-                          : completed
-                            ? "w-full bg-primary/55"
-                            : "w-0 bg-primary"
-                      }`}
-                    />
-                  </div>
-                  <div className="font-mono text-xs tracking-[0.14em] text-muted-foreground">
-                    {active
-                      ? "IN VIEW"
-                      : completed
-                        ? "COMPLETED"
-                        : "UP NEXT"}
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <p className="max-w-[52ch] text-base leading-8 text-muted-foreground">
+                    {step.description}
+                  </p>
+
+                  <div className="w-full max-w-[220px]">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-2 text-sm font-medium text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)]"
+                    >
+                      {step.action}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -485,7 +476,7 @@ export default function HomePage() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_18%,rgba(28,231,131,0.09),transparent_24%),radial-gradient(circle_at_80%_18%,rgba(118,75,255,0.08),transparent_24%),radial-gradient(circle_at_50%_120%,rgba(28,231,131,0.06),transparent_28%)]" />
         <div
-          className="absolute inset-0 bg-[linear-gradient(rgba(28,231,131,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(28,231,131,0.045)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_72%_58%_at_50%_24%,black_35%,transparent_80%)]"
+          className="absolute inset-0 bg-[linear-gradient(rgba(28,231,131,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(28,231,131,0.045)_1px,transparent_1px)]"
           style={{ backgroundSize: "64px 64px" }}
         />
       </div>
@@ -633,27 +624,35 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {loopFeatures.map((feature) => (
-                <div
+              {loopFeatures.map((feature, index) => (
+                <motion.div
                   key={feature.title}
-                  className={`rounded-[2rem] border bg-card p-8 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)] ${
+                  initial={{ opacity: 0, y: 22, filter: "blur(8px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: true, amount: 0.22 }}
+                  transition={{
+                    duration: 0.42,
+                    delay: index * 0.07,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className={`tamagotchi-card p-8 transition-all duration-300 hover:-translate-y-0.5 ${
                     feature.tone === "super"
                       ? "border-primary/35 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_16px_rgba(28,231,131,0.10),0_2px_6px_rgba(0,0,0,0.06)]"
-                      : "border-border shadow-[0_8px_30px_rgba(0,0,0,0.05)]"
+                      : ""
                   }`}
                 >
-                  <SurfaceIcon
-                    tone={
-                      feature.tone === "super"
-                        ? "super"
-                        : feature.tone === "secondary"
-                          ? "secondary"
-                          : "primary"
-                    }
-                  >
-                    {feature.icon}
-                  </SurfaceIcon>
-                  <div className="mt-5 flex items-center gap-2">
+                  <div className="flex items-center gap-4">
+                    <SurfaceIcon
+                      tone={
+                        feature.tone === "super"
+                          ? "super"
+                          : feature.tone === "secondary"
+                            ? "secondary"
+                            : "primary"
+                      }
+                    >
+                      {feature.icon}
+                    </SurfaceIcon>
                     <h3 className="font-heading text-xl font-semibold">
                       {feature.title}
                     </h3>
@@ -666,23 +665,31 @@ export default function HomePage() {
                   <p className="mt-2 text-[0.95rem] leading-7 text-muted-foreground">
                     {feature.description}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="how" className="relative bg-muted/50 py-24 sm:py-32">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <section
+          id="how"
+          className="relative overflow-hidden py-24 sm:py-32"
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_88%_88%,rgba(28,231,131,0.16),transparent_0%,transparent_18%),radial-gradient(circle_at_82%_72%,rgba(28,231,131,0.12),transparent_28%),radial-gradient(circle_at_68%_58%,rgba(28,231,131,0.08),transparent_34%),radial-gradient(circle_at_50%_120%,rgba(28,231,131,0.05),transparent_40%)]" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
             <div className="mb-16">
               <SectionLabel className="mb-3">HOW LOOPS WORK</SectionLabel>
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                Register, claim, streak.
+                Participation. On Repeat.
               </h2>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
-                Join a Loop, claim each period, and keep your streak alive with
-                recurring participation that compounds into rewards and
-                reputation.
+                Register - Claim - Streak. Enter a Loop, claim each
+                distribution period and keep your streak alive with recurring
+                participation-claims that compounds into rewards and higher
+                score.
               </p>
             </div>
 
