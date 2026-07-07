@@ -2,12 +2,8 @@
 
 import { ReactNode, useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-} from "framer-motion"
 import Link from "next/link"
+import { motion, useMotionValueEvent, useScroll } from "framer-motion"
 import {
   FaArrowRight,
   FaBolt,
@@ -16,7 +12,10 @@ import {
   FaDiscord,
   FaFireAlt,
   FaGithub,
+  FaLockOpen,
+  FaRedoAlt,
   FaShieldAlt,
+  FaThumbsUp,
   FaTrophy,
   FaUsers,
   FaWallet,
@@ -24,6 +23,7 @@ import {
 import { FaXTwitter } from "react-icons/fa6"
 import { LuArrowDown } from "react-icons/lu"
 
+import { cn } from "@/lib/utils"
 import { NavLogoMark } from "@/components/layout/main-nav"
 import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
@@ -42,43 +42,42 @@ const loopFeatures = [
   {
     title: "Recurring Participation",
     description:
-      "Turn one-off campaigns into repeatable participation systems with recurring claim windows and clear reward cadence.",
-    icon: <FaArrowRight className="size-5" aria-hidden="true" />,
+      "Turn one-off campaigns into repeatable participation loops with a clear reward cadence.",
+    icon: <FaRedoAlt className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
     title: "Retention by Design",
     description:
-      "Use streaks, season logic, and progression loops to keep contributors coming back period after period.",
+      "Keep contributors coming back every cycle with streak-driven participation.",
     icon: <FaFireAlt className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
-    title: "Trusted Eligibility",
+    title: "Trusted Eligibilities",
     description:
-      "Gate access with humanity checks, community membership, or custom credentials before rewards are unlocked.",
-    icon: <FaShieldAlt className="size-5" aria-hidden="true" />,
+      "Gate access with verified eligibilities checks through and human-proof systems.",
+    icon: <FaThumbsUp className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
   {
     title: "Live Reward Claims",
     description:
-      "Let verified users claim on-chain in a simple flow that lands rewards directly in their wallet.",
-    icon: <FaWallet className="size-5" aria-hidden="true" />,
+      "Let users claim on-chain in a simple flow that lands rewards directly in their wallet.",
+    icon: <FaCoins className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
-    title: "Premium Reward Rails",
+    title: "Customizable Reward Mechanics",
     description:
-      "Support premium loop mechanics and richer reward programs, including streamed incentives for higher-value participation.",
-    icon: <FaBolt className="size-5" aria-hidden="true" />,
+      "Tailor reward structures to fit your community's unique needs and engagement strategies.",
+    icon: <FaLockOpen className="size-5" aria-hidden="true" />,
     tone: "super",
-    badge: "STREAM",
   },
   {
     title: "Visible Momentum",
     description:
-      "Make participation legible with claim activity, streak signals, and season-long competition that communities can rally around.",
+      "Make community momentum visible through claim activity, streak signals, and season-long competition.",
     icon: <FaTrophy className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
@@ -89,8 +88,12 @@ const stepsData = [
     title: "Register",
     icon: <FaShieldAlt className="size-5" aria-hidden="true" />,
     description:
-      "Pass the loop requirements and enter once, whether the gate is humanity, membership, or another community rule.",
+      "Pass the loop requirements and enter the loop to start claiming each distribution period.",
     action: "Enter the Loop",
+    helper: "Verified once",
+    status: "Eligibility passed",
+    statLabel: "Access",
+    statValue: "Unlocked",
   },
   {
     title: "Claim",
@@ -98,6 +101,10 @@ const stepsData = [
     description:
       "Claim the current distribution period in a simple on-chain flow and receive rewards directly in your wallet.",
     action: "Claim X tokens",
+    helper: "Current distribution live",
+    status: "Claim window open",
+    statLabel: "Reward",
+    statValue: "Live now",
   },
   {
     title: "Streak",
@@ -105,6 +112,10 @@ const stepsData = [
     description:
       "Return next period to keep your streak alive, raise your score, and prove recurring participation over time.",
     action: "Streak",
+    helper: "Come back next cycle",
+    status: "Momentum building",
+    statLabel: "Score",
+    statValue: "Growing",
   },
 ]
 
@@ -144,31 +155,33 @@ const footerColumns = [
     title: "Product",
     links: [
       { label: "Loops", href: "#loops" },
-      { label: "Epochs", href: "#epochs" },
-      { label: "Metrics", href: "#metrics" },
+      // { label: "Epochs", href: "#epochs" },
+      // { label: "Metrics", href: "#metrics" },
       { label: "SuperLoops", href: "#loops" },
+      { label: "Stats", href: "dashboard" },
+      { label: "Eligibilities", href: "eligibilities" },
     ],
   },
   {
     title: "Builders",
     links: [
       {
-        label: "Documentation",
+        label: "GitHub",
         href: "https://github.com/orgs/Gyralis/repositories",
       },
-      { label: "SDK", href: "#builders" },
-      {
-        label: "API Reference",
-        href: "https://github.com/orgs/Gyralis/repositories",
-      },
-      { label: "Status", href: "#metrics" },
+      // { label: "SDK", href: "#builders" },
+      // {
+      //   label: "API Reference",
+      //   href: "https://github.com/orgs/Gyralis/repositories",
+      // },
+      // { label: "Status", href: "#metrics" },
     ],
   },
   {
     title: "Community",
     links: [
-      { label: "Blog", href: "https://x.com/gyralis_xyz" },
-      { label: "Governance", href: "https://discord.gg/VgGQHDpn" },
+      // { label: "Blog", href: "https://x.com/gyralis_xyz" },
+      // { label: "Governance", href: "https://discord.gg/VgGQHDpn" },
       { label: "Discord", href: "https://discord.gg/VgGQHDpn" },
       { label: "Twitter", href: "https://x.com/gyralis_xyz" },
     ],
@@ -178,7 +191,7 @@ const footerColumns = [
     links: [
       { label: "Privacy", href: "/" },
       { label: "Terms", href: "/" },
-      { label: "Audits", href: "#trust" },
+      // { label: "Audits", href: "#trust" },
     ],
   },
 ]
@@ -190,16 +203,12 @@ function SurfaceIcon({
   children: ReactNode
   tone?: "primary" | "secondary" | "super"
 }) {
-  const className =
-    tone === "secondary"
-      ? "bg-secondary/12 text-secondary"
-      : tone === "super"
-        ? "bg-[linear-gradient(135deg,#764bff_0%,#1ce783_100%)] text-white"
-        : "bg-primary/12 text-primary"
-
   return (
     <div
-      className={`flex size-[52px] items-center justify-center rounded-2xl ${className}`}
+      className={cn(
+        "flex size-[52px] items-center justify-center rounded-2xl border border-[#764bff]/22 bg-[#764bff]/12 text-[#764bff] transition-all duration-300",
+        "group-hover:border-primary/35 group-hover:bg-primary/12 group-hover:text-primary group-hover:shadow-[0_0_24px_rgba(28,231,131,0.18)]"
+      )}
     >
       {children}
     </div>
@@ -243,81 +252,158 @@ function SectionLabel({
 
 function HowItWorksHorizontalStepper() {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const stepRefs = useRef<Array<HTMLDivElement | null>>([])
   const [activeStep, setActiveStep] = useState(0)
   const { scrollYProgress } = useScroll({
     container: wrapperRef,
+    offset: ["start start", "end start"],
   })
 
-  useMotionValueEvent(scrollYProgress, "change", (value) => {
-    const nextStep = Math.min(
-      stepsData.length - 1,
-      Math.floor(Math.min(value, 0.9999) * stepsData.length)
-    )
-    setActiveStep(nextStep)
+  useMotionValueEvent(scrollYProgress, "change", () => {
+    const wrapper = wrapperRef.current
+
+    if (!wrapper) {
+      return
+    }
+
+    const wrapperCenter = wrapper.scrollTop + wrapper.clientHeight / 2
+    let nextActive = 0
+    let closestDistance = Number.POSITIVE_INFINITY
+
+    stepRefs.current.forEach((node, index) => {
+      if (!node) {
+        return
+      }
+
+      const itemCenter = node.offsetTop + node.offsetHeight / 2
+      const distance = Math.abs(itemCenter - wrapperCenter)
+
+      if (distance < closestDistance) {
+        closestDistance = distance
+        nextActive = index
+      }
+    })
+
+    setActiveStep(nextActive)
   })
+
+  const backgroundColors = ["#0f172a", "#000000", "#171717"]
+  const gradients = [
+    "linear-gradient(to bottom right, #0f2f25, #1ce783)",
+    "linear-gradient(to bottom right, #06281d, #16a34a)",
+    "linear-gradient(to bottom right, #0f3a2d, #0f766e)",
+  ]
+  const [backgroundGradient, setBackgroundGradient] = useState(gradients[0])
+
+  useEffect(() => {
+    setBackgroundGradient(gradients[activeStep % gradients.length])
+  }, [activeStep])
+
+  const content = stepsData.map((step) => ({
+    title: `${step.title} / ${step.statLabel}`,
+    description: step.description,
+    content: (
+      <div className="flex h-full flex-col justify-between p-5 text-white">
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-white/12 text-white shadow-[0_0_18px_rgba(255,255,255,0.14)]">
+            {step.icon}
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+              Participant view
+            </p>
+            <p className="text-base font-semibold text-white">{step.status}</p>
+          </div>
+        </div>
+
+        <div className="rounded-[1.2rem] border border-white/10 bg-black/15 p-4 backdrop-blur-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+            Loop state
+          </p>
+          <p className="mt-2 text-sm leading-7 text-white/90">
+            {step.title === "Register"
+              ? "Eligibility is verified and loop access is unlocked for this user."
+              : step.title === "Claim"
+              ? "The current distribution period is available and the claim flow is ready."
+              : "The streak is active and the next return keeps momentum building."}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="inline-flex min-h-[46px] w-full items-center justify-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_8px_20px_-18px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:bg-white/15"
+        >
+          {step.action}
+        </button>
+      </div>
+    ),
+  }))
 
   return (
-    <div
+    <motion.div
+      animate={{
+        backgroundColor: backgroundColors[activeStep % backgroundColors.length],
+      }}
       ref={wrapperRef}
-      className="relative mx-auto h-[520px] max-w-4xl snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-[2rem] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      className="relative mx-auto flex h-[30rem] max-w-6xl justify-center space-x-10 overflow-y-auto rounded-[2rem] border border-border/70 p-10 shadow-[0_22px_60px_rgba(0,0,0,0.08)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
-      <div className="relative z-20 flex flex-col gap-8 px-4 py-3">
-        {stepsData.map((step, index) => {
-          const active = activeStep === index
-          const completed = index < activeStep
-
-          return (
-            <motion.article
-              key={step.title}
-              layout
-              className={`tamagotchi-card snap-start relative flex min-h-[230px] w-full flex-col justify-between overflow-hidden p-8 text-left transition-all duration-500 lg:min-h-[220px] lg:px-10 ${
-                active
-                  ? "border-primary shadow-[0_18px_44px_rgba(28,231,131,0.16)]"
-                  : completed
-                    ? "border-primary/45 shadow-[0_10px_28px_rgba(28,231,131,0.08)]"
-                    : ""
-              }`}
+      <div className="relative flex items-start px-4">
+        <div className="max-w-2xl">
+          {content.map((item, index) => (
+            <div
+              key={`${item.title}-${index}`}
+              ref={(node) => {
+                stepRefs.current[index] = node
+              }}
+              className="my-20 flex gap-5"
             >
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`flex size-14 shrink-0 items-center justify-center rounded-2xl ${
-                      active
-                        ? "bg-primary/14 text-primary shadow-[0_0_20px_rgba(28,231,131,0.24)]"
-                        : completed
-                          ? "bg-primary/8 text-primary/65"
-                          : "bg-muted text-muted-foreground opacity-60"
-                    }`}
-                  >
-                    {step.icon}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-heading text-[1.8rem] font-semibold leading-tight text-foreground">
-                      {step.title}
-                    </h3>
-                  </div>
-                </div>
+              <motion.div
+                animate={{
+                  opacity: activeStep === index ? 1 : 0.3,
+                  scale: activeStep === index ? 1 : 0.94,
+                }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className={`mt-1 flex size-12 shrink-0 items-center justify-center rounded-2xl border ${
+                  activeStep === index
+                    ? "border-primary/45 bg-primary/15 text-primary shadow-[0_0_24px_rgba(28,231,131,0.25)]"
+                    : "border-white/10 bg-white/5 text-white/45"
+                }`}
+              >
+                {stepsData[index]?.icon}
+              </motion.div>
 
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                  <p className="max-w-[52ch] text-base leading-8 text-muted-foreground">
-                    {step.description}
-                  </p>
-
-                  <div className="w-full max-w-[220px]">
-                    <button
-                      type="button"
-                      className="inline-flex min-h-[42px] w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-2 text-sm font-medium text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)]"
-                    >
-                      {step.action}
-                    </button>
-                  </div>
-                </div>
+              <div className="max-w-xl">
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: activeStep === index ? 1 : 0.3 }}
+                  className="text-2xl font-bold text-slate-100"
+                >
+                  {item.title}
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: activeStep === index ? 1 : 0.3 }}
+                  className="text-kg mt-6 max-w-sm text-slate-300"
+                >
+                  {item.description}
+                </motion.p>
               </div>
-            </motion.article>
-          )
-        })}
+            </div>
+          ))}
+          <div className="h-64" />
+        </div>
       </div>
-    </div>
+
+      <div
+        style={{ background: backgroundGradient }}
+        className={cn(
+          "sticky top-10 hidden h-72 w-[22rem] overflow-hidden rounded-[1.8rem] lg:block",
+          "shadow-[0_22px_50px_rgba(0,0,0,0.18)]"
+        )}
+      >
+        {content[activeStep]?.content ?? null}
+      </div>
+    </motion.div>
   )
 }
 
@@ -438,8 +524,10 @@ export default function HomePage() {
             claimRatePercent: payload.stats.claimRatePercent ?? null,
             snapshotDate: payload.snapshotDate ?? null,
             recordedAt: payload.recordedAt ?? null,
-            totalDistributedAmount: payload.stats.totalDistributedAmount ?? null,
-            totalDistributedSymbol: payload.stats.totalDistributedSymbol ?? null,
+            totalDistributedAmount:
+              payload.stats.totalDistributedAmount ?? null,
+            totalDistributedSymbol:
+              payload.stats.totalDistributedSymbol ?? null,
           })
         }
       } catch {
@@ -544,8 +632,8 @@ export default function HomePage() {
                       )}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      From {heroSummary.totalRegistrations.toLocaleString()} total
-                      registrations
+                      From {heroSummary.totalRegistrations.toLocaleString()}{" "}
+                      total registrations
                     </div>
                   </div>
                 </div>
@@ -574,80 +662,20 @@ export default function HomePage() {
 
         <section id="loops" className="relative py-24 sm:py-32">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mb-18 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="mb-18">
               <div>
                 <SectionLabel className="mb-3">LOOPS</SectionLabel>
                 <h2 className="max-w-3xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                  Build momentum with recurring participation systems.
+                  Build momentum with recurring participation.
                 </h2>
                 <p className="mt-5 max-w-xl text-lg leading-7 text-muted-foreground">
-                  Give protocols and communities a repeatable way to reward
-                  verified participation with eligibility, claims, streaks, and
-                  live on-chain feedback loops.
+                  Turn participation into a repeatable on-chain rhythm with
+                  verified access, recurring claims, streaks, and live momentum.
                 </p>
-              </div>
-
-              <div className="flex justify-center">
-                <div className="tamagotchi-card relative w-full max-w-[360px] overflow-hidden rounded-[2rem] p-5 shadow-[0_18px_44px_rgba(28,231,131,0.08)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(28,231,131,0.16),transparent_30%),radial-gradient(circle_at_16%_88%,rgba(28,231,131,0.08),transparent_26%)]" />
-                  <div className="relative z-10 space-y-4">
-                    <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-background/80 px-4 py-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                          Loop Setup
-                        </p>
-                        <p className="mt-1 font-heading text-base font-semibold text-foreground">
-                          Weekly contributor rewards
-                        </p>
-                      </div>
-                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-                        Active
-                      </span>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Eligibility
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          Human Passport + community member
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          Reward cadence
-                        </p>
-                        <p className="mt-2 text-sm font-semibold text-foreground">
-                          Claim every 7 days
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                            Participation signal
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-foreground">
-                            84.6% claim rate this cycle
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-primary">
-                          <FaFireAlt className="size-3.5" aria-hidden="true" />
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]">
-                            Streaks live
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {loopFeatures.map((feature, index) => (
                 <motion.div
                   key={feature.title}
@@ -659,7 +687,7 @@ export default function HomePage() {
                     delay: index * 0.07,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className={`tamagotchi-card p-8 transition-all duration-300 hover:-translate-y-0.5 ${
+                  className={`group tamagotchi-card p-8 transition-all duration-300 hover:-translate-y-0.5 ${
                     feature.tone === "super"
                       ? "border-primary/35 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_16px_rgba(28,231,131,0.10),0_2px_6px_rgba(0,0,0,0.06)]"
                       : ""
@@ -671,8 +699,8 @@ export default function HomePage() {
                         feature.tone === "super"
                           ? "super"
                           : feature.tone === "secondary"
-                            ? "secondary"
-                            : "primary"
+                          ? "secondary"
+                          : "primary"
                       }
                     >
                       {feature.icon}
@@ -695,10 +723,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section
-          id="how"
-          className="relative overflow-hidden py-24 sm:py-32"
-        >
+        <section id="how" className="relative overflow-hidden py-24 sm:py-32">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_96%_96%,rgba(28,231,131,0.12)_0%,rgba(28,231,131,0.08)_12%,transparent_34%),radial-gradient(circle_at_84%_78%,rgba(28,231,131,0.09)_0%,transparent_32%),radial-gradient(circle_at_68%_58%,rgba(28,231,131,0.06)_0%,transparent_38%),radial-gradient(circle_at_50%_120%,rgba(28,231,131,0.04)_0%,transparent_46%)] blur-[10px]" />
           </div>
@@ -854,92 +879,90 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="tamagotchi-card overflow-hidden rounded-[2rem] p-0 shadow-[0_10px_34px_rgba(0,0,0,0.06)]">
-              <div className="grid gap-px sm:grid-cols-2">
-                <div className="bg-card p-6">
-                  <HighlightStatCard
-                    title="Total Claims"
-                    value={<AnimatedStatValue value={heroSummary.totalClaims} />}
-                    icon={FaWallet}
-                    className="min-h-[250px]"
-                    helperText="Across all tracked loops"
-                    substats={[
-                      {
-                        label: "Latest Snapshot",
-                        value: heroSummary.snapshotDate ?? "--",
-                        tone: "muted",
-                      },
-                    ]}
-                  />
-                </div>
-                <div className="bg-card p-6">
-                  <HighlightStatCard
-                    title="Unique Registered Users"
-                    value={<AnimatedStatValue value={heroSummary.uniqueUsers} />}
-                    icon={FaUsers}
-                    tone="secondary"
-                    className="min-h-[250px]"
-                    helperText="Verified participants in history"
-                    substats={[
-                      {
-                        label: "Total Registrations",
-                        value: heroSummary.totalRegistrations.toLocaleString(),
-                        tone: "positive",
-                      },
-                    ]}
-                  />
-                </div>
-                <div className="bg-card p-6">
-                  <HighlightStatCard
-                    title="Claim Rate"
-                    value={
-                      heroSummary.claimRatePercent == null
-                        ? "--"
-                        : (
-                            <AnimatedStatValue
-                              value={heroSummary.claimRatePercent}
-                              decimals={2}
-                            />
-                          )
-                    }
-                    suffix={heroSummary.claimRatePercent == null ? null : "%"}
-                    icon={FaCheck}
-                    className="min-h-[250px]"
-                    helperText="Claims over total registrations"
-                    progress={{
-                      label: "Participation Rate",
-                      value: heroClaimRateLabel,
-                      percent: heroSummary.claimRatePercent ?? 0,
-                    }}
-                  />
-                </div>
-                <div className="bg-card p-6">
-                  <HighlightStatCard
-                    title="Total Distributed"
-                    value={
-                      heroSummary.totalDistributedAmount == null ? (
-                        "--"
-                      ) : (
-                        <AnimatedStatValue
-                          value={Number(heroSummary.totalDistributedAmount)}
-                          decimals={2}
-                        />
-                      )
-                    }
-                    suffix={heroSummary.totalDistributedSymbol}
-                    icon={FaCoins}
-                    tone="secondary"
-                    className="min-h-[250px]"
-                    helperText="From the latest history snapshot"
-                    substats={[
-                      {
-                        label: "Last Updated",
-                        value: latestUpdatedLabel,
-                        tone: "muted",
-                      },
-                    ]}
-                  />
-                </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="bg-card p-6">
+                <HighlightStatCard
+                  title="Total Claims"
+                  value={<AnimatedStatValue value={heroSummary.totalClaims} />}
+                  icon={FaWallet}
+                  className="min-h-[230px]"
+                  helperText="Across all tracked loops"
+                  substats={[
+                    {
+                      label: "Latest Snapshot",
+                      value: heroSummary.snapshotDate ?? "--",
+                      tone: "muted",
+                    },
+                  ]}
+                />
+              </div>
+              <div className="bg-card p-6">
+                <HighlightStatCard
+                  title="Unique Registered Users"
+                  value={<AnimatedStatValue value={heroSummary.uniqueUsers} />}
+                  icon={FaUsers}
+                  tone="secondary"
+                  className="min-h-[230px]"
+                  helperText="Verified participants in history"
+                  substats={[
+                    {
+                      label: "Total Registrations",
+                      value: heroSummary.totalRegistrations.toLocaleString(),
+                      tone: "positive",
+                    },
+                  ]}
+                />
+              </div>
+              <div className="bg-card p-6">
+                <HighlightStatCard
+                  title="Claim Rate"
+                  value={
+                    heroSummary.claimRatePercent == null ? (
+                      "--"
+                    ) : (
+                      <AnimatedStatValue
+                        value={heroSummary.claimRatePercent}
+                        decimals={2}
+                      />
+                    )
+                  }
+                  suffix={heroSummary.claimRatePercent == null ? null : "%"}
+                  icon={FaCheck}
+                  className="min-h-[230px]"
+                  helperText="Claims over total registrations"
+                  progress={{
+                    label: "Participation Rate",
+                    value: heroClaimRateLabel,
+                    percent: heroSummary.claimRatePercent ?? 0,
+                  }}
+                />
+              </div>
+              <div className="bg-card p-6">
+                <HighlightStatCard
+                  title="Total Distributed"
+                  value={
+                    heroSummary.totalDistributedAmount == null ? (
+                      "--"
+                    ) : (
+                      <AnimatedStatValue
+                        value={Number(heroSummary.totalDistributedAmount)}
+                        decimals={2}
+                      />
+                    )
+                  }
+                  suffix={heroSummary.totalDistributedSymbol}
+                  icon={FaCoins}
+                  tone="secondary"
+                  className="min-h-[230px]"
+                  helperText="From the latest history snapshot"
+                  substats={[
+                    {
+                      label: "Last Updated",
+                      value: latestUpdatedLabel,
+                      tone: "muted",
+                    },
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -947,22 +970,32 @@ export default function HomePage() {
 
         <section id="connectors" className="relative py-24 sm:py-32">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mb-12">
+              <SectionLabel className="mb-3">ELIGIBILITY</SectionLabel>
+              <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
+                Trusted entry rules for every loop.
+              </h2>
+            </div>
+
             <div className="overflow-hidden rounded-[2rem] border border-border bg-card shadow-[0_10px_34px_rgba(0,0,0,0.06)]">
               <div className="grid gap-10 px-6 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-12">
                 <div>
-                  <SectionLabel className="mb-3">ELIGIBILITY</SectionLabel>
-                  <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                    Trusted entry rules for every loop.
-                  </h2>
-                  <p className="mt-5 max-w-xl text-lg leading-7 text-muted-foreground">
+                  <p className="max-w-xl text-lg leading-7 text-muted-foreground">
                     Gyralis helps protocols and communities decide who can
                     participate, register, and claim with rules that stay
                     visible and human-first.
                   </p>
                   <div className="mt-7 space-y-3 text-sm leading-7 text-muted-foreground">
-                    <p>Each loop can define its own membership or humanity gate.</p>
-                    <p>Human Passport score checks help keep access human-first.</p>
-                    <p>Community membership gates connect real participation to rewards.</p>
+                    <p>
+                      Each loop can define its own membership or humanity gate.
+                    </p>
+                    <p>
+                      Human Passport score checks help keep access human-first.
+                    </p>
+                    <p>
+                      Community membership gates connect real participation to
+                      rewards.
+                    </p>
                   </div>
                   <Link
                     href="/eligibilities"
@@ -1148,7 +1181,13 @@ export default function HomePage() {
                     strokeDasharray="5 10"
                     opacity="0.6"
                   />
-                  <circle cx="100" cy="100" r="60" stroke="#764BFF" strokeWidth="2" />
+                  <circle
+                    cx="100"
+                    cy="100"
+                    r="60"
+                    stroke="#764BFF"
+                    strokeWidth="2"
+                  />
                   <path
                     d="M132 55 148 68l-19 6"
                     stroke="#1CE783"
@@ -1211,8 +1250,7 @@ export default function HomePage() {
                 </span>
               </Link>
               <p className="max-w-xs text-[0.92rem] leading-7 text-muted-foreground">
-                Infrastructure for recurring on-chain participation. Register,
-                claim, and build streaks - on repeat.
+                Infrastructure protocol for recurring on-chain participation.
               </p>
               <div className="mt-5 flex gap-3">
                 <a
@@ -1220,7 +1258,7 @@ export default function HomePage() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Gyralis on X"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   <FaXTwitter className="size-5" />
                 </a>
@@ -1229,7 +1267,7 @@ export default function HomePage() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Gyralis GitHub"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   <FaGithub className="size-5" />
                 </a>
@@ -1238,11 +1276,14 @@ export default function HomePage() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Gyralis Discord"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   <FaDiscord className="size-5" />
                 </a>
               </div>
+              <p className="mt-5 text-sm text-muted-foreground">
+                © 2026 Gyralis. All rights reserved.
+              </p>
             </div>
 
             {footerColumns.map((column) => (
@@ -1270,15 +1311,6 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border py-6">
-            <p className="text-sm text-muted-foreground">
-              © 2026 Gyralis. All rights reserved.
-            </p>
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="size-2 rounded-full bg-primary" />
-              All systems operational
-            </span>
-          </div>
         </div>
       </footer>
 
