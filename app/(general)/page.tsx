@@ -13,11 +13,9 @@ import {
   FaBolt,
   FaCheck,
   FaCoins,
-  FaCode,
   FaDiscord,
   FaFireAlt,
   FaGithub,
-  FaLock,
   FaShieldAlt,
   FaTrophy,
   FaUsers,
@@ -42,45 +40,45 @@ type HeroHistorySummary = {
 
 const loopFeatures = [
   {
-    title: "Recurring Loops",
+    title: "Recurring Participation",
     description:
-      "Set a reward and a period, and let members register once and claim on repeat.",
+      "Turn one-off campaigns into repeatable participation systems with recurring claim windows and clear reward cadence.",
     icon: <FaArrowRight className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
-    title: "Streaks & Flames",
+    title: "Retention by Design",
     description:
-      "Every consecutive claim grows a streak. Miss a period and it resets.",
+      "Use streaks, season logic, and progression loops to keep contributors coming back period after period.",
     icon: <FaFireAlt className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
-    title: "Eligibility Gates",
+    title: "Trusted Eligibility",
     description:
-      "Gate participation on a Passport score, DAO membership, or any credential.",
+      "Gate access with humanity checks, community membership, or custom credentials before rewards are unlocked.",
     icon: <FaShieldAlt className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
   {
-    title: "Instant Claims",
+    title: "Live Reward Claims",
     description:
-      "One tap, on-chain, non-custodial. Rewards land straight in the wallet.",
+      "Let verified users claim on-chain in a simple flow that lands rewards directly in their wallet.",
     icon: <FaWallet className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
-    title: "SuperLoops",
+    title: "Premium Reward Rails",
     description:
-      "Premium loops backed by continuous token streams. Rewards flow by the second.",
+      "Support premium loop mechanics and richer reward programs, including streamed incentives for higher-value participation.",
     icon: <FaBolt className="size-5" aria-hidden="true" />,
     tone: "super",
     badge: "STREAM",
   },
   {
-    title: "Leaderboards",
+    title: "Visible Momentum",
     description:
-      "Rank loopers by claims and streaks. Turn participation into a season-long competition.",
+      "Make participation legible with claim activity, streak signals, and season-long competition that communities can rally around.",
     icon: <FaTrophy className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
@@ -88,27 +86,24 @@ const loopFeatures = [
 
 const stepsData = [
   {
-    num: "01",
     title: "Register",
     icon: <FaShieldAlt className="size-5" aria-hidden="true" />,
     description:
-      "Join a Loop and prove eligibility once - a Passport score, DAO membership, or any credential the creator sets.",
+      "Pass the loop requirements and enter once, whether the gate is humanity, membership, or another community rule.",
     action: "Enter the Loop",
   },
   {
-    num: "02",
     title: "Claim",
     icon: <FaWallet className="size-5" aria-hidden="true" />,
     description:
-      "Claim your reward every period. One tap, on-chain, non-custodial - the tokens land straight in your wallet.",
+      "Claim the current distribution period in a simple on-chain flow and receive rewards directly in your wallet.",
     action: "Claim X tokens",
   },
   {
-    num: "03",
     title: "Streak",
     icon: <FaFireAlt className="size-5" aria-hidden="true" />,
     description:
-      "Come back next period to keep the streak alive, earn Season Points, and climb the leaderboard.",
+      "Return next period to keep your streak alive, raise your score, and prove recurring participation over time.",
     action: "Streak",
   },
 ]
@@ -273,7 +268,7 @@ function HowItWorksHorizontalStepper() {
 
           return (
             <motion.article
-              key={step.num}
+              key={step.title}
               layout
               className={`tamagotchi-card snap-start relative flex min-h-[230px] w-full flex-col justify-between overflow-hidden p-8 text-left transition-all duration-500 lg:min-h-[220px] lg:px-10 ${
                 active
@@ -500,8 +495,9 @@ export default function HomePage() {
                   <span className="italic text-primary">Build</span> trust.
                 </h1>
                 <p className="mx-auto mt-10 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-[1.15rem]">
-                  Gyralis helps protocols and communities reward verified humans
-                  for consistent participation through proof-based loops.
+                  Gyralis helps protocols and communities turn recurring
+                  participation into visible, rewardable momentum with
+                  proof-based loops for verified humans.
                 </p>
               </div>
 
@@ -582,43 +578,71 @@ export default function HomePage() {
               <div>
                 <SectionLabel className="mb-3">LOOPS</SectionLabel>
                 <h2 className="max-w-3xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                  Everything you need to build momentum.
+                  Build momentum with recurring participation systems.
                 </h2>
                 <p className="mt-5 max-w-xl text-lg leading-7 text-muted-foreground">
-                  Recurring on-chain participation - eligibility, claims,
-                  streaks, and season-long games.
+                  Give protocols and communities a repeatable way to reward
+                  verified participation with eligibility, claims, streaks, and
+                  live on-chain feedback loops.
                 </p>
               </div>
 
               <div className="flex justify-center">
-                <div className="relative size-[300px]">
-                  <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(28,231,131,0.18)_0%,transparent_60%)] blur-md" />
-                  <svg
-                    viewBox="0 0 200 200"
-                    fill="none"
-                    className="relative size-full"
-                    aria-hidden="true"
-                  >
-                    <circle
-                      cx="100"
-                      cy="100"
-                      r="82"
-                      stroke="#764BFF"
-                      strokeWidth="2"
-                      strokeDasharray="4 10"
-                      opacity="0.5"
-                    />
-                    <circle cx="100" cy="100" r="60" stroke="#1CE783" strokeWidth="3" />
-                    <path
-                      d="M132 55 148 68l-19 6"
-                      stroke="#1CE783"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="100" cy="100" r="22" fill="#764BFF" opacity="0.9" />
-                    <circle cx="100" cy="100" r="9" fill="#1CE783" />
-                  </svg>
+                <div className="tamagotchi-card relative w-full max-w-[360px] overflow-hidden rounded-[2rem] p-5 shadow-[0_18px_44px_rgba(28,231,131,0.08)]">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_18%,rgba(28,231,131,0.16),transparent_30%),radial-gradient(circle_at_16%_88%,rgba(28,231,131,0.08),transparent_26%)]" />
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex items-center justify-between rounded-2xl border border-border/70 bg-background/80 px-4 py-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                          Loop Setup
+                        </p>
+                        <p className="mt-1 font-heading text-base font-semibold text-foreground">
+                          Weekly contributor rewards
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                        Active
+                      </span>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                          Eligibility
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-foreground">
+                          Human Passport + community member
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                          Reward cadence
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-foreground">
+                          Claim every 7 days
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/70 bg-background/75 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                            Participation signal
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-foreground">
+                            84.6% claim rate this cycle
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-primary">
+                          <FaFireAlt className="size-3.5" aria-hidden="true" />
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]">
+                            Streaks live
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -683,13 +707,12 @@ export default function HomePage() {
             <div className="mb-16">
               <SectionLabel className="mb-3">HOW LOOPS WORK</SectionLabel>
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                Participation. On Repeat.
+                The user journey your loop creates.
               </h2>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
-                Register - Claim - Streak. Enter a Loop, claim each
-                distribution period and keep your streak alive with recurring
-                participation-claims that compounds into rewards and higher
-                score.
+                Register, Claim, Streak. Users enter a loop, claim each
+                distribution period, and come back again to keep their streak
+                alive, compound rewards, and build a higher score.
               </p>
             </div>
 
@@ -821,7 +844,7 @@ export default function HomePage() {
               <div>
                 <SectionLabel className="mb-3">LIVE ON-CHAIN</SectionLabel>
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                  Participation, in real time.
+                  Real participation. Real claims. Real recurrence.
                 </h2>
               </div>
 
@@ -831,7 +854,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[2rem] border border-border bg-border shadow-[0_10px_34px_rgba(0,0,0,0.06)]">
+            <div className="tamagotchi-card overflow-hidden rounded-[2rem] p-0 shadow-[0_10px_34px_rgba(0,0,0,0.06)]">
               <div className="grid gap-px sm:grid-cols-2">
                 <div className="bg-card p-6">
                   <HighlightStatCard
@@ -929,17 +952,17 @@ export default function HomePage() {
                 <div>
                   <SectionLabel className="mb-3">ELIGIBILITY</SectionLabel>
                   <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                    Eligibility
+                    Trusted entry rules for every loop.
                   </h2>
                   <p className="mt-5 max-w-xl text-lg leading-7 text-muted-foreground">
-                    Meet the requirements to participate in loops and claim
-                    rewards. Gyralis checks eligibility at registration and when
-                    you come back to claim.
+                    Gyralis helps protocols and communities decide who can
+                    participate, register, and claim with rules that stay
+                    visible and human-first.
                   </p>
                   <div className="mt-7 space-y-3 text-sm leading-7 text-muted-foreground">
                     <p>Each loop can define its own membership or humanity gate.</p>
-                    <p>Human Passport score checks help keep loop access human-first.</p>
-                    <p>Community membership gates connect real on-chain participation to rewards.</p>
+                    <p>Human Passport score checks help keep access human-first.</p>
+                    <p>Community membership gates connect real participation to rewards.</p>
                   </div>
                   <Link
                     href="/eligibilities"
@@ -951,11 +974,15 @@ export default function HomePage() {
 
                 <div>
                   <SectionLabel className="mb-4">TRUSTED PARTNERS</SectionLabel>
+                  <p className="mb-5 max-w-xl text-sm leading-7 text-muted-foreground">
+                    These integrations help verify who gets in, how eligibility
+                    works, and why loop participation can be trusted.
+                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {eligibilityPartners.map((partner) => (
                       <div
                         key={partner.title}
-                        className="rounded-3xl border border-border bg-muted/30 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]"
+                        className="tamagotchi-card rounded-3xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]"
                       >
                         <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-border bg-card">
                           {partner.logoUrl ? (
@@ -1134,7 +1161,7 @@ export default function HomePage() {
 
               <div className="relative z-10 max-w-2xl px-8 py-16 sm:px-14 sm:py-[72px]">
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.03] tracking-[-0.015em] text-white">
-                  Enter the Loops, today.
+                  Step into live participation loops.
                 </h2>
                 <div className="mt-5 max-w-xl space-y-4 text-lg leading-7 text-white/70">
                   <p>
@@ -1142,7 +1169,8 @@ export default function HomePage() {
                     <span className="text-white">
                       +{heroSummary.uniqueUsers.toLocaleString()} users
                     </span>{" "}
-                    building streaks across the ecosystem.
+                    already claiming, returning, and building streaks across the
+                    ecosystem.
                   </p>
                   <p>
                     Unlock special access to{" "}
