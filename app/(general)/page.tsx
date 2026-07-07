@@ -676,7 +676,7 @@ export default function HomePage() {
           className="relative overflow-hidden py-24 sm:py-32"
         >
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_88%_88%,rgba(28,231,131,0.16),transparent_0%,transparent_18%),radial-gradient(circle_at_82%_72%,rgba(28,231,131,0.12),transparent_28%),radial-gradient(circle_at_68%_58%,rgba(28,231,131,0.08),transparent_34%),radial-gradient(circle_at_50%_120%,rgba(28,231,131,0.05),transparent_40%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_96%_96%,rgba(28,231,131,0.12)_0%,rgba(28,231,131,0.08)_12%,transparent_34%),radial-gradient(circle_at_84%_78%,rgba(28,231,131,0.09)_0%,transparent_32%),radial-gradient(circle_at_68%_58%,rgba(28,231,131,0.06)_0%,transparent_38%),radial-gradient(circle_at_50%_120%,rgba(28,231,131,0.04)_0%,transparent_46%)] blur-[10px]" />
           </div>
 
           <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
