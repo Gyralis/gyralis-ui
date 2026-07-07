@@ -24,6 +24,7 @@ import { FaXTwitter } from "react-icons/fa6"
 import { LuArrowDown } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
+import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { NavLogoMark } from "@/components/layout/main-nav"
 import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
@@ -56,7 +57,7 @@ const loopFeatures = [
   {
     title: "Trusted Eligibilities",
     description:
-      "Gate access with verified eligibilities checks through and human-proof systems.",
+      "Gate access with verified eligibilities and human-proof checks.",
     icon: <FaThumbsUp className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
@@ -68,7 +69,7 @@ const loopFeatures = [
     tone: "primary",
   },
   {
-    title: "Customizable Reward Mechanics",
+    title: "Unlock Reward Mechanics",
     description:
       "Tailor reward structures to fit your community's unique needs and engagement strategies.",
     icon: <FaLockOpen className="size-5" aria-hidden="true" />,
@@ -215,6 +216,31 @@ function SurfaceIcon({
   )
 }
 
+function LandingFeatureCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn("group h-full min-h-[15.5rem] list-none", className)}>
+      <div className="relative h-full rounded-[1.75rem] border border-border/70 p-2 md:rounded-[1.85rem]">
+        <GlowingEffect
+          spread={36}
+          glow
+          disabled={false}
+          proximity={64}
+          inactiveZone={0.01}
+        />
+        <div className="relative flex h-full flex-col rounded-[1.2rem] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SectionLabel({
   children,
   className = "",
@@ -347,6 +373,10 @@ function HowItWorksHorizontalStepper() {
       ref={wrapperRef}
       className="relative mx-auto flex h-[30rem] max-w-6xl justify-center space-x-10 overflow-y-auto rounded-[2rem] border border-border/70 p-10 shadow-[0_22px_60px_rgba(0,0,0,0.08)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-[radial-gradient(circle_at_bottom_center,hsl(var(--secondary)/0.28)_0%,hsl(var(--secondary)/0.18)_24%,hsl(var(--primary)/0.18)_56%,transparent_82%)] dark:bg-[radial-gradient(circle_at_bottom_center,hsl(var(--secondary)/0.34)_0%,hsl(var(--secondary)/0.22)_24%,hsl(var(--primary)/0.22)_56%,transparent_82%)]"
+      />
       <div className="relative flex items-start px-4">
         <div className="max-w-2xl">
           {content.map((item, index) => (
@@ -670,12 +700,13 @@ export default function HomePage() {
                 </h2>
                 <p className="mt-5 max-w-xl text-lg leading-7 text-muted-foreground">
                   Turn participation into a repeatable on-chain rhythm with
-                  verified access, recurring claims, streaks, and live momentum.
+                  verified access, recurring claims, streaks, leaderboard and
+                  more.
                 </p>
               </div>
             </div>
 
-            <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-10 grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
               {loopFeatures.map((feature, index) => (
                 <motion.div
                   key={feature.title}
@@ -687,36 +718,38 @@ export default function HomePage() {
                     delay: index * 0.07,
                     ease: [0.22, 1, 0.36, 1],
                   }}
-                  className={`group tamagotchi-card p-8 transition-all duration-300 hover:-translate-y-0.5 ${
-                    feature.tone === "super"
-                      ? "border-primary/35 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_16px_rgba(28,231,131,0.10),0_2px_6px_rgba(0,0,0,0.06)]"
-                      : ""
-                  }`}
+                  className="h-full"
                 >
-                  <div className="flex items-center gap-4">
-                    <SurfaceIcon
-                      tone={
-                        feature.tone === "super"
-                          ? "super"
-                          : feature.tone === "secondary"
-                          ? "secondary"
-                          : "primary"
-                      }
-                    >
-                      {feature.icon}
-                    </SurfaceIcon>
-                    <h3 className="font-heading text-xl font-semibold">
-                      {feature.title}
-                    </h3>
-                    {feature.badge ? (
-                      <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[0.65rem] tracking-[0.16em] text-primary">
-                        {feature.badge}
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="mt-2 text-[0.95rem] leading-7 text-muted-foreground">
-                    {feature.description}
-                  </p>
+                  <LandingFeatureCard>
+                    <div className="flex h-full flex-col gap-5">
+                      <div className="flex items-center gap-4">
+                        <SurfaceIcon
+                          tone={
+                            feature.tone === "super"
+                              ? "super"
+                              : feature.tone === "secondary"
+                              ? "secondary"
+                              : "primary"
+                          }
+                        >
+                          {feature.icon}
+                        </SurfaceIcon>
+                        <div className="min-w-0">
+                          <h3 className="font-heading text-xl font-semibold">
+                            {feature.title}
+                          </h3>
+                          {feature.badge ? (
+                            <span className="mt-2 inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[0.65rem] tracking-[0.16em] text-primary">
+                              {feature.badge}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <p className="mt-auto text-[0.95rem] leading-7 text-muted-foreground">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </LandingFeatureCard>
                 </motion.div>
               ))}
             </div>
@@ -1011,34 +1044,37 @@ export default function HomePage() {
                     These integrations help verify who gets in, how eligibility
                     works, and why loop participation can be trusted.
                   </p>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid auto-rows-fr gap-4 sm:grid-cols-2">
                     {eligibilityPartners.map((partner) => (
-                      <div
+                      <LandingFeatureCard
                         key={partner.title}
-                        className="tamagotchi-card rounded-3xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]"
                       >
-                        <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-border bg-card">
-                          {partner.logoUrl ? (
-                            <Image
-                              src={partner.logoUrl}
-                              alt={`${partner.title} logo`}
-                              width={30}
-                              height={30}
-                              className="size-8 object-contain"
-                            />
-                          ) : (
-                            <span className="font-heading text-sm font-bold text-primary">
-                              {partner.mark}
-                            </span>
-                          )}
+                        <div className="flex h-full flex-col gap-5">
+                          <div className="flex size-14 items-center justify-center rounded-2xl border border-border/70 bg-background/65">
+                            {partner.logoUrl ? (
+                              <Image
+                                src={partner.logoUrl}
+                                alt={`${partner.title} logo`}
+                                width={30}
+                                height={30}
+                                className="size-8 object-contain"
+                              />
+                            ) : (
+                              <span className="font-heading text-sm font-bold text-primary">
+                                {partner.mark}
+                              </span>
+                            )}
+                          </div>
+                          <div className="space-y-2">
+                            <h3 className="font-heading text-lg font-semibold">
+                              {partner.title}
+                            </h3>
+                            <p className="text-sm leading-7 text-muted-foreground">
+                              {partner.description}
+                            </p>
+                          </div>
                         </div>
-                        <h3 className="font-heading text-lg font-semibold">
-                          {partner.title}
-                        </h3>
-                        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                          {partner.description}
-                        </p>
-                      </div>
+                      </LandingFeatureCard>
                     ))}
                   </div>
                 </div>
@@ -1310,7 +1346,6 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-
         </div>
       </footer>
 
