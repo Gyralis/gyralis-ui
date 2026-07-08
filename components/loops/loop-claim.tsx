@@ -48,6 +48,27 @@ const BLOCKSCOUT_TX_BASE_URLS: Record<number, string> = {
   10200: "https://gnosis-chiado.blockscout.com/tx",
   8453: "https://basescan.org/tx",
 }
+const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
+const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+
+function getPassportScoreRequiredMessage(error?: string) {
+  const minScore = error?.match(/at least\s+(\d+(?:\.\d+)?)/i)?.[1]
+
+  return minScore
+    ? `This loop requires a Human Passport score of ${minScore}+.`
+    : "This loop requires a higher Human Passport score."
+}
+
+function getProviderEligibilityMessage(
+  eligibilityProvider: LoopEligibilityProvider
+) {
+  switch (eligibilityProvider) {
+    case "blockscout":
+      return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
+    case "garden_1hive":
+      return "Join the 1Hive community in GardensV2 to enter this loop."
+  }
+}
 
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
@@ -320,19 +341,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const [
-          registeredForPrevious,
-          registeredForCurrent,
-          registeredForNext,
-        ] = await Promise.all([
-          isSuperLoop && previousPeriodValue != null
-            ? fetchPeriodRegistration(previousPeriodValue)
-            : Promise.resolve(false),
-          isSuperLoop
-            ? fetchPeriodRegistration(currentPeriodValue)
-            : Promise.resolve(false),
-          fetchPeriodRegistration(nextPeriod),
-        ])
+        const [registeredForPrevious, registeredForCurrent, registeredForNext] =
+          await Promise.all([
+            isSuperLoop && previousPeriodValue != null
+              ? fetchPeriodRegistration(previousPeriodValue)
+              : Promise.resolve(false),
+            isSuperLoop
+              ? fetchPeriodRegistration(currentPeriodValue)
+              : Promise.resolve(false),
+            fetchPeriodRegistration(nextPeriod),
+          ])
 
         if (!cancelled) {
           setIsRegisteredForPreviousPeriod(registeredForPrevious)
@@ -476,12 +494,35 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       })
 
       const payload = (await response.json()) as {
+        code?: string
         success?: boolean
         signature?: `0x${string}`
         error?: string
       }
 
       if (!response.ok || !payload.success || !payload.signature) {
+        if (payload.code === PASSPORT_SCORE_REQUIRED_CODE) {
+          toast({
+            title: "Passport score too low",
+            description: getPassportScoreRequiredMessage(payload.error),
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (payload.code === PROVIDER_ELIGIBILITY_REQUIRED_CODE) {
+          toast({
+            title: "Eligibility required",
+            description: getProviderEligibilityMessage(eligibilityProvider),
+            variant: "destructive",
+            link: {
+              href: "/eligibilities",
+              label: "View eligibility steps",
+            },
+          })
+          return
+        }
+
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 

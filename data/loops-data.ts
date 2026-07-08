@@ -54,7 +54,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainName: "Gnosis",
     historyLoopKey: "1hive",
     eligibilityProvider: "garden_1hive",
-    passportMinScore: 15,
+    passportMinScore: 0,
     enabled: true,
   },
   {
@@ -67,7 +67,7 @@ export const LoopCardsData: LoopCardData[] = [
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "Gyralis offer redemption required",
+    eligibility: "Redeem Gyralis offer in Blockscout Merits",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",

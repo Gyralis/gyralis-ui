@@ -454,14 +454,16 @@ function PassportScoreBadge({
   const ShieldIcon = hasPassed ? LuShieldCheck : LuShield
   const label = hasPassed
     ? "Shield Passed"
-    : `Requires Passport score ${thresholdLabel}`
+    : `This loop requires a Human Passport score of ${thresholdLabel}.`
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative inline-flex size-10 shrink-0 items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)]"
+          className="relative inline-flex size-10 shrink-0 cursor-help items-center justify-center rounded-full text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/10 hover:drop-shadow-[0_0_14px_rgba(28,231,131,0.64)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label={label}
+          role="button"
+          tabIndex={0}
         >
           <ShieldIcon className="absolute inset-0 size-full fill-none stroke-[1.8]" />
           {hasPassed ? null : (
