@@ -169,8 +169,10 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
               <LoopDistributionStat
                 balanceDetail={settingsDetails.balanceDetail}
+                balanceDetailLabel={settingsDetails.balanceDetailLabel}
                 compact
                 value={settingsDetails.distributionLabel}
+                valueUnit={settingsDetails.distributionUnit}
                 detail={settingsDetails.distributionDetail}
                 tooltip={settingsDetails.distributionTooltip}
               />

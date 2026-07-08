@@ -79,6 +79,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
   const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
+  const [isRegisteredForPreviousPeriod, setIsRegisteredForPreviousPeriod] =
+    useState(false)
   const [isRegisteredForCurrentPeriod, setIsRegisteredForCurrentPeriod] =
     useState(false)
   const [isRegisteredForNextPeriod, setIsRegisteredForNextPeriod] =
@@ -197,7 +199,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = isSuperLoop
     ? previousPeriodPayoutAmount
     : periodPayoutAmount
-  const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
+  const isClaimableNow =
+    isRegistered &&
+    !hasClaimed &&
+    claimableAmount > 0n &&
+    (!isSuperLoop || isRegisteredForPreviousPeriod)
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
   const isRegisteredAhead = hasEnteredNextPeriod || isRegisteredForNextPeriod
@@ -263,6 +269,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
+    setIsRegisteredForPreviousPeriod(false)
     setIsRegisteredForCurrentPeriod(false)
     setIsRegisteredForNextPeriod(false)
     setLastClaimedAmount(undefined)
@@ -272,6 +279,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     if (!publicClient || !connectedAccount || currentPeriodValue == null) {
       setIsRegisteredForCurrentPeriod(false)
       setIsRegisteredForNextPeriod(false)
+      setIsRegisteredForPreviousPeriod(false)
       return
     }
 
@@ -312,7 +320,14 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const [registeredForCurrent, registeredForNext] = await Promise.all([
+        const [
+          registeredForPrevious,
+          registeredForCurrent,
+          registeredForNext,
+        ] = await Promise.all([
+          isSuperLoop && previousPeriodValue != null
+            ? fetchPeriodRegistration(previousPeriodValue)
+            : Promise.resolve(false),
           isSuperLoop
             ? fetchPeriodRegistration(currentPeriodValue)
             : Promise.resolve(false),
@@ -320,12 +335,14 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         ])
 
         if (!cancelled) {
+          setIsRegisteredForPreviousPeriod(registeredForPrevious)
           setIsRegisteredForCurrentPeriod(registeredForCurrent)
           setIsRegisteredForNextPeriod(registeredForNext)
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching period Register logs:", error)
+          setIsRegisteredForPreviousPeriod(false)
           setIsRegisteredForCurrentPeriod(false)
           setIsRegisteredForNextPeriod(false)
         }
@@ -342,6 +359,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     connectedAccount,
     currentPeriodValue,
     isSuperLoop,
+    previousPeriodValue,
     publicClient,
     registrationRefreshKey,
   ])
@@ -527,7 +545,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       ? `Claim ${claimAmountLabel}`
       : "Claim"
     : isActiveThisPeriod
-    ? isRegisteredAhead
+    ? isSuperLoop
+      ? "Accumulating rewards"
+      : isRegisteredAhead
       ? "Accumulating rewards"
       : "Stay in the loop"
     : !isRegistered
@@ -546,9 +566,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     !isValidLoopAddress ||
     isLoadingOnchainState ||
     (isSuperLoop
-      ? isActiveThisPeriod
-        ? isRegisteredAhead
-        : isEnteredForNextPeriod
+      ? isActiveThisPeriod || isEnteredForNextPeriod
       : isEnteredForNextPeriod)
   const buttonClassName = compact
     ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"

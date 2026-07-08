@@ -4,11 +4,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
+import { useAccount } from "wagmi"
 
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
+import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
@@ -64,6 +66,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
         <div className="flex items-center justify-center">
           <LoopDistributionStat
             value={details.distributionLabel}
+            valueUnit={details.distributionUnit}
             detail={details.distributionDetail}
             balanceDetail={details.balanceDetail}
             tooltip={details.distributionTooltip}
@@ -119,6 +122,8 @@ export function useLoopSettingsDetails({
     chainId,
     contractType
   )
+  const isSuperLoop = contractType === "superLoop" || Boolean(isSuper)
+  const { isConnected } = useAccount()
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
@@ -141,9 +146,17 @@ export function useLoopSettingsDetails({
     if (isLoading) return "Loading..."
     if (!settings) return "--"
 
+    if (isSuperLoop) {
+      if (isConnected && claimStatus === "default" && loopBalance?.symbol) {
+        return "0"
+      }
+
+      return "Streaming"
+    }
+
     const percentPerPeriod = Number(settings.percentPerPeriod)
     return percentPerPeriod === 0 ? "Infinite" : `${percentPerPeriod}%`
-  }, [isLoading, settings])
+  }, [claimStatus, isConnected, isLoading, isSuperLoop, loopBalance, settings])
 
   const distributionAmountLabel = useMemo(() => {
     if (isLoading) return undefined
@@ -162,9 +175,35 @@ export function useLoopSettingsDetails({
     return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
   }, [isLoading, settings, loopBalance])
 
-  const distributionDetail = distributionAmountLabel
+  const distributionUnit = useMemo(() => {
+    if (
+      isSuperLoop &&
+      isConnected &&
+      claimStatus === "default" &&
+      loopBalance?.symbol
+    ) {
+      return `${loopBalance.symbol}/day`
+    }
+
+    return undefined
+  }, [claimStatus, isConnected, isSuperLoop, loopBalance])
+  const distributionDetail = useMemo(() => {
+    if (isSuperLoop) return undefined
+
+    return distributionAmountLabel
+  }, [distributionAmountLabel, isSuperLoop])
   const balanceDetail = useMemo(() => {
     if (isLoading || !loopBalance) return undefined
+
+    if (isSuperLoop) {
+      return loopBalance.flowRateError
+        ? "Unavailable"
+        : formatMonthlyIncoming({
+            flowRatePerSecond: loopBalance.flowRatePerSecond,
+            decimals: loopBalance.decimals,
+            symbol: loopBalance.symbol,
+          })
+    }
 
     const balance = trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),
@@ -173,9 +212,11 @@ export function useLoopSettingsDetails({
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
     return `${balance}${symbol}`
-  }, [isLoading, loopBalance])
-  const distributionTooltip =
-    settings && settings.percentPerPeriod > 0n
+  }, [isLoading, isSuperLoop, loopBalance])
+  const balanceDetailLabel = isSuperLoop ? "Flow Rate" : "Balance"
+  const distributionTooltip = isSuperLoop
+    ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
+    : settings && settings.percentPerPeriod > 0n
       ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
       : "The loop balance is distributed evenly among registered users each period."
 
@@ -190,7 +231,7 @@ export function useLoopSettingsDetails({
       case "claimed":
         return "Next claim opens in"
       default:
-        return "Current period ends in"
+        return "Entry closes in"
     }
   }, [claimStatus, isSuper])
 
@@ -207,8 +248,10 @@ export function useLoopSettingsDetails({
   return {
     currentPeriod,
     balanceDetail,
+    balanceDetailLabel,
     distributionDetail,
     distributionLabel,
+    distributionUnit,
     distributionTooltip,
     handleClaimStatusChange,
     handleClaimSuccess,
@@ -224,14 +267,18 @@ export function useLoopSettingsDetails({
 
 export const LoopDistributionStat = ({
   balanceDetail,
+  balanceDetailLabel = "Balance",
   compact = false,
   value,
+  valueUnit,
   detail,
   tooltip,
 }: {
   balanceDetail?: string
+  balanceDetailLabel?: string
   compact?: boolean
   value: string
+  valueUnit?: string
   detail?: string
   tooltip: string
 }) => {
@@ -245,12 +292,17 @@ export const LoopDistributionStat = ({
             tabIndex={0}
           >
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Distribution
+              Rewards
             </p>
             <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
               <p className="text-[1.6rem] font-bold leading-none text-foreground">
                 {value}
               </p>
+              {valueUnit ? (
+                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                  {valueUnit}
+                </p>
+              ) : null}
               {detail ? (
                 <p className="text-[11px] font-semibold leading-4 text-foreground">
                   {detail}
@@ -260,7 +312,7 @@ export const LoopDistributionStat = ({
             {balanceDetail ? (
               <div className="mt-2 border-t border-border/80 pt-1.5">
                 <p className="text-[10px] font-semibold leading-none text-muted-foreground">
-                  Balance:{" "}
+                  {balanceDetailLabel}:{" "}
                   <span className="text-foreground">{balanceDetail}</span>
                 </p>
               </div>
@@ -274,9 +326,9 @@ export const LoopDistributionStat = ({
 
   return (
     <SettingStatCard
-      label="Distribution"
+      label="Rewards"
       value={value}
-      detail={detail}
+      detail={valueUnit ?? detail}
       tooltip={tooltip}
     />
   )
