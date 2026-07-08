@@ -512,12 +512,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
         if (payload.code === PROVIDER_ELIGIBILITY_REQUIRED_CODE) {
           toast({
-            title: "Eligibility required",
+            title: "Not eligible yet",
             description: getProviderEligibilityMessage(eligibilityProvider),
             variant: "destructive",
             link: {
               href: "/eligibilities",
-              label: "View eligibility steps",
+              label: "See how to access",
             },
           })
           return
