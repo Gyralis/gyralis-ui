@@ -31,6 +31,7 @@ interface LoopClaimProps {
   address: Address
   chainId: number
   contractType?: LoopContractType
+  currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
   compact?: boolean
   showHelper?: boolean
@@ -70,6 +71,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   address,
   chainId,
   contractType = DEFAULT_LOOP_CONTRACT_TYPE,
+  currentPeriod: currentPeriodOverride,
   eligibilityProvider,
   compact = false,
   onSuccess,
@@ -143,7 +145,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   })
 
   const currentPeriodValue =
-    typeof currentPeriod === "bigint" ? currentPeriod : undefined
+    currentPeriodOverride ??
+    (typeof currentPeriod === "bigint" ? currentPeriod : undefined)
   const previousPeriodValue =
     currentPeriodValue != null && currentPeriodValue > 0n
       ? currentPeriodValue - 1n
@@ -218,7 +221,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       ? isWaitingForAccumulationPeriod || isRegisteredAhead
       : isRegisteredAhead) || isWaitingNextPeriod
   const isLoadingOnchainState =
-    isLoadingCurrentPeriod ||
+    (currentPeriodOverride == null && isLoadingCurrentPeriod) ||
     isLoadingCurrentPeriodPayout ||
     (isSuperLoop && isLoadingSuperLoopPreviousPeriodPayout)
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)

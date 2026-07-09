@@ -9,6 +9,7 @@ import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
+import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
@@ -66,6 +67,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
             value={details.distributionLabel}
             detail={details.distributionDetail}
             balanceDetail={details.balanceDetail}
+            balanceDetailLabel={details.balanceDetailLabel}
             tooltip={details.distributionTooltip}
           />
         </div>
@@ -82,6 +84,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
           address={address}
           chainId={chainId}
           contractType={contractType}
+          currentPeriod={details.currentPeriod}
           eligibilityProvider={eligibilityProvider}
           onStatusChange={details.handleClaimStatusChange}
           onSuccess={details.handleClaimSuccess}
@@ -122,6 +125,7 @@ export function useLoopSettingsDetails({
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
+  const isSuperLoop = contractType === "superLoop" || Boolean(isSuper)
   const { data: loopBalance, refetch: refetchLoopBalance } =
     useLoopTokenBalance({
       address,
@@ -141,9 +145,13 @@ export function useLoopSettingsDetails({
     if (isLoading) return "Loading..."
     if (!settings) return "--"
 
+    if (isSuperLoop) {
+      return "0"
+    }
+
     const percentPerPeriod = Number(settings.percentPerPeriod)
     return percentPerPeriod === 0 ? "Infinite" : `${percentPerPeriod}%`
-  }, [isLoading, settings])
+  }, [isLoading, isSuperLoop, settings])
 
   const distributionAmountLabel = useMemo(() => {
     if (isLoading) return undefined
@@ -162,9 +170,23 @@ export function useLoopSettingsDetails({
     return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
   }, [isLoading, settings, loopBalance])
 
-  const distributionDetail = distributionAmountLabel
+  const distributionDetail = isSuperLoop
+    ? loopBalance?.symbol
+      ? `${loopBalance.symbol} / mo`
+      : undefined
+    : distributionAmountLabel
   const balanceDetail = useMemo(() => {
     if (isLoading || !loopBalance) return undefined
+
+    if (isSuperLoop) {
+      return loopBalance.flowRateError
+        ? "Unavailable"
+        : formatMonthlyIncoming({
+            flowRatePerSecond: loopBalance.flowRatePerSecond,
+            decimals: loopBalance.decimals,
+            symbol: loopBalance.symbol,
+          })
+    }
 
     const balance = trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),
@@ -173,7 +195,8 @@ export function useLoopSettingsDetails({
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
     return `${balance}${symbol}`
-  }, [isLoading, loopBalance])
+  }, [isLoading, isSuperLoop, loopBalance])
+  const balanceDetailLabel = isSuperLoop ? "Flow Rate" : "Balance"
   const distributionTooltip =
     settings && settings.percentPerPeriod > 0n
       ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
@@ -182,7 +205,7 @@ export function useLoopSettingsDetails({
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
       case "active":
-        return isSuper ? "Claim opens in" : "Active period ends in"
+        return isSuper ? "Accumulation ends in" : "Active period ends in"
       case "entered":
         return isSuper ? "Accumulation starts in" : "Claim opens in"
       case "claimable":
@@ -190,7 +213,7 @@ export function useLoopSettingsDetails({
       case "claimed":
         return "Next claim opens in"
       default:
-        return "Current period ends in"
+        return "Entry closes in"
     }
   }, [claimStatus, isSuper])
 
@@ -207,6 +230,7 @@ export function useLoopSettingsDetails({
   return {
     currentPeriod,
     balanceDetail,
+    balanceDetailLabel,
     distributionDetail,
     distributionLabel,
     distributionTooltip,
@@ -224,12 +248,14 @@ export function useLoopSettingsDetails({
 
 export const LoopDistributionStat = ({
   balanceDetail,
+  balanceDetailLabel = "Balance",
   compact = false,
   value,
   detail,
   tooltip,
 }: {
   balanceDetail?: string
+  balanceDetailLabel?: string
   compact?: boolean
   value: string
   detail?: string
@@ -245,7 +271,7 @@ export const LoopDistributionStat = ({
             tabIndex={0}
           >
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Distribution
+              Rewards
             </p>
             <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
               <p className="text-[1.6rem] font-bold leading-none text-foreground">
@@ -260,7 +286,7 @@ export const LoopDistributionStat = ({
             {balanceDetail ? (
               <div className="mt-2 border-t border-border/80 pt-1.5">
                 <p className="text-[10px] font-semibold leading-none text-muted-foreground">
-                  Balance:{" "}
+                  {balanceDetailLabel}:{" "}
                   <span className="text-foreground">{balanceDetail}</span>
                 </p>
               </div>
@@ -274,7 +300,7 @@ export const LoopDistributionStat = ({
 
   return (
     <SettingStatCard
-      label="Distribution"
+      label="Rewards"
       value={value}
       detail={detail}
       tooltip={tooltip}
@@ -366,6 +392,7 @@ const LoopSettingsClaimAction = ({
   address,
   chainId,
   contractType,
+  currentPeriod,
   eligibilityProvider,
   onStatusChange,
   onSuccess,
@@ -373,6 +400,7 @@ const LoopSettingsClaimAction = ({
   address: Address
   chainId: number
   contractType: LoopContractType
+  currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
   onStatusChange: (status: LoopClaimStatus) => void
   onSuccess: () => void
@@ -383,6 +411,7 @@ const LoopSettingsClaimAction = ({
         address={address}
         chainId={chainId}
         contractType={contractType}
+        currentPeriod={currentPeriod}
         eligibilityProvider={eligibilityProvider}
         onStatusChange={onStatusChange}
         onSuccess={onSuccess}

@@ -169,6 +169,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
               <LoopDistributionStat
                 balanceDetail={settingsDetails.balanceDetail}
+                balanceDetailLabel={settingsDetails.balanceDetailLabel}
                 compact
                 value={settingsDetails.distributionLabel}
                 detail={settingsDetails.distributionDetail}
@@ -227,6 +228,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
             contractType={loop.contractType}
+            currentPeriod={settingsDetails.currentPeriod}
             eligibilityProvider={loop.eligibilityProvider}
             onStatusChange={settingsDetails.handleClaimStatusChange}
             onSuccess={settingsDetails.handleClaimSuccess}
