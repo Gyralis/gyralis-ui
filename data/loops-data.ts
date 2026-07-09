@@ -31,6 +31,10 @@ export interface LoopCardData {
   claimAmount?: string // New: Amount user can claim
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
+  rewardsSummary?: string
+  sponsorName?: string
+  sponsorLogoUrl?: string
+  sponsorUrl?: string
 }
 
 export const LoopCardsData: LoopCardData[] = [
@@ -86,7 +90,7 @@ export const LoopCardsData: LoopCardData[] = [
     by: "Test Team",
     address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
     description:
-      "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
+      "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
     eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score 15+",
@@ -101,6 +105,10 @@ export const LoopCardsData: LoopCardData[] = [
     historyLoopKey: "test-superloops",
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
-    enabled: true,
+    enabled: false,
+    rewardsSummary: "TBA",
+    sponsorName: "TBA",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
 ]

@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import LoopCard from "@/components/loops/loop-card"
+import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
 import { LoopsTable } from "@/components/loops/loops-table"
 import {
   EcosystemMetricData,
@@ -290,7 +291,11 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
             <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
               {cards.map((loop) => (
                 <div key={loop.id} id={`loop-card-${loop.id}`}>
-                  <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
+                  {loop.enabled ? (
+                    <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
+                  ) : (
+                    <LoopCardInactive loop={loop} />
+                  )}
                 </div>
               ))}
             </div>
