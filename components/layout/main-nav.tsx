@@ -11,7 +11,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 
@@ -76,8 +75,10 @@ export function MainNavMenu() {
                 <LinkComponent
                   href={href}
                   isExternal={external}
-                  className={`${navigationMenuTriggerStyle()} ${
-                    isActive ? "" : "text-foreground"
+                  className={`inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-lg font-medium transition-colors focus:outline-none ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <span
