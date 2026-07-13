@@ -17,7 +17,7 @@ import {
   FaWallet,
 } from "react-icons/fa"
 import { FaXTwitter } from "react-icons/fa6"
-import { LuArrowDown } from "react-icons/lu"
+import { LuArrowDown, LuChevronDown } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
@@ -80,7 +80,7 @@ const stepsData = [
       "Pass the loop requirements and enter the loop to start claiming each distribution period.",
     action: "Enter the Loop",
     helper: "Prove Participation",
-    status: "Eligibility passed",
+    status: "Eligibility Passed",
     loopState:
       "Eligibility is verified and loop access is unlocked for this user.",
   },
@@ -90,8 +90,8 @@ const stepsData = [
     description:
       "Claim the current distribution period in a simple on-chain flow and receive rewards directly in your wallet.",
     action: "Claim",
-    helper: "Earn rewards",
-    status: "Claim window open",
+    helper: "Earn Rewards",
+    status: "Claim Window Open",
     loopState:
       "The current distribution period is available and the claim flow is ready.",
   },
@@ -101,8 +101,8 @@ const stepsData = [
     description:
       "Return next period to keep your streak alive, raise your score, and prove recurring participation over time.",
     action: "Streak",
-    helper: "Streak & Build Momentum",
-    status: "Momentum building",
+    helper: "Build Momentum",
+    status: "Momentum Building",
     loopState:
       "The streak is active and the next return keeps momentum building.",
   },
@@ -132,6 +132,34 @@ const eligibilityPartners = [
     description:
       "DAO coordination framework powering community membership checks.",
     logoUrl: "/gardens-logo.png",
+  },
+] as const
+
+const faqItems = [
+  {
+    question: "How are rewards calculated?",
+    answer:
+      "Each Loop uses a fixed distribution percentage that applies to every claim period. The amount to distribute comes from that percentage and the loop balance snapshot of the previous period, and the resulting rewards are split evenly across all registered users in that cycle.",
+  },
+  {
+    question: "Can loops use different settings and cycle lengths?",
+    answer:
+      "Yes. Loops are customizable, so each protocol or community can set its own distribution percentage, claim cadence, eligibility logic, and reward structure. The default and recommended claiming window is every 24 hours, but loop cycles can be configured to run more or less frequently depending on the program.",
+  },
+  {
+    question: "What is the difference between Loops and SuperLoops?",
+    answer:
+      "Loops follow a recurring participation cycle where users register, claim, and maintain a streak period by period. Loop rewards decay over time, so earlier participation matters. SuperLoops follow a register, accumulate, and claim model: rewards accumulate every 24 hours and distribute an equal amount each period to every registered user.",
+  },
+  {
+    question: "What happens if I miss a claim period?",
+    answer:
+      "If you miss a claim period, your streak for that specific loop is lost. You need to register again and wait until the next claiming period to participate.",
+  },
+  {
+    question: "When are eligibility and human score checks evaluated?",
+    answer:
+      "Eligibility and human score checks are evaluated each time you try to enter or claim. Loop access stays human-first, and every new registration or claim attempt must still satisfy the active requirements for that loop.",
   },
 ] as const
 
@@ -610,6 +638,7 @@ function AnimatedStatValue({
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion()
+  const [activeFaq, setActiveFaq] = useState(faqItems[0]?.question ?? "")
   const [heroSummary, setHeroSummary] = useState<HeroHistorySummary>({
     totalClaims: 2858,
     totalRegistrations: 3349,
@@ -989,8 +1018,8 @@ export default function HomePage() {
                   Building a protocol or community?{" "}
                   <span className="text-foreground">
                     Bring your own eligibility
-                  </span>{" "}
-                  - reward your own users and find new ones through the Gyralis
+                  </span>
+                  : reward your own users and find new ones through the Gyralis
                   ecosystem.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -1046,6 +1075,76 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section id="faq" className="relative py-24 sm:py-32">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <Reveal className="mb-12">
+              <SectionLabel className="mb-3">FAQ</SectionLabel>
+              <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
+                Loop mechanics, distribution, and cycle rules.
+              </h2>
+              <p className="mt-4 max-w-2xl text-lg leading-7 text-muted-foreground">
+                The most important details about how rewards, claim periods,
+                SuperLoops, and streaks actually work.
+              </p>
+            </Reveal>
+
+            <div className="space-y-4">
+              {faqItems.map((item, index) => {
+                const isOpen = activeFaq === item.question
+
+                return (
+                  <Reveal
+                    key={item.question}
+                    delay={index * 0.05}
+                    className="h-full"
+                  >
+                    <LandingFeatureCard>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveFaq((current) =>
+                            current === item.question ? current : item.question
+                          )
+                        }
+                        aria-expanded={isOpen}
+                        className="flex w-full items-start justify-between gap-6 text-left"
+                      >
+                        <div>
+                          <h3 className="font-heading text-lg font-semibold text-foreground">
+                            {item.question}
+                          </h3>
+                        </div>
+                        <motion.span
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          transition={{ duration: 0.24, ease: "easeOut" }}
+                          className="mt-1 inline-flex shrink-0 text-primary"
+                        >
+                          <LuChevronDown className="size-5" aria-hidden="true" />
+                        </motion.span>
+                      </button>
+
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          height: isOpen ? "auto" : 0,
+                          opacity: isOpen ? 1 : 0,
+                          marginTop: isOpen ? 16 : 0,
+                        }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="text-sm leading-7 text-muted-foreground">
+                          {item.answer}
+                        </p>
+                      </motion.div>
+                    </LandingFeatureCard>
+                  </Reveal>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
         <section className="relative overflow-hidden py-24 sm:py-32">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <motion.div
@@ -1076,7 +1175,7 @@ export default function HomePage() {
 
               <div className="relative z-10 max-w-2xl px-8 py-16 sm:px-14 sm:py-[72px]">
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.03] tracking-[-0.015em] text-white">
-                  Join a live loop today.
+                  Enter a live loop today.
                 </h2>
                 <div className="mt-5 max-w-xl space-y-4 text-lg leading-7 text-white/70">
                   <p>
