@@ -43,32 +43,32 @@ type LoopFeature = {
 
 const loopFeatures: LoopFeature[] = [
   {
-    title: "Recurring Rewards",
-    description:
-      "Turn one-off campaigns into repeatable loops with on-chain claims landing directly in users' wallets each period.",
-    icon: <FaRedoAlt className="size-5" aria-hidden="true" />,
-    tone: "primary",
-  },
-  {
     title: "Verified Access",
     description:
-      "Gate every loop with verified eligibilities and human-proof checks.",
+      "Decide who gets in with human checks and custom eligibility rules that stay visible to everyone.",
     icon: <FaThumbsUp className="size-5" aria-hidden="true" />,
     tone: "secondary",
   },
   {
+    title: "Recurring Rewards",
+    description:
+      "Run repeatable on-chain reward cycles that contributors can count on and return to every distribution period.",
+    icon: <FaRedoAlt className="size-5" aria-hidden="true" />,
+    tone: "primary",
+  },
+  {
     title: "Streaks & Scores",
     description:
-      "Streaks, scores, and leaderboards keep contributors returning and make momentum visible.",
+      "Turn repeat participation into visible momentum with streaks, scores, and social proof that keep contributors coming back.",
     icon: <FaFireAlt className="size-5" aria-hidden="true" />,
     tone: "primary",
   },
   {
     title: "Custom Reward Mechanics",
     description:
-      "Tailor reward structures to fit your community's needs and engagement strategy.",
+      "Shape each loop around your community with custom cadence, incentives, and eligibility logic that fit your program.",
     icon: <FaLockOpen className="size-5" aria-hidden="true" />,
-    tone: "super",
+    tone: "secondary",
   },
 ]
 
@@ -79,7 +79,7 @@ const stepsData = [
     description:
       "Pass the loop requirements and enter the loop to start claiming each distribution period.",
     action: "Enter the Loop",
-    helper: "Verified once",
+    helper: "Prove Participation",
     status: "Eligibility passed",
     loopState:
       "Eligibility is verified and loop access is unlocked for this user.",
@@ -89,8 +89,8 @@ const stepsData = [
     icon: <FaWallet className="size-5" aria-hidden="true" />,
     description:
       "Claim the current distribution period in a simple on-chain flow and receive rewards directly in your wallet.",
-    action: "Claim X tokens",
-    helper: "Current distribution live",
+    action: "Claim",
+    helper: "Earn rewards",
     status: "Claim window open",
     loopState:
       "The current distribution period is available and the claim flow is ready.",
@@ -101,7 +101,7 @@ const stepsData = [
     description:
       "Return next period to keep your streak alive, raise your score, and prove recurring participation over time.",
     action: "Streak",
-    helper: "Come back next cycle",
+    helper: "Streak & Build Momentum",
     status: "Momentum building",
     loopState:
       "The streak is active and the next return keeps momentum building.",
@@ -145,6 +145,14 @@ const footerColumns = [
       { label: "Eligibilities", href: "/eligibilities" },
     ],
   },
+
+  {
+    title: "Community",
+    links: [
+      { label: "Discord", href: "https://discord.gg/VgGQHDpn" },
+      { label: "Twitter", href: "https://x.com/gyralis_xyz" },
+    ],
+  },
   {
     title: "Builders",
     links: [
@@ -152,13 +160,6 @@ const footerColumns = [
         label: "GitHub",
         href: "https://github.com/orgs/Gyralis/repositories",
       },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Discord", href: "https://discord.gg/VgGQHDpn" },
-      { label: "Twitter", href: "https://x.com/gyralis_xyz" },
     ],
   },
 ]
@@ -756,9 +757,9 @@ export default function HomePage() {
                   }}
                   className="mx-auto mt-10 max-w-3xl text-lg leading-8 text-muted-foreground sm:text-[1.15rem]"
                 >
-                  Gyralis helps protocols and communities turn recurring
-                  participation into visible, rewardable momentum with
-                  proof-based loops for verified humans.
+                  Gyralis gives protocols and communities on-chain loops to
+                  reward verified recurring participation and build retention,
+                  trust, and momentum.
                 </motion.p>
               </div>
             </div>
@@ -821,9 +822,9 @@ export default function HomePage() {
                   Build momentum with recurring participation.
                 </h2>
                 <p className="mt-4 max-w-xl text-lg leading-7 text-muted-foreground">
-                  Turn participation into a repeatable on-chain rhythm with
-                  verified access, recurring claims, streaks, leaderboard and
-                  more.
+                  Give protocols and communities a repeatable on-chain program
+                  with verified access, recurring rewards, streaks, and visible
+                  momentum.
                 </p>
               </div>
             </Reveal>
@@ -868,12 +869,12 @@ export default function HomePage() {
             <Reveal className="mb-16">
               <SectionLabel className="mb-3">HOW LOOPS WORK</SectionLabel>
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
-                The user journey your loop creates.
+                The 3-step loop flow.
               </h2>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-muted-foreground">
                 Register, Claim, Streak. Users enter a loop, claim each
-                distribution period, and come back again to keep their streak
-                alive, compound rewards, and build a higher score.
+                distribution period, and return again to keep their streak
+                alive, compound rewards, and build a stronger score over time.
               </p>
             </Reveal>
 
@@ -885,7 +886,9 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <Reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <SectionLabel className="mb-3">LIVE ON-CHAIN</SectionLabel>
+                <SectionLabel className="mb-3">
+                  LIVE & ON-CHAIN DATA
+                </SectionLabel>
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                   Real participation. Real claims. Real recurrence.
                 </h2>
@@ -907,7 +910,7 @@ export default function HomePage() {
               </Reveal>
               <Reveal delay={0.07} className="h-full">
                 <LandingStatCard
-                  title="Verified Humans"
+                  title="Verified Participants"
                   value={<AnimatedStatValue value={heroSummary.uniqueUsers} />}
                   helper={`From ${heroSummary.totalRegistrations.toLocaleString()} total registrations`}
                 />
@@ -1073,7 +1076,7 @@ export default function HomePage() {
 
               <div className="relative z-10 max-w-2xl px-8 py-16 sm:px-14 sm:py-[72px]">
                 <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-extrabold leading-[1.03] tracking-[-0.015em] text-white">
-                  Step into live participation loops.
+                  Join a live loop today.
                 </h2>
                 <div className="mt-5 max-w-xl space-y-4 text-lg leading-7 text-white/70">
                   <p>
