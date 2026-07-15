@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LuExternalLink } from "react-icons/lu"
 
 import { siteConfig } from "@/config/site"
 import {
@@ -11,7 +10,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 
@@ -57,27 +55,30 @@ export function MainNavMenu() {
   const links = [
     { href: "/eligibilities", label: "Eligibilities", external: false },
     { href: "/dashboard", label: "Dashboard", external: false },
-    {
-      href: "https://github.com/orgs/Gyralis/repositories",
-      label: "Docs",
-      external: true,
-    },
+    { href: "/#faq", label: "FAQ", external: false, anchorOnly: true },
+    // {
+    //   href: "https://github.com/orgs/Gyralis/repositories",
+    //   label: "Docs",
+    //   external: true,
+    // },
   ]
 
   return (
     <NavigationMenu>
       <NavigationMenuList>
         {/* Simple links */}
-        {links.map(({ href, label, external }) => {
-          const isActive = !external && pathname === href
+        {links.map(({ href, label, external, anchorOnly }) => {
+          const isActive = !external && !anchorOnly && pathname === href
           return (
             <NavigationMenuItem key={href}>
               <NavigationMenuLink asChild>
                 <LinkComponent
                   href={href}
                   isExternal={external}
-                  className={`${navigationMenuTriggerStyle()} ${
-                    isActive ? "" : "text-foreground"
+                  className={`inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-lg font-medium transition-colors focus:outline-none ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <span
@@ -89,9 +90,6 @@ export function MainNavMenu() {
                   >
                     {label}
                   </span>
-                  {external ? (
-                    <LuExternalLink className="ml-1.5 size-3.5 text-muted-foreground" />
-                  ) : null}
                 </LinkComponent>
               </NavigationMenuLink>
             </NavigationMenuItem>
