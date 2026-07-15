@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { LuExternalLink, LuMenu } from "react-icons/lu"
+import { usePathname } from "next/navigation"
+import { LuMenu } from "react-icons/lu"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -14,8 +15,21 @@ import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
 import { ModeToggle } from "../shared/mode-toggle"
 import { NavLogoMark } from "./main-nav"
 
+const navLinks = [
+  { href: "/eligibilities", label: "Eligibilities", external: false },
+  { href: "/dashboard", label: "Dashboard", external: false },
+  { href: "/#faq", label: "FAQ", external: false },
+  // {
+  //   href: "https://github.com/orgs/Gyralis/repositories",
+  //   label: "Docs",
+  //   external: true,
+  // },
+] as const
+
 export function MobileNav() {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
+  const isLandingPage = pathname === "/"
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -25,10 +39,13 @@ export function MobileNav() {
           <span className="sr-only">Gyralis</span>
         </Link>
         <div className="flex items-center gap-x-4">
-          <IdentityHubDrawer compact />
-          <WalletConnect className="shrink-0" />
+          {!isLandingPage ? <IdentityHubDrawer compact /> : null}
+          {!isLandingPage ? <WalletConnect className="shrink-0" /> : null}
           <SheetTrigger asChild>
-            <Button className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden">
+            <Button
+              requireWallet={false}
+              className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+            >
               <LuMenu className="size-5" />
               <span className="sr-only">Toggle Menu</span>
             </Button>
@@ -45,30 +62,30 @@ export function MobileNav() {
 
         <ScrollArea className="my-4 mr-4 h-[calc(100vh-8rem)] pb-10">
           <div className="flex flex-col space-y-2">
-            <MobileLink href="/eligibilities" onOpenChange={setOpen}>
-              Eligibilities
-            </MobileLink>
-            <MobileLink href="/dashboard" onOpenChange={setOpen}>
-              Dashboard
-            </MobileLink>
-            <a
-              href="https://github.com/orgs/Gyralis/repositories"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className={linkClassName}
-            >
-              <span>Docs</span>
-              <LuExternalLink className="ml-1.5 size-3.5 text-muted-foreground" />
-            </a>
+            {navLinks.map((link) => (
+              <MobileLink
+                key={link.href}
+                href={link.href}
+                onOpenChange={setOpen}
+              >
+                {link.label}
+              </MobileLink>
+            ))}
+
             <Separator className="my-0.5" />
 
-            <div className="flex items-center justify-between px-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                Theme:
-              </span>
-              <ModeToggle />
-            </div>
+            {isLandingPage ? (
+              <MobileLink href="/loops" onOpenChange={setOpen}>
+                Launch App
+              </MobileLink>
+            ) : (
+              <div className="flex items-center justify-between px-2">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Theme:
+                </span>
+                <ModeToggle />
+              </div>
+            )}
           </div>
         </ScrollArea>
       </SheetContent>
