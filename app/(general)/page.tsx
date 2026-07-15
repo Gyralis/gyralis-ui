@@ -149,7 +149,7 @@ const faqItems = [
   {
     question: "What is the difference between Loops and SuperLoops?",
     answer:
-      "Loops follow a recurring participation cycle where users register, claim, and maintain a streak period by period. Loop rewards decay over time, so earlier participation matters. SuperLoops follow a register, accumulate, and claim model: rewards accumulate every 24 hours and distribute an equal amount each period to every registered user.",
+      "Loops follow a register and claim flow, with rewards distributed from a fixed percentage applied to a decaying balance snapshot. SuperLoops follow a register, accumulate, and claim flow, distributing the same amount each period based on flow rate.",
   },
   {
     question: "What happens if I miss a claim period?",
