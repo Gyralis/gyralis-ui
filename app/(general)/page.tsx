@@ -815,8 +815,8 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    Claimed across {heroSummary.totalClaims.toLocaleString()}{" "}
-                    on-chain claims
+                    Across {heroSummary.totalClaims.toLocaleString()} on-chain
+                    claim events
                   </div>
                 </div>
 
@@ -1119,7 +1119,10 @@ export default function HomePage() {
                           transition={{ duration: 0.24, ease: "easeOut" }}
                           className="mt-1 inline-flex shrink-0 text-primary"
                         >
-                          <LuChevronDown className="size-5" aria-hidden="true" />
+                          <LuChevronDown
+                            className="size-5"
+                            aria-hidden="true"
+                          />
                         </motion.span>
                       </button>
 
@@ -1130,7 +1133,10 @@ export default function HomePage() {
                           opacity: isOpen ? 1 : 0,
                           marginTop: isOpen ? 16 : 0,
                         }}
-                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{
+                          duration: 0.28,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
                         className="overflow-hidden"
                       >
                         <p className="text-sm leading-7 text-muted-foreground">
