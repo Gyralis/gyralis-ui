@@ -1,11 +1,13 @@
 {
-  "name": "@turbo-eth/template-web3-app",
+  "name": "@gyralis/ui",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
     "check-loop-user": "node scripts/check-loop-user.mjs",
     "inspect-loop-registrations": "node scripts/inspect-loop-registrations.mjs",
     "lint": "eslint . --ext .ts,.tsx",
@@ -98,6 +100,7 @@
     "@types/react-table": "^7.7.14",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
+    "@vitest/coverage-v8": "^2.1.9",
     "@wagmi/cli": "^2.1.4",
     "autoprefixer": "^10.4.13",
     "concurrently": "^8.2.0",
@@ -120,6 +123,7 @@
     "prettier": "^2.8.1",
     "prettier-plugin-tailwindcss": "^0.2.0",
     "prisma": "^4.8.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
   }
 }

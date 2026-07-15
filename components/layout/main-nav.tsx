@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -11,7 +10,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { LightDarkImage } from "@/components/shared/light-dark-image"
 
@@ -39,92 +37,66 @@ export function NavLogoMark() {
 
 export function MainNav() {
   return (
-    <div className="mr-4 hidden md:flex">
-      <Link href="/" className="mr-6 flex items-center space-x-2">
+    <div className="hidden md:flex">
+      <Link href="/" className="flex items-center space-x-2">
         <NavLogoMark />
 
         <h2 className="hidden sm:inline-block text-2xl font-bold">
           {siteConfig.name}
         </h2>
       </Link>
-      <nav className="flex items-center space-x-6 text-base font-medium">
-        <MainNavMenu />
-      </nav>
     </div>
   )
 }
 
-function MainNavMenu() {
+export function MainNavMenu() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/loops", label: "Loops", disabled: false },
-    { href: "/eligibilities", label: "Eligibilities", disabled: false },
-    { href: "/dashboard", label: "Dashboard", disabled: false, tag: "New" },
-    { href: "/leaderboard", label: "Leaderboard", disabled: true, tag: "Soon" },
+    { href: "/eligibilities", label: "Eligibilities", external: false },
+    { href: "/dashboard", label: "Dashboard", external: false },
+    { href: "/#faq", label: "FAQ", external: false, anchorOnly: true },
+    // {
+    //   href: "https://github.com/orgs/Gyralis/repositories",
+    //   label: "Docs",
+    //   external: true,
+    // },
   ]
 
   return (
     <NavigationMenu>
       <NavigationMenuList>
         {/* Simple links */}
-        {links.map(({ href, label, disabled, tag }) => {
-          const isActive = pathname === href
+        {links.map(({ href, label, external, anchorOnly }) => {
+          const isActive = !external && !anchorOnly && pathname === href
           return (
             <NavigationMenuItem key={href}>
-              {disabled ? (
-                <NavigationMenuLink
-                  className={`${navigationMenuTriggerStyle()} cursor-not-allowed pointer-events-none text-muted-foreground opacity-60`}
-                  aria-disabled="true"
+              <NavigationMenuLink asChild>
+                <LinkComponent
+                  href={href}
+                  isExternal={external}
+                  className={`inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-lg font-medium transition-colors focus:outline-none ${
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <span>{label}</span>
-                  {tag ? <NavItemTag tone="muted">{tag}</NavItemTag> : null}
-                </NavigationMenuLink>
-              ) : (
-                <LinkComponent href={href}>
-                  <NavigationMenuLink
-                    className={`${navigationMenuTriggerStyle()} ${
-                      isActive ? "" : "text-foreground"
-                    }`}
+                  <span
+                    className={
+                      isActive
+                        ? "text-primary underline decoration-2 decoration-primary underline-offset-8 drop-shadow-[0_0_8px_rgba(28,231,131,0.65)]"
+                        : undefined
+                    }
                   >
-                    <span
-                      className={
-                        isActive
-                          ? "underline decoration-primary underline-offset-8"
-                          : undefined
-                      }
-                    >
-                      {label}
-                    </span>
-                    {tag ? <NavItemTag>{tag}</NavItemTag> : null}
-                  </NavigationMenuLink>
+                    {label}
+                  </span>
                 </LinkComponent>
-              )}
+              </NavigationMenuLink>
             </NavigationMenuItem>
           )
         })}
       </NavigationMenuList>
     </NavigationMenu>
-  )
-}
-
-export function NavItemTag({
-  children,
-  tone = "accent",
-}: {
-  children: React.ReactNode
-  tone?: "accent" | "muted"
-}) {
-  return (
-    <span
-      className={`ml-2 inline-flex items-center rounded-full px-2 py-1 text-xs font-bold leading-none ${
-        tone === "muted"
-          ? "bg-muted text-muted-foreground"
-          : "bg-primary tabular-nums text-primary-foreground"
-      }`}
-    >
-      {children}
-    </span>
   )
 }
 

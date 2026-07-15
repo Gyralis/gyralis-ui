@@ -1,6 +1,7 @@
 import { Address } from "viem"
 
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
 
@@ -23,6 +24,7 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
+  historyLoopKey: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   passportMinScore: number
   enabled: boolean
@@ -50,6 +52,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
+    historyLoopKey: "1hive",
     eligibilityProvider: "garden_1hive",
     passportMinScore: 15,
     enabled: true,
@@ -72,15 +75,16 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
+    historyLoopKey: "blockscout",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
   },
   {
     id: 5,
-    title: "Blockscout Merits",
-    by: "Gyralis Team",
-    address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
+    title: "Super Blockscout Merits",
+    by: "Test Team",
+    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
     description:
       "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
@@ -94,6 +98,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "superLoop",
     chainId: 8453,
     chainName: "Base",
+    historyLoopKey: "test-superloops",
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
     enabled: true,
