@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
+import { useAccount } from "wagmi"
 
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
@@ -65,6 +66,7 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
         <div className="flex items-center justify-center">
           <LoopDistributionStat
             value={details.distributionLabel}
+            valueUnit={details.distributionUnit}
             detail={details.distributionDetail}
             balanceDetail={details.balanceDetail}
             balanceDetailLabel={details.balanceDetailLabel}
@@ -122,10 +124,11 @@ export function useLoopSettingsDetails({
     chainId,
     contractType
   )
+  const isSuperLoop = contractType === "superLoop" || Boolean(isSuper)
+  const { isConnected } = useAccount()
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
-  const isSuperLoop = contractType === "superLoop" || Boolean(isSuper)
   const { data: loopBalance, refetch: refetchLoopBalance } =
     useLoopTokenBalance({
       address,
@@ -175,6 +178,7 @@ export function useLoopSettingsDetails({
       ? `${loopBalance.symbol} / mo`
       : undefined
     : distributionAmountLabel
+  const distributionUnit = undefined
   const balanceDetail = useMemo(() => {
     if (isLoading || !loopBalance) return undefined
 
@@ -197,8 +201,9 @@ export function useLoopSettingsDetails({
     return `${balance}${symbol}`
   }, [isLoading, isSuperLoop, loopBalance])
   const balanceDetailLabel = isSuperLoop ? "Flow Rate" : "Balance"
-  const distributionTooltip =
-    settings && settings.percentPerPeriod > 0n
+  const distributionTooltip = isSuperLoop
+    ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
+    : settings && settings.percentPerPeriod > 0n
       ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
       : "The loop balance is distributed evenly among registered users each period."
 
@@ -233,6 +238,7 @@ export function useLoopSettingsDetails({
     balanceDetailLabel,
     distributionDetail,
     distributionLabel,
+    distributionUnit,
     distributionTooltip,
     handleClaimStatusChange,
     handleClaimSuccess,
@@ -251,6 +257,7 @@ export const LoopDistributionStat = ({
   balanceDetailLabel = "Balance",
   compact = false,
   value,
+  valueUnit,
   detail,
   tooltip,
 }: {
@@ -258,6 +265,7 @@ export const LoopDistributionStat = ({
   balanceDetailLabel?: string
   compact?: boolean
   value: string
+  valueUnit?: string
   detail?: string
   tooltip: string
 }) => {
@@ -277,6 +285,11 @@ export const LoopDistributionStat = ({
               <p className="text-[1.6rem] font-bold leading-none text-foreground">
                 {value}
               </p>
+              {valueUnit ? (
+                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                  {valueUnit}
+                </p>
+              ) : null}
               {detail ? (
                 <p className="text-[11px] font-semibold leading-4 text-foreground">
                   {detail}
@@ -302,7 +315,7 @@ export const LoopDistributionStat = ({
     <SettingStatCard
       label="Rewards"
       value={value}
-      detail={detail}
+      detail={valueUnit ?? detail}
       tooltip={tooltip}
     />
   )

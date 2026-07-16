@@ -49,6 +49,27 @@ const BLOCKSCOUT_TX_BASE_URLS: Record<number, string> = {
   10200: "https://gnosis-chiado.blockscout.com/tx",
   8453: "https://basescan.org/tx",
 }
+const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
+const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+
+function getPassportScoreRequiredMessage(error?: string) {
+  const minScore = error?.match(/at least\s+(\d+(?:\.\d+)?)/i)?.[1]
+
+  return minScore
+    ? `This loop requires a Human Passport score of ${minScore}+.`
+    : "This loop requires a higher Human Passport score."
+}
+
+function getProviderEligibilityMessage(
+  eligibilityProvider: LoopEligibilityProvider
+) {
+  switch (eligibilityProvider) {
+    case "blockscout":
+      return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
+    case "garden_1hive":
+      return "Join the 1Hive community in GardensV2 to enter this loop."
+  }
+}
 
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
@@ -81,6 +102,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
   const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
+  const [isRegisteredForPreviousPeriod, setIsRegisteredForPreviousPeriod] =
+    useState(false)
   const [isRegisteredForCurrentPeriod, setIsRegisteredForCurrentPeriod] =
     useState(false)
   const [isRegisteredForNextPeriod, setIsRegisteredForNextPeriod] =
@@ -200,7 +223,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = isSuperLoop
     ? previousPeriodPayoutAmount
     : periodPayoutAmount
-  const isClaimableNow = isRegistered && !hasClaimed && claimableAmount > 0n
+  const isClaimableNow =
+    isRegistered &&
+    !hasClaimed &&
+    claimableAmount > 0n &&
+    (!isSuperLoop || isRegisteredForPreviousPeriod)
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
   const isRegisteredAhead = hasEnteredNextPeriod || isRegisteredForNextPeriod
@@ -266,6 +293,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
+    setIsRegisteredForPreviousPeriod(false)
     setIsRegisteredForCurrentPeriod(false)
     setIsRegisteredForNextPeriod(false)
     setLastClaimedAmount(undefined)
@@ -275,6 +303,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     if (!publicClient || !connectedAccount || currentPeriodValue == null) {
       setIsRegisteredForCurrentPeriod(false)
       setIsRegisteredForNextPeriod(false)
+      setIsRegisteredForPreviousPeriod(false)
       return
     }
 
@@ -315,20 +344,26 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     const fetchPeriodRegistrations = async () => {
       try {
         const nextPeriod = currentPeriodValue + 1n
-        const [registeredForCurrent, registeredForNext] = await Promise.all([
-          isSuperLoop
-            ? fetchPeriodRegistration(currentPeriodValue)
-            : Promise.resolve(false),
-          fetchPeriodRegistration(nextPeriod),
-        ])
+        const [registeredForPrevious, registeredForCurrent, registeredForNext] =
+          await Promise.all([
+            isSuperLoop && previousPeriodValue != null
+              ? fetchPeriodRegistration(previousPeriodValue)
+              : Promise.resolve(false),
+            isSuperLoop
+              ? fetchPeriodRegistration(currentPeriodValue)
+              : Promise.resolve(false),
+            fetchPeriodRegistration(nextPeriod),
+          ])
 
         if (!cancelled) {
+          setIsRegisteredForPreviousPeriod(registeredForPrevious)
           setIsRegisteredForCurrentPeriod(registeredForCurrent)
           setIsRegisteredForNextPeriod(registeredForNext)
         }
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching period Register logs:", error)
+          setIsRegisteredForPreviousPeriod(false)
           setIsRegisteredForCurrentPeriod(false)
           setIsRegisteredForNextPeriod(false)
         }
@@ -345,6 +380,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     connectedAccount,
     currentPeriodValue,
     isSuperLoop,
+    previousPeriodValue,
     publicClient,
     registrationRefreshKey,
   ])
@@ -461,12 +497,35 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       })
 
       const payload = (await response.json()) as {
+        code?: string
         success?: boolean
         signature?: `0x${string}`
         error?: string
       }
 
       if (!response.ok || !payload.success || !payload.signature) {
+        if (payload.code === PASSPORT_SCORE_REQUIRED_CODE) {
+          toast({
+            title: "Passport score too low",
+            description: getPassportScoreRequiredMessage(payload.error),
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (payload.code === PROVIDER_ELIGIBILITY_REQUIRED_CODE) {
+          toast({
+            title: "Not eligible yet",
+            description: getProviderEligibilityMessage(eligibilityProvider),
+            variant: "destructive",
+            link: {
+              href: "/eligibilities",
+              label: "See how to access",
+            },
+          })
+          return
+        }
+
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
@@ -530,7 +589,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       ? `Claim ${claimAmountLabel}`
       : "Claim"
     : isActiveThisPeriod
-    ? isRegisteredAhead
+    ? isSuperLoop
+      ? "Accumulating rewards"
+      : isRegisteredAhead
       ? "Accumulating rewards"
       : "Stay in the loop"
     : !isRegistered
@@ -549,9 +610,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     !isValidLoopAddress ||
     isLoadingOnchainState ||
     (isSuperLoop
-      ? isActiveThisPeriod
-        ? isRegisteredAhead
-        : isEnteredForNextPeriod
+      ? isActiveThisPeriod || isEnteredForNextPeriod
       : isEnteredForNextPeriod)
   const buttonClassName = compact
     ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
