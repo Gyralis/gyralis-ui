@@ -1,10 +1,10 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import React, { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
+import { useQuery } from "@tanstack/react-query"
 import {
   LuExternalLink,
   LuFlame,
@@ -27,13 +27,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score"
 
 import { LoopClaim } from "./loop-claim"
@@ -105,7 +105,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           .join(" ")}
       >
         <div className="relative z-10 space-y-3">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-1.5">
               {(loop.eligibilityLogoUrl || isSuperLoop) && (
                 <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">

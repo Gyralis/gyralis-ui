@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
 import { FaXTwitter } from "react-icons/fa6"
-import { LuClock, LuRepeat2, LuZap } from "react-icons/lu"
+import { LuRepeat2, LuZap } from "react-icons/lu"
 
 import { LoopCriteriaCard } from "./loop-elegibility"
 
@@ -10,9 +10,7 @@ interface LoopCardInactiveProps {
   loop: LoopCardData
 }
 
-export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({
-  loop,
-}) => {
+export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
   const isSuperLoop = loop.contractType === "superLoop" || Boolean(loop.super)
   const TypeIcon = isSuperLoop ? LuZap : LuRepeat2
   const loopLabel = isSuperLoop ? "SuperLoop" : "Loop"
@@ -28,7 +26,7 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({
         .join(" ")}
     >
       <div className="relative z-10 space-y-3">
-        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex min-w-0 items-center gap-1.5">
             {(loop.eligibilityLogoUrl || isSuperLoop) && (
               <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">
@@ -77,7 +75,6 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({
           </div>
 
           <div className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] dark:border-white/8 dark:bg-background dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] md:w-[165px]">
-            <LuClock className="size-3.5 shrink-0" aria-hidden="true" />
             <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
               Coming Soon
             </span>
