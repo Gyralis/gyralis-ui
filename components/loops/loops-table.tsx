@@ -190,6 +190,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
               address={address}
               chainId={loop.chainId}
               contractType={loop.contractType}
+              currentPeriod={currentPeriod}
               eligibilityProvider={loop.eligibilityProvider}
               compact
               showHelper={false}

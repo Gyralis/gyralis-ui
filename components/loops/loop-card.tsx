@@ -1,10 +1,10 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
 import React, { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
+import { useQuery } from "@tanstack/react-query"
 import {
   LuExternalLink,
   LuFlame,
@@ -27,13 +27,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score"
 
 import { LoopClaim } from "./loop-claim"
@@ -105,7 +105,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
           .join(" ")}
       >
         <div className="relative z-10 space-y-3">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-1.5">
               {(loop.eligibilityLogoUrl || isSuperLoop) && (
                 <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">
@@ -169,8 +169,10 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
               <LoopDistributionStat
                 balanceDetail={settingsDetails.balanceDetail}
+                balanceDetailLabel={settingsDetails.balanceDetailLabel}
                 compact
                 value={settingsDetails.distributionLabel}
+                valueUnit={settingsDetails.distributionUnit}
                 detail={settingsDetails.distributionDetail}
                 tooltip={settingsDetails.distributionTooltip}
               />
@@ -227,6 +229,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             address={loop.address ?? "0x"}
             chainId={loop.chainId}
             contractType={loop.contractType}
+            currentPeriod={settingsDetails.currentPeriod}
             eligibilityProvider={loop.eligibilityProvider}
             onStatusChange={settingsDetails.handleClaimStatusChange}
             onSuccess={settingsDetails.handleClaimSuccess}
@@ -452,14 +455,16 @@ function PassportScoreBadge({
   const ShieldIcon = hasPassed ? LuShieldCheck : LuShield
   const label = hasPassed
     ? "Shield Passed"
-    : `Requires Passport score ${thresholdLabel}`
+    : `This loop requires a Human Passport score of ${thresholdLabel}.`
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative inline-flex size-10 shrink-0 items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)]"
+          className="relative inline-flex size-10 shrink-0 cursor-help items-center justify-center rounded-full text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/10 hover:drop-shadow-[0_0_14px_rgba(28,231,131,0.64)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           aria-label={label}
+          role="button"
+          tabIndex={0}
         >
           <ShieldIcon className="absolute inset-0 size-full fill-none stroke-[1.8]" />
           {hasPassed ? null : (
