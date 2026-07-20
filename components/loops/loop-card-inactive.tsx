@@ -1,10 +1,37 @@
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
+import { LuLoader2, LuMegaphone } from "react-icons/lu"
 import { FaXTwitter } from "react-icons/fa6"
-import { LuRepeat2, LuZap } from "react-icons/lu"
+import {
+  RiLoopLeftFill,
+  RiLoopRightFill as RiLoopRightAiFill,
+} from "react-icons/ri"
 
 import { LoopCriteriaCard } from "./loop-elegibility"
+
+type InactiveLoopStatus = "Announced" | "Preparing"
+
+const CHAIN_ICON_SRC: Record<string, string> = {
+  Base: "/icons/NetworkBaseTest.svg",
+  Gnosis: "/icons/NetworkGnosis.svg",
+}
+
+const STATUS_CONFIG: Record<
+  InactiveLoopStatus,
+  {
+    icon: typeof LuMegaphone
+    iconClassName?: string
+  }
+> = {
+  Announced: {
+    icon: LuMegaphone,
+  },
+  Preparing: {
+    icon: LuLoader2,
+    iconClassName: "text-primary",
+  },
+}
 
 interface LoopCardInactiveProps {
   loop: LoopCardData
@@ -12,9 +39,12 @@ interface LoopCardInactiveProps {
 
 export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
   const isSuperLoop = loop.contractType === "superLoop" || Boolean(loop.super)
-  const TypeIcon = isSuperLoop ? LuZap : LuRepeat2
+  const TypeIcon = isSuperLoop ? RiLoopRightAiFill : RiLoopLeftFill
   const loopLabel = isSuperLoop ? "SuperLoop" : "Loop"
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
+  const statusLabel =
+    loop.statusLabel === "Preparing" ? "Preparing" : "Announced"
+  const StatusIcon = STATUS_CONFIG[statusLabel].icon
 
   return (
     <div
@@ -55,28 +85,55 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
                   {loop.title}
                 </h2>
-                <span
-                  aria-label={loopLabel}
-                  className={[
-                    "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full border",
-                    isSuperLoop
-                      ? "border-primary/25 bg-primary/10 text-primary"
-                      : "border-border/80 bg-background/45 text-muted-foreground",
-                  ].join(" ")}
-                >
-                  <TypeIcon className="size-3" />
-                </span>
+                <div className="flex shrink-0 items-center gap-1">
+                  <span
+                    aria-label={loopLabel}
+                    className={[
+                      "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full",
+                      isSuperLoop
+                        ? "text-primary"
+                        : "border border-border/80 bg-background/45 text-foreground",
+                    ].join(" ")}
+                  >
+                    <TypeIcon className="size-4" />
+                  </span>
+                  <span
+                    aria-label={`${loop.chainName} chain`}
+                    className="inline-flex size-[22px] shrink-0 items-center justify-center rounded-full border border-border/80 bg-background/45"
+                  >
+                    {CHAIN_ICON_SRC[loop.chainName] ? (
+                      <Image
+                        src={CHAIN_ICON_SRC[loop.chainName]}
+                        alt=""
+                        width={12}
+                        height={12}
+                        className="size-4 rounded-full"
+                      />
+                    ) : (
+                      <span className="size-2 rounded-full bg-primary/70" />
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-muted-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] dark:border-white/8 dark:bg-background dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] md:w-[165px]">
+            <StatusIcon
+              className={[
+                "size-3.5 shrink-0",
+                STATUS_CONFIG[statusLabel].iconClassName ?? "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-hidden="true"
+            />
             <span className="text-[10px] font-bold uppercase tracking-[0.14em]">
-              Coming Soon
+              {statusLabel}
             </span>
           </div>
         </div>

@@ -86,7 +86,7 @@ export default function ElegibilityPage() {
       <div className="relative z-10 mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-16 pt-6 font-body sm:px-6 lg:pl-32 lg:pr-8 lg:pt-8 xl:pl-36 xl:pr-10">
         <header className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-transparent sm:min-h-[380px] dark:bg-slate-950">
           <Image
-            src="/dashboard-header.png"
+            src="/eligibilities-header.png"
             alt=""
             fill
             priority
