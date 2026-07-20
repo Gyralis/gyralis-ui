@@ -345,25 +345,27 @@ function LoopsUpgradeNotice({
 
   return (
     <div className="mx-auto max-w-screen-xl px-4 pt-5">
-      <div className="mx-auto flex max-w-5xl flex-col gap-3 rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_38px_-30px_rgba(28,231,131,0.65)] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <div className="mx-auto max-w-5xl rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_38px_-30px_rgba(28,231,131,0.65)] sm:px-5">
         <div className="min-w-0">
-          <p className="font-baloo text-sm font-semibold uppercase tracking-[0.12em] text-primary">
-            Building The Next Layer
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-baloo text-sm font-semibold uppercase tracking-[0.12em] text-primary">
+              Building The Next Layer
+            </p>
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss upgrade notice"
+              className="inline-flex size-7 shrink-0 items-center justify-center text-primary/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <LuX className="size-3.5" />
+            </button>
+          </div>
           <p className="mt-1 text-sm leading-6 text-foreground/80">
             We&apos;re improving real-time user stats across Loops, Profile,
             and Leaderboard. During this upgrade, claim counts and rankings may
             not reflect.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          aria-label="Dismiss upgrade notice"
-          className="inline-flex size-9 shrink-0 items-center justify-center self-end rounded-full border border-primary/25 bg-background/70 text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:self-center"
-        >
-          <LuX className="size-4" />
-        </button>
       </div>
     </div>
   )

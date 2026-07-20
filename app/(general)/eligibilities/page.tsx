@@ -7,6 +7,7 @@ import { LuLaptop } from "react-icons/lu"
 
 import { Button } from "@/components/ui/button"
 import Modal from "@/components/ui/modal"
+import { BackToLoopsLink } from "@/components/layout/back-to-loops-link"
 import { LinkComponent } from "@/components/shared/link-component"
 
 const eligibilityRequirements = [
@@ -81,17 +82,35 @@ export default function ElegibilityPage() {
     (typeof eligibilityRequirements)[0] | null
   >(null)
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl px-4 py-8 font-body">
-        <div className="mb-6 md:mb-8">
-          <h1 className="mb-3 font-heading text-2xl font-bold  md:mb-4 md:text-3xl">
-            Eligibility Requirements
-          </h1>
-          <p className="font-body text-sm opacity-70 md:text-base">
-            Meet these requirements to participate in various loops and claim
-            rewards.
-          </p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden text-foreground">
+      <div className="relative z-10 mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-16 pt-6 font-body sm:px-6 lg:pl-32 lg:pr-8 lg:pt-8 xl:pl-36 xl:pr-10">
+        <header className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-transparent sm:min-h-[380px] dark:bg-slate-950">
+          <Image
+            src="/dashboard-header.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1536px) 1360px, (min-width: 1024px) calc(100vw - 11rem), calc(100vw - 2rem)"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
+          <BackToLoopsLink className="absolute left-5 top-5 z-20 border-white/15 bg-black/35 text-slate-200 hover:border-primary/45 hover:bg-primary/15 hover:text-primary sm:left-6 sm:top-6" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+            <div className="space-y-3">
+              <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
+                Gyralis{" "}
+                <span className="bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)] bg-clip-text text-transparent">
+                  Eligibilities
+                </span>
+              </h1>
+              <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
+                Live loops eligibility requirements for checking access,
+                protocol steps, and reward readiness across the Gyralis
+                ecosystem.
+              </p>
+            </div>
+          </div>
+        </header>
 
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8">
           {eligibilityRequirements.map((requirement) => {
