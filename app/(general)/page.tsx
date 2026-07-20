@@ -168,7 +168,7 @@ const footerColumns = [
     title: "Product",
     links: [
       { label: "Loops", href: "#loops" },
-      { label: "SuperLoops", href: "#loops" },
+      // { label: "SuperLoops", href: "#loops" },
       { label: "Stats", href: "/dashboard" },
       { label: "Eligibilities", href: "/eligibilities" },
     ],
@@ -847,10 +847,10 @@ export default function HomePage() {
             <Reveal className="mb-10">
               <div>
                 <SectionLabel className="mb-3">LOOPS</SectionLabel>
-                <h2 className="max-w-3xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
+                <h2 className="max-w-5xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                   Build momentum with recurring participation.
                 </h2>
-                <p className="mt-4 max-w-xl text-lg leading-7 text-muted-foreground">
+                <p className="mt-4 max-w-5xl text-lg leading-7 text-muted-foreground">
                   Give protocols and communities a repeatable on-chain program
                   with verified access, recurring rewards, streaks, and visible
                   momentum.
@@ -1018,9 +1018,9 @@ export default function HomePage() {
                   Building a protocol or community?{" "}
                   <span className="text-foreground">
                     Bring your own eligibility
-                  </span>
-                  : reward your own users and find new ones through the Gyralis
-                  ecosystem.
+                  </span>{" "}
+                  and reward your own users while finding new ones through the
+                  Gyralis ecosystem.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
@@ -1082,9 +1082,9 @@ export default function HomePage() {
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                 Loop mechanics, distribution, and cycle rules.
               </h2>
-              <p className="mt-4 max-w-2xl text-lg leading-7 text-muted-foreground">
-                The most important details about how rewards, claim periods,
-                SuperLoops, and streaks actually work.
+              <p className="mt-4 max-w-3xl text-lg leading-7 text-muted-foreground">
+                The most important details about how rewards, claim periods and
+                Loops actually work.
               </p>
             </Reveal>
 
