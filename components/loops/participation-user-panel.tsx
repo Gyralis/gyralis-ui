@@ -7,7 +7,7 @@ import { FaAward } from "react-icons/fa"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const TRUE_LOOPER_TARGET = 20
+const TRUE_LOOPER_TARGET = 50
 
 type UserScoringResponse = {
   success: boolean
@@ -174,8 +174,8 @@ function TrueLooperBadge({ enabled }: { enabled: boolean }) {
     >
       <div className="flex flex-col items-center justify-center">
         <FaAward className="size-4" />
-        <span className="mt-0.5 font-baloo text-[8px] font-semibold uppercase tracking-widest">
-          {enabled ? "True" : "Loop"}
+        <span className="mt-0.5 font-sans text-[10px] font-bold leading-none tabular-nums">
+          +{TRUE_LOOPER_TARGET}
         </span>
       </div>
     </div>

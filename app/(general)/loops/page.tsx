@@ -8,6 +8,7 @@ import type { EcosystemMetricData } from "@/components/loops/participation-profi
 type RawLoopRegistrationCache = {
   loops?: Record<string, unknown>
   global?: {
+    updatedAt?: string | null
     uniqueUsers?: unknown[]
     uniqueUserCount?: string | number | null
     uniqueClaimUserCount?: string | number | null
@@ -52,14 +53,28 @@ function formatPercent(value: number | null): string {
   return `${(Math.ceil(value * 10) / 10).toFixed(1)}%`
 }
 
-async function getLoopsHeaderMetrics(): Promise<
-  [
+type LoopsHeaderData = {
+  metrics: [
     EcosystemMetricData,
     EcosystemMetricData,
     EcosystemMetricData,
     EcosystemMetricData
   ]
-> {
+  updatedAtLabel: string
+}
+
+function formatUpdatedAt(value: string | null | undefined): string {
+  if (!value) return "Unknown"
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value))
+}
+
+async function getLoopsHeaderData(): Promise<LoopsHeaderData> {
   const raw = await readFile(CACHE_FILE_PATH, "utf8")
   const cache = JSON.parse(raw) as RawLoopRegistrationCache
 
@@ -75,18 +90,27 @@ async function getLoopsHeaderMetrics(): Promise<
     (Array.isArray(cache.global?.uniqueUsers)
       ? cache.global.uniqueUsers.length
       : 0)
-  return [
-    { value: formatCount(uniqueUsers), label: "Unique Users" },
-    { value: formatCount(totalClaims), label: "Claims" },
-    { value: formatPercent(claimRate), label: "Claim rate" },
-    { value: "2", label: "Active Loop" },
-  ]
+  return {
+    metrics: [
+      { value: formatCount(uniqueUsers), label: "Unique Users" },
+      { value: formatCount(totalClaims), label: "Claims" },
+      { value: formatPercent(claimRate), label: "Claim rate" },
+      { value: "2", label: "Active Loop" },
+    ],
+    updatedAtLabel: formatUpdatedAt(cache.global?.updatedAt),
+  }
 }
 
 export default async function LoopsPage() {
   noStore()
 
-  const ecosystemMetrics = await getLoopsHeaderMetrics()
+  const { metrics: ecosystemMetrics, updatedAtLabel } =
+    await getLoopsHeaderData()
 
-  return <LoopsPageClient ecosystemMetrics={ecosystemMetrics} />
+  return (
+    <LoopsPageClient
+      ecosystemMetrics={ecosystemMetrics}
+      statsLastUpdatedLabel={updatedAtLabel}
+    />
+  )
 }
