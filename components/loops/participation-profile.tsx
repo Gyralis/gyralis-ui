@@ -4,14 +4,14 @@ import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { FaChartLine, FaLayerGroup, FaUsers } from "react-icons/fa"
 import { LuInfo } from "react-icons/lu"
 
-import { ParticipationUserPanel } from "@/components/loops/participation-user-panel"
-import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ParticipationUserPanel } from "@/components/loops/participation-user-panel"
+import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
 export interface ParticipationProfileData {
   rank: number
@@ -71,7 +71,7 @@ export function ParticipationProfile({
         return (
           <div
             id="participation-profile"
-            className="relative mx-auto w-full max-w-7xl rounded-full border border-border bg-card px-3 py-2 text-card-foreground md:px-5 md:py-2.5 md:pr-10"
+            className="relative mx-auto w-full max-w-7xl rounded-full sm:border sm:border-border bg-none sm:bg-card px-3 py-2 text-card-foreground md:px-5 md:py-2.5 md:pr-10"
             style={{
               opacity: ready ? 1 : 0.65,
               pointerEvents: ready ? "auto" : "none",

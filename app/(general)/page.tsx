@@ -133,14 +133,14 @@ const eligibilityPartners = [
 
 const faqItems = [
   {
-    question: "How are rewards calculated?",
+    question: "How are Loops rewards calculated?",
     answer:
       "Each Loop uses a fixed distribution percentage that applies to every claim period. The amount to distribute comes from that percentage and the loop balance snapshot of the previous period, and the resulting rewards are split evenly across all registered users in that cycle.",
   },
   {
-    question: "Can loops use different settings and cycle lengths?",
+    question: "Can Loops use different settings and cycle lengths?",
     answer:
-      "Yes. Loops are customizable, so each protocol or community can set its own distribution percentage, claim cadence, eligibility logic, and reward structure. The default and recommended claiming window is every 24 hours, but loop cycles can be configured to run more or less frequently depending on the program.",
+      "Yes. Loops are customizable, so each protocol or community can set its own distribution percentage and eligibility logic . The default and recommended claiming window is every 24 hours, but loop cycles can be configured to run more or less frequently depending on the program.",
   },
   {
     question: "What is the difference between Loops and SuperLoops?",
@@ -150,12 +150,12 @@ const faqItems = [
   {
     question: "What happens if I miss a claim period?",
     answer:
-      "If you miss a claim period, your streak for that specific loop is lost. You need to register again and wait until the next claiming period to participate.",
+      "If you miss a claim period, your streak for that specific Loop is lost. You need to register again and wait until the next claiming period to participate.",
   },
   {
     question: "When are eligibility and human score checks evaluated?",
     answer:
-      "Eligibility and human score checks are evaluated each time you try to enter or claim. Loop access stays human-first, and every new registration or claim attempt must still satisfy the active requirements for that loop.",
+      "Eligibility and human score checks are evaluated each time you try to enter or claim. Loop access stays human-first, and every new registration or claim attempt must still satisfy the active requirements for that Loop.",
   },
 ] as const
 
@@ -986,8 +986,8 @@ export default function HomePage() {
                   <span className="text-foreground">
                     Bring your own eligibility
                   </span>{" "}
-                  and reward your own users while finding new ones through the
-                  Gyralis ecosystem.
+                  and reward your users while find new ones through the Gyralis
+                  ecosystem.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
@@ -1160,8 +1160,8 @@ export default function HomePage() {
                     ecosystem.
                   </p>
                   <p>
-                    Unlock special access to{" "}
-                    <span className="text-white">The True Loopers</span> —
+                    Unlock special access to the{" "}
+                    <span className="text-white">True Loopers Loop</span> —
                     coming soon.
                   </p>
                 </div>
@@ -1186,7 +1186,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
     </div>
   )
 }
