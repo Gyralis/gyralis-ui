@@ -32,6 +32,7 @@ export interface LoopCardData {
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
   rewardsSummary?: string
+  statusLabel?: string
   sponsorName?: string
   sponsorLogoUrl?: string
   sponsorUrl?: string
@@ -86,13 +87,13 @@ export const LoopCardsData: LoopCardData[] = [
   },
   {
     id: 5,
-    title: "Super Blockscout Merits",
+    title: "SuperLoops",
     by: "Test Team",
     address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-    eligibilityLogoUrl: "/blockscout-logo.png",
+    eligibilityLogoUrl: "/images/inactive_loop.png",
     shieldScore: "Passport Score 15+",
     eligibility: "TBA",
     chainBadgeColor: "bg-custom-green",
@@ -107,6 +108,33 @@ export const LoopCardsData: LoopCardData[] = [
     passportMinScore: 0,
     enabled: false,
     rewardsSummary: "TBA",
+    sponsorName: "TBA",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
+  },
+  {
+    id: 6,
+    title: "True Loopers",
+    by: "Gyralis",
+    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
+    description: "A rewards Loop for Gyralis users who keep showing up.",
+    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    eligibilityLogoUrl: "/images/inactive_loop.png",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: false,
+    contractType: "loop",
+    chainId: 8453,
+    chainName: "Base",
+    historyLoopKey: "test-superloops",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 0,
+    enabled: false,
+    rewardsSummary: "Up to $50 USDC",
+    statusLabel: "Preparing",
     sponsorName: "TBA",
     sponsorLogoUrl: "/1Hive-logo.png",
     sponsorUrl: "https://1hive.org",

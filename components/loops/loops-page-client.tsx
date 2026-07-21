@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import { motion } from "framer-motion"
-import { LuLayoutGrid, LuList } from "react-icons/lu"
+import { LuLayoutGrid, LuList, LuX } from "react-icons/lu"
 
 import {
   Tooltip,
@@ -30,6 +30,7 @@ type LoopsPageClientProps = {
     EcosystemMetricData,
     EcosystemMetricData
   ]
+  statsLastUpdatedLabel: string
 }
 
 const participationPreview: ParticipationProfileData = {
@@ -45,9 +46,26 @@ const participationPreview: ParticipationProfileData = {
   activeLoops: 2,
 }
 
-export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
+const UPGRADE_NOTICE_STORAGE_KEY = "gyralis-loops-upgrade-notice-dismissed"
+
+export function LoopsPageClient({
+  ecosystemMetrics,
+  statsLastUpdatedLabel,
+}: LoopsPageClientProps) {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  const [showUpgradeNotice, setShowUpgradeNotice] = useState(false)
+
+  useEffect(() => {
+    setShowUpgradeNotice(
+      localStorage.getItem(UPGRADE_NOTICE_STORAGE_KEY) !== "true"
+    )
+  }, [])
+
+  const dismissUpgradeNotice = () => {
+    localStorage.setItem(UPGRADE_NOTICE_STORAGE_KEY, "true")
+    setShowUpgradeNotice(false)
+  }
 
   const handleBalanceUpdate = (
     cardId: number,
@@ -66,7 +84,7 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
   return (
     <div className="min-h-screen">
       <div className="relative">
-        <div className="sticky top-3 z-40 flex justify-center px-4 pt-8">
+        <div className="flex justify-center px-4 pt-8">
           <TooltipProvider>
             <nav
               aria-label="Loops participation"
@@ -117,11 +135,17 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
           </TooltipProvider>
         </div>
 
+        <LoopsUpgradeNotice
+          visible={showUpgradeNotice}
+          onDismiss={dismissUpgradeNotice}
+        />
+
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
           <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 sm:gap-10">
             <ParticipationProfile
               profile={participationPreview}
               ecosystemMetrics={ecosystemMetrics}
+              statsLastUpdatedLabel={statsLastUpdatedLabel}
               preview
             />
           </div>
@@ -304,6 +328,43 @@ export function LoopsPageClient({ ecosystemMetrics }: LoopsPageClientProps) {
               <LoopsTable loops={cards} />
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LoopsUpgradeNotice({
+  visible,
+  onDismiss,
+}: {
+  visible: boolean
+  onDismiss: () => void
+}) {
+  if (!visible) return null
+
+  return (
+    <div className="mx-auto max-w-screen-xl px-4 pt-5">
+      <div className="mx-auto max-w-5xl rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_38px_-30px_rgba(28,231,131,0.65)] sm:px-5">
+        <div className="min-w-0">
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-baloo text-sm font-semibold uppercase tracking-[0.12em] text-primary">
+              Building The Next Layer
+            </p>
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss upgrade notice"
+              className="inline-flex size-7 shrink-0 items-center justify-center text-primary/80 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            >
+              <LuX className="size-3.5" />
+            </button>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-foreground/80">
+            We&apos;re improving real-time user stats across Loops, Profile,
+            and Leaderboard. During this upgrade, claim counts and rankings may
+            not reflect.
+          </p>
         </div>
       </div>
     </div>

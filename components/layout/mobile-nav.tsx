@@ -17,7 +17,7 @@ import { NavLogoMark } from "./main-nav"
 
 const navLinks = [
   { href: "/eligibilities", label: "Eligibilities", external: false },
-  { href: "/dashboard", label: "Dashboard", external: false },
+  { href: "/dashboard", label: "Stats", external: false },
   { href: "/#faq", label: "FAQ", external: false },
   // {
   //   href: "https://github.com/orgs/Gyralis/repositories",

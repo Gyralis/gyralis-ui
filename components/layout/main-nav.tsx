@@ -54,7 +54,7 @@ export function MainNavMenu() {
 
   const links = [
     { href: "/eligibilities", label: "Eligibilities", external: false },
-    { href: "/dashboard", label: "Dashboard", external: false },
+    { href: "/dashboard", label: "Stats", external: false },
     { href: "/#faq", label: "FAQ", external: false, anchorOnly: true },
     // {
     //   href: "https://github.com/orgs/Gyralis/repositories",

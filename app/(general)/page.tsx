@@ -7,21 +7,17 @@ import { motion, useReducedMotion } from "framer-motion"
 import {
   FaArrowRight,
   FaCheck,
-  FaDiscord,
   FaFireAlt,
-  FaGithub,
   FaLockOpen,
   FaRedoAlt,
   FaShieldAlt,
   FaThumbsUp,
   FaWallet,
 } from "react-icons/fa"
-import { FaXTwitter } from "react-icons/fa6"
 import { LuArrowDown, LuChevronDown } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
-import { NavLogoMark } from "@/components/layout/main-nav"
 
 type HeroHistorySummary = {
   totalClaims: number
@@ -137,14 +133,14 @@ const eligibilityPartners = [
 
 const faqItems = [
   {
-    question: "How are rewards calculated?",
+    question: "How are Loops rewards calculated?",
     answer:
       "Each Loop uses a fixed distribution percentage that applies to every claim period. The amount to distribute comes from that percentage and the loop balance snapshot of the previous period, and the resulting rewards are split evenly across all registered users in that cycle.",
   },
   {
-    question: "Can loops use different settings and cycle lengths?",
+    question: "Can Loops use different settings and cycle lengths?",
     answer:
-      "Yes. Loops are customizable, so each protocol or community can set its own distribution percentage, claim cadence, eligibility logic, and reward structure. The default and recommended claiming window is every 24 hours, but loop cycles can be configured to run more or less frequently depending on the program.",
+      "Yes. Loops are customizable, so each protocol or community can set its own distribution percentage and eligibility logic . The default and recommended claiming window is every 24 hours, but loop cycles can be configured to run more or less frequently depending on the program.",
   },
   {
     question: "What is the difference between Loops and SuperLoops?",
@@ -154,43 +150,14 @@ const faqItems = [
   {
     question: "What happens if I miss a claim period?",
     answer:
-      "If you miss a claim period, your streak for that specific loop is lost. You need to register again and wait until the next claiming period to participate.",
+      "If you miss a claim period, your streak for that specific Loop is lost. You need to register again and wait until the next claiming period to participate.",
   },
   {
     question: "When are eligibility and human score checks evaluated?",
     answer:
-      "Eligibility and human score checks are evaluated each time you try to enter or claim. Loop access stays human-first, and every new registration or claim attempt must still satisfy the active requirements for that loop.",
+      "Eligibility and human score checks are evaluated each time you try to enter or claim. Loop access stays human-first, and every new registration or claim attempt must still satisfy the active requirements for that Loop.",
   },
 ] as const
-
-const footerColumns = [
-  {
-    title: "Product",
-    links: [
-      { label: "Loops", href: "#loops" },
-      { label: "SuperLoops", href: "#loops" },
-      { label: "Stats", href: "/dashboard" },
-      { label: "Eligibilities", href: "/eligibilities" },
-    ],
-  },
-
-  {
-    title: "Community",
-    links: [
-      { label: "Discord", href: "https://discord.gg/VgGQHDpn" },
-      { label: "Twitter", href: "https://x.com/gyralis_xyz" },
-    ],
-  },
-  {
-    title: "Builders",
-    links: [
-      {
-        label: "GitHub",
-        href: "https://github.com/orgs/Gyralis/repositories",
-      },
-    ],
-  },
-]
 
 function SurfaceIcon({
   children,
@@ -847,10 +814,10 @@ export default function HomePage() {
             <Reveal className="mb-10">
               <div>
                 <SectionLabel className="mb-3">LOOPS</SectionLabel>
-                <h2 className="max-w-3xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
+                <h2 className="max-w-5xl font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                   Build momentum with recurring participation.
                 </h2>
-                <p className="mt-4 max-w-xl text-lg leading-7 text-muted-foreground">
+                <p className="mt-4 max-w-5xl text-lg leading-7 text-muted-foreground">
                   Give protocols and communities a repeatable on-chain program
                   with verified access, recurring rewards, streaks, and visible
                   momentum.
@@ -1018,8 +985,8 @@ export default function HomePage() {
                   Building a protocol or community?{" "}
                   <span className="text-foreground">
                     Bring your own eligibility
-                  </span>
-                  : reward your own users and find new ones through the Gyralis
+                  </span>{" "}
+                  and reward your users while find new ones through the Gyralis
                   ecosystem.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -1082,9 +1049,9 @@ export default function HomePage() {
               <h2 className="font-heading text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.05] tracking-[-0.01em]">
                 Loop mechanics, distribution, and cycle rules.
               </h2>
-              <p className="mt-4 max-w-2xl text-lg leading-7 text-muted-foreground">
-                The most important details about how rewards, claim periods,
-                SuperLoops, and streaks actually work.
+              <p className="mt-4 max-w-3xl text-lg leading-7 text-muted-foreground">
+                The most important details about how rewards, claim periods and
+                Loops actually work.
               </p>
             </Reveal>
 
@@ -1193,8 +1160,8 @@ export default function HomePage() {
                     ecosystem.
                   </p>
                   <p>
-                    Unlock special access to{" "}
-                    <span className="text-white">The True Loopers</span> —
+                    Unlock special access to the{" "}
+                    <span className="text-white">True Loopers Loop</span> —
                     coming soon.
                   </p>
                 </div>
@@ -1219,80 +1186,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      <footer className="relative border-t border-border">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="grid gap-10 py-16 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-            <div>
-              <Link href="/" className="mb-5 flex items-center gap-3">
-                <NavLogoMark />
-                <span className="font-heading text-xl font-bold tracking-tight">
-                  Gyralis
-                </span>
-              </Link>
-              <p className="max-w-xs text-[0.92rem] leading-7 text-muted-foreground">
-                Infrastructure protocol for recurring on-chain participation.
-              </p>
-              <div className="mt-5 flex gap-3">
-                <a
-                  href="https://x.com/gyralis_xyz"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Gyralis on X"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <FaXTwitter className="size-5" />
-                </a>
-                <a
-                  href="https://github.com/orgs/Gyralis/repositories"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Gyralis GitHub"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <FaGithub className="size-5" />
-                </a>
-                <a
-                  href="https://discord.gg/VgGQHDpn"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Gyralis Discord"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <FaDiscord className="size-5" />
-                </a>
-              </div>
-              <p className="mt-5 text-sm text-muted-foreground">
-                © 2026 Gyralis. All rights reserved.
-              </p>
-            </div>
-
-            {footerColumns.map((column) => (
-              <div key={column.title}>
-                <h3 className="mb-4 text-sm font-semibold">{column.title}</h3>
-                <ul className="space-y-3">
-                  {column.links.map((link) => {
-                    const external = link.href.startsWith("http")
-                    return (
-                      <li key={`${column.title}-${link.label}`}>
-                        <a
-                          href={link.href}
-                          {...(external
-                            ? { target: "_blank", rel: "noreferrer" }
-                            : {})}
-                          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                        >
-                          {link.label}
-                        </a>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

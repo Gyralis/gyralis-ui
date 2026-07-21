@@ -9,11 +9,13 @@ import {
   LuExternalLink,
   LuFlame,
   LuInfo,
-  LuRepeat2,
   LuShield,
   LuShieldCheck,
-  LuZap,
 } from "react-icons/lu"
+import {
+  RiLoopLeftFill,
+  RiLoopRightFill as RiLoopRightAiFill,
+} from "react-icons/ri"
 import { useAccount } from "wagmi"
 
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
@@ -134,7 +136,7 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
                     {loop.title}
                   </h2>
@@ -542,21 +544,21 @@ function LoopTypeIconBadge({
   isSuper: boolean
   label: string
 }) {
-  const Icon = isSuper ? LuZap : LuRepeat2
+  const Icon = isSuper ? RiLoopRightAiFill : RiLoopLeftFill
 
   return (
     <span
       aria-label={label}
       className={[
-        "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full border",
+        "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full",
         isSuper
-          ? "border-primary/25 bg-primary/10 text-primary"
-          : "border-border/80 bg-background/45 text-muted-foreground",
+          ? "text-primary"
+          : "border border-border/80 bg-background/45 text-foreground",
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <Icon className="size-3" />
+      <Icon className="size-4" />
     </span>
   )
 }
@@ -579,7 +581,7 @@ function ChainIcon({ chainName }: { chainName: string }) {
       alt=""
       width={12}
       height={12}
-      className="size-3 rounded-full"
+      className="size-4 rounded-full"
     />
   ) : (
     <span className="size-2 rounded-full bg-primary/70" />
