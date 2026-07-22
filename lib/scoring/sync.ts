@@ -15,6 +15,10 @@ import {
   upsertUserLoopStats,
 } from "@/lib/db/clients/loop-stats.client"
 import {
+  clearProcessedClaimEvents,
+  markProcessedClaimEvents,
+} from "@/lib/db/clients/processed-claim-events.client"
+import {
   getScoringSyncState,
   resetScoringSyncState,
   updateScoringSyncState,
@@ -34,13 +38,13 @@ type SyncMode = "incremental" | "full"
 
 interface SyncInput {
   mode?: SyncMode
-  loopAddress?: string
+  loopId?: number
   chainId?: number
 }
 
 interface AffectedLoopKey {
   userAddress: string
-  loopAddress: string
+  loopId: number
   chainId: number
 }
 
@@ -50,11 +54,7 @@ interface ScoringSyncCursor {
 }
 
 function keyForAffectedLoop(key: AffectedLoopKey): string {
-  return [
-    key.chainId,
-    key.loopAddress.toLowerCase(),
-    key.userAddress.toLowerCase(),
-  ].join("|")
+  return [key.chainId, key.loopId, key.userAddress.toLowerCase()].join("|")
 }
 
 function parseEarnedBonuses(value: unknown): EarnedStreakBonus[] {
@@ -76,7 +76,7 @@ function mapDbLoopStats(
 ): UserLoopScoringStats {
   return {
     userAddress: stats.userAddress,
-    loopAddress: stats.loopAddress,
+    loopId: stats.loopId,
     chainId: stats.chainId,
     totalClaims: stats.totalClaims,
     claimPoints: stats.claimPoints,
@@ -93,6 +93,7 @@ async function clearScoringProjections() {
   await clearLeaderboardEntries()
   await clearUserGlobalStats()
   await clearUserLoopStats()
+  await clearProcessedClaimEvents()
   await resetScoringSyncState()
 }
 
@@ -122,7 +123,7 @@ export function advanceScoringSyncCursor(
 
 export async function runScoringSync(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
-  if (mode === "full" && input.loopAddress) {
+  if (mode === "full" && input.loopId != null) {
     throw new Error("Full scoring recompute must run without a loop filter")
   }
   if (input.chainId && input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
@@ -139,6 +140,10 @@ export async function runScoringSync(input: SyncInput = {}) {
   const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
   const batchSize = env.SCORING_SYNC_BATCH_SIZE
   const affectedLoops = new Map<string, AffectedLoopKey>()
+  const fullModeClaimEventsByLoop = new Map<
+    string,
+    Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+  >()
   let processedEvents = 0
   let cursor: ScoringSyncCursor = {
     lastBlockNumber: mode === "incremental" ? lastSyncedBlock : 0,
@@ -151,10 +156,16 @@ export async function runScoringSync(input: SyncInput = {}) {
     for (const event of events) {
       const key = {
         userAddress: event.userAddress,
-        loopAddress: event.loopAddress,
+        loopId: event.loopId,
         chainId: event.chainId,
       }
-      affectedLoops.set(keyForAffectedLoop(key), key)
+      const loopKey = keyForAffectedLoop(key)
+      affectedLoops.set(loopKey, key)
+      if (mode === "full") {
+        const eventsForLoop = fullModeClaimEventsByLoop.get(loopKey) ?? []
+        eventsForLoop.push(event)
+        fullModeClaimEventsByLoop.set(loopKey, eventsForLoop)
+      }
       cursor = advanceScoringSyncCursor(cursor, event)
       processedEvents += 1
     }
@@ -173,7 +184,7 @@ export async function runScoringSync(input: SyncInput = {}) {
         blockNumber: pageInput.blockNumber,
         afterEventId,
         first: batchSize,
-        loopAddress: input.loopAddress,
+        loopId: input.loopId,
       })
 
       if (events.length === 0) break
@@ -197,11 +208,15 @@ export async function runScoringSync(input: SyncInput = {}) {
   const affectedUsers = new Set<string>()
   for (const key of affectedLoops.values()) {
     await ensureUserProfile(key.userAddress)
-    const claimEvents = await fetchAllClaimEventsForUserLoop({
-      userAddress: key.userAddress,
-      loopAddress: key.loopAddress,
-      batchSize,
-    })
+    const loopKey = keyForAffectedLoop(key)
+    const claimEvents =
+      mode === "full"
+        ? fullModeClaimEventsByLoop.get(loopKey) ?? []
+        : await fetchAllClaimEventsForUserLoop({
+            userAddress: key.userAddress,
+            loopId: key.loopId,
+            batchSize,
+          })
     const loopStats = computeLoopStatsFromClaims(
       claimEvents,
       scoringConfig,
@@ -209,6 +224,7 @@ export async function runScoringSync(input: SyncInput = {}) {
     )
     await upsertUserLoopStats(loopStats)
     await upsertLoopLeaderboardEntry(loopStats)
+    await markProcessedClaimEvents(claimEvents)
     affectedUsers.add(key.userAddress)
   }
 
@@ -221,7 +237,7 @@ export async function runScoringSync(input: SyncInput = {}) {
     await upsertGlobalLeaderboardEntry(globalStats)
   }
 
-  if (!input.loopAddress) {
+  if (input.loopId == null) {
     await updateScoringSyncState({
       lastBlockNumber: cursor.lastBlockNumber,
       lastEventId: cursor.lastEventId,

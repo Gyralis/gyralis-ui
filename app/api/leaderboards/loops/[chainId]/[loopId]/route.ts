@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { databaseUnavailableResponse } from "@/lib/api/database-error"
-import { parsePagination } from "@/lib/api/pagination"
+import { parseLeaderboardQuery } from "@/lib/api/leaderboard-query"
 import { getLoopLeaderboard } from "@/lib/db/clients/leaderboard.client"
 import { toRankedLeaderboardEntry } from "@/lib/scoring/responses"
 
@@ -9,9 +9,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET(
   req: Request,
-  { params }: { params: { chainId: string; loopAddress: string } }
+  { params }: { params: { chainId: string; loopId: string } }
 ) {
-  const { limit, offset } = parsePagination(req.url)
+  const query = parseLeaderboardQuery(req.url)
   const chainId = Number(params.chainId)
   if (!Number.isInteger(chainId) || chainId <= 0) {
     return NextResponse.json(
@@ -19,23 +19,36 @@ export async function GET(
       { status: 400 }
     )
   }
+  const loopId = Number(params.loopId)
+  if (!Number.isSafeInteger(loopId) || loopId < 0) {
+    return NextResponse.json(
+      { success: false, error: "Invalid loopId" },
+      { status: 400 }
+    )
+  }
 
   try {
     const entries = await getLoopLeaderboard({
       chainId,
-      loopAddress: params.loopAddress,
-      limit,
-      offset,
+      loopId,
+      limit: query.limit,
+      offset: query.offset,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+      filters: query.filters,
     })
 
     return NextResponse.json({
       success: true,
-      limit,
-      offset,
+      limit: query.limit,
+      offset: query.offset,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+      filters: query.filters,
       chainId,
-      loopAddress: params.loopAddress.toLowerCase(),
+      loopId,
       entries: entries.map((entry, index) =>
-        toRankedLeaderboardEntry(entry, offset + index + 1)
+        toRankedLeaderboardEntry(entry, query.offset + index + 1)
       ),
     })
   } catch (error) {

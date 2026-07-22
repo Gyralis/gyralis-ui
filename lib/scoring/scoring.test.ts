@@ -1,3 +1,4 @@
+import { encodeAbiParameters, encodeEventTopics, parseAbiItem } from "viem"
 import { describe, expect, it } from "vitest"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
@@ -12,11 +13,13 @@ import {
 import { buildClaimEventsQuery } from "./subgraph-client"
 import { advanceScoringSyncCursor } from "./sync"
 import { ClaimScoringEvent, ScoringConfig } from "./types"
+import { extractClaimEventsFromReceiptLogs } from "./user-claim-sync"
 
 const userAddress = "0x00000000000000000000000000000000000000aa"
 const secondUserAddress = "0x00000000000000000000000000000000000000bb"
-const loopAddress = "0x00000000000000000000000000000000000000cc"
 const secondLoopAddress = "0x00000000000000000000000000000000000000dd"
+const loopId = 42
+const secondLoopId = 43
 const chainId = 100
 const testConfig: ScoringConfig = {
   claimPoints: 1,
@@ -31,9 +34,9 @@ function claim(
   overrides: Partial<ClaimScoringEvent> = {}
 ): ClaimScoringEvent {
   return {
-    id: `${overrides.loopAddress ?? loopAddress}-${periodNumber}`,
+    id: `${overrides.loopId ?? loopId}-${periodNumber}`,
     userAddress,
-    loopAddress,
+    loopId,
     chainId,
     periodNumber,
     blockNumber: periodNumber,
@@ -212,10 +215,7 @@ describe("loop scoring", () => {
       testConfig
     )
     const secondLoop = computeLoopStatsFromClaims(
-      [
-        claim(1, { loopAddress: secondLoopAddress }),
-        claim(3, { loopAddress: secondLoopAddress }),
-      ],
+      [claim(1, { loopId: secondLoopId }), claim(3, { loopId: secondLoopId })],
       testConfig
     )
 
@@ -249,33 +249,32 @@ describe("loop scoring", () => {
     const full = computeLoopStatsFromClaims(events, testConfig)
     const incremental = events.reduce(
       (stats, event) => applyClaimToLoopStats(stats, event, testConfig),
-      createEmptyLoopStats({ userAddress, loopAddress, chainId })
+      createEmptyLoopStats({ userAddress, loopId, chainId })
     )
 
     expect(incremental).toEqual(full)
   })
 
-  it("normalizes address casing", () => {
+  it("normalizes user address casing and keeps numeric loop id", () => {
     const [event] = normalizeClaimEvents([
       claim(1, {
         userAddress: userAddress.toUpperCase(),
-        loopAddress: loopAddress.toUpperCase(),
       }),
     ])
 
     expect(event.userAddress).toBe(userAddress)
-    expect(event.loopAddress).toBe(loopAddress)
+    expect(event.loopId).toBe(loopId)
   })
 
   it("can return empty stats when fallback identity is provided", () => {
     const stats = computeLoopStatsFromClaims([], testConfig, {
       userAddress,
-      loopAddress,
+      loopId,
       chainId,
     })
 
     expect(stats).toEqual(
-      createEmptyLoopStats({ userAddress, loopAddress, chainId })
+      createEmptyLoopStats({ userAddress, loopId, chainId })
     )
   })
 
@@ -293,10 +292,7 @@ describe("global scoring", () => {
       testConfig
     )
     const secondLoop = computeLoopStatsFromClaims(
-      [
-        claim(1, { loopAddress: secondLoopAddress }),
-        claim(2, { loopAddress: secondLoopAddress }),
-      ],
+      [claim(1, { loopId: secondLoopId }), claim(2, { loopId: secondLoopId })],
       testConfig
     )
     const global = computeGlobalStatsFromLoops(userAddress, [
@@ -321,15 +317,15 @@ describe("global scoring", () => {
       [
         claim(1, {
           userAddress: secondUserAddress,
-          loopAddress: secondLoopAddress,
+          loopId: secondLoopId,
         }),
         claim(2, {
           userAddress: secondUserAddress,
-          loopAddress: secondLoopAddress,
+          loopId: secondLoopId,
         }),
         claim(3, {
           userAddress: secondUserAddress,
-          loopAddress: secondLoopAddress,
+          loopId: secondLoopId,
         }),
       ],
       testConfig
@@ -404,13 +400,99 @@ describe("scoring sync cursors", () => {
     const query = buildClaimEventsQuery({
       fromBlock: true,
       afterEventId: true,
-      loopAddress: true,
+      loopId: true,
     })
 
     expect(query).toContain("orderBy: id")
     expect(query).toContain("id_gt: $afterEventId")
     expect(query).toContain("blockNumber_gte: $fromBlock")
-    expect(query).toContain("loop: $loopAddress")
+    expect(query).toContain("loop: $loopId")
     expect(query).not.toContain("skip")
+  })
+})
+
+describe("receipt claim scoring sync", () => {
+  it("extracts future loopId claim events from transaction receipt logs", () => {
+    const claimEvent = parseAbiItem(
+      "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
+    )
+    const txHash = `0x${"1".repeat(64)}` as `0x${string}`
+    const topics = encodeEventTopics({
+      abi: [claimEvent],
+      eventName: "Claim",
+      args: {
+        loopId: 42n,
+        claimer: userAddress,
+        periodNumber: 5n,
+      },
+    })
+    const data = encodeAbiParameters([{ type: "uint256" }], [100n])
+
+    const [event] = extractClaimEventsFromReceiptLogs({
+      logs: [
+        {
+          address: secondLoopAddress,
+          data,
+          topics,
+          logIndex: 7,
+        },
+      ],
+      txHash,
+      blockNumber: 123,
+      userAddress,
+      contractAddress: secondLoopAddress,
+      chainId,
+      periodNumber: 5,
+      loopId,
+    })
+
+    expect(event).toMatchObject({
+      id: `${txHash}-7`,
+      userAddress,
+      loopId,
+      chainId,
+      periodNumber: 5,
+      blockNumber: 123,
+      txHash,
+      logIndex: 7,
+      payout: "100",
+    })
+  })
+
+  it("ignores receipt claim logs for the wrong loop id", () => {
+    const claimEvent = parseAbiItem(
+      "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
+    )
+    const txHash = `0x${"2".repeat(64)}` as `0x${string}`
+    const topics = encodeEventTopics({
+      abi: [claimEvent],
+      eventName: "Claim",
+      args: {
+        loopId: 43n,
+        claimer: userAddress,
+        periodNumber: 5n,
+      },
+    })
+    const data = encodeAbiParameters([{ type: "uint256" }], [100n])
+
+    expect(
+      extractClaimEventsFromReceiptLogs({
+        logs: [
+          {
+            address: secondLoopAddress,
+            data,
+            topics,
+            logIndex: 7,
+          },
+        ],
+        txHash,
+        blockNumber: 123,
+        userAddress,
+        contractAddress: secondLoopAddress,
+        chainId,
+        periodNumber: 5,
+        loopId,
+      })
+    ).toEqual([])
   })
 })
