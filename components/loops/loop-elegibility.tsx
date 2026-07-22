@@ -45,7 +45,7 @@ export const LoopEligibility: React.FC<LoopEligibilityProps> = ({
   )
 }
 
-export const LoopCriteriaCard = ({
+const LoopCriteriaCard = ({
   label,
   value,
 }: {

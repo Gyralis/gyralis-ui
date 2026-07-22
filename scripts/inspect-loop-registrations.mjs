@@ -66,7 +66,6 @@ const upgradedClaimEvent = parseAbiItem(
 )
 
 const DEFAULT_CACHE_FILE = "data/loop-registration-cache.json"
-const DEFAULT_HISTORY_FILE = "data/history/loop-stats-history.json"
 
 function loadEnvFile(fileName) {
   const filePath = resolve(process.cwd(), fileName)
@@ -91,12 +90,7 @@ function loadEnvFile(fileName) {
 }
 
 function parseArgs(argv) {
-  const args = {
-    loop: "all",
-    format: "json",
-    cacheFile: DEFAULT_CACHE_FILE,
-    historyFile: DEFAULT_HISTORY_FILE,
-  }
+  const args = { loop: "all", format: "json", cacheFile: DEFAULT_CACHE_FILE }
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
@@ -112,9 +106,7 @@ function parseArgs(argv) {
     else if (arg === "--rpc-url") args.rpcUrl = readValue()
     else if (arg === "--up-to-period") args.upToPeriod = readValue()
     else if (arg === "--cache-file") args.cacheFile = readValue()
-    else if (arg === "--history-file") args.historyFile = readValue()
     else if (arg === "--refresh-all") args.refreshAll = true
-    else if (arg === "--skip-history") args.skipHistory = true
     else throw new Error(`Unknown argument: ${arg}`)
   }
 
@@ -592,121 +584,6 @@ function saveCache(cacheFile, cache) {
   writeFileSync(cachePath, `${JSON.stringify(cache, null, 2)}\n`)
 }
 
-function getHistoryFilePath(historyFile) {
-  return resolve(process.cwd(), historyFile)
-}
-
-function loadHistory(historyFile) {
-  const historyPath = getHistoryFilePath(historyFile)
-  if (!existsSync(historyPath)) {
-    return {
-      version: 1,
-      generatedFromCacheFile: DEFAULT_CACHE_FILE,
-      snapshots: [],
-    }
-  }
-
-  const parsed = JSON.parse(readFileSync(historyPath, "utf8"))
-  return {
-    version: parsed.version ?? 1,
-    generatedFromCacheFile:
-      parsed.generatedFromCacheFile ?? DEFAULT_CACHE_FILE,
-    snapshots: Array.isArray(parsed.snapshots) ? parsed.snapshots : [],
-  }
-}
-
-function saveHistory(historyFile, history) {
-  const historyPath = getHistoryFilePath(historyFile)
-  mkdirSync(resolve(historyPath, ".."), { recursive: true })
-  writeFileSync(historyPath, `${JSON.stringify(history, null, 2)}\n`)
-}
-
-function getSnapshotDate(recordedAt) {
-  return recordedAt.slice(0, 10)
-}
-
-function getSingleTokenTotal(tokenTotals) {
-  if (!Array.isArray(tokenTotals) || tokenTotals.length !== 1) return null
-  return tokenTotals[0]
-}
-
-function buildLoopHistorySnapshot(loopKey, loopEntry) {
-  return {
-    loopKey,
-    loopName: loopEntry.loopName ?? loopKey,
-    updatedAt: loopEntry.updatedAt ?? null,
-    lastProcessedPeriod: loopEntry.lastProcessedPeriod ?? null,
-    uniqueUserCount: loopEntry.uniqueUserCount ?? 0,
-    uniqueClaimUserCount: loopEntry.uniqueClaimUserCount ?? 0,
-    totalRegistrationsCount: loopEntry.stats?.totalRegistrationsCount ?? 0,
-    totalClaimsCount: loopEntry.stats?.totalClaimsCount ?? 0,
-    totalDistributedAmountRaw: loopEntry.stats?.totalRegisteredAmountRaw ?? "0",
-    totalDistributedAmountFormatted:
-      loopEntry.stats?.totalRegisteredAmountFormatted ?? "0",
-    tokenSymbol: loopEntry.token?.symbol ?? null,
-  }
-}
-
-function buildGlobalHistorySnapshot(globalCache) {
-  const primaryTokenTotal = getSingleTokenTotal(globalCache?.tokenTotals)
-
-  return {
-    updatedAt: globalCache?.updatedAt ?? null,
-    loopsIncluded: globalCache?.loopsIncluded ?? [],
-    uniqueUserCount: globalCache?.uniqueUserCount ?? 0,
-    uniqueClaimUserCount: globalCache?.uniqueClaimUserCount ?? 0,
-    totalRegistrationsCount: globalCache?.stats?.totalRegistrationsCount ?? 0,
-    totalClaimsCount: globalCache?.stats?.totalClaimsCount ?? 0,
-    totalDistributedAmountRaw:
-      primaryTokenTotal?.totalRegisteredAmountRaw ?? null,
-    totalDistributedAmountFormatted:
-      primaryTokenTotal?.totalRegisteredAmountFormatted ?? null,
-    tokenSymbol: primaryTokenTotal?.tokenSymbol ?? null,
-    tokenTotals: (globalCache?.tokenTotals ?? []).map((tokenTotal) => ({
-      tokenAddress: tokenTotal.tokenAddress ?? null,
-      tokenSymbol: tokenTotal.tokenSymbol ?? null,
-      tokenDecimals: tokenTotal.tokenDecimals ?? null,
-      totalDistributedAmountRaw: tokenTotal.totalRegisteredAmountRaw ?? "0",
-      totalDistributedAmountFormatted:
-        tokenTotal.totalRegisteredAmountFormatted ?? "0",
-      totalClaimedAmountRaw: tokenTotal.totalClaimedAmountRaw ?? "0",
-      totalClaimedAmountFormatted:
-        tokenTotal.totalClaimedAmountFormatted ?? "0",
-      totalUnclaimedAmountRaw: tokenTotal.totalUnclaimedAmountRaw ?? "0",
-      totalUnclaimedAmountFormatted:
-        tokenTotal.totalUnclaimedAmountFormatted ?? "0",
-    })),
-  }
-}
-
-function upsertHistorySnapshot(history, cache, cacheFile, recordedAt) {
-  const snapshotDate = getSnapshotDate(recordedAt)
-  const loopsSnapshot = {}
-
-  for (const [loopKey, loopEntry] of Object.entries(cache.loops ?? {})) {
-    if (loopEntry == null) continue
-    loopsSnapshot[loopKey] = buildLoopHistorySnapshot(loopKey, loopEntry)
-  }
-
-  const snapshotEntry = {
-    date: snapshotDate,
-    recordedAt,
-    cacheFile,
-    cacheUpdatedAt: cache.global?.updatedAt ?? recordedAt,
-    loops: loopsSnapshot,
-    global: buildGlobalHistorySnapshot(cache.global),
-  }
-
-  const existingSnapshotIndex = history.snapshots.findIndex(
-    (snapshot) => snapshot?.date === snapshotDate
-  )
-
-  if (existingSnapshotIndex === -1) history.snapshots.push(snapshotEntry)
-  else history.snapshots[existingSnapshotIndex] = snapshotEntry
-
-  history.snapshots.sort((a, b) => a.date.localeCompare(b.date))
-}
-
 function getCachedLoopEntry(cache, loop) {
   const cachedLoop = cache.loops[loop.key]
   if (!cachedLoop) return null
@@ -726,14 +603,7 @@ function mergeStoredPeriods(existingPeriods, updates) {
   }
 }
 
-function buildCacheLoopEntry(
-  loop,
-  currentPeriod,
-  lastEndedPeriod,
-  storedPeriods,
-  summary,
-  updatedAt
-) {
+function buildCacheLoopEntry(loop, currentPeriod, lastEndedPeriod, storedPeriods, summary) {
   return {
     loopName: loop.name,
     loopAddress: loop.address,
@@ -750,7 +620,7 @@ function buildCacheLoopEntry(
     uniqueClaimUserCount: summary.uniqueClaimUserCount,
     stats: summary.stats,
     periods: storedPeriods,
-    updatedAt,
+    updatedAt: new Date().toISOString(),
   }
 }
 
@@ -765,7 +635,7 @@ function buildCachedPeriods(storedPeriods, summaryPeriods) {
   return cachedPeriods
 }
 
-function rebuildGlobalCache(cache, updatedAt) {
+function rebuildGlobalCache(cache) {
   const loopEntries = Object.entries(cache.loops ?? {}).filter(([, value]) => value != null)
   const globalUsers = new Set()
   const globalClaimUsers = new Set()
@@ -836,7 +706,7 @@ function rebuildGlobalCache(cache, updatedAt) {
         ),
       }))
       .sort((a, b) => a.tokenAddress.localeCompare(b.tokenAddress)),
-    updatedAt,
+    updatedAt: new Date().toISOString(),
   }
 }
 
@@ -860,7 +730,7 @@ function printTable(results) {
   }
 }
 
-async function inspectLoop(loop, args, cache, runTimestamp) {
+async function inspectLoop(loop, args, cache) {
   const chainRpcEnvName = loop.chain.id === base.id ? "BASE_RPC_URL" : "GNOSIS_RPC_URL"
   const rpcUrl = args.rpcUrl ?? process.env[chainRpcEnvName]
   const client = createPublicClient({
@@ -979,10 +849,9 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
         pruneStoredPeriods(mergeStoredPeriods(cachedLoop?.periods, storedPeriods), cacheHighWaterMark),
         cacheSummary.periods
       ),
-      cacheSummary,
-      runTimestamp
+      cacheSummary
     )
-    rebuildGlobalCache(cache, runTimestamp)
+    rebuildGlobalCache(cache)
   }
 
   return {
@@ -1008,27 +877,15 @@ async function main() {
 
   const loopKeys = getLoopKeys(args.loop)
   const cache = loadCache(args.cacheFile)
-  const runTimestamp = new Date().toISOString()
   const results = []
 
   for (const loopKey of loopKeys) {
-    const result = await inspectLoop(
-      { ...loops[loopKey], key: loopKey },
-      args,
-      cache,
-      runTimestamp
-    )
+    const result = await inspectLoop({ ...loops[loopKey], key: loopKey }, args, cache)
     results.push(result)
   }
 
-  rebuildGlobalCache(cache, runTimestamp)
+  rebuildGlobalCache(cache)
   saveCache(args.cacheFile, cache)
-  if (args.upToPeriod == null && !args.skipHistory) {
-    const history = loadHistory(args.historyFile)
-    history.generatedFromCacheFile = args.cacheFile
-    upsertHistorySnapshot(history, cache, args.cacheFile, runTimestamp)
-    saveHistory(args.historyFile, history)
-  }
 
   if (args.format === "table") {
     printTable(results)

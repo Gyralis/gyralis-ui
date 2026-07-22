@@ -1,10 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { parseAbiItem, type Address, type Log } from "viem"
+import { parseAbiItem, type Address } from "viem"
 import { usePublicClient } from "wagmi"
-
-import { getLogsChunked } from "./get-logs-chunked"
 
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
@@ -14,13 +12,6 @@ const upgradedRegisterEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
-type RegisterLog = Log<bigint, number, false, typeof legacyRegisterEventAbiItem>
-type UpgradedRegisterLog = Log<
-  bigint,
-  number,
-  false,
-  typeof upgradedRegisterEventAbiItem
->
 
 interface UseRegisteredUsersResult {
   users: Address[]
@@ -32,8 +23,7 @@ export function useRegisteredUsers(
   chainId: number,
   periodNumber?: bigint,
   refreshKey = 0,
-  enabled = true,
-  blockRange?: { fromBlock: bigint; toBlock: bigint }
+  enabled = true
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
@@ -54,39 +44,28 @@ export function useRegisteredUsers(
       try {
         const latestBlock = await publicClient.getBlockNumber()
         const fromBlock =
-          blockRange?.fromBlock ??
-          (latestBlock > LOG_LOOKBACK_BLOCKS
+          latestBlock > LOG_LOOKBACK_BLOCKS
             ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n)
-        const toBlock = blockRange?.toBlock ?? latestBlock
-        const chunkSize = blockRange ? 9n : undefined
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          getLogsChunked(
-            publicClient,
-            {
-              address: loopAddress,
-              event: legacyRegisterEventAbiItem,
-              args: {
-                periodNumber,
-              },
-              fromBlock,
-              toBlock,
+          publicClient.getLogs({
+            address: loopAddress,
+            event: legacyRegisterEventAbiItem,
+            args: {
+              periodNumber,
             },
-            chunkSize
-          ).then((logs) => logs as RegisterLog[]),
-          getLogsChunked(
-            publicClient,
-            {
-              address: loopAddress,
-              event: upgradedRegisterEventAbiItem,
-              args: {
-                periodNumber,
-              },
-              fromBlock,
-              toBlock,
+            fromBlock,
+            toBlock: "latest",
+          }),
+          publicClient.getLogs({
+            address: loopAddress,
+            event: upgradedRegisterEventAbiItem,
+            args: {
+              periodNumber,
             },
-            chunkSize
-          ).then((logs) => logs as UpgradedRegisterLog[]),
+            fromBlock,
+            toBlock: "latest",
+          }),
         ])
 
         if (cancelled) {
@@ -114,16 +93,7 @@ export function useRegisteredUsers(
     return () => {
       cancelled = true
     }
-  }, [
-    blockRange?.fromBlock,
-    blockRange?.toBlock,
-    chainId,
-    enabled,
-    loopAddress,
-    periodNumber,
-    publicClient,
-    refreshKey,
-  ])
+  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
 
   return { users, loading }
 }

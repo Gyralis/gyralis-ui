@@ -9,7 +9,6 @@ import { defaultDashboardLoopKeys, loopDashboardMeta } from "@/data/loop-dashboa
 import type {
   DashboardCurrentPeriodOverview,
   DashboardDistributionByPeriodRow,
-  DashboardGrowthStat,
   DashboardLoopKey,
   DashboardLoopSummary,
   DashboardLoopTableRow,
@@ -20,8 +19,6 @@ import type {
   DashboardPeriodTableRow,
   DashboardTokenSummary,
   GetDashboardDataOptions,
-  RawHistorySnapshotEntry,
-  RawLoopStatsHistory,
   RawGlobalTokenTotal,
   RawLoopCacheEntry,
   RawLoopPeriodEntry,
@@ -29,10 +26,6 @@ import type {
 } from "./types"
 
 const DEFAULT_CACHE_FILE_PATH = resolve(process.cwd(), "data/loop-registration-cache.json")
-const DEFAULT_HISTORY_FILE_PATH = resolve(
-  process.cwd(),
-  "data/history/loop-stats-history.json"
-)
 const DEFAULT_PERIODS_BACK = 6
 const periodEndedShortFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -246,8 +239,7 @@ function buildOverview(
   loopSummaries: DashboardLoopSummary[],
   tokenSummary: DashboardTokenSummary | undefined,
   uniqueRegisteredUsers: number,
-  uniqueClaimUsers: number,
-  weekOverWeek: DashboardOverviewCards["weekOverWeek"]
+  uniqueClaimUsers: number
 ): DashboardOverviewCards {
   const currentPeriod = loopSummaries.reduce<number | null>((maxPeriod, loop) => {
     if (loop.lastProcessedPeriod == null) return maxPeriod
@@ -283,7 +275,6 @@ function buildOverview(
       (total, period) => total + period.newUserCount,
       0
     ),
-    weekOverWeek,
   }
 }
 
@@ -544,159 +535,15 @@ async function readLoopRegistrationCache(cacheFilePath: string): Promise<RawLoop
   return JSON.parse(contents) as RawLoopRegistrationCache
 }
 
-async function readLoopStatsHistory(historyFilePath: string): Promise<RawLoopStatsHistory | null> {
-  try {
-    const contents = await readFile(historyFilePath, "utf8")
-    return JSON.parse(contents) as RawLoopStatsHistory
-  } catch {
-    return null
-  }
-}
-
-function getSortedHistorySnapshots(
-  history: RawLoopStatsHistory | null
-): RawHistorySnapshotEntry[] {
-  return [...(history?.snapshots ?? [])]
-    .filter((snapshot) => typeof snapshot?.date === "string" && snapshot.date.length > 0)
-    .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
-}
-
-function formatHistoryDateLabel(value: string | null | undefined) {
-  if (!value) return null
-
-  const parsed = new Date(`${value}T00:00:00Z`)
-  if (Number.isNaN(parsed.getTime())) return value
-
-  return periodEndedShortFormatter.format(parsed)
-}
-
-function computeGrowthPercent(current: number, previous: number): number | null {
-  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null
-  return Number((((current - previous) / previous) * 100).toFixed(2))
-}
-
-function buildNumberGrowthStat(
-  currentValue: number,
-  previousValue: number | undefined,
-  previousDate: string | null | undefined
-): DashboardGrowthStat | null {
-  if (typeof previousValue !== "number") return null
-
-  return {
-    currentValue: currentValue.toString(),
-    previousValue: previousValue.toString(),
-    deltaValue: (currentValue - previousValue).toString(),
-    deltaPercent: computeGrowthPercent(currentValue, previousValue),
-    previousDate: formatHistoryDateLabel(previousDate),
-  }
-}
-
-function buildAmountGrowthStat(
-  currentValue: string | null,
-  previousValue: string | null | undefined,
-  previousDate: string | null | undefined
-): DashboardGrowthStat | null {
-  if (!currentValue || !previousValue) return null
-
-  const current = Number.parseFloat(currentValue)
-  const previous = Number.parseFloat(previousValue)
-  if (!Number.isFinite(current) || !Number.isFinite(previous)) return null
-
-  return {
-    currentValue,
-    previousValue,
-    deltaValue: (current - previous).toString(),
-    deltaPercent: computeGrowthPercent(current, previous),
-    previousDate: formatHistoryDateLabel(previousDate),
-  }
-}
-
-function buildOverviewGrowth(
-  history: RawLoopStatsHistory | null,
-  selectedLoopKeys: DashboardLoopKey[],
-  uniqueRegisteredUsers: number,
-  totalDistributedAmount: string | null,
-  totalRegistrations: number,
-  totalClaims: number
-): DashboardOverviewCards["weekOverWeek"] {
-  const snapshots = getSortedHistorySnapshots(history)
-  const previousSnapshot = snapshots.length > 1 ? snapshots[snapshots.length - 2] : null
-
-  const previousDate = previousSnapshot?.date ?? null
-
-  const previousTotals = selectedLoopKeys.reduce(
-    (totals, loopKey) => {
-      const loopSnapshot = previousSnapshot?.loops?.[loopKey]
-      if (!loopSnapshot) return totals
-
-      totals.uniqueUsers += loopSnapshot.uniqueUserCount ?? 0
-      totals.totalRegistrations += loopSnapshot.totalRegistrationsCount ?? 0
-      totals.totalClaims += loopSnapshot.totalClaimsCount ?? 0
-      totals.totalDistributedRaw += BigInt(loopSnapshot.totalDistributedAmountRaw ?? "0")
-      return totals
-    },
-    {
-      uniqueUsers: 0,
-      totalRegistrations: 0,
-      totalClaims: 0,
-      totalDistributedRaw: 0n,
-    }
-  )
-  const previousLoopsIncluded = new Set(previousSnapshot?.global?.loopsIncluded ?? [])
-  const selectedLoopsMatchPreviousGlobal =
-    previousLoopsIncluded.size === selectedLoopKeys.length &&
-    selectedLoopKeys.every((loopKey) => previousLoopsIncluded.has(loopKey))
-  const previousUniqueRegisteredUsers = selectedLoopsMatchPreviousGlobal
-    ? previousSnapshot?.global?.uniqueUserCount
-    : undefined
-
-  return {
-    uniqueRegisteredUsers:
-      previousSnapshot == null || previousUniqueRegisteredUsers == null
-        ? null
-        : buildNumberGrowthStat(
-            uniqueRegisteredUsers,
-            previousUniqueRegisteredUsers,
-            previousDate
-          ),
-    totalDistributedAmount:
-      previousSnapshot == null
-        ? null
-        : buildAmountGrowthStat(
-            totalDistributedAmount,
-            formatUnits(previousTotals.totalDistributedRaw, 18),
-            previousDate
-          ),
-    totalRegistrations:
-      previousSnapshot == null
-        ? null
-        : buildNumberGrowthStat(
-            totalRegistrations,
-            previousTotals.totalRegistrations,
-            previousDate
-          ),
-    totalClaims:
-      previousSnapshot == null
-        ? null
-        : buildNumberGrowthStat(totalClaims, previousTotals.totalClaims, previousDate),
-  }
-}
-
 export async function getDashboardPageData(
   options: GetDashboardDataOptions = {}
 ): Promise<DashboardPageData> {
   const cacheFilePath = options.cacheFilePath
     ? resolve(process.cwd(), options.cacheFilePath)
     : DEFAULT_CACHE_FILE_PATH
-  const historyFilePath = options.historyFilePath
-    ? resolve(process.cwd(), options.historyFilePath)
-    : DEFAULT_HISTORY_FILE_PATH
   const selectedLoopKeys = filterLoopKeys(options.loopKeys)
   const periodsBack = options.periodsBack ?? DEFAULT_PERIODS_BACK
-  const [cache, history] = await Promise.all([
-    readLoopRegistrationCache(cacheFilePath),
-    readLoopStatsHistory(historyFilePath),
-  ])
+  const cache = await readLoopRegistrationCache(cacheFilePath)
 
   const loopSummaries = selectedLoopKeys
     .map((loopKey) => {
@@ -715,29 +562,12 @@ export async function getDashboardPageData(
   const uniqueClaimUsers = new Set(
     selectedLoopKeys.flatMap((loopKey) => cache.loops?.[loopKey]?.uniqueClaimUsers ?? [])
   )
-  const totalRegistrations = loopSummaries.reduce(
-    (total, loop) => total + loop.totalRegistrationsCount,
-    0
-  )
-  const totalClaims = loopSummaries.reduce(
-    (total, loop) => total + loop.totalClaimsCount,
-    0
-  )
-  const weekOverWeek = buildOverviewGrowth(
-    history,
-    selectedLoopKeys,
-    uniqueUsers.size,
-    primaryTokenSummary?.totalDistributedAmount ?? null,
-    totalRegistrations,
-    totalClaims
-  )
 
   const overview = buildOverview(
     loopSummaries,
     primaryTokenSummary,
     uniqueUsers.size,
-    uniqueClaimUsers.size,
-    weekOverWeek
+    uniqueClaimUsers.size
   )
 
   return {

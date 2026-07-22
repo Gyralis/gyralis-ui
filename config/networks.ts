@@ -22,8 +22,6 @@ const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY?.trim()
 const mainnetRpcUrl = alchemyApiKey
   ? `https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`
   : undefined
-const baseRpcUrl =
-  process.env.NEXT_PUBLIC_BASE_RPC_URL?.trim() || "https://mainnet.base.org"
 
 export const chains = [
   mainnet,
@@ -53,5 +51,5 @@ export const transports = {
   [arbitrum.id]: http(),
   [polygon.id]: http(),
   [gnosis.id]: http(),
-  [base.id]: http(baseRpcUrl),
+  [base.id]: http(),
 } as const

@@ -11,7 +11,7 @@ export async function upsertUserLoopStats(stats: UserLoopScoringStats) {
     create: {
       id,
       userAddress: stats.userAddress,
-      loopAddress: stats.loopAddress,
+      loopId: stats.loopId,
       chainId: stats.chainId,
       totalClaims: stats.totalClaims,
       claimPoints: stats.claimPoints,
@@ -45,7 +45,7 @@ export async function getUserLoopStatsForUser(userAddress: string) {
 
 export async function getUserLoopStats(input: {
   userAddress: string
-  loopAddress: string
+  loopId: number
   chainId: number
 }) {
   return prisma.userLoopStats.findUnique({

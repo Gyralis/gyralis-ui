@@ -1,10 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { parseAbiItem, type Address, type Log } from "viem"
+import { parseAbiItem, type Address } from "viem"
 import { usePublicClient } from "wagmi"
-
-import { getLogsChunked } from "./get-logs-chunked"
 
 const legacyClaimEventAbiItem = parseAbiItem(
   "event Claim(address indexed claimer, uint256 periodNumber, uint256 payout)"
@@ -14,13 +12,6 @@ const upgradedClaimEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
-type ClaimLog = Log<bigint, number, false, typeof legacyClaimEventAbiItem>
-type UpgradedClaimLog = Log<
-  bigint,
-  number,
-  false,
-  typeof upgradedClaimEventAbiItem
->
 
 interface UseClaimedUsersResult {
   users: Address[]
@@ -33,8 +24,7 @@ export function useClaimedUsers(
   chainId: number,
   periodNumber?: bigint,
   refreshKey = 0,
-  enabled = true,
-  blockRange?: { fromBlock: bigint; toBlock: bigint }
+  enabled = true
 ): UseClaimedUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
@@ -57,33 +47,22 @@ export function useClaimedUsers(
       try {
         const latestBlock = await publicClient.getBlockNumber()
         const fromBlock =
-          blockRange?.fromBlock ??
-          (latestBlock > LOG_LOOKBACK_BLOCKS
+          latestBlock > LOG_LOOKBACK_BLOCKS
             ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n)
-        const toBlock = blockRange?.toBlock ?? latestBlock
-        const chunkSize = blockRange ? 9n : undefined
+            : 0n
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          getLogsChunked(
-            publicClient,
-            {
-              address: loopAddress,
-              event: legacyClaimEventAbiItem,
-              fromBlock,
-              toBlock,
-            },
-            chunkSize
-          ).then((logs) => logs as ClaimLog[]),
-          getLogsChunked(
-            publicClient,
-            {
-              address: loopAddress,
-              event: upgradedClaimEventAbiItem,
-              fromBlock,
-              toBlock,
-            },
-            chunkSize
-          ).then((logs) => logs as UpgradedClaimLog[]),
+          publicClient.getLogs({
+            address: loopAddress,
+            event: legacyClaimEventAbiItem,
+            fromBlock,
+            toBlock: "latest",
+          }),
+          publicClient.getLogs({
+            address: loopAddress,
+            event: upgradedClaimEventAbiItem,
+            fromBlock,
+            toBlock: "latest",
+          }),
         ])
 
         if (cancelled) {
@@ -134,16 +113,7 @@ export function useClaimedUsers(
     return () => {
       cancelled = true
     }
-  }, [
-    blockRange?.fromBlock,
-    blockRange?.toBlock,
-    chainId,
-    enabled,
-    loopAddress,
-    periodNumber,
-    publicClient,
-    refreshKey,
-  ])
+  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
 
   return { users, payouts, loading }
 }

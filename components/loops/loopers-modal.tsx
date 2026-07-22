@@ -9,12 +9,10 @@ import { usePublicClient, useReadContract } from "wagmi"
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   getLoopContractAbi,
-  getLoopContractMethods,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
-import { usePeriodLogBlockRange } from "@/lib/hooks/app/use-period-log-block-range"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
 import {
@@ -37,8 +35,6 @@ interface LoopersModalProps {
   loopToken?: Address
   loopTitle?: string
   onOpenChange: (open: boolean) => void
-  periodLength?: bigint
-  firstPeriodStart?: bigint
   refreshKey?: number
 }
 
@@ -124,8 +120,6 @@ export function LoopersModal({
   loopToken,
   loopTitle,
   onOpenChange,
-  periodLength,
-  firstPeriodStart,
   refreshKey = 0,
 }: LoopersModalProps) {
   const [periodOffset, setPeriodOffset] = useState(0)
@@ -144,10 +138,6 @@ export function LoopersModal({
     () => getLoopContractAbi(chainId, loopContractType),
     [chainId, loopContractType]
   )
-  const loopMethods = useMemo(
-    () => getLoopContractMethods(loopContractType),
-    [loopContractType]
-  )
 
   const selectedPeriod = useMemo(() => {
     if (currentPeriod == null) {
@@ -157,75 +147,14 @@ export function LoopersModal({
     const nextPeriod = currentPeriod + BigInt(periodOffset)
     return nextPeriod >= 0n ? nextPeriod : 0n
   }, [currentPeriod, periodOffset])
-  const isSuperLoop = loopContractType === "superLoop"
-  const periodRangesReady =
-    isSuperLoop &&
-    selectedPeriod != null &&
-    firstPeriodStart != null &&
-    periodLength != null
-  const registerWindowPeriod =
-    selectedPeriod != null && selectedPeriod > 0n ? selectedPeriod - 1n : 0n
-  const isSelectedFuturePeriod =
-    currentPeriod != null && selectedPeriod != null && selectedPeriod > currentPeriod
-  const registrationRange = usePeriodLogBlockRange({
-    chainId,
-    enabled: periodRangesReady,
-    firstPeriodStart,
-    periodLength,
-    windowPeriod: registerWindowPeriod,
-  })
-  const claimRange = usePeriodLogBlockRange({
-    chainId,
-    enabled: periodRangesReady && !isSelectedFuturePeriod,
-    firstPeriodStart,
-    periodLength,
-    windowPeriod: selectedPeriod,
-  })
-  const registrationBlockRange =
-    periodRangesReady &&
-    registrationRange.fromBlock != null &&
-    registrationRange.toBlock != null
-      ? {
-          fromBlock: registrationRange.fromBlock,
-          toBlock: registrationRange.toBlock,
-        }
-      : undefined
-  const claimBlockRange =
-    periodRangesReady &&
-    !isSelectedFuturePeriod &&
-    claimRange.fromBlock != null &&
-    claimRange.toBlock != null
-      ? {
-          fromBlock: claimRange.fromBlock,
-          toBlock: claimRange.toBlock,
-        }
-      : undefined
-  const registeredUsersEnabled =
-    !isSuperLoop || registrationBlockRange != null
-  const claimedUsersEnabled =
-    !isSelectedFuturePeriod && (!isSuperLoop || claimBlockRange != null)
 
   const { users: registeredUsers, loading: loadingRegisteredUsers } =
-    useRegisteredUsers(
-      loopAddress,
-      chainId,
-      selectedPeriod,
-      refreshKey,
-      registeredUsersEnabled,
-      registrationBlockRange
-    )
+    useRegisteredUsers(loopAddress, chainId, selectedPeriod, refreshKey)
   const {
     users: claimedUsers,
     payouts: claimedPayouts,
     loading: loadingClaimedUsers,
-  } = useClaimedUsers(
-    loopAddress,
-    chainId,
-    selectedPeriod,
-    refreshKey,
-    claimedUsersEnabled,
-    claimBlockRange
-  )
+  } = useClaimedUsers(loopAddress, chainId, selectedPeriod, refreshKey)
   const { data: loopBalance } = useLoopTokenBalance({
     address: loopAddress,
     chainId,
@@ -236,7 +165,7 @@ export function LoopersModal({
   const { data: selectedPeriodPayout } = useReadContract({
     address: loopAddress,
     abi: loopAbi,
-    functionName: loopMethods.getPeriodIndividualPayout,
+    functionName: "getPeriodIndividualPayout",
     args: [selectedPeriod ?? 0n],
     chainId,
     query: {
@@ -344,11 +273,7 @@ export function LoopersModal({
           2
         )} ${loopBalance.symbol}`
       : "--"
-  const isLoading =
-    registrationRange.loading ||
-    claimRange.loading ||
-    loadingRegisteredUsers ||
-    loadingClaimedUsers
+  const isLoading = loadingRegisteredUsers || loadingClaimedUsers
   const canGoBack =
     currentPeriod != null && currentPeriod + BigInt(periodOffset - 1) >= 0n
   const canGoForward =

@@ -1,7 +1,6 @@
 import { Address } from "viem"
 
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
-import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
 
@@ -24,18 +23,12 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
-  historyLoopKey: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   passportMinScore: number
   enabled: boolean
   claimAmount?: string // New: Amount user can claim
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
-  rewardsSummary?: string
-  statusLabel?: string
-  sponsorName?: string
-  sponsorLogoUrl?: string
-  sponsorUrl?: string
 }
 
 export const LoopCardsData: LoopCardData[] = [
@@ -49,7 +42,7 @@ export const LoopCardsData: LoopCardData[] = [
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "1Hive membership in Gardens required",
+    eligibility: "1Hive membership required",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -57,9 +50,8 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
-    historyLoopKey: "1hive",
     eligibilityProvider: "garden_1hive",
-    passportMinScore: 0,
+    passportMinScore: 15,
     enabled: true,
   },
   {
@@ -72,7 +64,7 @@ export const LoopCardsData: LoopCardData[] = [
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "Redeem Gyralis offer in Blockscout Merits",
+    eligibility: "Gyralis offer redemption required",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -80,63 +72,41 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
-    historyLoopKey: "blockscout",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
   },
-  {
-    id: 5,
-    title: "SuperLoops",
-    by: "Test Team",
-    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
-    description:
-      "The first SuperLoop on Base, streaming rewards you can claim daily.",
-    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-    eligibilityLogoUrl: "/images/inactive_loop.png",
-    shieldScore: "Passport Score 15+",
-    eligibility: "TBA",
-    chainBadgeColor: "bg-custom-green",
-    shieldAccount: "0xtt...453",
-    shieldValue: "26",
-    super: true,
-    contractType: "superLoop",
-    chainId: 8453,
-    chainName: "Base",
-    historyLoopKey: "test-superloops",
-    eligibilityProvider: "blockscout",
-    passportMinScore: 0,
-    enabled: false,
-    rewardsSummary: "TBA",
-    sponsorName: "TBA",
-    sponsorLogoUrl: "/1Hive-logo.png",
-    sponsorUrl: "https://1hive.org",
-  },
-  {
-    id: 6,
-    title: "True Loopers",
-    by: "Gyralis",
-    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
-    description: "A rewards Loop for Gyralis users who keep showing up.",
-    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-    eligibilityLogoUrl: "/images/inactive_loop.png",
-    shieldScore: "Passport Score 15+",
-    eligibility: "+50 Claims in Gyralis",
-    chainBadgeColor: "bg-custom-green",
-    shieldAccount: "0xtt...453",
-    shieldValue: "26",
-    super: false,
-    contractType: "loop",
-    chainId: 8453,
-    chainName: "Base",
-    historyLoopKey: "test-superloops",
-    eligibilityProvider: "blockscout",
-    passportMinScore: 0,
-    enabled: false,
-    rewardsSummary: "Up to $50 USDC",
-    statusLabel: "Preparing",
-    sponsorName: "TBA",
-    sponsorLogoUrl: "/1Hive-logo.png",
-    sponsorUrl: "https://1hive.org",
-  },
+  // {
+  //   id: 5,
+  //   title: "Blockscout Merits",
+  //   by: "Gyralis Team",
+  //   address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
+  //   description:
+  //     "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
+  //   token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+  //   eligibilityLogoUrl: "/blockscout-logo.png",
+  //   shieldScore: "Passport Score 15+",
+  //   eligibility: "Gyralis offer redemption required",
+  //   chainBadgeColor: "bg-custom-green",
+  //   shieldAccount: "0xtt...453",
+  //   shieldValue: "26",
+  //   super: true,
+  //   contractType: "superLoop",
+  //   chainId: 8453,
+  //   chainName: "Base",
+  //   eligibilityProvider: "blockscout",
+  //   passportMinScore: 0,
+  //   enabled: true,
+  // },
 ]
+
+export function getLoopCardById(loopId: number | string) {
+  const parsedLoopId = Number(loopId)
+  if (!Number.isSafeInteger(parsedLoopId)) return undefined
+  return LoopCardsData.find((loop) => loop.id === parsedLoopId)
+}
+
+export function getEnabledLoopCardById(loopId: number | string) {
+  const loop = getLoopCardById(loopId)
+  return loop?.enabled ? loop : undefined
+}
