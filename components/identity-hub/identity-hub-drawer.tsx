@@ -420,12 +420,12 @@ export const IdentityHubDrawer = ({
       <SheetTrigger asChild>
         <button
           className={cn(
-            "inline-flex shrink-0 items-center justify-center gap-2 rounded-md border px-4 text-sm font-semibold shadow-sm transition-colors",
+            "inline-flex shrink-0 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold shadow-sm backdrop-blur transition-colors",
             hasTriggerScore
-              ? "border-primary/50 bg-primary/10 text-foreground ring-1 ring-primary/10 hover:border-primary/70 hover:bg-primary/15"
+              ? "bg-background/70 text-foreground hover:bg-accent/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.08]"
               : triggerNeedsAttention
-              ? "border-amber-300 bg-amber-50 text-amber-900 ring-1 ring-amber-200/70 hover:border-amber-400 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200 dark:ring-amber-900/70 dark:hover:bg-amber-950"
-              : "border-border bg-background hover:bg-accent hover:text-accent-foreground",
+              ? "bg-amber-50 text-amber-900 hover:bg-amber-100 dark:bg-amber-950/60 dark:text-amber-200 dark:hover:bg-amber-950"
+              : "bg-background/70 hover:bg-accent/60 hover:text-accent-foreground dark:bg-white/[0.04] dark:hover:bg-white/[0.07]",
             compact ? "h-10 text-xs" : "h-10",
             className
           )}
@@ -436,12 +436,12 @@ export const IdentityHubDrawer = ({
               triggerNeedsAttention ? "text-amber-600" : "text-primary"
             )}
           />
-          <span>GyraHub</span>
+          {!hasTriggerScore && <span>GyraHub</span>}
           {address && scoreQuery.isLoading && (
             <HiArrowPath className="size-4 animate-spin text-muted-foreground" />
           )}
           {hasTriggerScore && (
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold tabular-nums text-primary-foreground">
+            <span className="text-xs font-bold tabular-nums text-foreground">
               {triggerScoreValue.toFixed(2)}
             </span>
           )}

@@ -4,12 +4,12 @@ export function normalizeDbAddress(address: string): string {
 
 export function userLoopStatsId(input: {
   chainId: number
-  loopId: number
+  loopAddress: string
   userAddress: string
 }): string {
   return [
     input.chainId,
-    input.loopId,
+    normalizeDbAddress(input.loopAddress),
     normalizeDbAddress(input.userAddress),
   ].join("-")
 }
@@ -20,16 +20,8 @@ export function globalLeaderboardEntryId(userAddress: string): string {
 
 export function loopLeaderboardEntryId(input: {
   chainId: number
-  loopId: number
+  loopAddress: string
   userAddress: string
 }): string {
   return `loop-${userLoopStatsId(input)}`
-}
-
-export function processedClaimEventId(input: {
-  chainId: number
-  txHash: string
-  logIndex: number
-}): string {
-  return [input.chainId, input.txHash.toLowerCase(), input.logIndex].join("-")
 }
