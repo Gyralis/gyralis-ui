@@ -204,23 +204,23 @@ export function useLoopSettingsDetails({
   const distributionTooltip = isSuperLoop
     ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
     : settings && settings.percentPerPeriod > 0n
-      ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
-      : "The loop balance is distributed evenly among registered users each period."
+    ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
+    : "The loop balance is distributed evenly among registered users each period."
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
       case "active":
-        return isSuper ? "Accumulation ends in" : "Active period ends in"
+        return isSuperLoop ? "Accumulation ends in" : "Active period ends in"
       case "entered":
-        return isSuper ? "Accumulation starts in" : "Claim opens in"
+        return isSuperLoop ? "Accumulation starts in" : "Claim opens in"
       case "claimable":
         return "Claim period ends in"
       case "claimed":
-        return "Next claim opens in"
+        return isSuperLoop ? "Accumulation starts in" : "Next claim opens in"
       default:
         return "Entry closes in"
     }
-  }, [claimStatus, isSuper])
+  }, [claimStatus, isSuperLoop])
 
   const handleClaimSuccess = () => {
     void refetchLoopBalance()

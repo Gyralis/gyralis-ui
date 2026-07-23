@@ -106,7 +106,7 @@ export const LoopCardsData: LoopCardData[] = [
     historyLoopKey: "test-superloops",
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
-    enabled: false,
+    enabled: true,
     rewardsSummary: "TBA",
     sponsorName: "TBA",
     sponsorLogoUrl: "/1Hive-logo.png",

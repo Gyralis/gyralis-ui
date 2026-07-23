@@ -22,6 +22,7 @@ import {
 import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import { useUserPeriodRegistrations } from "@/lib/hooks/app/use-user-period-registrations"
 import { trimFormattedBalance } from "@/lib/utils"
 
 import { Button } from "../ui/button"
@@ -162,6 +163,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     chainId,
     query: {
       enabled: !!connectedAccount,
+      refetchInterval: 10_000,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -174,6 +176,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     currentPeriodValue != null && currentPeriodValue > 0n
       ? currentPeriodValue - 1n
       : undefined
+  const superLoopRegistrations = useUserPeriodRegistrations({
+    chainId,
+    currentPeriod: currentPeriodValue,
+    enabled: isSuperLoop,
+    firstPeriodStart: settings?.firstPeriodStart,
+    loopAddress: address,
+    periodLength: settings?.periodLength,
+    refreshKey: registrationRefreshKey,
+    userAddress: connectedAccount,
+  })
 
   const {
     data: currentPeriodPayout,
@@ -223,34 +235,31 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimableAmount = isSuperLoop
     ? previousPeriodPayoutAmount
     : periodPayoutAmount
+  const isRegisteredForClaim = isSuperLoop
+    ? superLoopRegistrations.registeredPrevious
+    : isRegistered
   const isClaimableNow =
-    isRegistered &&
-    !hasClaimed &&
-    claimableAmount > 0n &&
-    (!isSuperLoop || isRegisteredForPreviousPeriod)
+    isRegisteredForClaim && !hasClaimed && claimableAmount > 0n
   const isWaitingNextPeriod =
     !isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
-  const isRegisteredAhead = hasEnteredNextPeriod || isRegisteredForNextPeriod
-  const isWaitingForAccumulationPeriod =
-    isSuperLoop &&
-    isRegistered &&
-    !isRegisteredForCurrentPeriod &&
-    !hasClaimed &&
-    !isClaimableNow
+  const registeredNext = isSuperLoop
+    ? superLoopRegistrations.registeredNext
+    : isRegisteredForNextPeriod
+  const isRegisteredAhead = hasEnteredNextPeriod || registeredNext
   const isActiveThisPeriod =
     isSuperLoop &&
     isRegistered &&
     !hasClaimed &&
     !isClaimableNow &&
-    isRegisteredForCurrentPeriod
-  const isEnteredForNextPeriod =
-    (isSuperLoop
-      ? isWaitingForAccumulationPeriod || isRegisteredAhead
-      : isRegisteredAhead) || isWaitingNextPeriod
+    !superLoopRegistrations.isLoading &&
+    !registeredNext
+  const isEnteredForNextPeriod = isRegisteredAhead || isWaitingNextPeriod
   const isLoadingOnchainState =
     (currentPeriodOverride == null && isLoadingCurrentPeriod) ||
     isLoadingCurrentPeriodPayout ||
-    (isSuperLoop && isLoadingSuperLoopPreviousPeriodPayout)
+    (isSuperLoop &&
+      (isLoadingSuperLoopPreviousPeriodPayout ||
+        superLoopRegistrations.isLoading))
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
   const wrongNetwork = currentChainId !== chainId
   const claimAmountLabel = loopBalance
@@ -300,6 +309,12 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   }, [address, chainId, connectedAccount, currentPeriodValue])
 
   useEffect(() => {
+    if (!connectedAccount || currentPeriodValue == null) return
+
+    void refetchClaimerStatus()
+  }, [connectedAccount, currentPeriodValue, refetchClaimerStatus])
+
+  useEffect(() => {
     if (!publicClient || !connectedAccount || currentPeriodValue == null) {
       setIsRegisteredForCurrentPeriod(false)
       setIsRegisteredForNextPeriod(false)
@@ -346,13 +361,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         const nextPeriod = currentPeriodValue + 1n
         const [registeredForPrevious, registeredForCurrent, registeredForNext] =
           await Promise.all([
-            isSuperLoop && previousPeriodValue != null
-              ? fetchPeriodRegistration(previousPeriodValue)
-              : Promise.resolve(false),
+            Promise.resolve(false),
+            Promise.resolve(false),
             isSuperLoop
-              ? fetchPeriodRegistration(currentPeriodValue)
-              : Promise.resolve(false),
-            fetchPeriodRegistration(nextPeriod),
+              ? Promise.resolve(false)
+              : fetchPeriodRegistration(nextPeriod),
           ])
 
         if (!cancelled) {

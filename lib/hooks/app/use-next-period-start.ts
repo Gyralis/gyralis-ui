@@ -55,6 +55,7 @@ export function useLoopSettings(
     ],
     query: {
       enabled: Boolean(loopAddress && chainId),
+      refetchInterval: 10_000,
     },
   })
 

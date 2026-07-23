@@ -32,7 +32,6 @@ interface UseUserPeriodRegistrationsOptions {
 interface UserPeriodRegistrations {
   error?: Error
   isLoading: boolean
-  registeredCurrent: boolean
   registeredNext: boolean
   registeredPrevious: boolean
 }
@@ -50,7 +49,6 @@ export function useUserPeriodRegistrations({
   const publicClient = usePublicClient({ chainId })
   const [result, setResult] = useState<UserPeriodRegistrations>({
     isLoading: false,
-    registeredCurrent: false,
     registeredNext: false,
     registeredPrevious: false,
   })
@@ -60,111 +58,102 @@ export function useUserPeriodRegistrations({
     currentPeriod != null &&
     firstPeriodStart != null &&
     periodLength != null
-  const previousRegistrationWindow =
-    currentPeriod != null && currentPeriod > 1n ? currentPeriod - 2n : 0n
-
-  const previousRange = usePeriodLogBlockRange({
-    chainId,
-    enabled: ready && currentPeriod != null && currentPeriod > 0n,
-    firstPeriodStart,
-    periodLength,
-    windowPeriod: previousRegistrationWindow,
-  })
-
-  const nextRange = usePeriodLogBlockRange({
+  const nextRegistrationRange = usePeriodLogBlockRange({
     chainId,
     enabled: ready,
     firstPeriodStart,
     periodLength,
     windowPeriod: currentPeriod,
   })
+  const previousRegistrationRange = usePeriodLogBlockRange({
+    chainId,
+    enabled: ready && currentPeriod != null && currentPeriod > 0n,
+    firstPeriodStart,
+    periodLength,
+    windowPeriod:
+      currentPeriod != null && currentPeriod > 1n ? currentPeriod - 2n : 0n,
+  })
 
   useEffect(() => {
-    if (!ready || !publicClient || !userAddress || currentPeriod == null) {
-      setResult({
-        isLoading: false,
-        registeredCurrent: false,
-        registeredNext: false,
-        registeredPrevious: false,
-      })
+    setResult({
+      isLoading: ready,
+      registeredNext: false,
+      registeredPrevious: false,
+    })
+  }, [currentPeriod, ready, userAddress])
+
+  useEffect(() => {
+    if (!ready || !publicClient || !userAddress || currentPeriod == null) return
+    if (nextRegistrationRange.loading || previousRegistrationRange.loading) {
       return
     }
-
-    if (previousRange.loading || nextRange.loading) {
-      setResult((current) => ({
-        ...current,
-        error: undefined,
-        isLoading: true,
-      }))
-      return
-    }
-
     if (
-      nextRange.fromBlock == null ||
-      nextRange.toBlock == null ||
+      nextRegistrationRange.fromBlock == null ||
+      nextRegistrationRange.toBlock == null ||
       (currentPeriod > 0n &&
-        (previousRange.fromBlock == null || previousRange.toBlock == null))
+        (previousRegistrationRange.fromBlock == null ||
+          previousRegistrationRange.toBlock == null))
     ) {
       return
     }
 
     let cancelled = false
 
-    const fetchRegistrations = async () => {
-      setResult((current) => ({
-        ...current,
-        error: undefined,
-        isLoading: true,
-      }))
-
+    const fetchNextRegistration = async () => {
       try {
-        const fromBlock =
-          currentPeriod > 0n ? previousRange.fromBlock! : nextRange.fromBlock!
-        const toBlock = nextRange.toBlock!
-        const registrationLogs = await getLogsChunked(
-          publicClient,
-          {
-            address: loopAddress,
-            event: upgradedRegisterEvent,
-            args: { sender: userAddress },
-            fromBlock,
-            toBlock,
-          },
-          ALCHEMY_LOG_CHUNK_SIZE
-        ).then((logs) => logs as UpgradedRegisterLog[])
-        const registrationPeriods = new Set(
-          registrationLogs
-            .map((log) => log.args.periodNumber)
-            .filter((period): period is bigint => typeof period === "bigint")
-        )
-        const registeredPrevious =
-          currentPeriod > 0n && registrationPeriods.has(currentPeriod - 1n)
-        const registeredCurrent = registrationPeriods.has(currentPeriod)
-        const registeredNext = registrationPeriods.has(currentPeriod + 1n)
+        const getRegistration = async (
+          periodNumber: bigint,
+          fromBlock: bigint,
+          toBlock: bigint
+        ) => {
+          const logs = await getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: upgradedRegisterEvent,
+              args: { sender: userAddress, periodNumber },
+              fromBlock,
+              toBlock,
+            },
+            ALCHEMY_LOG_CHUNK_SIZE
+          ).then((value) => value as UpgradedRegisterLog[])
+
+          return logs.length > 0
+        }
+        const [registeredPrevious, registeredNext] = await Promise.all([
+          currentPeriod > 0n
+            ? getRegistration(
+                currentPeriod - 1n,
+                previousRegistrationRange.fromBlock!,
+                previousRegistrationRange.toBlock!
+              )
+            : Promise.resolve(false),
+          getRegistration(
+            currentPeriod + 1n,
+            nextRegistrationRange.fromBlock!,
+            nextRegistrationRange.toBlock!
+          ),
+        ])
 
         if (!cancelled) {
-          setResult({
-            isLoading: false,
-            registeredCurrent,
-            registeredNext,
-            registeredPrevious,
-          })
+          setResult({ isLoading: false, registeredNext, registeredPrevious })
         }
       } catch (error) {
         if (!cancelled) {
-          setResult((current) => ({
-            ...current,
+          setResult({
             error:
               error instanceof Error
                 ? error
-                : new Error("Unable to check period registrations"),
+                : new Error("Unable to check next-period registration"),
             isLoading: false,
-          }))
+            registeredNext: false,
+            registeredPrevious: false,
+          })
         }
       }
     }
 
-    void fetchRegistrations()
+    void fetchNextRegistration()
 
     return () => {
       cancelled = true
@@ -172,12 +161,12 @@ export function useUserPeriodRegistrations({
   }, [
     currentPeriod,
     loopAddress,
-    nextRange.fromBlock,
-    nextRange.loading,
-    nextRange.toBlock,
-    previousRange.fromBlock,
-    previousRange.loading,
-    previousRange.toBlock,
+    nextRegistrationRange.fromBlock,
+    nextRegistrationRange.loading,
+    nextRegistrationRange.toBlock,
+    previousRegistrationRange.fromBlock,
+    previousRegistrationRange.loading,
+    previousRegistrationRange.toBlock,
     publicClient,
     ready,
     refreshKey,
