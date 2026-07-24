@@ -10,12 +10,21 @@ import { usePeriodLogBlockRange } from "./use-period-log-block-range"
 const upgradedRegisterEvent = parseAbiItem(
   "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
 )
+const legacyRegisterEvent = parseAbiItem(
+  "event Register(address indexed sender, uint256 indexed periodNumber)"
+)
 const ALCHEMY_LOG_CHUNK_SIZE = 9n
 type UpgradedRegisterLog = Log<
   bigint,
   number,
   false,
   typeof upgradedRegisterEvent
+>
+type LegacyRegisterLog = Log<
+  bigint,
+  number,
+  false,
+  typeof legacyRegisterEvent
 >
 
 interface UseUserPeriodRegistrationsOptions {
@@ -32,6 +41,7 @@ interface UseUserPeriodRegistrationsOptions {
 interface UserPeriodRegistrations {
   error?: Error
   isLoading: boolean
+  registeredCurrent: boolean
   registeredNext: boolean
   registeredPrevious: boolean
 }
@@ -49,6 +59,7 @@ export function useUserPeriodRegistrations({
   const publicClient = usePublicClient({ chainId })
   const [result, setResult] = useState<UserPeriodRegistrations>({
     isLoading: false,
+    registeredCurrent: false,
     registeredNext: false,
     registeredPrevious: false,
   })
@@ -65,6 +76,14 @@ export function useUserPeriodRegistrations({
     periodLength,
     windowPeriod: currentPeriod,
   })
+  const currentRegistrationRange = usePeriodLogBlockRange({
+    chainId,
+    enabled: ready,
+    firstPeriodStart,
+    periodLength,
+    windowPeriod:
+      currentPeriod != null && currentPeriod > 0n ? currentPeriod - 1n : 0n,
+  })
   const previousRegistrationRange = usePeriodLogBlockRange({
     chainId,
     enabled: ready && currentPeriod != null && currentPeriod > 0n,
@@ -77,6 +96,7 @@ export function useUserPeriodRegistrations({
   useEffect(() => {
     setResult({
       isLoading: ready,
+      registeredCurrent: false,
       registeredNext: false,
       registeredPrevious: false,
     })
@@ -90,6 +110,8 @@ export function useUserPeriodRegistrations({
     if (
       nextRegistrationRange.fromBlock == null ||
       nextRegistrationRange.toBlock == null ||
+      currentRegistrationRange.fromBlock == null ||
+      currentRegistrationRange.toBlock == null ||
       (currentPeriod > 0n &&
         (previousRegistrationRange.fromBlock == null ||
           previousRegistrationRange.toBlock == null))
@@ -106,37 +128,64 @@ export function useUserPeriodRegistrations({
           fromBlock: bigint,
           toBlock: bigint
         ) => {
-          const logs = await getLogsChunked(
-            publicClient,
-            {
-              address: loopAddress,
-              event: upgradedRegisterEvent,
-              args: { sender: userAddress, periodNumber },
-              fromBlock,
-              toBlock,
-            },
-            ALCHEMY_LOG_CHUNK_SIZE
-          ).then((value) => value as UpgradedRegisterLog[])
+          const userAddressLower = userAddress.toLowerCase()
+          const [legacyLogs, upgradedLogs] = await Promise.all([
+            getLogsChunked(
+              publicClient,
+              {
+                address: loopAddress,
+                event: legacyRegisterEvent,
+                args: { periodNumber },
+                fromBlock,
+                toBlock,
+              },
+              ALCHEMY_LOG_CHUNK_SIZE
+            ).then((value) => value as LegacyRegisterLog[]),
+            getLogsChunked(
+              publicClient,
+              {
+                address: loopAddress,
+                event: upgradedRegisterEvent,
+                args: { periodNumber },
+                fromBlock,
+                toBlock,
+              },
+              ALCHEMY_LOG_CHUNK_SIZE
+            ).then((value) => value as UpgradedRegisterLog[]),
+          ])
 
-          return logs.length > 0
+          return [...legacyLogs, ...upgradedLogs].some(
+            (log) => log.args.sender?.toLowerCase() === userAddressLower
+          )
         }
-        const [registeredPrevious, registeredNext] = await Promise.all([
-          currentPeriod > 0n
-            ? getRegistration(
-                currentPeriod - 1n,
-                previousRegistrationRange.fromBlock!,
-                previousRegistrationRange.toBlock!
-              )
-            : Promise.resolve(false),
-          getRegistration(
-            currentPeriod + 1n,
-            nextRegistrationRange.fromBlock!,
-            nextRegistrationRange.toBlock!
-          ),
-        ])
+        const [registeredPrevious, registeredCurrent, registeredNext] =
+          await Promise.all([
+            currentPeriod > 0n
+              ? getRegistration(
+                  currentPeriod - 1n,
+                  previousRegistrationRange.fromBlock!,
+                  previousRegistrationRange.toBlock!
+                )
+              : Promise.resolve(false),
+            getRegistration(
+              currentPeriod,
+              currentRegistrationRange.fromBlock!,
+              currentRegistrationRange.toBlock!
+            ),
+            getRegistration(
+              currentPeriod + 1n,
+              nextRegistrationRange.fromBlock!,
+              nextRegistrationRange.toBlock!
+            ),
+          ])
 
         if (!cancelled) {
-          setResult({ isLoading: false, registeredNext, registeredPrevious })
+          setResult({
+            isLoading: false,
+            registeredCurrent,
+            registeredNext,
+            registeredPrevious,
+          })
         }
       } catch (error) {
         if (!cancelled) {
@@ -146,6 +195,7 @@ export function useUserPeriodRegistrations({
                 ? error
                 : new Error("Unable to check next-period registration"),
             isLoading: false,
+            registeredCurrent: false,
             registeredNext: false,
             registeredPrevious: false,
           })
@@ -160,6 +210,9 @@ export function useUserPeriodRegistrations({
     }
   }, [
     currentPeriod,
+    currentRegistrationRange.fromBlock,
+    currentRegistrationRange.loading,
+    currentRegistrationRange.toBlock,
     loopAddress,
     nextRegistrationRange.fromBlock,
     nextRegistrationRange.loading,

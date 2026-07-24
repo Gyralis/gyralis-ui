@@ -138,11 +138,19 @@ export function useLoopSettingsDetails({
       token: settings?.token,
     })
 
-  const nextPeriodStart =
-    settings && currentPeriod != null
-      ? BigInt(settings.firstPeriodStart) +
-        BigInt(settings.periodLength) * (BigInt(currentPeriod) + BigInt(1))
-      : undefined
+  const nextPeriodStart = useMemo(() => {
+    if (!settings || currentPeriod == null) return undefined
+
+    const superLoopOffset =
+      claimStatus === "entered" || claimStatus === "claimed" ? 2n : 1n
+    const targetPeriod =
+      BigInt(currentPeriod) + (isSuperLoop ? superLoopOffset : 1n)
+
+    return (
+      BigInt(settings.firstPeriodStart) +
+      BigInt(settings.periodLength) * targetPeriod
+    )
+  }, [claimStatus, currentPeriod, isSuperLoop, settings])
 
   const distributionLabel = useMemo(() => {
     if (isLoading) return "Loading..."
@@ -210,13 +218,13 @@ export function useLoopSettingsDetails({
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
       case "active":
-        return isSuperLoop ? "Accumulation ends in" : "Active period ends in"
+        return isSuperLoop ? "Claim opens in" : "Active period ends in"
       case "entered":
-        return isSuperLoop ? "Accumulation starts in" : "Claim opens in"
+        return "Claim opens in"
       case "claimable":
         return "Claim period ends in"
       case "claimed":
-        return isSuperLoop ? "Accumulation starts in" : "Next claim opens in"
+        return "Next claim opens in"
       default:
         return "Entry closes in"
     }

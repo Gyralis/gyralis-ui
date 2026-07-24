@@ -246,13 +246,14 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     ? superLoopRegistrations.registeredNext
     : isRegisteredForNextPeriod
   const isRegisteredAhead = hasEnteredNextPeriod || registeredNext
+  const isSuperLoopWaitingByContract =
+    isSuperLoop && isRegistered && !hasClaimed && !isClaimableNow
   const isActiveThisPeriod =
     isSuperLoop &&
-    isRegistered &&
     !hasClaimed &&
     !isClaimableNow &&
     !superLoopRegistrations.isLoading &&
-    !registeredNext
+    (superLoopRegistrations.registeredCurrent || isSuperLoopWaitingByContract)
   const isEnteredForNextPeriod = isRegisteredAhead || isWaitingNextPeriod
   const isLoadingOnchainState =
     (currentPeriodOverride == null && isLoadingCurrentPeriod) ||
@@ -535,7 +536,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
               href: "/eligibilities",
               label: "See how to access",
             },
-          })
+          } as any)
           return
         }
 
@@ -607,6 +608,8 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       : isRegisteredAhead
       ? "Accumulating rewards"
       : "Stay in the loop"
+    : isSuperLoop && isEnteredForNextPeriod
+    ? "Accumulating rewards"
     : !isRegistered
     ? isEnteredForNextPeriod
       ? "You are in the loop"
