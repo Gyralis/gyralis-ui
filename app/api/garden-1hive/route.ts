@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import type { GardensCommunityKey } from "@/data/loops-data"
 import { env } from "@/env.mjs"
 import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -16,8 +17,16 @@ const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
   "Unable to get score for provided scorer."
-const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
-const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
+const GARDENS_COMMUNITIES = {
+  "1hive": {
+    address: "0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    subgraphEndpoint: env.GARDENS_1HIVE_SUBGRAPH_ENDPOINT,
+  },
+  markee: {
+    address: "0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
+    subgraphEndpoint: env.GARDENS_MARKEE_SUBGRAPH_ENDPOINT,
+  },
+} as const
 const ELIGIBILITY_ERROR_CODES = {
   invalidRequest: "INVALID_REQUEST",
   loopNotEnabled: "LOOP_NOT_ENABLED",
@@ -103,28 +112,61 @@ async function fetchNextPeriod(
   return Number(currentPeriod + BigInt(1))
 }
 
-async function checkMembership(userAddress: string) {
+async function checkMembership(
+  userAddress: string,
+  communityKey: GardensCommunityKey
+) {
+  const community = GARDENS_COMMUNITIES[communityKey]
+  if (!community.subgraphEndpoint) {
+    throw new Error(`Gardens subgraph endpoint missing for ${communityKey}`)
+  }
+
   const query = `
-    query CheckMembership($userAddress: String!) {
+    query CheckMembership(
+      $communityAddress: String!
+      $userAddress: String!
+    ) {
       memberCommunities(
-        where: { registryCommunity: "0xe2396fe2169ca026962971d3b2e373ba925b6257", memberAddress: $userAddress }
+        first: 1
+        where: {
+          registryCommunity: $communityAddress
+          memberAddress: $userAddress
+        }
       ) {
         memberAddress
       }
     }
   `
 
-  const response = await fetch(SUBGRAPH_URL, {
+  const response = await fetch(community.subgraphEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       query,
-      variables: { userAddress: userAddress.toLowerCase() },
+      variables: {
+        communityAddress: community.address.toLowerCase(),
+        userAddress: userAddress.toLowerCase(),
+      },
     }),
   })
 
-  const json = await response.json()
-  return json.data?.memberCommunities?.length > 0
+  if (!response.ok) {
+    throw new Error(`Gardens subgraph request failed (${response.status})`)
+  }
+
+  const json = (await response.json()) as {
+    data?: { memberCommunities?: { memberAddress: string }[] }
+    errors?: { message: string }[]
+  }
+  if (json.errors?.length) {
+    throw new Error(
+      `Gardens subgraph query failed: ${
+        json.errors[0]?.message ?? "Unknown error"
+      }`
+    )
+  }
+
+  return Boolean(json.data?.memberCommunities?.length)
 }
 
 export async function POST(req: Request) {
@@ -193,7 +235,13 @@ export async function POST(req: Request) {
       )
 
     // Membership check
-    const isMember = await checkMembership(userAddress)
+    if (!allowlistedLoop.gardensCommunity) {
+      throw new Error("Gardens community is not configured for this loop")
+    }
+    const isMember = await checkMembership(
+      userAddress,
+      allowlistedLoop.gardensCommunity
+    )
     console.log(`[${requestId}] Membership check result`, { isMember })
     if (!isMember)
       return NextResponse.json(
