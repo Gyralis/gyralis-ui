@@ -256,7 +256,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const claimAmountLabel = loopBalance
     ? `${trimFormattedBalance(
         formatUnits(claimableAmount, loopBalance.decimals),
-        2
+        4
       )} ${loopBalance.symbol}`
     : undefined
   const claimedAmount = lastClaimedAmount ?? claimableAmount
@@ -264,7 +264,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     loopBalance && claimedAmount > 0n
       ? `${trimFormattedBalance(
           formatUnits(claimedAmount, loopBalance.decimals),
-          2
+          4
         )} ${loopBalance.symbol}`
       : undefined
   const claimStatus: LoopClaimStatus = hasClaimed

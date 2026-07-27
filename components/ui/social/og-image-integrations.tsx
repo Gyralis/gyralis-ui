@@ -35,7 +35,7 @@ export function IntegrationOgImage(
           }}
         >
           <img
-            alt="TurboETH Logo"
+            alt="Gyralis Logo"
             src={new URL(integrationData.imgDark, url).toString()}
             style={{ borderRadius: "9999px" }}
             tw="w-32 h-32 mb-2 opacity-95"

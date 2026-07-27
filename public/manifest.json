@@ -4,9 +4,9 @@
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
-  "name": "TurboETH",
-  "short_name": "TurboETH",
-  "description": "Full-Stack Web3 Application",
+  "name": "Gyralis",
+  "short_name": "Gyra",
+  "description": "Web3 participation layer protocol for DAOs, communities, and projects.",
   "icons": [
     {
       "src": "/icon-192x192.png",

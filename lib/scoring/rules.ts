@@ -11,12 +11,12 @@ export function normalizeAddress(address: string): string {
 
 export function createEmptyLoopStats(input: {
   userAddress: string
-  loopAddress: string
+  loopId: number
   chainId: number
 }): UserLoopScoringStats {
   return {
     userAddress: normalizeAddress(input.userAddress),
-    loopAddress: normalizeAddress(input.loopAddress),
+    loopId: input.loopId,
     chainId: input.chainId,
     totalClaims: 0,
     claimPoints: 0,
@@ -96,7 +96,6 @@ export function normalizeClaimEvents(
       byEventId.set(event.id, {
         ...event,
         userAddress: normalizeAddress(event.userAddress),
-        loopAddress: normalizeAddress(event.loopAddress),
       })
     }
   }
@@ -114,7 +113,7 @@ export function computeLoopStatsFromClaims(
   config: ScoringConfig,
   fallbackIdentity?: {
     userAddress: string
-    loopAddress: string
+    loopId: number
     chainId: number
   }
 ): UserLoopScoringStats {
