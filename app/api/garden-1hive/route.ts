@@ -14,20 +14,29 @@ const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
 const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
-const PASSPORT_SCORE_NOT_SYNCED_ERROR =
-  "Your Human Passport score must be at least 15 to enter this loop. Open GyraHub to improve your score, then try again."
 const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
   "Unable to get score for provided scorer."
 const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
 const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
+const ELIGIBILITY_ERROR_CODES = {
+  invalidRequest: "INVALID_REQUEST",
+  loopNotEnabled: "LOOP_NOT_ENABLED",
+  passportScoreRequired: "PASSPORT_SCORE_REQUIRED",
+  providerEligibilityRequired: "PROVIDER_ELIGIBILITY_REQUIRED",
+  internalError: "INTERNAL_ERROR",
+} as const
+
+function getPassportScoreError(minScore: number) {
+  return `Your Human Passport score must be at least ${minScore} to enter this loop. Open GyraHub to improve your score, then try again.`
+}
 
 interface PassportScoreResponse {
   score: number
 }
 
 class PassportScoreNotSyncedError extends Error {
-  constructor() {
-    super(PASSPORT_SCORE_NOT_SYNCED_ERROR)
+  constructor(minScore: number) {
+    super(getPassportScoreError(minScore))
     this.name = "PassportScoreNotSyncedError"
   }
 }
@@ -39,7 +48,10 @@ function getViemChain(chainId: string | number): Chain {
   throw new Error(`Chain with id ${chainId} not found`)
 }
 
-async function fetchPassportScore(userAddress: string): Promise<number> {
+async function fetchPassportScore(
+  userAddress: string,
+  minScore: number
+): Promise<number> {
   if (!GITCOIN_PASSPORT_API_KEY)
     throw new Error("Gitcoin Passport API key missing")
   if (!SCORER_ID) throw new Error("Gitcoin Passport scorer id missing")
@@ -54,7 +66,7 @@ async function fetchPassportScore(userAddress: string): Promise<number> {
       response.status === 404 ||
       body.includes(HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR)
     ) {
-      throw new PassportScoreNotSyncedError()
+      throw new PassportScoreNotSyncedError(minScore)
     }
 
     throw new Error(
@@ -123,7 +135,11 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       console.warn(`[${requestId}] Invalid payload`, parsed.error.flatten())
       return NextResponse.json(
-        { success: false, error: "Invalid request payload" },
+        {
+          success: false,
+          code: ELIGIBILITY_ERROR_CODES.invalidRequest,
+          error: "Invalid request payload",
+        },
         { status: 400 }
       )
     }
@@ -146,23 +162,32 @@ export async function POST(req: Request) {
         chainId,
       })
       return NextResponse.json(
-        { success: false, error: "Loop is not enabled for this eligibility" },
+        {
+          success: false,
+          code: ELIGIBILITY_ERROR_CODES.loopNotEnabled,
+          error: "Loop is not enabled for this eligibility",
+        },
         { status: 403 }
       )
     }
     console.log(`[${requestId}] Allowlist check passed`, allowlistedLoop)
 
     // Passport score
-    const passportScore = await fetchPassportScore(userAddress)
+    const passportThreshold = THRESHOLD_SCORE
+    const passportScore = await fetchPassportScore(
+      userAddress,
+      passportThreshold
+    )
     console.log(`[${requestId}] Passport score fetched`, {
       score: passportScore,
-      threshold: THRESHOLD_SCORE,
+      threshold: passportThreshold,
     })
-    if (passportScore < THRESHOLD_SCORE)
+    if (passportScore < passportThreshold)
       return NextResponse.json(
         {
           success: false,
-          error: PASSPORT_SCORE_NOT_SYNCED_ERROR,
+          code: ELIGIBILITY_ERROR_CODES.passportScoreRequired,
+          error: getPassportScoreError(passportThreshold),
         },
         { status: 403 }
       )
@@ -174,6 +199,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
+          code: ELIGIBILITY_ERROR_CODES.providerEligibilityRequired,
           error:
             "You are not eligible yet. Open the Eligibility tab to see how to enter this loop.",
         },
@@ -202,14 +228,22 @@ export async function POST(req: Request) {
   } catch (error) {
     if (error instanceof PassportScoreNotSyncedError) {
       return NextResponse.json(
-        { success: false, error: PASSPORT_SCORE_NOT_SYNCED_ERROR },
+        {
+          success: false,
+          code: ELIGIBILITY_ERROR_CODES.passportScoreRequired,
+          error: error.message,
+        },
         { status: 403 }
       )
     }
 
     console.error(`[${requestId}] API Error`, error)
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      {
+        success: false,
+        code: ELIGIBILITY_ERROR_CODES.internalError,
+        error: "Internal server error",
+      },
       { status: 500 }
     )
   }

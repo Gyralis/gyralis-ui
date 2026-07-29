@@ -24,7 +24,7 @@ interface ClaimEventsQueryFilters {
   fromBlock?: boolean
   blockNumber?: boolean
   afterEventId?: boolean
-  loopAddress?: boolean
+  loopId?: boolean
   userAddress?: boolean
 }
 
@@ -46,9 +46,9 @@ export function buildClaimEventsQuery(
     variables.push("$afterEventId: ID!")
     where.push("id_gt: $afterEventId")
   }
-  if (filters.loopAddress) {
-    variables.push("$loopAddress: ID!")
-    where.push("loop: $loopAddress")
+  if (filters.loopId) {
+    variables.push("$loopId: ID!")
+    where.push("loop: $loopId")
   }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
@@ -83,7 +83,7 @@ export async function fetchClaimEventsFromSubgraph(input: {
   blockNumber?: number
   afterEventId?: string
   first: number
-  loopAddress?: string
+  loopId?: number
 }): Promise<ClaimScoringEvent[]> {
   if (input.fromBlock != null && input.blockNumber != null) {
     throw new Error("Use either fromBlock or blockNumber, not both")
@@ -94,21 +94,21 @@ export async function fetchClaimEventsFromSubgraph(input: {
       fromBlock: input.fromBlock != null,
       blockNumber: input.blockNumber != null,
       afterEventId: input.afterEventId != null,
-      loopAddress: input.loopAddress != null,
+      loopId: input.loopId != null,
     }),
     variables: {
       first: input.first,
       fromBlock: input.fromBlock,
       blockNumber: input.blockNumber,
       afterEventId: input.afterEventId,
-      loopAddress: input.loopAddress?.toLowerCase(),
+      loopId: input.loopId?.toString(),
     },
   })
 }
 
 export async function fetchAllClaimEventsForUserLoop(input: {
   userAddress: string
-  loopAddress: string
+  loopId: number
   batchSize: number
 }): Promise<ClaimScoringEvent[]> {
   const events: ClaimScoringEvent[] = []
@@ -118,13 +118,13 @@ export async function fetchAllClaimEventsForUserLoop(input: {
     const batch = await fetchClaimEventPage({
       query: buildClaimEventsQuery({
         afterEventId: afterEventId != null,
-        loopAddress: true,
+        loopId: true,
         userAddress: true,
       }),
       variables: {
         first: input.batchSize,
         afterEventId,
-        loopAddress: input.loopAddress.toLowerCase(),
+        loopId: input.loopId.toString(),
         userAddress: input.userAddress.toLowerCase(),
       },
     })
@@ -134,6 +134,20 @@ export async function fetchAllClaimEventsForUserLoop(input: {
   }
 
   return events
+}
+
+function parseSubgraphLogIndex(id: string): number | undefined {
+  const raw = id.split("-").at(-1)
+  if (raw == null || Number.isNaN(Number(raw))) return undefined
+  return Number(raw)
+}
+
+function parseSubgraphLoopId(id: string): number {
+  const loopId = Number(id)
+  if (!Number.isSafeInteger(loopId) || loopId < 0) {
+    throw new Error(`Invalid numeric loop id from subgraph: ${id}`)
+  }
+  return loopId
 }
 
 async function fetchClaimEventPage(input: {
@@ -162,12 +176,13 @@ async function fetchClaimEventPage(input: {
   return (payload.data?.claimEvents ?? []).map((event) => ({
     id: event.id,
     userAddress: event.account.id.toLowerCase(),
-    loopAddress: event.loop.id.toLowerCase(),
+    loopId: parseSubgraphLoopId(event.loop.id),
     chainId: env.GYRALIS_SUBGRAPH_CHAIN_ID,
     periodNumber: Number(event.periodNumber),
     payout: event.payout,
     blockNumber: Number(event.blockNumber),
     timestamp: new Date(Number(event.timestamp) * 1000),
     txHash: event.txHash,
+    logIndex: parseSubgraphLogIndex(event.id),
   }))
 }

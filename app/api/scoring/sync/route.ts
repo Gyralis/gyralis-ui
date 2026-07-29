@@ -9,7 +9,7 @@ export const maxDuration = 60
 
 const syncRequestSchema = z.object({
   mode: z.enum(["incremental", "full"]).optional(),
-  loopAddress: z.string().min(1).optional(),
+  loopId: z.coerce.number().int().nonnegative().optional(),
   chainId: z.coerce.number().int().positive().optional(),
 })
 

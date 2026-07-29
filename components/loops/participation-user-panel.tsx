@@ -7,7 +7,7 @@ import { FaAward } from "react-icons/fa"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const TRUE_LOOPER_TARGET = 20
+const TRUE_LOOPER_TARGET = 50
 
 type UserScoringResponse = {
   success: boolean
@@ -106,7 +106,7 @@ function TrueLooperStatusPanel({
       title={address}
       className={cn(
         className,
-        "relative -translate-y-2 w-full flex items-center gap-2 overflow-hidden rounded-full bg-card px-6 py-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_22px_40px_-26px_rgba(15,23,42,0.24),0_26px_34px_-24px_rgba(28,231,131,0.38)] backdrop-blur-xl md:-translate-y-2.5 "
+        "relative -translate-y-2 w-full flex items-center gap-2 overflow-hidden rounded-full px-6 py-2 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_22px_40px_-26px_rgba(15,23,42,0.24),0_26px_34px_-24px_rgba(28,231,131,0.38)] backdrop-blur-xl md:-translate-y-2.5 "
       )}
       {...motionProps}
     >
@@ -174,8 +174,8 @@ function TrueLooperBadge({ enabled }: { enabled: boolean }) {
     >
       <div className="flex flex-col items-center justify-center">
         <FaAward className="size-4" />
-        <span className="mt-0.5 font-baloo text-[8px] font-semibold uppercase tracking-widest">
-          {enabled ? "True" : "Loop"}
+        <span className="mt-0.5 font-sans text-[10px] font-bold leading-none tabular-nums">
+          +{TRUE_LOOPER_TARGET}
         </span>
       </div>
     </div>

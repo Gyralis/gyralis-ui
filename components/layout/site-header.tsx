@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -17,11 +18,61 @@ export function SiteHeader() {
   const scrolled = useScroll(0)
   const pathname = usePathname()
   const isLandingPage = pathname === "/"
+  const [isVisible, setIsVisible] = useState(true)
+  const [hasEntered, setHasEntered] = useState(false)
+
+  useEffect(() => {
+    if (!isLandingPage) {
+      setIsVisible(true)
+      setHasEntered(true)
+      return
+    }
+
+    setIsVisible(true)
+    setHasEntered(false)
+
+    const enterFrame = window.requestAnimationFrame(() => {
+      setHasEntered(true)
+    })
+
+    let lastY = window.scrollY
+
+    const onScrollDirection = () => {
+      const currentY = window.scrollY
+
+      if (currentY <= 12) {
+        setIsVisible(true)
+      } else if (currentY < lastY) {
+        setIsVisible(true)
+      } else if (currentY > lastY && currentY > 80) {
+        setIsVisible(false)
+      }
+
+      lastY = currentY
+    }
+
+    window.addEventListener("scroll", onScrollDirection, { passive: true })
+
+    return () => {
+      window.cancelAnimationFrame(enterFrame)
+      window.removeEventListener("scroll", onScrollDirection)
+    }
+  }, [isLandingPage])
 
   return (
     <header
       className={cn(
-        "z-50 w-full border-b backdrop-blur transition-all",
+        "z-50 w-full border-b backdrop-blur transition-all duration-300",
+        isLandingPage
+          ? "sticky top-0"
+          : "",
+        isLandingPage
+          ? hasEntered
+            ? isVisible
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-full opacity-0"
+            : "-translate-y-4 opacity-0"
+          : "",
         scrolled && "bg-background/50 "
       )}
     >

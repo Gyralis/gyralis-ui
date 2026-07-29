@@ -88,7 +88,7 @@ export function DashboardSectionNav({
   return (
     <>
       <nav
-        aria-label="Dashboard sections"
+        aria-label="Stats sections"
         className={cn(
           "rounded-2xl border border-border/70 bg-card/80 p-3 shadow-[0_24px_70px_-40px_hsl(var(--foreground)/0.22)] backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:hidden",
           className
@@ -128,7 +128,7 @@ export function DashboardSectionNav({
       </nav>
 
       <nav
-        aria-label="Dashboard sections"
+        aria-label="Stats sections"
         className={cn(
           "group hidden h-[calc(100vh-7rem)] w-[5.5rem] flex-col rounded-[2rem] border border-border/70 bg-card/80 px-3 py-5 text-card-foreground shadow-[24px_0_90px_-52px_hsl(var(--foreground)/0.28)] backdrop-blur-xl transition-[width,transform] duration-500 hover:w-64 lg:flex",
           className

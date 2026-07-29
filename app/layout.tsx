@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
 import RootProvider from "@/components/providers/root-provider"
 
-const url = env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+const url = env.NEXT_PUBLIC_SITE_URL || "https://www.gyralis.xyz/"
 
 export const metadata = {
   metadataBase: new URL(url),

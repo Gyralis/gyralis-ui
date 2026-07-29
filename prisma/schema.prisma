@@ -30,7 +30,7 @@ model UserLoopStats {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   userAddress         String
-  loopAddress         String
+  loopId              Int
   chainId             Int
   totalClaims         Int      @default(0)
   claimPoints         Int      @default(0)
@@ -41,7 +41,7 @@ model UserLoopStats {
   lastClaimedPeriod   Int?
   earnedStreakBonuses Json
 
-  @@unique([userAddress, chainId, loopAddress])
+  @@unique([userAddress, chainId, loopId])
   @@index([totalPoints])
 }
 
@@ -69,7 +69,7 @@ model LeaderboardEntry {
   scope               String
   userAddress         String
   chainId             Int?
-  loopAddress         String?
+  loopId              Int?
   totalPoints         Int      @default(0)
   claimPoints         Int      @default(0)
   streakBonusPoints   Int      @default(0)
@@ -79,7 +79,7 @@ model LeaderboardEntry {
   longestStreak       Int      @default(0)
   earnedStreakBonuses Json
 
-  @@unique([scope, userAddress, chainId, loopAddress])
+  @@unique([scope, userAddress, chainId, loopId])
   @@index([scope, totalPoints])
 }
 
@@ -90,6 +90,20 @@ model ScoringSyncState {
   lastBlockNumber Int       @default(0)
   lastEventId     String?
   lastSyncedAt    DateTime?
+}
+
+model ProcessedClaimEvent {
+  id           String   @id @map("_id")
+  createdAt    DateTime @default(now())
+  userAddress  String
+  loopId       Int
+  chainId      Int
+  periodNumber Int
+  txHash       String
+  logIndex     Int
+
+  @@unique([chainId, txHash, logIndex])
+  @@index([userAddress, chainId, loopId])
 }
 
 model LitProtocolMessage {
