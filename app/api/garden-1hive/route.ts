@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import type { GardensCommunityKey } from "@/data/loops-data"
 import { env } from "@/env.mjs"
 import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
@@ -9,6 +10,7 @@ import {
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
+import { checkGardensMembership } from "@/lib/loops/gardens-membership"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
@@ -16,8 +18,16 @@ const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
   "Unable to get score for provided scorer."
-const GARDENS_SUBGRAPH_VERSION: string = env.GARDENS_SUBGRAPH_VERSION ?? ""
-const SUBGRAPH_URL = `https://api.studio.thegraph.com/query/102093/gardens-v2---gnosis/${GARDENS_SUBGRAPH_VERSION}`
+const GARDENS_COMMUNITIES = {
+  "1hive": {
+    address: "0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    subgraphEndpoint: env.GARDENS_1HIVE_SUBGRAPH_ENDPOINT,
+  },
+  markee: {
+    address: "0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
+    subgraphEndpoint: env.GARDENS_MARKEE_SUBGRAPH_ENDPOINT,
+  },
+} as const
 const ELIGIBILITY_ERROR_CODES = {
   invalidRequest: "INVALID_REQUEST",
   loopNotEnabled: "LOOP_NOT_ENABLED",
@@ -103,28 +113,16 @@ async function fetchNextPeriod(
   return Number(currentPeriod + BigInt(1))
 }
 
-async function checkMembership(userAddress: string) {
-  const query = `
-    query CheckMembership($userAddress: String!) {
-      memberCommunities(
-        where: { registryCommunity: "0xe2396fe2169ca026962971d3b2e373ba925b6257", memberAddress: $userAddress }
-      ) {
-        memberAddress
-      }
-    }
-  `
-
-  const response = await fetch(SUBGRAPH_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query,
-      variables: { userAddress: userAddress.toLowerCase() },
-    }),
+async function checkMembership(
+  userAddress: string,
+  communityKey: GardensCommunityKey
+) {
+  const community = GARDENS_COMMUNITIES[communityKey]
+  return checkGardensMembership({
+    subgraphEndpoint: community.subgraphEndpoint,
+    communityAddress: community.address,
+    userAddress,
   })
-
-  const json = await response.json()
-  return json.data?.memberCommunities?.length > 0
 }
 
 export async function POST(req: Request) {
@@ -193,7 +191,13 @@ export async function POST(req: Request) {
       )
 
     // Membership check
-    const isMember = await checkMembership(userAddress)
+    if (!allowlistedLoop.gardensCommunity) {
+      throw new Error("Gardens community is not configured for this loop")
+    }
+    const isMember = await checkMembership(
+      userAddress,
+      allowlistedLoop.gardensCommunity
+    )
     console.log(`[${requestId}] Membership check result`, { isMember })
     if (!isMember)
       return NextResponse.json(

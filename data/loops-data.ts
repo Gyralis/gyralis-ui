@@ -4,6 +4,7 @@ import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
 export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
+export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
   id: number
@@ -26,6 +27,7 @@ export interface LoopCardData {
   chainName: string
   historyLoopKey: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
+  gardensCommunity?: GardensCommunityKey
   passportMinScore: number
   enabled: boolean
   claimAmount?: string // New: Amount user can claim
@@ -59,6 +61,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainName: "Gnosis",
     historyLoopKey: "1hive",
     eligibilityProvider: "garden_1hive",
+    gardensCommunity: "1hive",
     passportMinScore: 0,
     enabled: true,
   },
