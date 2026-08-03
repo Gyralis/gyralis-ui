@@ -19,7 +19,7 @@ const footerColumns = [
   {
     title: "Community",
     links: [
-      { label: "Discord", href: "https://discord.gg/VgGQHDpn" },
+      { label: "Discord", href: "https://discord.gg/xavmRJdqd" },
       { label: "Twitter", href: "https://x.com/gyralis_xyz" },
     ],
   },
@@ -71,7 +71,7 @@ export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
                 <FaGithub className="size-5" />
               </a>
               <a
-                href="https://discord.gg/VgGQHDpn"
+                href="https://discord.gg/xavmRJdqd"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Gyralis Discord"
