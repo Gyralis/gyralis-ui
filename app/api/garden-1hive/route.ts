@@ -10,6 +10,7 @@ import {
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
+import { checkGardensMembership } from "@/lib/loops/gardens-membership"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
 const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
@@ -117,56 +118,11 @@ async function checkMembership(
   communityKey: GardensCommunityKey
 ) {
   const community = GARDENS_COMMUNITIES[communityKey]
-  if (!community.subgraphEndpoint) {
-    throw new Error(`Gardens subgraph endpoint missing for ${communityKey}`)
-  }
-
-  const query = `
-    query CheckMembership(
-      $communityAddress: String!
-      $userAddress: String!
-    ) {
-      memberCommunities(
-        first: 1
-        where: {
-          registryCommunity: $communityAddress
-          memberAddress: $userAddress
-        }
-      ) {
-        memberAddress
-      }
-    }
-  `
-
-  const response = await fetch(community.subgraphEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      query,
-      variables: {
-        communityAddress: community.address.toLowerCase(),
-        userAddress: userAddress.toLowerCase(),
-      },
-    }),
+  return checkGardensMembership({
+    subgraphEndpoint: community.subgraphEndpoint,
+    communityAddress: community.address,
+    userAddress,
   })
-
-  if (!response.ok) {
-    throw new Error(`Gardens subgraph request failed (${response.status})`)
-  }
-
-  const json = (await response.json()) as {
-    data?: { memberCommunities?: { memberAddress: string }[] }
-    errors?: { message: string }[]
-  }
-  if (json.errors?.length) {
-    throw new Error(
-      `Gardens subgraph query failed: ${
-        json.errors[0]?.message ?? "Unknown error"
-      }`
-    )
-  }
-
-  return Boolean(json.data?.memberCommunities?.length)
 }
 
 export async function POST(req: Request) {
