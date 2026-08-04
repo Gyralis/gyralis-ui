@@ -3,7 +3,7 @@ import { Address } from "viem"
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
+export type LoopEligibilityProvider = "gardens" | "blockscout"
 export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
@@ -60,7 +60,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     historyLoopKey: "1hive",
-    eligibilityProvider: "garden_1hive",
+    eligibilityProvider: "gardens",
     gardensCommunity: "1hive",
     passportMinScore: 0,
     enabled: true,
@@ -107,7 +107,7 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 8453,
     chainName: "Base",
     historyLoopKey: "test-superloops",
-    eligibilityProvider: "garden_1hive",
+    eligibilityProvider: "gardens",
     gardensCommunity: "markee",
     passportMinScore: 0,
     enabled: true,

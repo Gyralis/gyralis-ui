@@ -43,7 +43,7 @@ interface LoopClaimProps {
 }
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
-  garden_1hive: "/api/garden-1hive",
+  gardens: "/api/gardens",
   blockscout: "/api/blockscout",
 }
 
@@ -69,8 +69,8 @@ function getProviderEligibilityMessage(
   switch (eligibilityProvider) {
     case "blockscout":
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
-    case "garden_1hive":
-      return "Join the 1Hive community in GardensV2 to enter this loop."
+    case "gardens":
+      return "Join the Gardens community required by this loop to enter."
   }
 }
 

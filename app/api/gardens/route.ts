@@ -126,7 +126,7 @@ async function checkMembership(
 }
 
 export async function POST(req: Request) {
-  const requestId = `garden-1hive:${Date.now()}`
+  const requestId = `gardens:${Date.now()}`
   try {
     console.log(`[${requestId}] Incoming eligibility request`)
     const parsed = eligibilityRequestSchema.safeParse(await req.json())
@@ -149,11 +149,7 @@ export async function POST(req: Request) {
       chainId,
     })
 
-    const allowlistedLoop = findAllowlistedLoop(
-      "garden_1hive",
-      loopAddress,
-      chainId
-    )
+    const allowlistedLoop = findAllowlistedLoop("gardens", loopAddress, chainId)
     if (!allowlistedLoop) {
       console.warn(`[${requestId}] Loop not allowlisted`, {
         loopAddress,
