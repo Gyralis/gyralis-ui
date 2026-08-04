@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  calculateStandardLoopParticipation,
   deriveStandardLoopClaimStatus,
   getStandardLoopActionLabel,
   getStandardLoopTimerTitle,
@@ -89,5 +90,34 @@ describe("standard Loop claim state", () => {
     expect(getStandardLoopTimerTitle("claimable")).toBe("Claim period ends in")
     expect(getStandardLoopTimerTitle("claimed")).toBe("Next claim opens in")
     expect(getStandardLoopTimerTitle("enter")).toBe("Entry closes in")
+  })
+})
+
+describe("standard Loop participation", () => {
+  it("deduplicates addresses and matches them case-insensitively", () => {
+    expect(
+      calculateStandardLoopParticipation({
+        registeredUsers: ["0xAbC", "0xabc", "0xDEF"],
+        claimedUsers: ["0xABC"],
+      })
+    ).toEqual({ claimedCount: 1, claimRate: 50, registeredCount: 2 })
+  })
+
+  it("does not count claims from wallets that did not register", () => {
+    expect(
+      calculateStandardLoopParticipation({
+        registeredUsers: ["0xabc"],
+        claimedUsers: ["0xdef"],
+      })
+    ).toEqual({ claimedCount: 0, claimRate: 0, registeredCount: 1 })
+  })
+
+  it("returns zeroes when there are no registrations", () => {
+    expect(
+      calculateStandardLoopParticipation({
+        registeredUsers: [],
+        claimedUsers: ["0xabc"],
+      })
+    ).toEqual({ claimedCount: 0, claimRate: 0, registeredCount: 0 })
   })
 })

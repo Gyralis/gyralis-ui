@@ -38,6 +38,7 @@ import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score
 
 import { LoopDistributionStat, LoopPeriodStat } from "./loop-settings"
 import { LoopersModal } from "./loopers-modal"
+import { LoopSectionError } from "./sections/loop-section-status"
 import type {
   LoopDistributionViewData,
   LoopPeriodViewData,
@@ -173,19 +174,23 @@ export function LoopCardShell({
 
           <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-muted/20 md:grid-cols-[1fr_minmax(118px,0.72fr)_1fr]">
             <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
-              <LoopDistributionStat
-                balanceDetail={distributionData?.balanceDetail}
-                balanceDetailLabel={distributionData?.balanceDetailLabel}
-                compact
-                value={getDistributionValue(distribution)}
-                valueUnit={distributionData?.valueUnit}
-                detail={distributionData?.detail}
-                tooltip={
-                  distribution.status === "error"
-                    ? distribution.message
-                    : distributionData?.tooltip ?? "Loading Loop rewards."
-                }
-              />
+              {distribution.status === "error" ? (
+                <LoopSectionError
+                  label="Rewards"
+                  message={distribution.message}
+                  onRetry={distribution.retry}
+                />
+              ) : (
+                <LoopDistributionStat
+                  balanceDetail={distributionData?.balanceDetail}
+                  balanceDetailLabel={distributionData?.balanceDetailLabel}
+                  compact
+                  value={getDistributionValue(distribution)}
+                  valueUnit={distributionData?.valueUnit}
+                  detail={distributionData?.detail}
+                  tooltip={distributionData?.tooltip ?? "Loading Loop rewards."}
+                />
+              )}
             </div>
 
             <div className="min-h-[94px] border-b border-border/80 px-3.5 py-3 md:border-b-0 md:border-r">
@@ -196,15 +201,23 @@ export function LoopCardShell({
             </div>
 
             <div className="min-h-[94px] px-3.5 py-3">
-              <LoopPeriodStat
-                compact
-                className="h-full"
-                isLoading={period.status === "loading"}
-                nextPeriodStart={periodData?.nextPeriodStart}
-                timerTitle={periodData?.timerTitle ?? "Entry closes in"}
-                onViewLoopers={() => setIsLoopersModalOpen(true)}
-                showLoopersTrigger={false}
-              />
+              {period.status === "error" ? (
+                <LoopSectionError
+                  label="Period"
+                  message={period.message}
+                  onRetry={period.retry}
+                />
+              ) : (
+                <LoopPeriodStat
+                  compact
+                  className="h-full"
+                  isLoading={period.status === "loading"}
+                  nextPeriodStart={periodData?.nextPeriodStart}
+                  timerTitle={periodData?.timerTitle ?? "Entry closes in"}
+                  onViewLoopers={() => setIsLoopersModalOpen(true)}
+                  showLoopersTrigger={false}
+                />
+              )}
             </div>
           </div>
 

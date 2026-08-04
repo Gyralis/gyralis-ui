@@ -23,9 +23,7 @@ import type {
 } from "@/components/loops/sections/loop-section-types"
 import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
 
-function getErrorMessage(error: unknown, fallback: string) {
-  return error instanceof Error ? error.message : fallback
-}
+import { createLoopSectionState } from "./standard-loop-card-state"
 
 function formatTokenAmount(
   amount: bigint,
@@ -48,6 +46,10 @@ function formatTokenAmount(
 export function useStandardLoopCardController(loop: LoopCardData) {
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const address = loop.address
+  const configError =
+    !address || !isAddress(address)
+      ? new Error("Loop address is missing or invalid")
+      : undefined
   const settings = useStandardLoopSettings({
     address,
     chainId: loop.chainId,
@@ -64,11 +66,29 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     currentPeriod: settings.data?.currentPeriod,
     enabled: Boolean(address && settings.data),
   })
+  const refetchBalance = balance.refetch
+  const refetchParticipation = participation.refetch
+  const refetchSettings = settings.refetch
+  const retrySettings = useCallback(() => {
+    void refetchSettings()
+  }, [refetchSettings])
+  const retryBalance = useCallback(() => {
+    void refetchBalance()
+  }, [refetchBalance])
+  const retryParticipation = useCallback(() => {
+    void refetchParticipation()
+  }, [refetchParticipation])
+  const retryDistribution = useCallback(() => {
+    void Promise.allSettled([refetchSettings(), refetchBalance()])
+  }, [refetchBalance, refetchSettings])
   const refreshCardData = useCallback(async () => {
-    participation.refetch()
     setModalRefreshKey((key) => key + 1)
-    await Promise.allSettled([settings.refetch(), balance.refetch()])
-  }, [balance, participation, settings])
+    await Promise.allSettled([
+      refetchSettings(),
+      refetchBalance(),
+      refetchParticipation(),
+    ])
+  }, [refetchBalance, refetchParticipation, refetchSettings])
   const claim = useStandardLoopClaim({
     address: address ?? "0x",
     chainId: loop.chainId,
@@ -78,117 +98,145 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   })
 
   const balanceState = useMemo<SectionState<LoopBalanceViewData>>(() => {
-    if (settings.isError) {
-      return {
-        status: "error",
-        message: getErrorMessage(settings.error, "Failed to fetch settings"),
-      }
-    }
-    if (balance.isError) {
-      return {
-        status: "error",
-        message: getErrorMessage(balance.error, "Failed to fetch balance"),
-      }
-    }
-    if (!balance.data) return { status: "loading" }
+    const data =
+      settings.data && balance.data
+        ? {
+            formattedBalance: trimFormattedBalance(
+              formatUnits(balance.data.value, balance.data.decimals),
+              1
+            ),
+            symbol: balance.data.symbol,
+          }
+        : undefined
+    const error = !settings.data ? settings.error ?? configError : balance.error
 
-    const data = {
-      formattedBalance: trimFormattedBalance(
-        formatUnits(balance.data.value, balance.data.decimals),
-        1
-      ),
-      symbol: balance.data.symbol,
-    }
-
-    return balance.isFetching
-      ? { status: "refreshing", data }
-      : { status: "ready", data }
+    return createLoopSectionState({
+      data,
+      error,
+      errorMessage: "Failed to fetch balance",
+      isFetching: settings.isFetching || balance.isFetching,
+      loadingMessage: "Fetching balance...",
+      retry: settings.data ? retryBalance : retrySettings,
+    })
   }, [
     balance.data,
     balance.error,
-    balance.isError,
     balance.isFetching,
-    settings,
+    configError,
+    retryBalance,
+    retrySettings,
+    settings.data,
+    settings.error,
+    settings.isFetching,
   ])
 
   const distributionState = useMemo<
     SectionState<LoopDistributionViewData>
   >(() => {
-    if (settings.isError) {
-      return {
-        status: "error",
-        message: getErrorMessage(settings.error, "Failed to fetch settings"),
-      }
-    }
-    if (balance.isError) {
-      return {
-        status: "error",
-        message: getErrorMessage(balance.error, "Failed to fetch balance"),
-      }
-    }
-    if (!settings.data || !balance.data) return { status: "loading" }
+    let data: LoopDistributionViewData | undefined
 
-    const percent = Number(settings.data.percentPerPeriod)
-    const value = percent === 0 ? "Infinite" : `${percent}%`
-    const distributedAmount =
-      settings.data.percentPerPeriod > 0n
-        ? `${trimFormattedBalance(
-            formatUnits(
-              (balance.data.value * settings.data.percentPerPeriod) / 100n,
-              balance.data.decimals
-            ),
-            4
-          )} ${balance.data.symbol}`
-        : undefined
-    const balanceDetail = `${trimFormattedBalance(
-      formatUnits(balance.data.value, balance.data.decimals),
-      4
-    )} ${balance.data.symbol}`
-    const data: LoopDistributionViewData = {
-      balanceDetail,
-      balanceDetailLabel: "Balance",
-      detail: distributedAmount,
-      tooltip:
+    if (settings.data && balance.data) {
+      const percent = Number(settings.data.percentPerPeriod)
+      const value = percent === 0 ? "Infinite" : `${percent}%`
+      const distributedAmount =
         settings.data.percentPerPeriod > 0n
-          ? `Each period releases ${value} of the remaining balance, split evenly among registered users.`
-          : "The loop balance is distributed evenly among registered users each period.",
-      value,
-    }
-    const isRefreshing = settings.isFetching || balance.isFetching
+          ? `${trimFormattedBalance(
+              formatUnits(
+                (balance.data.value * settings.data.percentPerPeriod) / 100n,
+                balance.data.decimals
+              ),
+              4
+            )} ${balance.data.symbol}`
+          : undefined
+      const balanceDetail = `${trimFormattedBalance(
+        formatUnits(balance.data.value, balance.data.decimals),
+        4
+      )} ${balance.data.symbol}`
 
-    return isRefreshing
-      ? { status: "refreshing", data }
-      : { status: "ready", data }
-  }, [balance, settings])
+      data = {
+        balanceDetail,
+        balanceDetailLabel: "Balance",
+        detail: distributedAmount,
+        tooltip:
+          settings.data.percentPerPeriod > 0n
+            ? `Each period releases ${value} of the remaining balance, split evenly among registered users.`
+            : "The loop balance is distributed evenly among registered users each period.",
+        value,
+      }
+    }
+
+    const error = !settings.data ? settings.error ?? configError : balance.error
+
+    return createLoopSectionState({
+      data,
+      error,
+      errorMessage: "Failed to fetch reward distribution",
+      isFetching: settings.isFetching || balance.isFetching,
+      loadingMessage: "Loading rewards...",
+      retry: retryDistribution,
+    })
+  }, [
+    balance.data,
+    balance.error,
+    balance.isFetching,
+    configError,
+    retryDistribution,
+    settings.data,
+    settings.error,
+    settings.isFetching,
+  ])
 
   const loopersState = useMemo<SectionState<LoopersViewData>>(
     () =>
-      participation.isLoading
-        ? { status: "loading" }
-        : { status: "ready", data: participation.data },
-    [participation.data, participation.isLoading]
+      createLoopSectionState({
+        data: settings.data ? participation.data : undefined,
+        error: !settings.data
+          ? settings.error ?? configError
+          : participation.error,
+        errorMessage: "Failed to fetch Loop participation",
+        isFetching: settings.isFetching || participation.isFetching,
+        loadingMessage: "Loading Loopers...",
+        retry: settings.data ? retryParticipation : retrySettings,
+      }),
+    [
+      configError,
+      participation.data,
+      participation.error,
+      participation.isFetching,
+      retryParticipation,
+      retrySettings,
+      settings.data,
+      settings.error,
+      settings.isFetching,
+    ]
   )
 
   const periodState = useMemo<SectionState<LoopPeriodViewData>>(() => {
-    if (settings.isError) {
-      return {
-        status: "error",
-        message: getErrorMessage(settings.error, "Failed to fetch period"),
-      }
-    }
-    if (!settings.data) return { status: "loading" }
+    const data = settings.data
+      ? {
+          nextPeriodStart:
+            settings.data.firstPeriodStart +
+            settings.data.periodLength * (settings.data.currentPeriod + 1n),
+          timerTitle: getStandardLoopTimerTitle(claim.status),
+        }
+      : undefined
 
-    const data = {
-      nextPeriodStart:
-        settings.data.firstPeriodStart +
-        settings.data.periodLength * (settings.data.currentPeriod + 1n),
-      timerTitle: getStandardLoopTimerTitle(claim.status),
-    }
-
-    return settings.isFetching
-      ? { status: "refreshing", data }
-      : { status: "ready", data }
-  }, [claim.status, settings])
+    return createLoopSectionState({
+      data,
+      error: settings.error ?? configError,
+      errorMessage: "Failed to fetch period",
+      isFetching: settings.isFetching,
+      loadingMessage: "Loading period...",
+      retry: retrySettings,
+    })
+  }, [
+    claim.status,
+    configError,
+    retrySettings,
+    settings.data,
+    settings.error,
+    settings.isFetching,
+  ])
 
   const currentAmount =
     claim.status === "claimed"
@@ -200,24 +248,27 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       ? "claiming"
       : "entering"
     : claim.status
+  const hasClaimError = claim.status === "error"
   const action: LoopActionViewModel = {
     status: actionStatus,
-    label: getStandardLoopActionLabel({
-      amountLabel,
-      isConfirming: claim.isConfirming,
-      isSubmitting: claim.isSubmitting,
-      pendingAction: claim.pendingAction,
-      status: claim.status,
-    }),
+    label: hasClaimError
+      ? "Retry claim status"
+      : getStandardLoopActionLabel({
+          amountLabel,
+          isConfirming: claim.isConfirming,
+          isSubmitting: claim.isSubmitting,
+          pendingAction: claim.pendingAction,
+          status: claim.status,
+        }),
     amountLabel,
     disabled:
       !claim.wrongNetwork &&
       (claim.isPending ||
         !address ||
         !isAddress(address) ||
-        ["checking", "entered", "claimed", "error"].includes(claim.status)),
+        ["checking", "entered", "claimed"].includes(claim.status)),
     isPending: claim.isPending,
-    execute: claim.execute,
+    execute: hasClaimError ? claim.refetch : claim.execute,
   }
 
   return {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import type { LoopEligibilityProvider } from "@/data/loops-data"
 import { isAddress, zeroAddress, type Address } from "viem"
 import {
@@ -118,6 +118,16 @@ export function useStandardLoopClaim({
     chainId,
     query: { enabled: Boolean(txHash) },
   })
+  const refetchClaimerStatus = claimerStatusQuery.refetch
+  const refetchPayout = payoutQuery.refetch
+  const refetchRegistration = registration.refetch
+  const refetch = useCallback(async () => {
+    await Promise.allSettled([
+      refetchClaimerStatus(),
+      refetchPayout(),
+      refetchRegistration(),
+    ])
+  }, [refetchClaimerStatus, refetchPayout, refetchRegistration])
 
   const claimerStatus = claimerStatusQuery.data as
     | readonly [boolean, boolean]
@@ -185,25 +195,37 @@ export function useStandardLoopClaim({
         : undefined,
     } as any)
 
-    registration.refetch()
-    void Promise.allSettled([
-      claimerStatusQuery.refetch(),
-      payoutQuery.refetch(),
-    ]).finally(() => {
+    void refetch().finally(() => {
       void onConfirmed?.()
     })
   }, [
     claimableAmount,
-    claimerStatusQuery,
     onConfirmed,
-    payoutQuery,
     pendingAction,
+    refetch,
     receipt.isSuccess,
-    registration,
     toast,
     transactionUrl,
     txHash,
   ])
+
+  useEffect(() => {
+    if (!receipt.isError || !txHash) return
+
+    const failedTransactionUrl = transactionUrl
+    setTxHash(undefined)
+    toast({
+      title: "Transaction failed",
+      description:
+        receipt.error instanceof Error
+          ? receipt.error.message
+          : "The transaction was not confirmed.",
+      variant: "destructive",
+      link: failedTransactionUrl
+        ? { href: failedTransactionUrl, label: "View transaction" }
+        : undefined,
+    } as any)
+  }, [receipt.error, receipt.isError, toast, transactionUrl, txHash])
 
   const execute = async () => {
     if (!connectedAccount) return
@@ -305,6 +327,7 @@ export function useStandardLoopClaim({
     isSubmitting,
     lastClaimedAmount,
     pendingAction,
+    refetch,
     status,
     transactionUrl,
     wrongNetwork,

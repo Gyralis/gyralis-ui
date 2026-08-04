@@ -6,6 +6,31 @@ export type StandardLoopClaimStatus =
   | "claimed"
   | "error"
 
+interface StandardLoopParticipationInput {
+  claimedUsers: readonly string[]
+  registeredUsers: readonly string[]
+}
+
+export function calculateStandardLoopParticipation({
+  claimedUsers,
+  registeredUsers,
+}: StandardLoopParticipationInput) {
+  const registered = new Set(registeredUsers.map((user) => user.toLowerCase()))
+  const claimed = new Set(claimedUsers.map((user) => user.toLowerCase()))
+  const claimedCount = Array.from(registered).filter((user) =>
+    claimed.has(user)
+  ).length
+  const registeredCount = registered.size
+  const claimRate =
+    registeredCount > 0 ? Math.round((claimedCount / registeredCount) * 100) : 0
+
+  return {
+    claimedCount,
+    claimRate,
+    registeredCount,
+  }
+}
+
 interface StandardLoopClaimStateInput {
   hasClaimed: boolean
   hasError: boolean

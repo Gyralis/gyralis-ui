@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 
+import { LoopSectionError } from "./loop-section-status"
 import type { SectionState } from "./loop-section-types"
 
 export interface LoopersViewData {
@@ -16,6 +17,16 @@ interface LoopersSectionProps {
 }
 
 export function LoopersSection({ onClick, state }: LoopersSectionProps) {
+  if (state.status === "error") {
+    return (
+      <LoopSectionError
+        label="Loopers"
+        message={state.message}
+        onRetry={state.retry}
+      />
+    )
+  }
+
   const isLoading = state.status === "loading"
   const data =
     state.status === "ready" || state.status === "refreshing"

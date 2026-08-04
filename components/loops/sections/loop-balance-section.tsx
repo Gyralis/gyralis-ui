@@ -2,6 +2,7 @@
 
 import { FaWallet } from "react-icons/fa"
 
+import { LoopSectionError } from "./loop-section-status"
 import type { SectionState } from "./loop-section-types"
 
 export interface LoopBalanceViewData {
@@ -23,7 +24,15 @@ export function LoopBalanceSection({ state }: LoopBalanceSectionProps) {
   }
 
   if (state.status === "error") {
-    return <StatusCard message={state.message} tone="error" />
+    return (
+      <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-4">
+        <LoopSectionError
+          label="Loop balance"
+          message={state.message}
+          onRetry={state.retry}
+        />
+      </div>
+    )
   }
 
   const { formattedBalance, secondary, symbol } = state.data
@@ -62,22 +71,10 @@ export function LoopBalanceSection({ state }: LoopBalanceSectionProps) {
   )
 }
 
-function StatusCard({
-  message,
-  tone = "muted",
-}: {
-  message: string
-  tone?: "muted" | "error"
-}) {
+function StatusCard({ message }: { message: string }) {
   return (
     <div className="rounded-[1.45rem] border border-border/80 bg-background/35 px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <p
-        className={`text-sm ${
-          tone === "error" ? "text-destructive" : "text-muted-foreground"
-        }`}
-      >
-        {message}
-      </p>
+      <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   )
 }
