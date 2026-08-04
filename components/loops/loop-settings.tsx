@@ -23,6 +23,9 @@ import {
 import { LoopClaim, LoopClaimStatus } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
 
+import type { PeriodRewardAnimationViewModel } from "./sections/loop-section-types"
+import { usePeriodRewardCountUp } from "./sections/use-period-reward-count-up"
+
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
@@ -204,8 +207,8 @@ export function useLoopSettingsDetails({
   const distributionTooltip = isSuperLoop
     ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
     : settings && settings.percentPerPeriod > 0n
-      ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
-      : "The loop balance is distributed evenly among registered users each period."
+    ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
+    : "The loop balance is distributed evenly among registered users each period."
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
@@ -253,6 +256,7 @@ export function useLoopSettingsDetails({
 }
 
 export const LoopDistributionStat = ({
+  animation,
   balanceDetail,
   balanceDetailLabel = "Balance",
   compact = false,
@@ -261,6 +265,7 @@ export const LoopDistributionStat = ({
   detail,
   tooltip,
 }: {
+  animation?: PeriodRewardAnimationViewModel
   balanceDetail?: string
   balanceDetailLabel?: string
   compact?: boolean
@@ -269,6 +274,11 @@ export const LoopDistributionStat = ({
   detail?: string
   tooltip: string
 }) => {
+  const animatedValue = usePeriodRewardCountUp(animation)
+  const displayedValue = animation?.enabled
+    ? animatedValue ?? "Loading..."
+    : value
+
   if (compact) {
     return (
       <Tooltip>
@@ -282,8 +292,8 @@ export const LoopDistributionStat = ({
               Rewards
             </p>
             <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
-              <p className="text-[1.6rem] font-bold leading-none text-foreground">
-                {value}
+              <p className="text-[1.6rem] font-bold leading-none tabular-nums text-foreground">
+                {displayedValue}
               </p>
               {valueUnit ? (
                 <p className="text-[11px] font-semibold leading-4 text-foreground">
@@ -314,7 +324,7 @@ export const LoopDistributionStat = ({
   return (
     <SettingStatCard
       label="Rewards"
-      value={value}
+      value={displayedValue}
       detail={valueUnit ?? detail}
       tooltip={tooltip}
     />

@@ -25,12 +25,21 @@ export interface LoopActionViewModel {
 }
 
 export interface LoopDistributionViewData {
+  animation?: PeriodRewardAnimationViewModel
   balanceDetail?: string
   balanceDetailLabel: string
   detail?: string
   tooltip: string
   value: string
   valueUnit?: string
+}
+
+export interface PeriodRewardAnimationViewModel {
+  enabled: boolean
+  estimatedPeriodPayout: bigint
+  periodLengthSeconds: bigint
+  periodStartSeconds: bigint
+  tokenDecimals: number
 }
 
 export interface LoopPeriodViewData {

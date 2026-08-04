@@ -184,6 +184,7 @@ export function LoopCardShell({
                 />
               ) : (
                 <LoopDistributionStat
+                  animation={distributionData?.animation}
                   balanceDetail={distributionData?.balanceDetail}
                   balanceDetailLabel={distributionData?.balanceDetailLabel}
                   compact

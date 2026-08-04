@@ -11,6 +11,7 @@ import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
 import { useSuperLoopParticipation } from "@/lib/hooks/loops/super/use-super-loop-participation"
 import { useSuperLoopSettings } from "@/lib/hooks/loops/super/use-super-loop-settings"
 import { useSuperLoopStatus } from "@/lib/hooks/loops/super/use-super-loop-status"
+import { calculateSuperLoopEstimatedPeriodPayout } from "@/lib/loops/super-loop-rewards"
 import {
   deriveSuperLoopClaimStatus,
   getSuperLoopActionLabel,
@@ -121,6 +122,19 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     currentPeriod: statusReads.data.currentPeriod,
     status: derivedStatus,
   })
+  const accumulatingUsers = participation.data?.registeredCount
+  const estimatedPeriodPayout = calculateSuperLoopEstimatedPeriodPayout({
+    accumulatingUsers,
+    flowRatePerSecond: balance.data?.flowRatePerSecond,
+    periodLengthSeconds: settings.data?.periodLength,
+  })
+  const estimatedPeriodPayoutLabel =
+    balance.data && estimatedPeriodPayout != null
+      ? `${trimFormattedBalance(
+          formatUnits(estimatedPeriodPayout, balance.data.decimals),
+          7
+        )} ${balance.data.symbol}`
+      : undefined
   const displayedAmount =
     status === "claimed"
       ? claim.lastClaimedAmount ?? claimableAmount
@@ -160,6 +174,21 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     const data =
       settings.data && balance.data
         ? {
+            animation:
+              status === "active" &&
+              estimatedPeriodPayout != null &&
+              statusReads.data.currentPeriod != null
+                ? {
+                    enabled: true,
+                    estimatedPeriodPayout,
+                    periodLengthSeconds: settings.data.periodLength,
+                    periodStartSeconds:
+                      settings.data.firstPeriodStart +
+                      settings.data.periodLength *
+                        statusReads.data.currentPeriod,
+                    tokenDecimals: balance.data.decimals,
+                  }
+                : undefined,
             balanceDetail: balance.data.flowRateError
               ? "Unavailable"
               : formatMonthlyIncoming({
@@ -168,10 +197,16 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                   symbol: balance.data.symbol,
                 }),
             balanceDetailLabel: "Flow Rate",
-            detail: `${balance.data.symbol} / mo`,
-            tooltip:
-              "Each day, registered users in the loop earn an equal share of the streaming rewards.",
-            value: "0",
+            detail: balance.data.symbol,
+            tooltip: estimatedPeriodPayoutLabel
+              ? `Estimated payout this period: ${estimatedPeriodPayoutLabel} per accumulating user. Calculated as flow rate per second × period length ÷ ${String(
+                  accumulatingUsers
+                )} accumulating ${
+                  accumulatingUsers === 1 ? "user" : "users"
+                }. The estimate changes if the flow rate or user count changes.`
+              : "The estimated payout appears when the flow rate, period length, and accumulating user count are available.",
+            value:
+              status === "checking" || status === "active" ? "Loading..." : "0",
           }
         : undefined
     const error = !settings.data ? settings.error ?? configError : balance.error
@@ -188,11 +223,16 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     balance.data,
     balance.error,
     balance.isFetching,
+    accumulatingUsers,
     configError,
+    estimatedPeriodPayout,
+    estimatedPeriodPayoutLabel,
     retryDistribution,
     settings.data,
     settings.error,
     settings.isFetching,
+    status,
+    statusReads.data.currentPeriod,
   ])
 
   const period = useMemo<SectionState<LoopPeriodViewData>>(() => {
