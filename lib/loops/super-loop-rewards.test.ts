@@ -4,6 +4,7 @@ import {
   calculateSuperLoopAnimatedReward,
   calculateSuperLoopEstimatedPeriodPayout,
   getSuperLoopRewardTooltip,
+  resolveSuperLoopIndividualPeriodPayout,
 } from "./super-loop-rewards"
 
 describe("SuperLoop reward estimate", () => {
@@ -15,6 +16,30 @@ describe("SuperLoop reward estimate", () => {
         periodLengthSeconds: 100n,
       })
     ).toBe(250n)
+  })
+
+  it("only exposes the individual payout to a registered user", () => {
+    expect(
+      resolveSuperLoopIndividualPeriodPayout({
+        estimatedPeriodPayout: 250n,
+        isRegistered: true,
+        isRegistrationLoading: false,
+      })
+    ).toBe(250n)
+    expect(
+      resolveSuperLoopIndividualPeriodPayout({
+        estimatedPeriodPayout: 250n,
+        isRegistered: false,
+        isRegistrationLoading: false,
+      })
+    ).toBe(0n)
+    expect(
+      resolveSuperLoopIndividualPeriodPayout({
+        estimatedPeriodPayout: 250n,
+        isRegistered: false,
+        isRegistrationLoading: true,
+      })
+    ).toBeUndefined()
   })
 
   it.each([undefined, 0, -1])(

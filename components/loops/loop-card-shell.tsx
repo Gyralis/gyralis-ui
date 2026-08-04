@@ -201,6 +201,10 @@ export function LoopCardShell({
                   balanceDetail={distributionData?.balanceDetail}
                   balanceDetailLabel={distributionData?.balanceDetailLabel}
                   compact
+                  isLoading={
+                    distribution.status === "loading" ||
+                    distributionData?.isLoading
+                  }
                   value={getDistributionValue(distribution)}
                   valueUnit={distributionData?.valueUnit}
                   detail={distributionData?.detail}

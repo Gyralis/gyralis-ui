@@ -20,6 +20,12 @@ interface SuperLoopRewardTooltipParams {
   status: SuperLoopClaimStatus
 }
 
+interface ResolveSuperLoopIndividualPayoutParams {
+  estimatedPeriodPayout?: bigint
+  isRegistered: boolean
+  isRegistrationLoading: boolean
+}
+
 export function calculateSuperLoopEstimatedPeriodPayout({
   accumulatingUsers,
   flowRatePerSecond,
@@ -38,6 +44,15 @@ export function calculateSuperLoopEstimatedPeriodPayout({
   }
 
   return (flowRatePerSecond * periodLengthSeconds) / BigInt(accumulatingUsers)
+}
+
+export function resolveSuperLoopIndividualPeriodPayout({
+  estimatedPeriodPayout,
+  isRegistered,
+  isRegistrationLoading,
+}: ResolveSuperLoopIndividualPayoutParams) {
+  if (isRegistrationLoading) return undefined
+  return isRegistered ? estimatedPeriodPayout : 0n
 }
 
 export function calculateSuperLoopAnimatedReward({

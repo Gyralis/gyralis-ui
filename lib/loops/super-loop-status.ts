@@ -173,7 +173,7 @@ export function getSuperLoopActionLabel({
     case "active":
       return "Accumulating rewards"
     case "entered":
-      return "You are in the loop"
+      return "You are in the Loop"
     case "claimable":
       return amountLabel ? `Claim ${amountLabel}` : "Claim"
     case "claimed":

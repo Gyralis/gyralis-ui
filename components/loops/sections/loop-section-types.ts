@@ -29,6 +29,7 @@ export interface LoopDistributionViewData {
   balanceDetail?: string
   balanceDetailLabel: string
   detail?: string
+  isLoading?: boolean
   tooltip: string
   value: string
   valueUnit?: string

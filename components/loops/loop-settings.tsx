@@ -14,6 +14,7 @@ import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -263,6 +264,7 @@ export const LoopDistributionStat = ({
   balanceDetail,
   balanceDetailLabel = "Balance",
   compact = false,
+  isLoading = false,
   value,
   valueUnit,
   detail,
@@ -272,6 +274,7 @@ export const LoopDistributionStat = ({
   balanceDetail?: string
   balanceDetailLabel?: string
   compact?: boolean
+  isLoading?: boolean
   value: string
   valueUnit?: string
   detail?: string
@@ -281,6 +284,8 @@ export const LoopDistributionStat = ({
   const displayedValue = animation?.enabled
     ? animatedValue ?? "Loading..."
     : value
+  const showValueSkeleton =
+    isLoading || (animation?.enabled === true && animatedValue == null)
   const animationEndValue = animation?.enabled
     ? formatAnimatedReward(
         animation.estimatedPeriodPayout,
@@ -306,34 +311,32 @@ export const LoopDistributionStat = ({
                 animationEndValue ? "flex-nowrap" : "flex-wrap",
               ].join(" ")}
             >
-              <div className={animationEndValue ? "grid shrink-0" : "shrink-0"}>
-                {animationEndValue ? (
-                  <>
+              {showValueSkeleton ? (
+                <Skeleton className="h-[26px] w-28 shrink-0 rounded-xs bg-muted" />
+              ) : (
+                <div
+                  className={animationEndValue ? "grid shrink-0" : "shrink-0"}
+                >
+                  {animationEndValue ? (
                     <span
                       aria-hidden="true"
                       className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums"
                     >
                       {animationEndValue}
                     </span>
-                    <span
-                      aria-hidden="true"
-                      className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none"
-                    >
-                      Loading...
-                    </span>
-                  </>
-                ) : null}
-                <p
-                  className={[
-                    "whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums text-foreground",
-                    animationEndValue ? "col-start-1 row-start-1" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  {displayedValue}
-                </p>
-              </div>
+                  ) : null}
+                  <p
+                    className={[
+                      "whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums text-foreground",
+                      animationEndValue ? "col-start-1 row-start-1" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    {displayedValue}
+                  </p>
+                </div>
+              )}
               {valueUnit ? (
                 <p className="shrink-0 text-[11px] font-semibold leading-4 text-foreground">
                   {valueUnit}

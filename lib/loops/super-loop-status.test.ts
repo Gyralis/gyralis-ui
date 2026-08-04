@@ -196,6 +196,14 @@ describe("SuperLoop claim state", () => {
     ).toBe("Claim 0.0114 MARK")
     expect(getSuperLoopTimerTitle("claimable")).toBe("Claim period ends in")
     expect(getSuperLoopTimerTitle("claimed")).toBe("Accumulation starts in")
+    expect(
+      getSuperLoopActionLabel({
+        isConfirming: false,
+        isSubmitting: false,
+        pendingAction: "enter",
+        status: "entered",
+      })
+    ).toBe("You are in the Loop")
   })
 
   it("shows a confirmed claim while refreshed contract reads catch up", () => {
