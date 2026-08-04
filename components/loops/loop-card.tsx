@@ -21,7 +21,7 @@ import { useAccount } from "wagmi"
 import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
 import { usePeriodLogBlockRange } from "@/lib/hooks/app/use-period-log-block-range"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
-import { cn, trimFormattedBalance } from "@/lib/utils"
+import { trimFormattedBalance } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -45,6 +45,7 @@ import {
   useLoopSettingsDetails,
 } from "./loop-settings"
 import { LoopersModal } from "./loopers-modal"
+import { LoopersSection } from "./sections/loopers-section"
 
 interface LoopCardProps {
   loop: LoopCardData
@@ -181,12 +182,20 @@ const LoopCard: React.FC<LoopCardProps> = ({ loop, onBalanceUpdate }) => {
             </div>
 
             <div className="min-h-[94px] border-b border-border/80 px-3.5 py-3 md:border-b-0 md:border-r">
-              <LoopersColumnStat
-                claimedCount={loopersOverview.claimedCount}
-                claimRate={loopersOverview.claimRate}
-                isLoading={loopersOverview.isLoading}
+              <LoopersSection
                 onClick={() => settingsDetails.setIsLoopersModalOpen(true)}
-                registeredCount={loopersOverview.registeredCount}
+                state={
+                  loopersOverview.isLoading
+                    ? { status: "loading" }
+                    : {
+                        status: "ready",
+                        data: {
+                          claimedCount: loopersOverview.claimedCount,
+                          claimRate: loopersOverview.claimRate,
+                          registeredCount: loopersOverview.registeredCount,
+                        },
+                      }
+                }
               />
             </div>
 
@@ -367,82 +376,6 @@ function useLoopersPeriodOverview({
       loadingClaimedUsers,
     registeredCount,
   }
-}
-
-function LoopersColumnStat({
-  claimedCount,
-  claimRate,
-  isLoading,
-  onClick,
-  registeredCount,
-}: {
-  claimedCount: number
-  claimRate: number
-  isLoading: boolean
-  onClick: () => void
-  registeredCount: number
-}) {
-  const hasLoopers = registeredCount > 0
-  const ringValue = isLoading ? 0 : claimRate
-  const radius = 25
-  const circumference = 2 * Math.PI * radius
-  const strokeOffset = circumference - (ringValue / 100) * circumference
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex size-full flex-col rounded-xl p-0 text-center transition-colors hover:bg-background/45 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-    >
-      <span className="sr-only">
-        View loopers. {claimedCount} claimed of {registeredCount} registered.
-      </span>
-      <p className="w-full text-center text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors group-hover:text-primary">
-        Loopers
-      </p>
-      <div className="relative mx-auto mt-2 flex size-[62px] items-center justify-center">
-        <svg
-          className="absolute inset-0 size-full -rotate-90"
-          viewBox="0 0 64 64"
-          aria-hidden="true"
-        >
-          <circle
-            cx="32"
-            cy="32"
-            fill="none"
-            r={radius}
-            stroke="hsl(var(--border))"
-            strokeWidth="5"
-          />
-          <circle
-            cx="32"
-            cy="32"
-            fill="none"
-            r={radius}
-            stroke="hsl(var(--primary))"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeOffset}
-            strokeLinecap="round"
-            strokeWidth="5"
-            className="transition-[stroke-dashoffset] duration-500 ease-out"
-          />
-        </svg>
-        <span
-          className={cn(
-            "relative flex flex-col items-center justify-center font-mono leading-none",
-            hasLoopers ? "text-foreground" : "text-muted-foreground"
-          )}
-        >
-          <span className="text-sm font-bold">
-            {isLoading ? "--" : claimedCount}
-          </span>
-          <span className="mt-1 text-[10px] text-muted-foreground">
-            /{isLoading ? "--" : registeredCount}
-          </span>
-        </span>
-      </div>
-    </button>
-  )
 }
 
 function PassportScoreBadge({

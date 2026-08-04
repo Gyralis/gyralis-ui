@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { LuCheck } from "react-icons/lu"
 import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
@@ -24,8 +23,12 @@ import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { useToast } from "../ui/use-toast"
+import { LoopClaimAction } from "./sections/loop-claim-action"
+import type {
+  LoopActionStatus,
+  LoopActionViewModel,
+} from "./sections/loop-section-types"
 
 interface LoopClaimProps {
   address: Address
@@ -612,22 +615,31 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     (isSuperLoop
       ? isActiveThisPeriod || isEnteredForNextPeriod
       : isEnteredForNextPeriod)
-  const buttonClassName = compact
-    ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
-    : "min-h-12 w-full rounded-full px-5 py-3 text-sm font-semibold tracking-[0.01em]"
+  const actionStatus: LoopActionStatus =
+    isSubmitting || isConfirming
+      ? isClaimableNow
+        ? "claiming"
+        : "entering"
+      : hasClaimed
+      ? "claimed"
+      : isClaimableNow
+      ? "claimable"
+      : isActiveThisPeriod
+      ? "active"
+      : isEnteredForNextPeriod
+      ? "entered"
+      : isLoadingOnchainState
+      ? "checking"
+      : "enter"
+  const actionModel: LoopActionViewModel = {
+    status: actionStatus,
+    label: actionLabel,
+    disabled: !wrongNetwork && isActionDisabled,
+    isPending: isSubmitting || isConfirming,
+    execute: handleClaim,
+  }
 
   return (
-    <div className={compact ? "inline-flex" : "w-full"}>
-      <Button
-        chainId={chainId}
-        onClick={handleClaim}
-        disabled={!wrongNetwork && isActionDisabled}
-        isLoading={isSubmitting || isConfirming}
-        className={buttonClassName}
-      >
-        {actionLabel}
-        {hasClaimed ? <LuCheck className="size-4 shrink-0" /> : null}
-      </Button>
-    </div>
+    <LoopClaimAction chainId={chainId} compact={compact} model={actionModel} />
   )
 }
