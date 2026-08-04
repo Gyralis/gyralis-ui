@@ -17,23 +17,11 @@ import type { LoopBalanceViewData } from "@/components/loops/sections/loop-balan
 import type {
   LoopActionStatus,
   LoopActionViewModel,
+  LoopDistributionViewData,
+  LoopPeriodViewData,
   SectionState,
 } from "@/components/loops/sections/loop-section-types"
 import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
-
-export interface StandardLoopDistributionViewData {
-  balanceDetail?: string
-  balanceDetailLabel: string
-  detail?: string
-  tooltip: string
-  value: string
-  valueUnit?: string
-}
-
-export interface StandardLoopPeriodViewData {
-  nextPeriodStart?: bigint
-  timerTitle: string
-}
 
 function getErrorMessage(error: unknown, fallback: string) {
   return error instanceof Error ? error.message : fallback
@@ -124,7 +112,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   ])
 
   const distributionState = useMemo<
-    SectionState<StandardLoopDistributionViewData>
+    SectionState<LoopDistributionViewData>
   >(() => {
     if (settings.isError) {
       return {
@@ -156,7 +144,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       formatUnits(balance.data.value, balance.data.decimals),
       4
     )} ${balance.data.symbol}`
-    const data: StandardLoopDistributionViewData = {
+    const data: LoopDistributionViewData = {
       balanceDetail,
       balanceDetailLabel: "Balance",
       detail: distributedAmount,
@@ -181,7 +169,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     [participation.data, participation.isLoading]
   )
 
-  const periodState = useMemo<SectionState<StandardLoopPeriodViewData>>(() => {
+  const periodState = useMemo<SectionState<LoopPeriodViewData>>(() => {
     if (settings.isError) {
       return {
         status: "error",

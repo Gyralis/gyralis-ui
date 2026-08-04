@@ -23,3 +23,17 @@ export interface LoopActionViewModel {
   isPending: boolean
   execute: () => void | Promise<void>
 }
+
+export interface LoopDistributionViewData {
+  balanceDetail?: string
+  balanceDetailLabel: string
+  detail?: string
+  tooltip: string
+  value: string
+  valueUnit?: string
+}
+
+export interface LoopPeriodViewData {
+  nextPeriodStart?: bigint
+  timerTitle: string
+}
