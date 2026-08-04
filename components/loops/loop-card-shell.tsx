@@ -55,6 +55,7 @@ interface LoopCardShellProps {
   isSuper: boolean
   loop: LoopCardData
   loopers: SectionState<LoopersViewData>
+  loopersModalEnabled?: boolean
   modal: {
     currentPeriod?: bigint
     firstPeriodStart?: bigint
@@ -77,6 +78,7 @@ export function LoopCardShell({
   isSuper,
   loop,
   loopers,
+  loopersModalEnabled = true,
   modal,
   period,
 }: LoopCardShellProps) {
@@ -195,7 +197,11 @@ export function LoopCardShell({
 
             <div className="min-h-[94px] border-b border-border/80 px-3.5 py-3 md:border-b-0 md:border-r">
               <LoopersSection
-                onClick={() => setIsLoopersModalOpen(true)}
+                onClick={
+                  loopersModalEnabled
+                    ? () => setIsLoopersModalOpen(true)
+                    : undefined
+                }
                 state={loopers}
               />
             </div>
@@ -248,21 +254,23 @@ export function LoopCardShell({
           {isConnected ? <LoopStreakSection /> : null}
         </div>
 
-        <LoopersModal
-          chainId={loop.chainId}
-          currentPeriod={modal.currentPeriod}
-          eligibilityLogoUrl={loop.eligibilityLogoUrl}
-          isOpen={isLoopersModalOpen}
-          loopAddress={loop.address ?? "0x"}
-          loopContractType={modal.loopContractType}
-          loopIsSuper={isSuper}
-          loopToken={modal.loopToken}
-          loopTitle={loop.title}
-          onOpenChange={setIsLoopersModalOpen}
-          firstPeriodStart={modal.firstPeriodStart}
-          periodLength={modal.periodLength}
-          refreshKey={modal.refreshKey}
-        />
+        {loopersModalEnabled ? (
+          <LoopersModal
+            chainId={loop.chainId}
+            currentPeriod={modal.currentPeriod}
+            eligibilityLogoUrl={loop.eligibilityLogoUrl}
+            isOpen={isLoopersModalOpen}
+            loopAddress={loop.address ?? "0x"}
+            loopContractType={modal.loopContractType}
+            loopIsSuper={isSuper}
+            loopToken={modal.loopToken}
+            loopTitle={loop.title}
+            onOpenChange={setIsLoopersModalOpen}
+            firstPeriodStart={modal.firstPeriodStart}
+            periodLength={modal.periodLength}
+            refreshKey={modal.refreshKey}
+          />
+        ) : null}
 
         <SponsorModal
           isOpen={isSponsorModalOpen}

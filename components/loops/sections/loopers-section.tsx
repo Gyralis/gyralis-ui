@@ -12,7 +12,7 @@ export interface LoopersViewData {
 }
 
 interface LoopersSectionProps {
-  onClick: () => void
+  onClick?: () => void
   state: SectionState<LoopersViewData>
 }
 
@@ -42,11 +42,18 @@ export function LoopersSection({ onClick, state }: LoopersSectionProps) {
   return (
     <button
       type="button"
+      disabled={!onClick}
       onClick={onClick}
-      className="group flex size-full flex-col rounded-xl p-0 text-center transition-colors hover:bg-background/45 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      className={cn(
+        "group flex size-full flex-col rounded-xl p-0 text-center transition-colors",
+        onClick
+          ? "hover:bg-background/45 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          : "cursor-default"
+      )}
     >
       <span className="sr-only">
-        View loopers. {claimedCount} claimed of {registeredCount} registered.
+        {onClick ? "View loopers. " : "Loopers. "}
+        {claimedCount} claimed of {registeredCount} registered.
       </span>
       <p className="w-full text-center text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors group-hover:text-primary">
         Loopers

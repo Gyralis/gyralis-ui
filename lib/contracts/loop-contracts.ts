@@ -23,10 +23,11 @@ export const loopContractMethods = {
     getCurrentPeriod: "getStreamingCurrentPeriod",
     getDetails: "getStreamingLoopDetails",
     getPeriodIndividualPayout: "getStreamingPeriodIndividualPayout",
+    getUserPhase: "getUserPhase",
+    owedToMe: "owedToMe",
   },
-} as const satisfies Record<
-  LoopContractType,
-  {
+} as const satisfies {
+  loop: {
     claim?: string
     claimAndRegister: string
     getClaimerStatus: string
@@ -34,7 +35,16 @@ export const loopContractMethods = {
     getDetails: string
     getPeriodIndividualPayout: string
   }
->
+  superLoop: {
+    claimAndRegister: string
+    getClaimerStatus: string
+    getCurrentPeriod: string
+    getDetails: string
+    getPeriodIndividualPayout: string
+    getUserPhase: string
+    owedToMe: string
+  }
+}
 
 type LoopContractEntry = {
   abi: Abi

@@ -92,7 +92,7 @@ export const LoopCardsData: LoopCardData[] = [
     id: 5,
     title: "SuperLoops",
     by: "Test Team",
-    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
+    address: "0x546480E2E0e964Aa3a6f15B022f6875327A1F60d",
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",

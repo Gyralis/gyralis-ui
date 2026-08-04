@@ -80,6 +80,7 @@ export function LegacySuperLoopCard({ loop }: LegacySuperLoopCardProps) {
       isSuper
       loop={loop}
       loopers={loopers}
+      loopersModalEnabled={false}
       modal={{
         currentPeriod: settings.currentPeriod,
         firstPeriodStart: settings.settings?.firstPeriodStart,
