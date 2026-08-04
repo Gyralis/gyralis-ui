@@ -90,7 +90,7 @@ export const LoopCardsData: LoopCardData[] = [
   },
   {
     id: 5,
-    title: "SuperLoops",
+    title: "Markee Gardens SuperLoop",
     by: "Test Team",
     address: "0x546480E2E0e964Aa3a6f15B022f6875327A1F60d",
     description:
@@ -107,9 +107,10 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 8453,
     chainName: "Base",
     historyLoopKey: "test-superloops",
-    eligibilityProvider: "blockscout",
+    eligibilityProvider: "garden_1hive",
+    gardensCommunity: "markee",
     passportMinScore: 0,
-    enabled: false,
+    enabled: true,
     rewardsSummary: "TBA",
     sponsorName: "TBA",
     sponsorLogoUrl: "/1Hive-logo.png",
