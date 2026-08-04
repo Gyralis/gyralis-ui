@@ -24,7 +24,10 @@ import { LoopClaim, LoopClaimStatus } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
 
 import type { PeriodRewardAnimationViewModel } from "./sections/loop-section-types"
-import { usePeriodRewardCountUp } from "./sections/use-period-reward-count-up"
+import {
+  formatAnimatedReward,
+  usePeriodRewardCountUp,
+} from "./sections/use-period-reward-count-up"
 
 interface LoopSettingsComponentProps {
   address: Address
@@ -278,6 +281,12 @@ export const LoopDistributionStat = ({
   const displayedValue = animation?.enabled
     ? animatedValue ?? "Loading..."
     : value
+  const animationEndValue = animation?.enabled
+    ? formatAnimatedReward(
+        animation.estimatedPeriodPayout,
+        animation.tokenDecimals
+      )
+    : undefined
 
   if (compact) {
     return (
@@ -291,17 +300,47 @@ export const LoopDistributionStat = ({
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
               Rewards
             </p>
-            <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
-              <p className="text-[1.6rem] font-bold leading-none tabular-nums text-foreground">
-                {displayedValue}
-              </p>
+            <div
+              className={[
+                "mt-4 flex items-baseline gap-x-2 gap-y-1 text-foreground",
+                animationEndValue ? "flex-nowrap" : "flex-wrap",
+              ].join(" ")}
+            >
+              <div className={animationEndValue ? "grid shrink-0" : "shrink-0"}>
+                {animationEndValue ? (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums"
+                    >
+                      {animationEndValue}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none"
+                    >
+                      Loading...
+                    </span>
+                  </>
+                ) : null}
+                <p
+                  className={[
+                    "whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums text-foreground",
+                    animationEndValue ? "col-start-1 row-start-1" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {displayedValue}
+                </p>
+              </div>
               {valueUnit ? (
-                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                <p className="shrink-0 text-[11px] font-semibold leading-4 text-foreground">
                   {valueUnit}
                 </p>
               ) : null}
               {detail ? (
-                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                <p className="shrink-0 text-[11px] font-semibold leading-4 text-foreground">
                   {detail}
                 </p>
               ) : null}

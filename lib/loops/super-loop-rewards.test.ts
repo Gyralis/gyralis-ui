@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   calculateSuperLoopAnimatedReward,
   calculateSuperLoopEstimatedPeriodPayout,
+  getSuperLoopRewardTooltip,
 } from "./super-loop-rewards"
 
 describe("SuperLoop reward estimate", () => {
@@ -59,5 +60,43 @@ describe("SuperLoop reward estimate", () => {
         nowMilliseconds: 1_101_000n,
       })
     ).toBe(1_000n)
+  })
+
+  it("only reports calculation while the estimate is actually loading", () => {
+    expect(
+      getSuperLoopRewardTooltip({
+        isEstimateLoading: true,
+        status: "active",
+      })
+    ).toBe("Estimated Payout: Calculating...")
+    expect(
+      getSuperLoopRewardTooltip({
+        isEstimateLoading: false,
+        status: "active",
+      })
+    ).toBe("Estimated Payout: 0")
+  })
+
+  it("prefers resolved estimated and claimable amounts", () => {
+    expect(
+      getSuperLoopRewardTooltip({
+        estimatedPeriodPayoutLabel: "1.25 MARK",
+        isEstimateLoading: false,
+        status: "active",
+      })
+    ).toBe("Estimated Payout: 1.25 MARK")
+    expect(
+      getSuperLoopRewardTooltip({
+        claimableRewardLabel: "1.2 MARK",
+        isEstimateLoading: false,
+        status: "claimable",
+      })
+    ).toBe("Claim Amount: 1.2 MARK")
+    expect(
+      getSuperLoopRewardTooltip({
+        isEstimateLoading: false,
+        status: "claimable",
+      })
+    ).toBe("Claim Amount: 0")
   })
 })

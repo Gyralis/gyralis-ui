@@ -64,6 +64,9 @@ export const LoopCardsData: LoopCardData[] = [
     gardensCommunity: "1hive",
     passportMinScore: 0,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
   {
     id: 4,
@@ -87,6 +90,9 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
   {
     id: 5,
@@ -112,7 +118,7 @@ export const LoopCardsData: LoopCardData[] = [
     passportMinScore: 0,
     enabled: true,
     rewardsSummary: "1000 markee tokens",
-    sponsorName: "Markee",
+    sponsorName: "Markee Cooperative",
     sponsorLogoUrl: "/markee-logo.png",
     sponsorUrl: "https://www.markee.xyz/",
   },

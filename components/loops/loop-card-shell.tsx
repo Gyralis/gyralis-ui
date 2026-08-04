@@ -102,6 +102,14 @@ export function LoopCardShell({
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
   const distributionData = getSectionData(distribution)
   const periodData = getSectionData(period)
+  const sponsor =
+    loop.sponsorName && loop.sponsorLogoUrl && loop.sponsorUrl
+      ? {
+          logoUrl: loop.sponsorLogoUrl,
+          name: loop.sponsorName,
+          url: loop.sponsorUrl,
+        }
+      : undefined
 
   return (
     <TooltipProvider>
@@ -155,21 +163,26 @@ export function LoopCardShell({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsSponsorModalOpen(true)}
-              className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-[165px] md:justify-start"
-            >
-              <SponsorBadgeMark />
-              <div className="min-w-0">
-                <p className="text-[8px] font-semibold uppercase leading-none tracking-widest text-muted-foreground">
-                  Sponsored by
-                </p>
-                <p className="mt-1 truncate text-[11px] font-semibold leading-none text-foreground">
-                  1Hive
-                </p>
-              </div>
-            </button>
+            {sponsor ? (
+              <button
+                type="button"
+                onClick={() => setIsSponsorModalOpen(true)}
+                className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-[165px] md:justify-start"
+              >
+                <SponsorBadgeMark
+                  logoUrl={sponsor.logoUrl}
+                  sponsorName={sponsor.name}
+                />
+                <div className="min-w-0">
+                  <p className="text-[8px] font-semibold uppercase leading-none tracking-widest text-muted-foreground">
+                    Sponsored by
+                  </p>
+                  <p className="mt-1 truncate text-[11px] font-semibold leading-none text-foreground">
+                    {sponsor.name}
+                  </p>
+                </div>
+              </button>
+            ) : null}
           </div>
 
           <div className="h-px bg-border/80" />
@@ -273,12 +286,19 @@ export function LoopCardShell({
           />
         ) : null}
 
-        <SponsorModal
-          isOpen={isSponsorModalOpen}
-          historyLoopKey={loop.historyLoopKey}
-          loopTitle={loop.title}
-          onOpenChange={setIsSponsorModalOpen}
-        />
+        {sponsor ? (
+          <SponsorModal
+            hardcodeZeroStats={sponsor.name.toLowerCase().includes("markee")}
+            isOpen={isSponsorModalOpen}
+            historyLoopKey={loop.historyLoopKey}
+            loopContractType={loop.contractType}
+            loopTitle={loop.title}
+            onOpenChange={setIsSponsorModalOpen}
+            sponsorLogoUrl={sponsor.logoUrl}
+            sponsorName={sponsor.name}
+            sponsorUrl={sponsor.url}
+          />
+        ) : null}
       </div>
     </TooltipProvider>
   )
@@ -432,7 +452,15 @@ function ChainIconBadge({ chainName }: { chainName: string }) {
   )
 }
 
-function SponsorBadgeMark({ large = false }: { large?: boolean }) {
+function SponsorBadgeMark({
+  large = false,
+  logoUrl,
+  sponsorName,
+}: {
+  large?: boolean
+  logoUrl: string
+  sponsorName: string
+}) {
   return (
     <div
       className={
@@ -442,12 +470,14 @@ function SponsorBadgeMark({ large = false }: { large?: boolean }) {
       }
     >
       <Image
-        src="/1Hive-logo.png"
-        alt="1Hive logo"
+        src={logoUrl}
+        alt={`${sponsorName} logo`}
         width={large ? 42 : 22}
         height={large ? 42 : 22}
         className={
-          large ? "size-11 object-contain" : "size-[22px] object-contain"
+          large
+            ? "size-11 object-contain"
+            : "size-[22px] rounded-full object-cover"
         }
       />
     </div>
@@ -455,15 +485,25 @@ function SponsorBadgeMark({ large = false }: { large?: boolean }) {
 }
 
 function SponsorModal({
+  hardcodeZeroStats = false,
   historyLoopKey,
   isOpen,
+  loopContractType,
   loopTitle,
   onOpenChange,
+  sponsorLogoUrl,
+  sponsorName,
+  sponsorUrl,
 }: {
+  hardcodeZeroStats?: boolean
   historyLoopKey: LoopCardData["historyLoopKey"]
   isOpen: boolean
+  loopContractType: LoopContractType
   loopTitle: string
   onOpenChange: (open: boolean) => void
+  sponsorLogoUrl: string
+  sponsorName: string
+  sponsorUrl: string
 }) {
   const { data, isLoading, isError } = useQuery<{
     success: boolean
@@ -486,18 +526,32 @@ function SponsorModal({
       }
       return response.json()
     },
-    enabled: isOpen,
+    enabled: isOpen && !hardcodeZeroStats,
     staleTime: 5 * 60 * 1000,
   })
+  const displayedStats = hardcodeZeroStats
+    ? {
+        claims: 0,
+        distributedAmount: "0",
+        registrations: 0,
+        tokenSymbol: null,
+        uniqueUsers: 0,
+      }
+    : data?.stats
+  const modalIsLoading = !hardcodeZeroStats && isLoading
+  const modalIsError = !hardcodeZeroStats && isError
   const stats = [
     {
       label: "Unique Users",
-      value: formatIntegerStat(data?.stats.uniqueUsers),
+      value: formatIntegerStat(displayedStats?.uniqueUsers),
     },
-    { label: "Claims", value: formatIntegerStat(data?.stats.claims) },
+    { label: "Claims", value: formatIntegerStat(displayedStats?.claims) },
     {
       label: "Claim Rate",
-      value: formatClaimRateStat(data?.stats.claims, data?.stats.registrations),
+      value: formatClaimRateStat(
+        displayedStats?.claims,
+        displayedStats?.registrations
+      ),
     },
   ]
 
@@ -506,21 +560,26 @@ function SponsorModal({
       <DialogContent className="max-w-[440px] rounded-[28px] border-border/80 bg-card p-6 text-card-foreground shadow-[0_28px_90px_-48px_rgba(0,0,0,0.55)]">
         <div className="space-y-5 text-center">
           <div className="space-y-3">
-            <SponsorBadgeMark large />
+            <SponsorBadgeMark
+              large
+              logoUrl={sponsorLogoUrl}
+              sponsorName={sponsorName}
+            />
             <div>
               <DialogTitle className="text-center text-2xl leading-none text-foreground">
                 <Link
-                  href="https://1hive.org"
+                  href={sponsorUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
-                  <span>1Hive</span>
+                  <span>{sponsorName}</span>
                   <LuExternalLink className="size-4 text-muted-foreground" />
                 </Link>
               </DialogTitle>
               <DialogDescription className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                Sponsor of {loopTitle} Loop
+                Sponsor of{" "}
+                {formatSponsoredLoopTitle(loopTitle, loopContractType)}
               </DialogDescription>
             </div>
           </div>
@@ -529,15 +588,15 @@ function SponsorModal({
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
               Total Distributed
             </p>
-            {isLoading ? (
+            {modalIsLoading ? (
               <div className="mt-3 flex flex-col items-center gap-2">
                 <Skeleton className="h-10 w-36 rounded-full bg-muted-foreground/15" />
               </div>
             ) : (
               <p className="mt-2 font-mono text-[2.35rem] font-bold leading-none text-primary">
                 {formatDistributedStat(
-                  data?.stats.distributedAmount,
-                  data?.stats.tokenSymbol
+                  displayedStats?.distributedAmount,
+                  displayedStats?.tokenSymbol
                 )}
               </p>
             )}
@@ -548,7 +607,7 @@ function SponsorModal({
               <HighlightStatCard
                 key={stat.label}
                 title={stat.label}
-                value={isLoading ? "..." : stat.value}
+                value={modalIsLoading ? "..." : stat.value}
                 size="compact"
                 bordered
                 className="min-h-[84px]"
@@ -556,11 +615,11 @@ function SponsorModal({
             ))}
           </div>
 
-          {isError ? (
+          {modalIsError ? (
             <p className="text-xs text-muted-foreground">
               We couldn&apos;t load the latest sponsor stats right now.
             </p>
-          ) : (
+          ) : hardcodeZeroStats ? null : (
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <LuInfo className="size-3.5 shrink-0" aria-hidden="true" />
               <span>Latest history snapshot</span>
@@ -571,6 +630,16 @@ function SponsorModal({
       </DialogContent>
     </Dialog>
   )
+}
+
+function formatSponsoredLoopTitle(
+  loopTitle: string,
+  loopContractType: LoopContractType
+) {
+  const titleWithoutType = loopTitle.replace(/\s+(?:superloop|loop)$/i, "")
+  const loopType = loopContractType === "superLoop" ? "SuperLoop" : "Loop"
+
+  return `${titleWithoutType} ${loopType}`
 }
 
 function formatIntegerStat(value: number | undefined) {

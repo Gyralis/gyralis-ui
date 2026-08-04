@@ -11,7 +11,10 @@ import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
 import { useSuperLoopParticipation } from "@/lib/hooks/loops/super/use-super-loop-participation"
 import { useSuperLoopSettings } from "@/lib/hooks/loops/super/use-super-loop-settings"
 import { useSuperLoopStatus } from "@/lib/hooks/loops/super/use-super-loop-status"
-import { calculateSuperLoopEstimatedPeriodPayout } from "@/lib/loops/super-loop-rewards"
+import {
+  calculateSuperLoopEstimatedPeriodPayout,
+  getSuperLoopRewardTooltip,
+} from "@/lib/loops/super-loop-rewards"
 import {
   deriveSuperLoopClaimStatus,
   getSuperLoopActionLabel,
@@ -135,6 +138,24 @@ export function useSuperLoopCardController(loop: LoopCardData) {
           7
         )} ${balance.data.symbol}`
       : undefined
+  const claimableRewardValue =
+    balance.data && claimableAmount > 0n
+      ? trimFormattedBalance(
+          formatUnits(claimableAmount, balance.data.decimals),
+          7
+        )
+      : undefined
+  const claimableRewardLabel =
+    balance.data && claimableRewardValue
+      ? `${claimableRewardValue} ${balance.data.symbol}`
+      : undefined
+  const rewardsTooltip = getSuperLoopRewardTooltip({
+    claimableRewardLabel,
+    estimatedPeriodPayoutLabel,
+    isEstimateLoading:
+      participation.isLoading && !participation.isError && !statusReads.isError,
+    status,
+  })
   const displayedAmount =
     status === "claimed"
       ? claim.lastClaimedAmount ?? claimableAmount
@@ -198,15 +219,13 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                 }),
             balanceDetailLabel: "Flow Rate",
             detail: balance.data.symbol,
-            tooltip: estimatedPeriodPayoutLabel
-              ? `Estimated payout this period: ${estimatedPeriodPayoutLabel} per accumulating user. Calculated as flow rate per second × period length ÷ ${String(
-                  accumulatingUsers
-                )} accumulating ${
-                  accumulatingUsers === 1 ? "user" : "users"
-                }. The estimate changes if the flow rate or user count changes.`
-              : "The estimated payout appears when the flow rate, period length, and accumulating user count are available.",
+            tooltip: rewardsTooltip,
             value:
-              status === "checking" || status === "active" ? "Loading..." : "0",
+              status === "checking" || status === "active"
+                ? "Loading..."
+                : status === "claimable"
+                ? claimableRewardValue ?? "Loading..."
+                : "0",
           }
         : undefined
     const error = !settings.data ? settings.error ?? configError : balance.error
@@ -224,10 +243,13 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     balance.error,
     balance.isFetching,
     accumulatingUsers,
+    claimableRewardLabel,
+    claimableRewardValue,
     configError,
     estimatedPeriodPayout,
     estimatedPeriodPayoutLabel,
     retryDistribution,
+    rewardsTooltip,
     settings.data,
     settings.error,
     settings.isFetching,

@@ -1,3 +1,5 @@
+import type { SuperLoopClaimStatus } from "./super-loop-status"
+
 interface SuperLoopPeriodPayoutParams {
   accumulatingUsers?: number
   flowRatePerSecond?: bigint
@@ -9,6 +11,13 @@ interface SuperLoopAnimatedRewardParams {
   nowMilliseconds: bigint
   periodLengthSeconds: bigint
   periodStartSeconds: bigint
+}
+
+interface SuperLoopRewardTooltipParams {
+  claimableRewardLabel?: string
+  estimatedPeriodPayoutLabel?: string
+  isEstimateLoading: boolean
+  status: SuperLoopClaimStatus
 }
 
 export function calculateSuperLoopEstimatedPeriodPayout({
@@ -51,4 +60,23 @@ export function calculateSuperLoopAnimatedReward({
   return (
     (estimatedPeriodPayout * elapsedMilliseconds) / periodLengthMilliseconds
   )
+}
+
+export function getSuperLoopRewardTooltip({
+  claimableRewardLabel,
+  estimatedPeriodPayoutLabel,
+  isEstimateLoading,
+  status,
+}: SuperLoopRewardTooltipParams) {
+  if (status === "claimable") {
+    return `Claim Amount: ${claimableRewardLabel ?? "0"}`
+  }
+
+  if (estimatedPeriodPayoutLabel) {
+    return `Estimated Payout: ${estimatedPeriodPayoutLabel}`
+  }
+
+  return isEstimateLoading
+    ? "Estimated Payout: Calculating..."
+    : "Estimated Payout: 0"
 }
