@@ -23,6 +23,7 @@ type UpgradedRegisterLog = Log<
 >
 
 interface UseRegisteredUsersResult {
+  error: unknown
   users: Address[]
   loading: boolean
 }
@@ -37,11 +38,13 @@ export function useRegisteredUsers(
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
+  const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
+      setError(null)
       setLoading(false)
       return
     }
@@ -49,6 +52,7 @@ export function useRegisteredUsers(
     let cancelled = false
 
     const fetchLogs = async () => {
+      setError(null)
       setLoading(true)
 
       try {
@@ -100,6 +104,7 @@ export function useRegisteredUsers(
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching Register logs:", error)
+          setError(error)
           setUsers([])
         }
       } finally {
@@ -125,5 +130,5 @@ export function useRegisteredUsers(
     refreshKey,
   ])
 
-  return { users, loading }
+  return { error, users, loading }
 }

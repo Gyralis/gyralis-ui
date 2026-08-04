@@ -1,28 +1,304 @@
 "use client"
 
+import { useCallback, useMemo } from "react"
 import type { LoopCardData } from "@/data/loops-data"
+import { formatUnits, isAddress } from "viem"
 import { useAccount } from "wagmi"
 
+import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
+import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
+import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
+import { useSuperLoopParticipation } from "@/lib/hooks/loops/super/use-super-loop-participation"
+import { useSuperLoopSettings } from "@/lib/hooks/loops/super/use-super-loop-settings"
 import { useSuperLoopStatus } from "@/lib/hooks/loops/super/use-super-loop-status"
+import {
+  deriveSuperLoopClaimStatus,
+  getSuperLoopActionLabel,
+  getSuperLoopTimerTitle,
+  reconcileSuperLoopConfirmedStatus,
+} from "@/lib/loops/super-loop-status"
+import { trimFormattedBalance } from "@/lib/utils"
+import { createLoopSectionState } from "@/components/loops/sections/create-loop-section-state"
+import type {
+  LoopActionStatus,
+  LoopActionViewModel,
+  LoopDistributionViewData,
+  LoopPeriodViewData,
+  SectionState,
+} from "@/components/loops/sections/loop-section-types"
+import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
 
 export function useSuperLoopCardController(loop: LoopCardData) {
   const { address: account } = useAccount()
+  const address = loop.address
+  const validAddress = Boolean(address && isAddress(address))
+  const configError = validAddress
+    ? undefined
+    : new Error("Loop address is missing or invalid")
   const statusReads = useSuperLoopStatus({
-    address: loop.address,
+    address,
     chainId: loop.chainId,
     user: account,
   })
+  const settings = useSuperLoopSettings({
+    address,
+    chainId: loop.chainId,
+  })
+  const balance = useLoopTokenBalance({
+    address,
+    chainId: loop.chainId,
+    contractType: "superLoop",
+    enabled: Boolean(address && settings.data?.token),
+    token: settings.data?.token,
+  })
+  const participation = useSuperLoopParticipation({
+    address: address ?? "0x",
+    chainId: loop.chainId,
+    currentPeriod: statusReads.data.currentPeriod,
+    enabled: validAddress && Boolean(settings.data),
+    firstPeriodStart: settings.data?.firstPeriodStart,
+    periodLength: settings.data?.periodLength,
+  })
+  const refetchBalance = balance.refetch
+  const refetchParticipation = participation.refetch
+  const refetchSettings = settings.refetch
+  const refetchStatus = statusReads.refetch
+  const retryDistribution = useCallback(() => {
+    void Promise.allSettled([refetchSettings(), refetchBalance()])
+  }, [refetchBalance, refetchSettings])
+  const retryPeriod = useCallback(() => {
+    void Promise.allSettled([refetchSettings(), refetchStatus()])
+  }, [refetchSettings, refetchStatus])
+  const retryParticipation = useCallback(() => {
+    if (!settings.data || statusReads.data.currentPeriod == null) {
+      void Promise.allSettled([refetchSettings(), refetchStatus()])
+      return
+    }
+
+    refetchParticipation()
+  }, [
+    refetchParticipation,
+    refetchSettings,
+    refetchStatus,
+    settings.data,
+    statusReads.data.currentPeriod,
+  ])
+  const refreshSections = useCallback(async () => {
+    refetchParticipation()
+    await Promise.allSettled([refetchSettings(), refetchBalance()])
+  }, [refetchBalance, refetchParticipation, refetchSettings])
+  const refreshCardData = useCallback(async () => {
+    refetchParticipation()
+    await Promise.allSettled([
+      refetchStatus(),
+      refetchSettings(),
+      refetchBalance(),
+    ])
+  }, [refetchBalance, refetchParticipation, refetchSettings, refetchStatus])
+  const claimerStatus = statusReads.data.claimerStatus
+  const claimableAmount = statusReads.data.owed?.total ?? 0n
+  const derivedStatus = deriveSuperLoopClaimStatus({
+    accountConnected: Boolean(account),
+    claimerStatus,
+    hasError: statusReads.isError,
+    isClaimable: statusReads.data.isClaimable,
+    isLoading: statusReads.isLoading,
+    userPhase: statusReads.data.userPhase,
+  })
+  const claim = useSuperLoopClaim({
+    address,
+    chainId: loop.chainId,
+    claimableAmount,
+    currentPeriod: statusReads.data.currentPeriod,
+    eligibilityProvider: loop.eligibilityProvider,
+    hasClaimed: Boolean(claimerStatus?.hasClaimed),
+    isClaimable: statusReads.data.isClaimable === true,
+    onConfirmed: refreshSections,
+    refetchStatus,
+  })
+  const status = reconcileSuperLoopConfirmedStatus({
+    confirmedAction: claim.confirmedAction,
+    currentPeriod: statusReads.data.currentPeriod,
+    status: derivedStatus,
+  })
+  const displayedAmount =
+    status === "claimed"
+      ? claim.lastClaimedAmount ?? claimableAmount
+      : claimableAmount
+  const amountLabel =
+    balance.data && displayedAmount > 0n
+      ? `${trimFormattedBalance(
+          formatUnits(displayedAmount, balance.data.decimals),
+          4
+        )} ${balance.data.symbol}`
+      : undefined
+  const actionStatus: LoopActionStatus = claim.isPending
+    ? claim.pendingAction === "claim"
+      ? "claiming"
+      : "entering"
+    : status
+  const action: LoopActionViewModel = {
+    status: actionStatus,
+    label: getSuperLoopActionLabel({
+      amountLabel,
+      isConfirming: claim.isConfirming,
+      isSubmitting: claim.isSubmitting,
+      pendingAction: claim.pendingAction,
+      status,
+    }),
+    amountLabel,
+    disabled:
+      !claim.wrongNetwork &&
+      (claim.isPending ||
+        !validAddress ||
+        ["checking", "entered", "active", "claimed"].includes(status)),
+    isPending: claim.isPending,
+    execute: status === "error" ? refetchStatus : claim.execute,
+  }
+
+  const distribution = useMemo<SectionState<LoopDistributionViewData>>(() => {
+    const data =
+      settings.data && balance.data
+        ? {
+            balanceDetail: balance.data.flowRateError
+              ? "Unavailable"
+              : formatMonthlyIncoming({
+                  flowRatePerSecond: balance.data.flowRatePerSecond,
+                  decimals: balance.data.decimals,
+                  symbol: balance.data.symbol,
+                }),
+            balanceDetailLabel: "Flow Rate",
+            detail: `${balance.data.symbol} / mo`,
+            tooltip:
+              "Each day, registered users in the loop earn an equal share of the streaming rewards.",
+            value: "0",
+          }
+        : undefined
+    const error = !settings.data ? settings.error ?? configError : balance.error
+
+    return createLoopSectionState({
+      data,
+      error,
+      errorMessage: "Failed to fetch SuperLoop rewards",
+      isFetching: settings.isFetching || balance.isFetching,
+      loadingMessage: "Loading rewards...",
+      retry: retryDistribution,
+    })
+  }, [
+    balance.data,
+    balance.error,
+    balance.isFetching,
+    configError,
+    retryDistribution,
+    settings.data,
+    settings.error,
+    settings.isFetching,
+  ])
+
+  const period = useMemo<SectionState<LoopPeriodViewData>>(() => {
+    const currentPeriod = statusReads.data.currentPeriod
+    const data =
+      settings.data && currentPeriod != null
+        ? {
+            nextPeriodStart:
+              settings.data.firstPeriodStart +
+              settings.data.periodLength * (currentPeriod + 1n),
+            timerTitle: getSuperLoopTimerTitle(status),
+          }
+        : undefined
+    const error = !settings.data
+      ? settings.error ?? configError
+      : statusReads.errors.currentPeriod
+
+    return createLoopSectionState({
+      data,
+      error,
+      errorMessage: "Failed to fetch SuperLoop period",
+      isFetching: settings.isFetching || statusReads.isFetching,
+      loadingMessage: "Loading period...",
+      retry: retryPeriod,
+    })
+  }, [
+    configError,
+    retryPeriod,
+    settings.data,
+    settings.error,
+    settings.isFetching,
+    status,
+    statusReads.data.currentPeriod,
+    statusReads.errors.currentPeriod,
+    statusReads.isFetching,
+  ])
+
+  const loopers = useMemo<SectionState<LoopersViewData>>(() => {
+    const prerequisitesError = !settings.data
+      ? settings.error ?? configError
+      : statusReads.data.currentPeriod == null
+      ? statusReads.errors.currentPeriod
+      : undefined
+
+    return createLoopSectionState({
+      data: participation.data,
+      error: prerequisitesError ?? participation.error,
+      errorMessage: "Failed to fetch SuperLoop participation",
+      isFetching: participation.isFetching,
+      loadingMessage: "Loading Loopers...",
+      retry: retryParticipation,
+    })
+  }, [
+    configError,
+    participation.data,
+    participation.error,
+    participation.isFetching,
+    retryParticipation,
+    settings.data,
+    settings.error,
+    statusReads.data.currentPeriod,
+    statusReads.errors.currentPeriod,
+  ])
 
   return {
-    error: statusReads.error,
-    errors: statusReads.errors,
-    isError: statusReads.isError,
-    isFetching: statusReads.isFetching,
-    isLoading: statusReads.isLoading,
+    action,
+    distribution,
+    error:
+      statusReads.error ??
+      settings.error ??
+      balance.error ??
+      participation.error ??
+      configError,
+    errors: {
+      balance: balance.error,
+      config: configError,
+      participation: participation.error,
+      settings: settings.error,
+      status: statusReads.errors,
+    },
+    isError:
+      statusReads.isError ||
+      settings.isError ||
+      balance.isError ||
+      participation.isError ||
+      Boolean(configError),
+    isFetching:
+      statusReads.isFetching ||
+      settings.isFetching ||
+      balance.isFetching ||
+      participation.isFetching,
+    isLoading:
+      statusReads.isLoading ||
+      settings.isLoading ||
+      balance.isLoading ||
+      participation.isLoading,
+    loopers,
+    modalRefreshKey: participation.refreshKey,
+    period,
     raw: {
       account,
+      balance: balance.data,
+      settings: settings.data,
       ...statusReads.data,
     },
-    refresh: statusReads.refetch,
+    refresh: refreshCardData,
+    status,
   }
 }

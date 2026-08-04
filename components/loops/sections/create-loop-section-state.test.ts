@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest"
 
-import { createLoopSectionState } from "./standard-loop-card-state"
+import { createLoopSectionState } from "./create-loop-section-state"
 
-describe("standard Loop card section state", () => {
+describe("Loop card section state", () => {
   const retry = vi.fn()
   const data = { value: "10 HNY" }
 

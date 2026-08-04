@@ -3,7 +3,7 @@
 import type { LoopCardData } from "@/data/loops-data"
 
 import { StandardLoopCard } from "./standard-loop/standard-loop-card"
-import { LegacySuperLoopCard } from "./super-loop/legacy-super-loop-card"
+import { SuperLoopCard } from "./super-loop/super-loop-card"
 
 interface LoopCardProps {
   loop: LoopCardData
@@ -18,7 +18,7 @@ export default function LoopCard({ loop, onBalanceUpdate }: LoopCardProps) {
   void onBalanceUpdate
 
   if (loop.contractType === "superLoop" || loop.super) {
-    return <LegacySuperLoopCard loop={loop} />
+    return <SuperLoopCard loop={loop} />
   }
 
   return <StandardLoopCard loop={loop} />

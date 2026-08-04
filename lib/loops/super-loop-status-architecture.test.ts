@@ -10,20 +10,70 @@ const CARD_CONTROLLER_PATH = resolve(
   process.cwd(),
   "components/loops/super-loop/use-super-loop-card-controller.ts"
 )
+const CLAIM_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/super/use-super-loop-claim.ts"
+)
+const SETTINGS_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/super/use-super-loop-settings.ts"
+)
+const PARTICIPATION_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/super/use-super-loop-participation.ts"
+)
+const CARD_PATH = resolve(
+  process.cwd(),
+  "components/loops/super-loop/super-loop-card.tsx"
+)
 const CLAIM_ACTION_LOGIC =
   /\bLoopClaim\b|LoopActionViewModel|useSuperLoopClaim|useWriteContract|useWaitForTransactionReceipt|claimAndRegister|eligibility|\bfetch\s*\(/
 
-describe("SuperLoop read architecture", () => {
-  it.each([STATUS_HOOK_PATH, CARD_CONTROLLER_PATH])(
-    "keeps claim and transaction actions out of %s",
-    (path) => {
-      expect(readFileSync(path, "utf8")).not.toMatch(CLAIM_ACTION_LOGIC)
-    }
-  )
+describe("SuperLoop card architecture", () => {
+  it("keeps claim and transaction actions out of the status hook", () => {
+    expect(readFileSync(STATUS_HOOK_PATH, "utf8")).not.toMatch(
+      CLAIM_ACTION_LOGIC
+    )
+  })
 
-  it("wires the read-only status hook into the card controller", () => {
-    expect(readFileSync(CARD_CONTROLLER_PATH, "utf8")).toContain(
-      "useSuperLoopStatus"
+  it("keeps eligibility and transaction state in the claim hook", () => {
+    const claimHook = readFileSync(CLAIM_HOOK_PATH, "utf8")
+
+    expect(claimHook).toContain("useWriteContract")
+    expect(claimHook).toContain("useWaitForTransactionReceipt")
+    expect(claimHook).toContain(
+      "loopContractMethods.superLoop.claimAndRegister"
+    )
+  })
+
+  it("combines all SuperLoop hooks in the card controller", () => {
+    const controller = readFileSync(CARD_CONTROLLER_PATH, "utf8")
+
+    expect(controller).toContain("useSuperLoopStatus")
+    expect(controller).toContain("useSuperLoopClaim")
+    expect(controller).toContain("useSuperLoopSettings")
+    expect(controller).toContain("useSuperLoopParticipation")
+    expect(controller).toContain("useLoopTokenBalance")
+    expect(controller).toContain("LoopActionViewModel")
+  })
+
+  it("keeps settings and participation reads in their dedicated hooks", () => {
+    expect(readFileSync(SETTINGS_HOOK_PATH, "utf8")).toContain(
+      "loopContractMethods.superLoop.getDetails"
+    )
+    expect(readFileSync(PARTICIPATION_HOOK_PATH, "utf8")).toContain(
+      "usePeriodLogBlockRange"
+    )
+  })
+
+  it("keeps the card as a controller-only renderer", () => {
+    const card = readFileSync(CARD_PATH, "utf8")
+
+    expect(card).toContain("useSuperLoopCardController")
+    expect(card).toContain("model={controller.action}")
+    expect(card).not.toMatch(/<LoopClaim[\s>]/)
+    expect(card).not.toMatch(
+      /useLoopSettingsDetails|useSuperLoopStatus|useSuperLoopClaim|useSuperLoopParticipation|useMemo/
     )
   })
 })

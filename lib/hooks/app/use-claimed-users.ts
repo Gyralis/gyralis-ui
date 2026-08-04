@@ -23,6 +23,7 @@ type UpgradedClaimLog = Log<
 >
 
 interface UseClaimedUsersResult {
+  error: unknown
   users: Address[]
   payouts: Record<string, bigint>
   loading: boolean
@@ -39,12 +40,14 @@ export function useClaimedUsers(
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
   const [payouts, setPayouts] = useState<Record<string, bigint>>({})
+  const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
       setPayouts({})
+      setError(null)
       setLoading(false)
       return
     }
@@ -52,6 +55,7 @@ export function useClaimedUsers(
     let cancelled = false
 
     const fetchLogs = async () => {
+      setError(null)
       setLoading(true)
 
       try {
@@ -119,6 +123,7 @@ export function useClaimedUsers(
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching Claim logs:", error)
+          setError(error)
           setUsers([])
           setPayouts({})
         }
@@ -145,5 +150,5 @@ export function useClaimedUsers(
     refreshKey,
   ])
 
-  return { users, payouts, loading }
+  return { error, users, payouts, loading }
 }

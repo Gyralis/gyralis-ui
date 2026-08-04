@@ -1,4 +1,4 @@
-import type { SectionState } from "@/components/loops/sections/loop-section-types"
+import type { SectionState } from "./loop-section-types"
 
 interface CreateLoopSectionStateParams<T> {
   data?: T

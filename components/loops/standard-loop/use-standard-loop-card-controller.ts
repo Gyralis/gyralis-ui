@@ -13,6 +13,7 @@ import {
   getStandardLoopTimerTitle,
 } from "@/lib/loops/standard-loop-state"
 import { trimFormattedBalance } from "@/lib/utils"
+import { createLoopSectionState } from "@/components/loops/sections/create-loop-section-state"
 import type { LoopBalanceViewData } from "@/components/loops/sections/loop-balance-section"
 import type {
   LoopActionStatus,
@@ -22,8 +23,6 @@ import type {
   SectionState,
 } from "@/components/loops/sections/loop-section-types"
 import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
-
-import { createLoopSectionState } from "./standard-loop-card-state"
 
 function formatTokenAmount(
   amount: bigint,
