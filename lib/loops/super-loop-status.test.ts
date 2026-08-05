@@ -184,6 +184,27 @@ describe("SuperLoop claim state", () => {
     expect(deriveSuperLoopClaimStatus(input)).toBe(expected)
   })
 
+  it.each([
+    SuperLoopPhase.Cooldown,
+    SuperLoopPhase.Accumulating,
+    SuperLoopPhase.Claimable,
+    SuperLoopPhase.Claimed,
+  ])(
+    "resolves an unregistered user to enter regardless of phase %s",
+    (phase) => {
+      expect(
+        deriveSuperLoopClaimStatus({
+          accountConnected: true,
+          claimerStatus: { hasClaimed: true, isRegistered: false },
+          hasError: false,
+          isClaimable: true,
+          isLoading: false,
+          userPhase: phase,
+        })
+      ).toBe("enter")
+    }
+  )
+
   it("builds the claim label and timer from the derived state", () => {
     expect(
       getSuperLoopActionLabel({

@@ -57,12 +57,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     token: settings.data?.token,
   })
   const participation = useSuperLoopParticipation({
-    address: address ?? "0x",
+    address,
     chainId: loop.chainId,
-    currentPeriod: statusReads.data.currentPeriod,
-    enabled: validAddress && Boolean(settings.data),
-    firstPeriodStart: settings.data?.firstPeriodStart,
-    periodLength: settings.data?.periodLength,
+    enabled: validAddress,
   })
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch
@@ -75,26 +72,18 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     void Promise.allSettled([refetchSettings(), refetchStatus()])
   }, [refetchSettings, refetchStatus])
   const retryParticipation = useCallback(() => {
-    if (!settings.data || statusReads.data.currentPeriod == null) {
-      void Promise.allSettled([refetchSettings(), refetchStatus()])
-      return
-    }
-
-    refetchParticipation()
-  }, [
-    refetchParticipation,
-    refetchSettings,
-    refetchStatus,
-    settings.data,
-    statusReads.data.currentPeriod,
-  ])
+    void refetchParticipation()
+  }, [refetchParticipation])
   const refreshSections = useCallback(async () => {
-    refetchParticipation()
-    await Promise.allSettled([refetchSettings(), refetchBalance()])
+    await Promise.allSettled([
+      refetchParticipation(),
+      refetchSettings(),
+      refetchBalance(),
+    ])
   }, [refetchBalance, refetchParticipation, refetchSettings])
   const refreshCardData = useCallback(async () => {
-    refetchParticipation()
     await Promise.allSettled([
+      refetchParticipation(),
       refetchStatus(),
       refetchSettings(),
       refetchBalance(),
@@ -327,15 +316,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
   ])
 
   const loopers = useMemo<SectionState<LoopersViewData>>(() => {
-    const prerequisitesError = !settings.data
-      ? settings.error ?? configError
-      : statusReads.data.currentPeriod == null
-      ? statusReads.errors.currentPeriod
-      : undefined
-
     return createLoopSectionState({
       data: participation.data,
-      error: prerequisitesError ?? participation.error,
+      error: configError ?? participation.error,
       errorMessage: "Failed to fetch SuperLoop participation",
       isFetching: participation.isFetching,
       loadingMessage: "Loading Loopers...",
@@ -347,10 +330,6 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     participation.error,
     participation.isFetching,
     retryParticipation,
-    settings.data,
-    settings.error,
-    statusReads.data.currentPeriod,
-    statusReads.errors.currentPeriod,
   ])
 
   return {

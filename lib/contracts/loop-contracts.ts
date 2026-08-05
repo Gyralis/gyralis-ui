@@ -21,6 +21,7 @@ export const loopContractMethods = {
     claimAndRegister: "streamingClaimAndRegister",
     getClaimerStatus: "getStreamingClaimerStatus",
     getCurrentPeriod: "getStreamingCurrentPeriod",
+    getCurrentPeriodData: "getStreamingCurrentPeriodData",
     getDetails: "getStreamingLoopDetails",
     getPeriodIndividualPayout: "getStreamingPeriodIndividualPayout",
     getUserPhase: "getUserPhase",
@@ -39,6 +40,7 @@ export const loopContractMethods = {
     claimAndRegister: string
     getClaimerStatus: string
     getCurrentPeriod: string
+    getCurrentPeriodData: string
     getDetails: string
     getPeriodIndividualPayout: string
     getUserPhase: string

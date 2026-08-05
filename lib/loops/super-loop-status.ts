@@ -86,23 +86,22 @@ export function deriveSuperLoopClaimStatus({
   isLoading: boolean
   userPhase?: number
 }): SuperLoopClaimStatus {
-  if (hasError) return "error"
   if (!accountConnected) return "enter"
-  if (isLoading || !claimerStatus || isClaimable == null || userPhase == null) {
+  if (!claimerStatus) return hasError ? "error" : "checking"
+  if (!claimerStatus.isRegistered) return "enter"
+  if (hasError) return "error"
+  if (isLoading || isClaimable == null || userPhase == null) {
     return "checking"
   }
   if (claimerStatus.hasClaimed || userPhase === SuperLoopPhase.Claimed) {
     return "claimed"
   }
   if (isClaimable) return "claimable"
-  if (claimerStatus.isRegistered && userPhase === SuperLoopPhase.Accumulating) {
+  if (userPhase === SuperLoopPhase.Accumulating) {
     return "active"
   }
-  if (claimerStatus.isRegistered || userPhase === SuperLoopPhase.Cooldown) {
-    return "entered"
-  }
 
-  return "enter"
+  return "entered"
 }
 
 export function reconcileSuperLoopConfirmedStatus({

@@ -6,8 +6,8 @@ import { LoopSectionError } from "./loop-section-status"
 import type { SectionState } from "./loop-section-types"
 
 export interface LoopersViewData {
-  claimedCount: number
-  claimRate: number
+  claimedCount?: number
+  claimRate?: number
   registeredCount: number
 }
 
@@ -31,10 +31,11 @@ export function LoopersSection({ onClick, state }: LoopersSectionProps) {
   const data =
     state.status === "ready" || state.status === "refreshing"
       ? state.data
-      : { claimedCount: 0, claimRate: 0, registeredCount: 0 }
+      : { registeredCount: 0 }
   const { claimedCount, claimRate, registeredCount } = data
+  const hasClaimMetrics = claimedCount != null && claimRate != null
   const hasLoopers = registeredCount > 0
-  const ringValue = isLoading ? 0 : claimRate
+  const ringValue = isLoading || !hasClaimMetrics ? 0 : claimRate
   const radius = 25
   const circumference = 2 * Math.PI * radius
   const strokeOffset = circumference - (ringValue / 100) * circumference
@@ -53,7 +54,9 @@ export function LoopersSection({ onClick, state }: LoopersSectionProps) {
     >
       <span className="sr-only">
         {onClick ? "View loopers. " : "Loopers. "}
-        {claimedCount} claimed of {registeredCount} registered.
+        {hasClaimMetrics
+          ? `${claimedCount} claimed of ${registeredCount} registered.`
+          : `${registeredCount} registered.`}
       </span>
       <p className="w-full text-center text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground transition-colors group-hover:text-primary">
         Loopers
@@ -72,18 +75,20 @@ export function LoopersSection({ onClick, state }: LoopersSectionProps) {
             stroke="hsl(var(--border))"
             strokeWidth="5"
           />
-          <circle
-            cx="32"
-            cy="32"
-            fill="none"
-            r={radius}
-            stroke="hsl(var(--primary))"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeOffset}
-            strokeLinecap="round"
-            strokeWidth="5"
-            className="transition-[stroke-dashoffset] duration-500 ease-out"
-          />
+          {hasClaimMetrics ? (
+            <circle
+              cx="32"
+              cy="32"
+              fill="none"
+              r={radius}
+              stroke="hsl(var(--primary))"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeOffset}
+              strokeLinecap="round"
+              strokeWidth="5"
+              className="transition-[stroke-dashoffset] duration-500 ease-out"
+            />
+          ) : null}
         </svg>
         <span
           className={cn(
@@ -92,10 +97,16 @@ export function LoopersSection({ onClick, state }: LoopersSectionProps) {
           )}
         >
           <span className="text-sm font-bold">
-            {isLoading ? "--" : claimedCount}
+            {isLoading
+              ? "--"
+              : hasClaimMetrics
+              ? claimedCount
+              : registeredCount}
           </span>
           <span className="mt-1 text-[10px] text-muted-foreground">
-            /{isLoading ? "--" : registeredCount}
+            {hasClaimMetrics
+              ? `/${isLoading ? "--" : registeredCount}`
+              : "total"}
           </span>
         </span>
       </div>

@@ -14,6 +14,7 @@ const upgradedClaimEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
+const PERIOD_LOG_CHUNK_SIZE = 10_000n
 type ClaimLog = Log<bigint, number, false, typeof legacyClaimEventAbiItem>
 type UpgradedClaimLog = Log<
   bigint,
@@ -66,7 +67,7 @@ export function useClaimedUsers(
             ? latestBlock - LOG_LOOKBACK_BLOCKS
             : 0n)
         const toBlock = blockRange?.toBlock ?? latestBlock
-        const chunkSize = blockRange ? 9n : undefined
+        const chunkSize = blockRange ? PERIOD_LOG_CHUNK_SIZE : undefined
         const [legacyLogs, upgradedLogs] = await Promise.all([
           getLogsChunked(
             publicClient,

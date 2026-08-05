@@ -58,12 +58,17 @@ describe("SuperLoop card architecture", () => {
   })
 
   it("keeps settings and participation reads in their dedicated hooks", () => {
+    const participationHook = readFileSync(PARTICIPATION_HOOK_PATH, "utf8")
+
     expect(readFileSync(SETTINGS_HOOK_PATH, "utf8")).toContain(
       "loopContractMethods.superLoop.getDetails"
     )
-    expect(readFileSync(PARTICIPATION_HOOK_PATH, "utf8")).toContain(
-      "usePeriodLogBlockRange"
+    expect(participationHook).toContain(
+      "loopContractMethods.superLoop.getCurrentPeriodData"
     )
+    expect(participationHook).not.toContain("usePeriodLogBlockRange")
+    expect(participationHook).not.toContain("useRegisteredUsers")
+    expect(participationHook).not.toContain("useClaimedUsers")
   })
 
   it("keeps the card as a controller-only renderer", () => {

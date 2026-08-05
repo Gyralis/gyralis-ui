@@ -1,131 +1,56 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
-import type { Address } from "viem"
+import { useMemo } from "react"
+import { isAddress, zeroAddress, type Address } from "viem"
+import { useReadContract } from "wagmi"
 
-import { useClaimedUsers } from "@/lib/hooks/app/use-claimed-users"
-import { usePeriodLogBlockRange } from "@/lib/hooks/app/use-period-log-block-range"
-import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
+import {
+  getLoopContractAbi,
+  loopContractMethods,
+} from "@/lib/contracts/loop-contracts"
 
 interface UseSuperLoopParticipationParams {
-  address: Address
+  address?: Address
   chainId: number
-  currentPeriod?: bigint
   enabled?: boolean
-  firstPeriodStart?: bigint
-  periodLength?: bigint
 }
 
 export function useSuperLoopParticipation({
   address,
   chainId,
-  currentPeriod,
   enabled = true,
-  firstPeriodStart,
-  periodLength,
 }: UseSuperLoopParticipationParams) {
-  const [refreshKey, setRefreshKey] = useState(0)
-  const rangesReady =
-    enabled &&
-    currentPeriod != null &&
-    firstPeriodStart != null &&
-    periodLength != null
-  const registerWindowPeriod =
-    currentPeriod != null && currentPeriod > 0n ? currentPeriod - 1n : 0n
-  const registrationRange = usePeriodLogBlockRange({
+  const abi = useMemo(() => getLoopContractAbi(chainId, "superLoop"), [chainId])
+  const validAddress = Boolean(address && isAddress(address))
+  const query = useReadContract({
+    address: address ?? zeroAddress,
+    abi,
+    functionName: loopContractMethods.superLoop.getCurrentPeriodData,
     chainId,
-    enabled: rangesReady,
-    firstPeriodStart,
-    periodLength,
-    refreshKey,
-    windowPeriod: registerWindowPeriod,
+    query: {
+      enabled: enabled && validAddress,
+      refetchInterval: 10_000,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
   })
-  const claimRange = usePeriodLogBlockRange({
-    chainId,
-    enabled: rangesReady,
-    firstPeriodStart,
-    periodLength,
-    refreshKey,
-    windowPeriod: currentPeriod,
-  })
-  const registrationBlockRange =
-    rangesReady &&
-    registrationRange.fromBlock != null &&
-    registrationRange.toBlock != null
-      ? {
-          fromBlock: registrationRange.fromBlock,
-          toBlock: registrationRange.toBlock,
-        }
-      : undefined
-  const claimBlockRange =
-    rangesReady && claimRange.fromBlock != null && claimRange.toBlock != null
-      ? {
-          fromBlock: claimRange.fromBlock,
-          toBlock: claimRange.toBlock,
-        }
-      : undefined
-  const registration = useRegisteredUsers(
-    address,
-    chainId,
-    currentPeriod,
-    refreshKey,
-    registrationBlockRange != null,
-    registrationBlockRange
-  )
-  const claims = useClaimedUsers(
-    address,
-    chainId,
-    currentPeriod,
-    refreshKey,
-    claimBlockRange != null,
-    claimBlockRange
-  )
   const data = useMemo(() => {
-    const claimedUsers = new Set(claims.users.map((user) => user.toLowerCase()))
-    const registeredUsers = new Set(
-      registration.users.map((user) => user.toLowerCase())
-    )
-    const claimedCount = Array.from(registeredUsers).filter((user) =>
-      claimedUsers.has(user)
-    ).length
-    const registeredCount = registeredUsers.size
-    const claimRate =
-      registeredCount > 0
-        ? Math.round((claimedCount / registeredCount) * 100)
-        : 0
+    if (!query.data) return undefined
+
+    const [registered] = query.data as readonly [bigint, bigint]
 
     return {
-      claimedCount,
-      claimRate: Math.max(0, Math.min(claimRate, 100)),
-      registeredCount,
+      registeredCount: Number(registered),
     }
-  }, [claims.users, registration.users])
-  const refetch = useCallback(() => {
-    setRefreshKey((key) => key + 1)
-  }, [])
-  const error =
-    registrationRange.error ??
-    claimRange.error ??
-    registration.error ??
-    claims.error ??
-    null
+  }, [query.data])
 
   return {
-    data: rangesReady ? data : undefined,
-    error,
-    isError: Boolean(error),
-    isFetching:
-      registrationRange.loading ||
-      claimRange.loading ||
-      registration.loading ||
-      claims.loading,
-    isLoading:
-      !rangesReady ||
-      registrationRange.loading ||
-      claimRange.loading ||
-      registration.loading ||
-      claims.loading,
-    refetch,
-    refreshKey,
+    data,
+    error: query.error,
+    isError: query.isError,
+    isFetching: query.isFetching,
+    isLoading: query.isLoading,
+    refetch: query.refetch,
+    refreshKey: 0,
   }
 }
