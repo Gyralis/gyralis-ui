@@ -6,6 +6,10 @@ import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
 
 import {
+  getLoopContractMethods,
+  type LoopContractType,
+} from "@/lib/contracts/loop-contracts"
+import {
   eligibilityRequestSchema,
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
@@ -18,6 +22,11 @@ const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
 const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
   "Unable to get score for provided scorer."
+const CURRENT_PERIOD_ABI = {
+  getCurrentPeriod: "function getCurrentPeriod() public view returns (uint256)",
+  getStreamingCurrentPeriod:
+    "function getStreamingCurrentPeriod() public view returns (uint256)",
+} as const
 const GARDENS_COMMUNITIES = {
   "1hive": {
     address: "0xe2396fe2169ca026962971d3b2e373ba925b6257",
@@ -92,9 +101,12 @@ async function fetchPassportScore(
 
 async function fetchNextPeriod(
   chainId: number,
-  loopAddress: string
+  loopAddress: string,
+  contractType: LoopContractType
 ): Promise<number> {
   const viemChain = getViemChain(chainId)
+  const currentPeriodMethod =
+    getLoopContractMethods(contractType).getCurrentPeriod
   const walletClient = createWalletClient({
     account: privateKeyToAccount(TRUSTED_BACKEND_SIGNER_PK as `0x${string}`),
     chain: viemChain,
@@ -103,13 +115,11 @@ async function fetchNextPeriod(
 
   const loopContract = getContract({
     address: loopAddress as `0x${string}`,
-    abi: parseAbi([
-      "function getCurrentPeriod() public view returns (uint256)",
-    ]),
+    abi: parseAbi([CURRENT_PERIOD_ABI[currentPeriodMethod]]),
     client: walletClient,
   })
 
-  const currentPeriod = await loopContract.read.getCurrentPeriod()
+  const currentPeriod = await loopContract.read[currentPeriodMethod]()
   return Number(currentPeriod + BigInt(1))
 }
 
@@ -126,7 +136,7 @@ async function checkMembership(
 }
 
 export async function POST(req: Request) {
-  const requestId = `garden-1hive:${Date.now()}`
+  const requestId = `gardens:${Date.now()}`
   try {
     console.log(`[${requestId}] Incoming eligibility request`)
     const parsed = eligibilityRequestSchema.safeParse(await req.json())
@@ -149,11 +159,7 @@ export async function POST(req: Request) {
       chainId,
     })
 
-    const allowlistedLoop = findAllowlistedLoop(
-      "garden_1hive",
-      loopAddress,
-      chainId
-    )
+    const allowlistedLoop = findAllowlistedLoop("gardens", loopAddress, chainId)
     if (!allowlistedLoop) {
       console.warn(`[${requestId}] Loop not allowlisted`, {
         loopAddress,
@@ -211,7 +217,11 @@ export async function POST(req: Request) {
       )
 
     // Next period
-    const nextPeriod = await fetchNextPeriod(chainId, allowlistedLoop.address)
+    const nextPeriod = await fetchNextPeriod(
+      chainId,
+      allowlistedLoop.address,
+      allowlistedLoop.contractType
+    )
     console.log(`[${requestId}] Next period fetched`, { nextPeriod })
 
     // Eligibility signature (EIP-712 typed data)

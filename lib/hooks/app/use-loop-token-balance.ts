@@ -77,7 +77,9 @@ export function useLoopTokenBalance({
 
   const {
     data: superLoopData,
+    error: superLoopDataError,
     isError: isSuperLoopDataError,
+    isFetching: isSuperLoopDataFetching,
     isLoading: isSuperLoopDataLoading,
     refetch: refetchSuperLoopData,
   } = useReadContracts({
@@ -136,7 +138,7 @@ export function useLoopTokenBalance({
           string,
           readonly [Address, bigint, bigint, bigint],
           bigint,
-          bigint,
+          bigint
         ]
       const periodLengthSeconds = loopDetails[1]
       const flowRatePerSecond = flowRateRaw
@@ -173,7 +175,9 @@ export function useLoopTokenBalance({
 
   return {
     data,
+    error: isSuperLoop ? superLoopDataError : tokenBalance.error,
     isError: isSuperLoop ? isSuperLoopDataError : tokenBalance.isError,
+    isFetching: isSuperLoop ? isSuperLoopDataFetching : tokenBalance.isFetching,
     isLoading: isSuperLoop ? isSuperLoopDataLoading : tokenBalance.isLoading,
     refetch,
   }

@@ -1,14 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardData } from "@/data/loops-data"
-import { LuLoader2, LuMegaphone } from "react-icons/lu"
 import { FaXTwitter } from "react-icons/fa6"
-import {
-  RiLoopLeftFill,
-  RiLoopRightFill as RiLoopRightAiFill,
-} from "react-icons/ri"
+import { LuLoader2, LuMegaphone } from "react-icons/lu"
 
 import { LoopCriteriaCard } from "./loop-elegibility"
+import { LoopIdentityMark } from "./loop-identity-mark"
+import { LoopTypeBadge } from "./loop-type-badge"
 
 type InactiveLoopStatus = "Announced" | "Preparing"
 
@@ -39,8 +37,6 @@ interface LoopCardInactiveProps {
 
 export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
   const isSuperLoop = loop.contractType === "superLoop" || Boolean(loop.super)
-  const TypeIcon = isSuperLoop ? RiLoopRightAiFill : RiLoopLeftFill
-  const loopLabel = isSuperLoop ? "SuperLoop" : "Loop"
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
   const statusLabel =
     loop.statusLabel === "Preparing" ? "Preparing" : "Announced"
@@ -58,66 +54,29 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
       <div className="relative z-10 space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex min-w-0 items-center gap-1.5">
-            {(loop.eligibilityLogoUrl || isSuperLoop) && (
-              <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">
-                {loop.eligibilityLogoUrl ? (
-                  <Image
-                    src={loop.eligibilityLogoUrl}
-                    alt={`${loop.eligibility} logo`}
-                    width={32}
-                    height={32}
-                    className="size-8 object-contain"
-                  />
-                ) : (
-                  <span className="size-3.5 rounded-full bg-primary" />
-                )}
-                {isSuperLoop ? (
-                  <div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border border-border bg-card p-[3px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
-                    <Image
-                      src="/superfluid-logo.png"
-                      alt="Superfluid logo"
-                      width={14}
-                      height={14}
-                      className="size-3.5 object-contain"
-                    />
-                  </div>
-                ) : null}
-              </div>
-            )}
+            <LoopIdentityMark loop={loop} />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
-                  {loop.title}
-                </h2>
-                <div className="flex shrink-0 items-center gap-1">
-                  <span
-                    aria-label={loopLabel}
-                    className={[
-                      "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full",
-                      isSuperLoop
-                        ? "text-primary"
-                        : "border border-border/80 bg-background/45 text-foreground",
-                    ].join(" ")}
-                  >
-                    <TypeIcon className="size-4" />
-                  </span>
-                  <span
-                    aria-label={`${loop.chainName} chain`}
-                    className="inline-flex size-[22px] shrink-0 items-center justify-center rounded-full border border-border/80 bg-background/45"
-                  >
-                    {CHAIN_ICON_SRC[loop.chainName] ? (
-                      <Image
-                        src={CHAIN_ICON_SRC[loop.chainName]}
-                        alt=""
-                        width={12}
-                        height={12}
-                        className="size-4 rounded-full"
-                      />
-                    ) : (
-                      <span className="size-2 rounded-full bg-primary/70" />
-                    )}
-                  </span>
-                </div>
+              <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
+                {loop.title}
+              </h2>
+              <div className="mt-1.5 flex shrink-0 items-center gap-1">
+                <LoopTypeBadge isSuper={isSuperLoop} />
+                <span
+                  aria-label={`${loop.chainName} chain`}
+                  className="inline-flex size-[22px] shrink-0 items-center justify-center rounded-full border border-border/80 bg-background/45"
+                >
+                  {CHAIN_ICON_SRC[loop.chainName] ? (
+                    <Image
+                      src={CHAIN_ICON_SRC[loop.chainName]}
+                      alt=""
+                      width={12}
+                      height={12}
+                      className="size-4 rounded-full"
+                    />
+                  ) : (
+                    <span className="size-2 rounded-full bg-primary/70" />
+                  )}
+                </span>
               </div>
             </div>
           </div>

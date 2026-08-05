@@ -140,8 +140,8 @@ export function LoopCardBoxy({ loop }: LoopCardBoxyProps) {
                 <Metric
                   label="Eligibility"
                   value={
-                    loop.eligibilityProvider === "garden_1hive"
-                      ? "1Hive"
+                    loop.eligibilityProvider === "gardens"
+                      ? "Gardens"
                       : "Blockscout"
                   }
                 />

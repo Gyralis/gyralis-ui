@@ -5,6 +5,7 @@ import type { PublicClient } from "viem"
 import { usePublicClient } from "wagmi"
 
 interface PeriodLogBlockRange {
+  error?: unknown
   fromBlock?: bigint
   loading: boolean
   toBlock?: bigint
@@ -15,6 +16,7 @@ interface UsePeriodLogBlockRangeOptions {
   enabled?: boolean
   firstPeriodStart?: bigint
   periodLength?: bigint
+  refreshKey?: number
   windowPeriod?: bigint
 }
 
@@ -48,6 +50,7 @@ export function usePeriodLogBlockRange({
   enabled = true,
   firstPeriodStart,
   periodLength,
+  refreshKey = 0,
   windowPeriod,
 }: UsePeriodLogBlockRangeOptions): PeriodLogBlockRange {
   const publicClient = usePublicClient({ chainId })
@@ -99,7 +102,7 @@ export function usePeriodLogBlockRange({
       } catch (error) {
         if (!cancelled) {
           console.error("Error resolving period log block range:", error)
-          setRange({ loading: false })
+          setRange({ error, loading: false })
         }
       }
     }
@@ -115,6 +118,7 @@ export function usePeriodLogBlockRange({
     firstPeriodStart,
     periodLength,
     publicClient,
+    refreshKey,
     windowPeriod,
   ])
 

@@ -3,7 +3,7 @@ import { Address } from "viem"
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
+export type LoopEligibilityProvider = "gardens" | "blockscout"
 export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
@@ -13,6 +13,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  communityLogoUrl?: string
   eligibilityLogoUrl?: string
 
   shieldScore: string
@@ -49,9 +50,10 @@ export const LoopCardsData: LoopCardData[] = [
     description:
       "Claim HNY token if you meet the 1Hive membership requirement.",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+    communityLogoUrl: "/1Hive-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "1Hive membership in Gardens required",
+    eligibility: "Join 1Hive community in Gardens required",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -60,10 +62,13 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 100,
     chainName: "Gnosis",
     historyLoopKey: "1hive",
-    eligibilityProvider: "garden_1hive",
+    eligibilityProvider: "gardens",
     gardensCommunity: "1hive",
     passportMinScore: 0,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
   {
     id: 4,
@@ -87,18 +92,22 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
   {
     id: 5,
-    title: "SuperLoops",
-    by: "Test Team",
-    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
+    title: "Markee",
+    by: "Markee cooperative",
+    address: "0x3a5972524cc121D6d8A9a7e79d6F49dbfe71857b",
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-    eligibilityLogoUrl: "/images/inactive_loop.png",
+    communityLogoUrl: "/markee-logo.png",
+    eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score 15+",
-    eligibility: "TBA",
+    eligibility: "Join Markee Cooperative community in Gardens required",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -107,13 +116,14 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 8453,
     chainName: "Base",
     historyLoopKey: "test-superloops",
-    eligibilityProvider: "blockscout",
+    eligibilityProvider: "gardens",
+    gardensCommunity: "markee",
     passportMinScore: 0,
-    enabled: false,
-    rewardsSummary: "TBA",
-    sponsorName: "TBA",
-    sponsorLogoUrl: "/1Hive-logo.png",
-    sponsorUrl: "https://1hive.org",
+    enabled: true,
+    rewardsSummary: "1000 markee tokens",
+    sponsorName: "Markee Cooperative",
+    sponsorLogoUrl: "/markee-logo.png",
+    sponsorUrl: "https://www.markee.xyz/",
   },
   {
     id: 6,
