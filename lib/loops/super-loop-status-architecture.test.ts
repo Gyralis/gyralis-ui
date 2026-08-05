@@ -75,10 +75,22 @@ describe("SuperLoop card architecture", () => {
     const controller = readFileSync(CARD_CONTROLLER_PATH, "utf8")
     const statusHook = readFileSync(STATUS_HOOK_PATH, "utf8")
     const participationHook = readFileSync(PARTICIPATION_HOOK_PATH, "utf8")
+    const actionRefreshStart = controller.indexOf("const refreshAfterAction")
+    const actionRefreshEnd = controller.indexOf(
+      "const refreshCardData",
+      actionRefreshStart
+    )
+    const actionRefresh = controller.slice(actionRefreshStart, actionRefreshEnd)
 
     expect(statusHook).not.toContain("refetchInterval")
     expect(participationHook).not.toContain("refetchInterval")
-    expect(controller).toContain("onConfirmed: refreshCardData")
+    expect(actionRefreshStart).toBeGreaterThan(-1)
+    expect(actionRefreshEnd).toBeGreaterThan(actionRefreshStart)
+    expect(actionRefresh).toContain("refetchParticipation()")
+    expect(actionRefresh).toContain("refetchStatus()")
+    expect(actionRefresh).not.toContain("refetchSettings()")
+    expect(actionRefresh).not.toContain("refetchBalance()")
+    expect(controller).toContain("onConfirmed: refreshAfterAction")
     expect(controller).toContain("onCountdownComplete: refreshCardData")
   })
 

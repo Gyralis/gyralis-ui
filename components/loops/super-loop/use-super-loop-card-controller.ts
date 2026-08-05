@@ -74,6 +74,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
   const retryParticipation = useCallback(() => {
     void refetchParticipation()
   }, [refetchParticipation])
+  const refreshAfterAction = useCallback(async () => {
+    await Promise.allSettled([refetchParticipation(), refetchStatus()])
+  }, [refetchParticipation, refetchStatus])
   const refreshCardData = useCallback(async () => {
     await Promise.allSettled([
       refetchParticipation(),
@@ -100,7 +103,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     eligibilityProvider: loop.eligibilityProvider,
     hasClaimed: Boolean(claimerStatus?.hasClaimed),
     isClaimable: statusReads.data.isClaimable === true,
-    onConfirmed: refreshCardData,
+    onConfirmed: refreshAfterAction,
   })
   const status = reconcileSuperLoopConfirmedStatus({
     confirmedAction: claim.confirmedAction,
