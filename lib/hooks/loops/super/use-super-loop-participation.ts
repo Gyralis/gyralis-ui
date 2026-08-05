@@ -29,7 +29,6 @@ export function useSuperLoopParticipation({
     chainId,
     query: {
       enabled: enabled && validAddress,
-      refetchInterval: 10_000,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },

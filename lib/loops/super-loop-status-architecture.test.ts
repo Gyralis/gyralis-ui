@@ -71,6 +71,17 @@ describe("SuperLoop card architecture", () => {
     expect(participationHook).not.toContain("useClaimedUsers")
   })
 
+  it("refreshes SuperLoop data from events instead of polling", () => {
+    const controller = readFileSync(CARD_CONTROLLER_PATH, "utf8")
+    const statusHook = readFileSync(STATUS_HOOK_PATH, "utf8")
+    const participationHook = readFileSync(PARTICIPATION_HOOK_PATH, "utf8")
+
+    expect(statusHook).not.toContain("refetchInterval")
+    expect(participationHook).not.toContain("refetchInterval")
+    expect(controller).toContain("onConfirmed: refreshCardData")
+    expect(controller).toContain("onCountdownComplete: refreshCardData")
+  })
+
   it("keeps the card as a controller-only renderer", () => {
     const card = readFileSync(CARD_PATH, "utf8")
 

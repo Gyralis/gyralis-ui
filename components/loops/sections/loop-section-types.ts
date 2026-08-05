@@ -45,5 +45,6 @@ export interface PeriodRewardAnimationViewModel {
 
 export interface LoopPeriodViewData {
   nextPeriodStart?: bigint
+  onCountdownComplete?: () => void | Promise<void>
   timerTitle: string
 }

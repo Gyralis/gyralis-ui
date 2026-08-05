@@ -210,6 +210,7 @@ export function LoopCardShell({
                   className="h-full"
                   isLoading={period.status === "loading"}
                   nextPeriodStart={periodData?.nextPeriodStart}
+                  onCountdownComplete={periodData?.onCountdownComplete}
                   timerTitle={periodData?.timerTitle ?? "Entry closes in"}
                   onViewLoopers={() => setIsLoopersModalOpen(true)}
                   showLoopersTrigger={false}

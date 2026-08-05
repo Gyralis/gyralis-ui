@@ -42,7 +42,6 @@ interface UseSuperLoopClaimParams {
   hasClaimed: boolean
   isClaimable: boolean
   onConfirmed?: () => void | Promise<void>
-  refetchStatus: () => Promise<unknown>
 }
 
 function getPassportScoreRequiredMessage(error?: string) {
@@ -71,7 +70,6 @@ export function useSuperLoopClaim({
   hasClaimed,
   isClaimable,
   onConfirmed,
-  refetchStatus,
 }: UseSuperLoopClaimParams) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmedAction, setConfirmedAction] =
@@ -131,16 +129,13 @@ export function useSuperLoopClaim({
         : undefined,
     } as any)
 
-    void refetchStatus().finally(() => {
-      void onConfirmed?.()
-    })
+    void onConfirmed?.()
   }, [
     claimableAmount,
     currentPeriod,
     onConfirmed,
     pendingAction,
     receipt.isSuccess,
-    refetchStatus,
     toast,
     transactionUrl,
     txHash,

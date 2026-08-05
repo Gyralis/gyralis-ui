@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
@@ -378,6 +378,7 @@ export const LoopPeriodStat = ({
   compact = false,
   isLoading,
   nextPeriodStart,
+  onCountdownComplete,
   timerTitle,
   onViewLoopers,
   showLoopersTrigger = true,
@@ -386,6 +387,7 @@ export const LoopPeriodStat = ({
   compact?: boolean
   isLoading: boolean
   nextPeriodStart?: bigint
+  onCountdownComplete?: () => void | Promise<void>
   timerTitle: string
   onViewLoopers: () => void
   showLoopersTrigger?: boolean
@@ -400,7 +402,10 @@ export const LoopPeriodStat = ({
           {timerTitle}
         </p>
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-          <CountdownInline nextPeriodStart={nextPeriodStart} />
+          <CountdownInline
+            nextPeriodStart={nextPeriodStart}
+            onComplete={onCountdownComplete}
+          />
         ) : (
           <p className="mt-2 text-xs font-medium text-muted-foreground">
             {isLoading ? "Loading..." : "Timer unavailable."}
@@ -419,7 +424,10 @@ export const LoopPeriodStat = ({
       </div>
 
       {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-        <Countdown nextPeriodStart={nextPeriodStart} />
+        <Countdown
+          nextPeriodStart={nextPeriodStart}
+          onComplete={onCountdownComplete}
+        />
       ) : (
         <p className="pt-2.5 text-center text-sm text-muted-foreground">
           {isLoading ? "Loading timer..." : "Timer unavailable."}
@@ -574,10 +582,17 @@ const SettingStatCard = ({
   )
 }
 
-const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
+const Countdown = ({
+  nextPeriodStart,
+  onComplete,
+}: {
+  nextPeriodStart: bigint
+  onComplete?: () => void | Promise<void>
+}) => {
   const [currentTime, setCurrentTime] = useState<number>(
     Math.floor(Date.now() / 1000)
   )
+  const completedTargetRef = useRef<bigint>()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -591,6 +606,13 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
     const diff = Number(nextPeriodStart) - currentTime
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
+
+  useEffect(() => {
+    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
+
+    completedTargetRef.current = nextPeriodStart
+    void onComplete?.()
+  }, [nextPeriodStart, onComplete, remaining])
 
   const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours
@@ -611,10 +633,17 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   )
 }
 
-const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
+const CountdownInline = ({
+  nextPeriodStart,
+  onComplete,
+}: {
+  nextPeriodStart: bigint
+  onComplete?: () => void | Promise<void>
+}) => {
   const [currentTime, setCurrentTime] = useState<number>(
     Math.floor(Date.now() / 1000)
   )
+  const completedTargetRef = useRef<bigint>()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -628,6 +657,13 @@ const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
     const diff = Number(nextPeriodStart) - currentTime
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
+
+  useEffect(() => {
+    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
+
+    completedTargetRef.current = nextPeriodStart
+    void onComplete?.()
+  }, [nextPeriodStart, onComplete, remaining])
 
   const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours

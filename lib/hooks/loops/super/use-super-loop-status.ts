@@ -22,8 +22,6 @@ interface UseSuperLoopStatusParams {
   user?: Address
 }
 
-const STATUS_REFETCH_INTERVAL = 10_000
-
 export function useSuperLoopStatus({
   address,
   chainId,
@@ -43,7 +41,6 @@ export function useSuperLoopStatus({
     chainId,
     query: {
       enabled: contractEnabled,
-      refetchInterval: STATUS_REFETCH_INTERVAL,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -56,7 +53,6 @@ export function useSuperLoopStatus({
     chainId,
     query: {
       enabled: accountEnabled,
-      refetchInterval: STATUS_REFETCH_INTERVAL,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -69,7 +65,6 @@ export function useSuperLoopStatus({
     chainId,
     query: {
       enabled: accountEnabled,
-      refetchInterval: STATUS_REFETCH_INTERVAL,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -82,7 +77,6 @@ export function useSuperLoopStatus({
     chainId,
     query: {
       enabled: accountEnabled,
-      refetchInterval: STATUS_REFETCH_INTERVAL,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -102,7 +96,6 @@ export function useSuperLoopStatus({
     chainId,
     query: {
       enabled: accountEnabled && previousPeriod != null,
-      refetchInterval: STATUS_REFETCH_INTERVAL,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
