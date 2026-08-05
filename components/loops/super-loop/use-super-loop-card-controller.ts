@@ -172,16 +172,28 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     balance.data && claimableRewardValue
       ? `${claimableRewardValue} ${balance.data.symbol}`
       : undefined
+  const claimedRewardAmount =
+    status === "claimed"
+      ? claim.lastClaimedAmount ??
+        statusReads.data.previousPeriodPayout ??
+        claimableAmount
+      : undefined
+  const claimedRewardLabel =
+    balance.data && claimedRewardAmount != null && claimedRewardAmount > 0n
+      ? `${trimFormattedBalance(
+          formatUnits(claimedRewardAmount, balance.data.decimals),
+          7
+        )} ${balance.data.symbol}`
+      : undefined
   const rewardsTooltip = getSuperLoopRewardTooltip({
     claimableRewardLabel,
+    claimedRewardLabel,
     estimatedPeriodPayoutLabel,
     isEstimateLoading: estimatedPeriodPayoutIsLoading,
     status,
   })
   const displayedAmount =
-    status === "claimed"
-      ? claim.lastClaimedAmount ?? claimableAmount
-      : claimableAmount
+    status === "claimed" ? claimedRewardAmount ?? 0n : claimableAmount
   const amountLabel =
     balance.data && displayedAmount > 0n
       ? `${trimFormattedBalance(

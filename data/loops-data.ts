@@ -13,6 +13,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  communityLogoUrl?: string
   eligibilityLogoUrl?: string
 
   shieldScore: string
@@ -49,6 +50,7 @@ export const LoopCardsData: LoopCardData[] = [
     description:
       "Claim HNY token if you meet the 1Hive membership requirement.",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+    communityLogoUrl: "/1Hive-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
     eligibility: "Join 1Hive community in Gardens required",
@@ -96,12 +98,13 @@ export const LoopCardsData: LoopCardData[] = [
   },
   {
     id: 5,
-    title: "Markee Gardens SuperLoop",
+    title: "Markee Gardens",
     by: "Markee cooperative",
-    address: "0x546480E2E0e964Aa3a6f15B022f6875327A1F60d",
+    address: "0x3a5972524cc121D6d8A9a7e79d6F49dbfe71857b",
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    communityLogoUrl: "/markee-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score 15+",
     eligibility: "Join Markee community in Gardens required",

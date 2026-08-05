@@ -15,6 +15,7 @@ interface SuperLoopAnimatedRewardParams {
 
 interface SuperLoopRewardTooltipParams {
   claimableRewardLabel?: string
+  claimedRewardLabel?: string
   estimatedPeriodPayoutLabel?: string
   isEstimateLoading: boolean
   status: SuperLoopClaimStatus
@@ -79,19 +80,24 @@ export function calculateSuperLoopAnimatedReward({
 
 export function getSuperLoopRewardTooltip({
   claimableRewardLabel,
+  claimedRewardLabel,
   estimatedPeriodPayoutLabel,
   isEstimateLoading,
   status,
 }: SuperLoopRewardTooltipParams) {
+  if (status === "claimed") {
+    return `Daily Rewards: Claimed - ${claimedRewardLabel ?? "0"}`
+  }
+
   if (status === "claimable") {
     return `Claim Amount: ${claimableRewardLabel ?? "0"}`
   }
 
   if (estimatedPeriodPayoutLabel) {
-    return `Estimated Payout: ${estimatedPeriodPayoutLabel}`
+    return `Est. Daily Rewards: ${estimatedPeriodPayoutLabel}`
   }
 
   return isEstimateLoading
-    ? "Estimated Payout: Calculating..."
-    : "Estimated Payout: 0"
+    ? "Est. Daily Rewards: Calculating..."
+    : "Est. Daily Rewards: 0"
 }

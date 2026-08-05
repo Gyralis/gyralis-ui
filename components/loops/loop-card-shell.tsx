@@ -12,10 +12,6 @@ import {
   LuShield,
   LuShieldCheck,
 } from "react-icons/lu"
-import {
-  RiLoopLeftFill,
-  RiLoopRightFill as RiLoopRightAiFill,
-} from "react-icons/ri"
 import { useAccount } from "wagmi"
 
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
@@ -36,7 +32,9 @@ import {
 import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score"
 
+import { LoopIdentityMark } from "./loop-identity-mark"
 import { LoopDistributionStat, LoopPeriodStat } from "./loop-settings"
+import { LoopTypeBadge } from "./loop-type-badge"
 import { LoopersModal } from "./loopers-modal"
 import { LoopSectionError } from "./sections/loop-section-status"
 import type {
@@ -122,39 +120,14 @@ export function LoopCardShell({
           .join(" ")}
       >
         <div className="relative z-10 space-y-3">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between ">
             <div className="flex min-w-0 items-center gap-1.5">
-              {(loop.eligibilityLogoUrl || isSuper) && (
-                <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">
-                  {loop.eligibilityLogoUrl ? (
-                    <Image
-                      src={loop.eligibilityLogoUrl}
-                      alt={`${loop.eligibility} logo`}
-                      width={32}
-                      height={32}
-                      className="size-8 object-contain"
-                    />
-                  ) : (
-                    <span className="size-3.5 rounded-full bg-primary" />
-                  )}
-                  {isSuper ? (
-                    <div className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full border border-border bg-card p-[3px] shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
-                      <Image
-                        src="/superfluid-logo.png"
-                        alt="Superfluid logo"
-                        width={14}
-                        height={14}
-                        className="size-3.5 object-contain"
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
-                    {loop.title}
-                  </h2>
+              <LoopIdentityMark loop={loop} />
+              <div className="min-w-0 flex-1  flex flex-col gap-0.5">
+                <h2 className="line-clamp-2 min-w-0 text-[1.35rem] leading-[1.05] text-foreground">
+                  {loop.title}
+                </h2>
+                <div className=" flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   <HeaderIconBadges
                     chainName={loop.chainName}
                     isSuper={isSuper}
@@ -379,23 +352,14 @@ function HeaderIconBadges({
   chainName: string
   isSuper: boolean
 }) {
-  const loopLabel = isSuper ? "SuperLoop" : "Loop"
-
   return (
     <div className="flex shrink-0 items-center gap-1">
       <div className="flex items-center gap-1 md:hidden">
-        <LoopTypeIconBadge isSuper={isSuper} label={loopLabel} />
+        <LoopTypeBadge isSuper={isSuper} />
         <ChainIconBadge chainName={chainName} />
       </div>
       <div className="hidden items-center gap-1 md:flex">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>
-              <LoopTypeIconBadge isSuper={isSuper} label={loopLabel} />
-            </span>
-          </TooltipTrigger>
-          <TooltipContent>{loopLabel}</TooltipContent>
-        </Tooltip>
+        <LoopTypeBadge isSuper={isSuper} />
         <Tooltip>
           <TooltipTrigger asChild>
             <span>
@@ -406,32 +370,6 @@ function HeaderIconBadges({
         </Tooltip>
       </div>
     </div>
-  )
-}
-
-function LoopTypeIconBadge({
-  isSuper,
-  label,
-}: {
-  isSuper: boolean
-  label: string
-}) {
-  const Icon = isSuper ? RiLoopRightAiFill : RiLoopLeftFill
-
-  return (
-    <span
-      aria-label={label}
-      className={[
-        "inline-flex size-[22px] shrink-0 items-center justify-center rounded-full",
-        isSuper
-          ? "text-primary"
-          : "border border-border/80 bg-background/45 text-foreground",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <Icon className="size-4" />
-    </span>
   )
 }
 

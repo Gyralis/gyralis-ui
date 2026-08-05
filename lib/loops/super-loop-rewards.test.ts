@@ -93,23 +93,23 @@ describe("SuperLoop reward estimate", () => {
         isEstimateLoading: true,
         status: "active",
       })
-    ).toBe("Estimated Payout: Calculating...")
+    ).toBe("Est. Daily Rewards: Calculating...")
     expect(
       getSuperLoopRewardTooltip({
         isEstimateLoading: false,
         status: "active",
       })
-    ).toBe("Estimated Payout: 0")
+    ).toBe("Est. Daily Rewards: 0")
   })
 
-  it("prefers resolved estimated and claimable amounts", () => {
+  it("prefers resolved estimated, claimable, and claimed amounts", () => {
     expect(
       getSuperLoopRewardTooltip({
         estimatedPeriodPayoutLabel: "1.25 MARK",
         isEstimateLoading: false,
         status: "active",
       })
-    ).toBe("Estimated Payout: 1.25 MARK")
+    ).toBe("Est. Daily Rewards: 1.25 MARK")
     expect(
       getSuperLoopRewardTooltip({
         claimableRewardLabel: "1.2 MARK",
@@ -117,6 +117,19 @@ describe("SuperLoop reward estimate", () => {
         status: "claimable",
       })
     ).toBe("Claim Amount: 1.2 MARK")
+    expect(
+      getSuperLoopRewardTooltip({
+        claimedRewardLabel: "1.2 MARK",
+        isEstimateLoading: false,
+        status: "claimed",
+      })
+    ).toBe("Daily Rewards: Claimed - 1.2 MARK")
+    expect(
+      getSuperLoopRewardTooltip({
+        isEstimateLoading: false,
+        status: "claimed",
+      })
+    ).toBe("Daily Rewards: Claimed - 0")
     expect(
       getSuperLoopRewardTooltip({
         isEstimateLoading: false,
