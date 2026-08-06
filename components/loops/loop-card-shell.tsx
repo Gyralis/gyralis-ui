@@ -160,11 +160,11 @@ export function LoopCardShell({
 
           <div className="h-px bg-border/80" />
 
-          <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-muted/20 md:grid-cols-[1fr_minmax(118px,0.72fr)_1fr]">
-            <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
+          <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-muted/20 md:grid-cols-[minmax(0,1fr)_minmax(118px,0.72fr)_minmax(0,1fr)]">
+            <div className="min-w-0 max-w-full min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
               {distribution.status === "error" ? (
                 <LoopSectionError
-                  label="Rewards"
+                  label="Daily rewards"
                   message={distribution.message}
                   onRetry={distribution.retry}
                 />
@@ -179,6 +179,7 @@ export function LoopCardShell({
                     distributionData?.isLoading
                   }
                   value={getDistributionValue(distribution)}
+                  valueMuted={distributionData?.valueMuted}
                   valueUnit={distributionData?.valueUnit}
                   detail={distributionData?.detail}
                   tooltip={distributionData?.tooltip ?? "Loading Loop rewards."}
@@ -197,7 +198,7 @@ export function LoopCardShell({
               />
             </div>
 
-            <div className="min-h-[94px] px-3.5 py-3">
+            <div className="min-w-0 max-w-full min-h-[94px] px-3.5 py-3">
               {period.status === "error" ? (
                 <LoopSectionError
                   label="Period"

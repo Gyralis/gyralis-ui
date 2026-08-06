@@ -266,6 +266,7 @@ export const LoopDistributionStat = ({
   compact = false,
   isLoading = false,
   value,
+  valueMuted = false,
   valueUnit,
   detail,
   tooltip,
@@ -276,6 +277,7 @@ export const LoopDistributionStat = ({
   compact?: boolean
   isLoading?: boolean
   value: string
+  valueMuted?: boolean
   valueUnit?: string
   detail?: string
   tooltip: string
@@ -298,19 +300,14 @@ export const LoopDistributionStat = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="group flex h-full cursor-help flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="group flex h-full min-w-0 max-w-full cursor-help flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             role="button"
             tabIndex={0}
           >
             <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Rewards
+              Daily rewards
             </p>
-            <div
-              className={[
-                "mt-4 flex items-baseline gap-x-2 gap-y-1 text-foreground",
-                animationEndValue ? "flex-nowrap" : "flex-wrap",
-              ].join(" ")}
-            >
+            <div className="mt-4 flex min-w-0 max-w-full flex-nowrap items-baseline gap-x-2 gap-y-1 text-foreground">
               {showValueSkeleton ? (
                 <Skeleton className="h-[26px] w-28 shrink-0 rounded-xs bg-muted" />
               ) : (
@@ -327,7 +324,10 @@ export const LoopDistributionStat = ({
                   ) : null}
                   <p
                     className={[
-                      "whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums text-foreground",
+                      "whitespace-nowrap text-[1.6rem] leading-none tabular-nums",
+                      valueMuted
+                        ? "font-normal text-muted-foreground"
+                        : "font-bold text-foreground",
                       animationEndValue ? "col-start-1 row-start-1" : "",
                     ]
                       .filter(Boolean)
@@ -338,18 +338,30 @@ export const LoopDistributionStat = ({
                 </div>
               )}
               {valueUnit ? (
-                <p className="shrink-0 text-[11px] font-semibold leading-4 text-foreground">
+                <p
+                  className={[
+                    "min-w-0 truncate text-[11px] font-semibold leading-4",
+                    valueMuted ? "text-muted-foreground" : "text-foreground",
+                  ].join(" ")}
+                  title={valueUnit}
+                >
                   {valueUnit}
                 </p>
               ) : null}
               {detail ? (
-                <p className="shrink-0 text-[11px] font-semibold leading-4 text-foreground">
+                <p
+                  className={[
+                    "min-w-0 truncate text-[11px] font-semibold leading-4",
+                    valueMuted ? "text-muted-foreground" : "text-foreground",
+                  ].join(" ")}
+                  title={detail}
+                >
                   {detail}
                 </p>
               ) : null}
             </div>
             {balanceDetail ? (
-              <div className="mt-2 border-t border-border/80 pt-1.5">
+              <div className="mt-2 flex min-h-5 items-center justify-start border-t border-border/80 pt-1.5 text-left">
                 <p className="text-[10px] font-semibold leading-none text-muted-foreground">
                   {balanceDetailLabel}:{" "}
                   <span className="text-foreground">{balanceDetail}</span>
@@ -358,14 +370,16 @@ export const LoopDistributionStat = ({
             ) : null}
           </div>
         </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
+        <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
+          {tooltip}
+        </TooltipContent>
       </Tooltip>
     )
   }
 
   return (
     <SettingStatCard
-      label="Rewards"
+      label="Daily rewards"
       value={displayedValue}
       detail={valueUnit ?? detail}
       tooltip={tooltip}
@@ -577,7 +591,9 @@ const SettingStatCard = ({
           <LuInfo className="size-3.5 shrink-0 text-primary" />
         </div>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   )
 }

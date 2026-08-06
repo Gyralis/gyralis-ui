@@ -39,6 +39,7 @@ export interface LoopDistributionViewData {
   isLoading?: boolean
   tooltip: string
   value: string
+  valueMuted?: boolean
   valueUnit?: string
 }
 
