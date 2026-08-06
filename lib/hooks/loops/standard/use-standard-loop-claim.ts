@@ -110,11 +110,21 @@ export function useStandardLoopClaim({
       refetchOnWindowFocus: false,
     },
   })
+  const claimerStatus = claimerStatusQuery.data as
+    | readonly [boolean, boolean]
+    | undefined
+  const isRegistered = Boolean(claimerStatus?.[0])
+  const hasClaimed = Boolean(claimerStatus?.[1])
+  const shouldCheckNextPeriodRegistration =
+    validAddress &&
+    Boolean(connectedAccount) &&
+    claimerStatus != null &&
+    !hasClaimed
   const registration = useStandardLoopWalletRegistration({
     address,
     chainId,
     currentPeriod,
-    enabled: validAddress && Boolean(connectedAccount),
+    enabled: shouldCheckNextPeriodRegistration,
     user: connectedAccount,
   })
   const receipt = useWaitForTransactionReceipt({
@@ -125,19 +135,17 @@ export function useStandardLoopClaim({
   const refetchClaimerStatus = claimerStatusQuery.refetch
   const refetchPayout = payoutQuery.refetch
   const refetchRegistration = registration.refetch
+  const refreshAccountState = useCallback(async () => {
+    await Promise.allSettled([refetchClaimerStatus(), refetchPayout()])
+  }, [refetchClaimerStatus, refetchPayout])
   const refetch = useCallback(async () => {
-    await Promise.allSettled([
-      refetchClaimerStatus(),
-      refetchPayout(),
-      refetchRegistration(),
-    ])
-  }, [refetchClaimerStatus, refetchPayout, refetchRegistration])
-
-  const claimerStatus = claimerStatusQuery.data as
-    | readonly [boolean, boolean]
-    | undefined
-  const isRegistered = Boolean(claimerStatus?.[0])
-  const hasClaimed = Boolean(claimerStatus?.[1])
+    await refreshAccountState()
+    if (shouldCheckNextPeriodRegistration) await refetchRegistration()
+  }, [
+    refetchRegistration,
+    refreshAccountState,
+    shouldCheckNextPeriodRegistration,
+  ])
   const claimableAmount =
     typeof payoutQuery.data === "bigint" ? payoutQuery.data : 0n
   const isClaimable = isRegistered && !hasClaimed && claimableAmount > 0n
@@ -201,14 +209,14 @@ export function useStandardLoopClaim({
         : undefined,
     } as any)
 
-    void refetch().finally(() => {
+    void refreshAccountState().finally(() => {
       void onConfirmed?.()
     })
   }, [
     claimableAmount,
     onConfirmed,
     pendingAction,
-    refetch,
+    refreshAccountState,
     receipt.isSuccess,
     toast,
     transactionUrl,

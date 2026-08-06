@@ -7,6 +7,18 @@ const STANDARD_LOOP_DIRECTORIES = [
   "lib/hooks/loops/standard",
 ]
 const FORBIDDEN_SUPER_LOOP_LOGIC = /\bsuperLoop\b|\bSuperLoop\b|streaming/i
+const PARTICIPATION_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/standard/use-standard-loop-participation.ts"
+)
+const LOOPERS_MODAL_PATH = resolve(
+  process.cwd(),
+  "components/loops/loopers-modal.tsx"
+)
+const CLAIM_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/standard/use-standard-loop-claim.ts"
+)
 
 function getSourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -30,4 +42,30 @@ describe("standard Loop architecture boundary", () => {
       }
     }
   )
+
+  it("reads visible participation from the current-period aggregate", () => {
+    const participationHook = readFileSync(PARTICIPATION_HOOK_PATH, "utf8")
+
+    expect(participationHook).toContain(
+      "loopContractMethods.loop.getCurrentPeriodData"
+    )
+    expect(participationHook).not.toContain("getLogsChunked")
+    expect(participationHook).not.toContain("parseAbiItem")
+  })
+
+  it("only enables detailed Looper logs while the modal is open", () => {
+    const modal = readFileSync(LOOPERS_MODAL_PATH, "utf8")
+
+    expect(modal).toMatch(/const registeredUsersEnabled\s*=\s*isOpen &&/)
+    expect(modal).toMatch(/const claimedUsersEnabled\s*=\s*isOpen &&/)
+  })
+
+  it("skips wallet registration logs after the user has claimed", () => {
+    const claimHook = readFileSync(CLAIM_HOOK_PATH, "utf8")
+
+    expect(claimHook).toContain("claimerStatus != null &&")
+    expect(claimHook).toContain("!hasClaimed")
+    expect(claimHook).toContain("enabled: shouldCheckNextPeriodRegistration")
+    expect(claimHook).toContain("void refreshAccountState().finally")
+  })
 })
