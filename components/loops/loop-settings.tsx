@@ -165,7 +165,12 @@ export function useLoopSettingsDetails({
 
   const distributionAmountLabel = useMemo(() => {
     if (isLoading) return undefined
-    if (!settings || !loopBalance || settings.percentPerPeriod === 0n) {
+    if (
+      !settings ||
+      !loopBalance ||
+      loopBalance.value == null ||
+      settings.percentPerPeriod === 0n
+    ) {
       return undefined
     }
 
@@ -198,6 +203,8 @@ export function useLoopSettingsDetails({
             symbol: loopBalance.symbol,
           })
     }
+
+    if (loopBalance.value == null) return undefined
 
     const balance = trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),

@@ -70,7 +70,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
     })
 
   const balanceLabel = useMemo(() => {
-    if (!loopBalance) return "--"
+    if (!loopBalance || loopBalance.value == null) return "--"
 
     return `${trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),
@@ -80,7 +80,7 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
 
   const distributionLabel = useMemo(() => {
     if (isLoading) return "Loading..."
-    if (!settings || !loopBalance) return "--"
+    if (!settings || !loopBalance || loopBalance.value == null) return "--"
 
     const percent =
       settings.percentPerPeriod === 0n

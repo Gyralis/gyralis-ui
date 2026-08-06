@@ -80,7 +80,7 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
 
   const formattedBalance = isSuperLoop
     ? formatFlowingDisplayValue(flowingBalance.formatted, 7)
-    : trimFormattedBalance(formatUnits(data.value, data.decimals), 1)
+    : trimFormattedBalance(formatUnits(data.value ?? 0n, data.decimals), 1)
 
   const monthlyIncoming = formatMonthlyIncoming({
     flowRatePerSecond: data.flowRatePerSecond,
