@@ -19,6 +19,8 @@ import {
 import {
   deriveSuperLoopClaimStatus,
   getSuperLoopActionLabel,
+  getSuperLoopActionPresentation,
+  getSuperLoopActionTooltip,
   getSuperLoopTimerTitle,
   reconcileSuperLoopConfirmedStatus,
 } from "@/lib/loops/super-loop-status"
@@ -195,9 +197,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     label: getSuperLoopActionLabel({
       amountLabel,
       isConfirming: claim.isConfirming,
-      isSubmitting: claim.isSubmitting,
       pendingAction: claim.pendingAction,
       status,
+      submissionStage: claim.submissionStage,
     }),
     amountLabel,
     disabled:
@@ -206,6 +208,12 @@ export function useSuperLoopCardController(loop: LoopCardData) {
         !validAddress ||
         ["checking", "entered", "active", "claimed"].includes(status)),
     isPending: claim.isPending,
+    presentation: getSuperLoopActionPresentation({
+      isPending: claim.isPending,
+      status,
+      wrongNetwork: claim.wrongNetwork,
+    }),
+    tooltip: getSuperLoopActionTooltip(status),
     execute: status === "error" ? refetchStatus : claim.execute,
   }
 

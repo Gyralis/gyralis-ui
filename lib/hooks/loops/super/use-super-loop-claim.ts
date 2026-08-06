@@ -14,7 +14,10 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
-import type { SuperLoopConfirmedAction } from "@/lib/loops/super-loop-status"
+import type {
+  SuperLoopConfirmedAction,
+  SuperLoopSubmissionStage,
+} from "@/lib/loops/super-loop-status"
 import { useToast } from "@/components/ui/use-toast"
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
@@ -71,7 +74,8 @@ export function useSuperLoopClaim({
   isClaimable,
   onConfirmed,
 }: UseSuperLoopClaimParams) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionStage, setSubmissionStage] =
+    useState<SuperLoopSubmissionStage>("idle")
   const [confirmedAction, setConfirmedAction] =
     useState<SuperLoopConfirmedAction>()
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
@@ -89,7 +93,7 @@ export function useSuperLoopClaim({
     query: { enabled: Boolean(txHash) },
   })
   const isConfirming = receipt.isLoading
-  const isPending = isSubmitting || isConfirming
+  const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = txHash
     ? `${
@@ -104,6 +108,7 @@ export function useSuperLoopClaim({
   useEffect(() => {
     setConfirmedAction(undefined)
     setPendingAction("enter")
+    setSubmissionStage("idle")
     setTxHash(undefined)
   }, [address, chainId, connectedAccount])
 
@@ -185,7 +190,9 @@ export function useSuperLoopClaim({
       return
     }
 
-    setIsSubmitting(true)
+    const action: SuperLoopPendingAction = isClaimable ? "claim" : "enter"
+    setPendingAction(action)
+    setSubmissionStage("checkingEligibility")
     setConfirmedAction(undefined)
 
     try {
@@ -228,8 +235,7 @@ export function useSuperLoopClaim({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      const action: SuperLoopPendingAction = isClaimable ? "claim" : "enter"
-      setPendingAction(action)
+      setSubmissionStage("awaitingWallet")
       const hash = await writeContractAsync({
         address,
         abi,
@@ -253,7 +259,7 @@ export function useSuperLoopClaim({
         variant: "destructive",
       })
     } finally {
-      setIsSubmitting(false)
+      setSubmissionStage("idle")
     }
   }
 
@@ -262,9 +268,9 @@ export function useSuperLoopClaim({
     execute,
     isConfirming,
     isPending,
-    isSubmitting,
     lastClaimedAmount,
     pendingAction,
+    submissionStage,
     transactionUrl,
     wrongNetwork,
   }

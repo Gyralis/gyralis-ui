@@ -15,12 +15,19 @@ export type LoopActionStatus =
   | "claimed"
   | "error"
 
+export interface LoopActionTooltip {
+  title: string
+  description?: string
+}
+
 export interface LoopActionViewModel {
   status: LoopActionStatus
   label: string
   amountLabel?: string
   disabled: boolean
   isPending: boolean
+  presentation?: "button" | "neutral" | "success"
+  tooltip?: LoopActionTooltip
   execute: () => void | Promise<void>
 }
 

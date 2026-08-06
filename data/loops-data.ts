@@ -107,7 +107,7 @@ export const LoopCardsData: LoopCardData[] = [
     communityLogoUrl: "/markee-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score 15+",
-    eligibility: "Join Markee Cooperative community in Gardens required",
+    eligibility: "Join Markee community in Gardens required",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",

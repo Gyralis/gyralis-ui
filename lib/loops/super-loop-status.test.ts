@@ -5,6 +5,8 @@ import {
   deriveSuperLoopIsClaimable,
   getPreviousSuperLoopPeriod,
   getSuperLoopActionLabel,
+  getSuperLoopActionPresentation,
+  getSuperLoopActionTooltip,
   getSuperLoopTimerTitle,
   normalizeSuperLoopStatusReads,
   reconcileSuperLoopConfirmedStatus,
@@ -205,14 +207,39 @@ describe("SuperLoop claim state", () => {
     }
   )
 
+  it.each([
+    {
+      status: "entered",
+      expected: {
+        title: "You are registered for the next accumulation period.",
+      },
+    },
+    {
+      status: "active",
+      expected: {
+        title: "Rewards are flowing in now!",
+        description: "Claim them at the end of the period.",
+      },
+    },
+    {
+      status: "claimed",
+      expected: {
+        title: "Your rewards were claimed successfully.",
+        description: "You are registered for the next accumulation period.",
+      },
+    },
+  ] as const)("provides the $status tooltip", ({ expected, status }) => {
+    expect(getSuperLoopActionTooltip(status)).toEqual(expected)
+  })
+
   it("builds the claim label and timer from the derived state", () => {
     expect(
       getSuperLoopActionLabel({
         amountLabel: "0.0114 MARK",
         isConfirming: false,
-        isSubmitting: false,
         pendingAction: "claim",
         status: "claimable",
+        submissionStage: "idle",
       })
     ).toBe("Claim 0.0114 MARK")
     expect(getSuperLoopTimerTitle("claimable")).toBe("Claim period ends in")
@@ -220,12 +247,99 @@ describe("SuperLoop claim state", () => {
     expect(
       getSuperLoopActionLabel({
         isConfirming: false,
-        isSubmitting: false,
+        pendingAction: "enter",
+        status: "checking",
+        submissionStage: "idle",
+      })
+    ).toBe("Checking your Loop status...")
+    expect(
+      getSuperLoopActionLabel({
+        isConfirming: false,
         pendingAction: "enter",
         status: "entered",
+        submissionStage: "idle",
       })
     ).toBe("You are in the Loop")
   })
+
+  it("describes each entry transaction stage", () => {
+    expect(
+      getSuperLoopActionLabel({
+        isConfirming: false,
+        pendingAction: "enter",
+        status: "enter",
+        submissionStage: "checkingEligibility",
+      })
+    ).toBe("Checking eligibility...")
+    expect(
+      getSuperLoopActionLabel({
+        isConfirming: false,
+        pendingAction: "enter",
+        status: "enter",
+        submissionStage: "awaitingWallet",
+      })
+    ).toBe("Confirm in wallet...")
+    expect(
+      getSuperLoopActionLabel({
+        isConfirming: true,
+        pendingAction: "enter",
+        status: "enter",
+        submissionStage: "idle",
+      })
+    ).toBe("Confirming entry...")
+  })
+
+  it.each([
+    {
+      expected: "button",
+      isPending: false,
+      status: "enter",
+      wrongNetwork: false,
+    },
+    {
+      expected: "button",
+      isPending: false,
+      status: "claimable",
+      wrongNetwork: false,
+    },
+    {
+      expected: "neutral",
+      isPending: false,
+      status: "active",
+      wrongNetwork: false,
+    },
+    {
+      expected: "neutral",
+      isPending: false,
+      status: "entered",
+      wrongNetwork: false,
+    },
+    {
+      expected: "success",
+      isPending: false,
+      status: "claimed",
+      wrongNetwork: false,
+    },
+    {
+      expected: "button",
+      isPending: true,
+      status: "active",
+      wrongNetwork: false,
+    },
+    {
+      expected: "button",
+      isPending: false,
+      status: "claimed",
+      wrongNetwork: true,
+    },
+  ] as const)(
+    "uses $expected presentation for $status",
+    ({ expected, isPending, status, wrongNetwork }) => {
+      expect(
+        getSuperLoopActionPresentation({ isPending, status, wrongNetwork })
+      ).toBe(expected)
+    }
+  )
 
   it("shows a confirmed claim while refreshed contract reads catch up", () => {
     expect(
