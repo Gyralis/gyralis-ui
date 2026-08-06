@@ -14,11 +14,15 @@ import { useSuperLoopStatus } from "@/lib/hooks/loops/super/use-super-loop-statu
 import {
   calculateSuperLoopEstimatedPeriodPayout,
   getSuperLoopRewardTooltip,
+  getSuperLoopRewardValue,
   resolveSuperLoopIndividualPeriodPayout,
+  superLoopRewardShowsToken,
 } from "@/lib/loops/super-loop-rewards"
 import {
   deriveSuperLoopClaimStatus,
   getSuperLoopActionLabel,
+  getSuperLoopActionPresentation,
+  getSuperLoopActionTooltip,
   getSuperLoopTimerTitle,
   reconcileSuperLoopConfirmedStatus,
 } from "@/lib/loops/super-loop-status"
@@ -162,16 +166,8 @@ export function useSuperLoopCardController(loop: LoopCardData) {
         statusReads.data.previousPeriodPayout ??
         claimableAmount
       : undefined
-  const claimedRewardLabel =
-    balance.data && claimedRewardAmount != null && claimedRewardAmount > 0n
-      ? `${trimFormattedBalance(
-          formatUnits(claimedRewardAmount, balance.data.decimals),
-          7
-        )} ${balance.data.symbol}`
-      : undefined
   const rewardsTooltip = getSuperLoopRewardTooltip({
     claimableRewardLabel,
-    claimedRewardLabel,
     estimatedPeriodPayoutLabel,
     isEstimateLoading: estimatedPeriodPayoutIsLoading,
     status,
@@ -195,9 +191,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     label: getSuperLoopActionLabel({
       amountLabel,
       isConfirming: claim.isConfirming,
-      isSubmitting: claim.isSubmitting,
       pendingAction: claim.pendingAction,
       status,
+      submissionStage: claim.submissionStage,
     }),
     amountLabel,
     disabled:
@@ -206,6 +202,12 @@ export function useSuperLoopCardController(loop: LoopCardData) {
         !validAddress ||
         ["checking", "entered", "active", "claimed"].includes(status)),
     isPending: claim.isPending,
+    presentation: getSuperLoopActionPresentation({
+      isPending: claim.isPending,
+      status,
+      wrongNetwork: claim.wrongNetwork,
+    }),
+    tooltip: getSuperLoopActionTooltip(status),
     execute: status === "error" ? refetchStatus : claim.execute,
   }
 
@@ -236,10 +238,16 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                   symbol: balance.data.symbol,
                 }),
             balanceDetailLabel: "Flow Rate",
-            detail: balance.data.symbol,
+            detail: superLoopRewardShowsToken(status)
+              ? balance.data.symbol
+              : undefined,
             isLoading: estimatedPeriodPayoutIsLoading,
             tooltip: rewardsTooltip,
-            value: status === "claimable" ? claimableRewardValue ?? "0" : "0",
+            value: getSuperLoopRewardValue({
+              claimableRewardValue,
+              status,
+            }),
+            valueMuted: status === "claimed",
           }
         : undefined
     const error = !settings.data ? settings.error ?? configError : balance.error
@@ -258,7 +266,6 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     balance.isFetching,
     accumulatingUsers,
     calculatedPeriodPayout,
-    claimableRewardLabel,
     claimableRewardValue,
     configError,
     estimatedPeriodPayout,

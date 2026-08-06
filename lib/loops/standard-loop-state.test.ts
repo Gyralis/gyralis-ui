@@ -4,6 +4,8 @@ import {
   calculateStandardLoopParticipation,
   deriveStandardLoopClaimStatus,
   getStandardLoopActionLabel,
+  getStandardLoopActionPresentation,
+  getStandardLoopActionTooltip,
   getStandardLoopTimerTitle,
 } from "./standard-loop-state"
 
@@ -78,11 +80,65 @@ describe("standard Loop claim state", () => {
       getStandardLoopActionLabel({
         amountLabel: "12.5 HNY",
         isConfirming: false,
-        isSubmitting: false,
         pendingAction: "claim",
         status: "claimable",
+        submissionStage: "idle",
       })
     ).toBe("Claim 12.5 HNY")
+  })
+
+  it.each([
+    ["checkingEligibility", "Checking eligibility..."],
+    ["awaitingWallet", "Confirm in wallet..."],
+  ] as const)("labels the %s stage", (submissionStage, expected) => {
+    expect(
+      getStandardLoopActionLabel({
+        isConfirming: false,
+        pendingAction: "enter",
+        status: "enter",
+        submissionStage,
+      })
+    ).toBe(expected)
+  })
+
+  it("uses informational surfaces for entered and claimed states", () => {
+    expect(
+      getStandardLoopActionPresentation({
+        isPending: false,
+        status: "entered",
+        wrongNetwork: false,
+      })
+    ).toBe("neutral")
+    expect(
+      getStandardLoopActionPresentation({
+        isPending: false,
+        status: "claimed",
+        wrongNetwork: false,
+      })
+    ).toBe("success")
+    expect(
+      getStandardLoopActionPresentation({
+        isPending: false,
+        status: "claimable",
+        wrongNetwork: false,
+      })
+    ).toBe("button")
+  })
+
+  it("provides state-specific action tooltips", () => {
+    expect(getStandardLoopActionTooltip("entered")).toEqual({
+      title: "You’re registered for the next claim period.",
+      description: "Your rewards will be available when it opens.",
+    })
+    expect(getStandardLoopActionTooltip("claimable")).toBeUndefined()
+    expect(getStandardLoopActionTooltip("claimed")).toEqual({
+      title: "Your rewards were claimed successfully.",
+      description: "You’re registered for the next claim period.",
+    })
+    expect(getStandardLoopActionTooltip("error")).toEqual({
+      title: "We couldn’t load your Loop status.",
+      description: "Try checking again.",
+    })
   })
 
   it("builds timer titles from claim state", () => {

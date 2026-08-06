@@ -159,6 +159,7 @@ export function LoopersModal({
   }, [currentPeriod, periodOffset])
   const isSuperLoop = loopContractType === "superLoop"
   const periodRangesReady =
+    isOpen &&
     isSuperLoop &&
     selectedPeriod != null &&
     firstPeriodStart != null &&
@@ -166,7 +167,9 @@ export function LoopersModal({
   const registerWindowPeriod =
     selectedPeriod != null && selectedPeriod > 0n ? selectedPeriod - 1n : 0n
   const isSelectedFuturePeriod =
-    currentPeriod != null && selectedPeriod != null && selectedPeriod > currentPeriod
+    currentPeriod != null &&
+    selectedPeriod != null &&
+    selectedPeriod > currentPeriod
   const registrationRange = usePeriodLogBlockRange({
     chainId,
     enabled: periodRangesReady,
@@ -201,9 +204,11 @@ export function LoopersModal({
         }
       : undefined
   const registeredUsersEnabled =
-    !isSuperLoop || registrationBlockRange != null
+    isOpen && (!isSuperLoop || registrationBlockRange != null)
   const claimedUsersEnabled =
-    !isSelectedFuturePeriod && (!isSuperLoop || claimBlockRange != null)
+    isOpen &&
+    !isSelectedFuturePeriod &&
+    (!isSuperLoop || claimBlockRange != null)
 
   const { users: registeredUsers, loading: loadingRegisteredUsers } =
     useRegisteredUsers(

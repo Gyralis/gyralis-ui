@@ -22,6 +22,10 @@ const PARTICIPATION_HOOK_PATH = resolve(
   process.cwd(),
   "lib/hooks/loops/super/use-super-loop-participation.ts"
 )
+const TOKEN_BALANCE_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/app/use-loop-token-balance.ts"
+)
 const CARD_PATH = resolve(
   process.cwd(),
   "components/loops/super-loop/super-loop-card.tsx"
@@ -69,6 +73,17 @@ describe("SuperLoop card architecture", () => {
     expect(participationHook).not.toContain("usePeriodLogBlockRange")
     expect(participationHook).not.toContain("useRegisteredUsers")
     expect(participationHook).not.toContain("useClaimedUsers")
+  })
+
+  it("keeps duplicate and unused reads out of the SuperLoop balance batch", () => {
+    const balanceHook = readFileSync(TOKEN_BALANCE_HOOK_PATH, "utf8")
+
+    expect(balanceHook).toContain('functionName: "decimals"')
+    expect(balanceHook).toContain('functionName: "symbol"')
+    expect(balanceHook).toContain('functionName: "getAccountFlowrate"')
+    expect(balanceHook).not.toContain("realtimeAvailableNow")
+    expect(balanceHook).not.toContain("getLoopContractMethods")
+    expect(balanceHook).not.toContain("getLoopContractAbi")
   })
 
   it("refreshes SuperLoop data from events instead of polling", () => {

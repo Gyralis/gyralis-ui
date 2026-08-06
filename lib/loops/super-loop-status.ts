@@ -31,6 +31,13 @@ export interface SuperLoopConfirmedAction {
   period?: bigint
 }
 
+export type SuperLoopSubmissionStage =
+  | "idle"
+  | "checkingEligibility"
+  | "awaitingWallet"
+
+export type SuperLoopActionPresentation = "button" | "neutral" | "success"
+
 export interface NormalizedSuperLoopClaimerStatus {
   hasClaimed: boolean
   isRegistered: boolean
@@ -142,25 +149,58 @@ export function getSuperLoopTimerTitle(status: SuperLoopClaimStatus) {
   }
 }
 
+export function getSuperLoopActionPresentation({
+  isPending,
+  status,
+  wrongNetwork,
+}: {
+  isPending: boolean
+  status: SuperLoopClaimStatus
+  wrongNetwork: boolean
+}): SuperLoopActionPresentation {
+  if (wrongNetwork || isPending) return "button"
+  if (status === "active" || status === "entered") return "neutral"
+  if (status === "claimed") return "success"
+  return "button"
+}
+
+export function getSuperLoopActionTooltip(status: SuperLoopClaimStatus) {
+  switch (status) {
+    case "entered":
+      return {
+        title: "You are registered for the next accumulation period.",
+      }
+    case "active":
+      return {
+        title: "Rewards are flowing in now!",
+        description: "Claim them at the end of the period.",
+      }
+    case "claimed":
+      return {
+        title: "Your rewards were claimed successfully.",
+        description: "You are registered for the next accumulation period.",
+      }
+    default:
+      return undefined
+  }
+}
+
 export function getSuperLoopActionLabel({
   amountLabel,
   isConfirming,
-  isSubmitting,
   pendingAction,
   status,
+  submissionStage,
 }: {
   amountLabel?: string
   isConfirming: boolean
-  isSubmitting: boolean
   pendingAction: "enter" | "claim"
   status: SuperLoopClaimStatus
+  submissionStage: SuperLoopSubmissionStage
 }) {
-  if (isSubmitting) {
-    if (status === "claimable") {
-      return amountLabel ? `Claiming ${amountLabel}...` : "Claiming..."
-    }
-    return "Entering the Loop..."
-  }
+  if (submissionStage === "checkingEligibility")
+    return "Checking eligibility..."
+  if (submissionStage === "awaitingWallet") return "Confirm in wallet..."
 
   if (isConfirming) {
     return pendingAction === "claim"
@@ -178,7 +218,7 @@ export function getSuperLoopActionLabel({
     case "claimed":
       return amountLabel ? `Claimed ${amountLabel}` : "Claimed"
     case "checking":
-      return "Checking claim status..."
+      return "Checking your Loop status..."
     case "error":
       return "Retry claim status"
     default:

@@ -30,8 +30,7 @@ const eligibilityRequirements = [
       "Review the community covenant, select Join, and stake the required community token.",
       "Return to Gyralis and enter the Loop. Your membership will be verified automatically.",
     ],
-    protocolUrl:
-      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    protocolUrl: "https://app.gardens.fund/gardens",
     coverUrl: "/gardens-cover.png",
     logoUrl: "/gardens-logo.png",
     type: "loop",

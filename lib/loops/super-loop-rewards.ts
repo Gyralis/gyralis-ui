@@ -15,9 +15,13 @@ interface SuperLoopAnimatedRewardParams {
 
 interface SuperLoopRewardTooltipParams {
   claimableRewardLabel?: string
-  claimedRewardLabel?: string
   estimatedPeriodPayoutLabel?: string
   isEstimateLoading: boolean
+  status: SuperLoopClaimStatus
+}
+
+interface SuperLoopRewardValueParams {
+  claimableRewardValue?: string
   status: SuperLoopClaimStatus
 }
 
@@ -80,24 +84,52 @@ export function calculateSuperLoopAnimatedReward({
 
 export function getSuperLoopRewardTooltip({
   claimableRewardLabel,
-  claimedRewardLabel,
   estimatedPeriodPayoutLabel,
   isEstimateLoading,
   status,
 }: SuperLoopRewardTooltipParams) {
-  if (status === "claimed") {
-    return `Daily Rewards: Claimed - ${claimedRewardLabel ?? "0"}`
+  switch (status) {
+    case "enter":
+      return "Not participating. Enter the Loop."
+    case "entered":
+      return "Your rewards will start accumulating next period."
+    case "active":
+      if (estimatedPeriodPayoutLabel) {
+        return `Estimated daily rewards: +${estimatedPeriodPayoutLabel}`
+      }
+      return isEstimateLoading
+        ? "Estimated daily rewards: Calculating..."
+        : "Estimated daily rewards: 0"
+    case "claimable":
+      return `Daily rewards available: +${claimableRewardLabel ?? "0"}`
+    case "claimed":
+      return "Daily rewards claimed."
+    case "checking":
+      return "Checking your Loop status..."
+    default:
+      return "Rewards are currently unavailable."
   }
+}
 
-  if (status === "claimable") {
-    return `Claim Amount: ${claimableRewardLabel ?? "0"}`
+export function getSuperLoopRewardValue({
+  claimableRewardValue,
+  status,
+}: SuperLoopRewardValueParams) {
+  switch (status) {
+    case "enter":
+    case "entered":
+      return "0"
+    case "error":
+      return "—"
+    case "claimable":
+      return claimableRewardValue ?? "0"
+    case "claimed":
+      return "0"
+    default:
+      return "0"
   }
+}
 
-  if (estimatedPeriodPayoutLabel) {
-    return `Est. Daily Rewards: ${estimatedPeriodPayoutLabel}`
-  }
-
-  return isEstimateLoading
-    ? "Est. Daily Rewards: Calculating..."
-    : "Est. Daily Rewards: 0"
+export function superLoopRewardShowsToken(status: SuperLoopClaimStatus) {
+  return ["enter", "entered", "active", "claimable", "claimed"].includes(status)
 }

@@ -1,3 +1,4 @@
+import { LoopCardsData } from "@/data/loops-data"
 import { describe, expect, it } from "vitest"
 
 import { findAllowlistedLoop } from "./eligibility"
@@ -42,6 +43,20 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
     ).toBeUndefined()
   })
 
+  it("maps the enabled Blockscout Loop to its eligibility provider", () => {
+    expect(
+      findAllowlistedLoop(
+        "blockscout",
+        "0xab25dbafd11b1eb606b2455eecec67e6746e409b",
+        100
+      )
+    ).toMatchObject({
+      address: "0xaB25dBaFD11b1eb606B2455Eecec67e6746E409b",
+      chainId: 100,
+      contractType: "loop",
+    })
+  })
+
   it("does not allow the loop through a different provider", () => {
     expect(
       findAllowlistedLoop(
@@ -50,5 +65,23 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
         100
       )
     ).toBeUndefined()
+  })
+})
+
+describe("Loop card eligibility links", () => {
+  it.each([
+    [
+      3,
+      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    ],
+    [4, "https://merits.blockscout.com/?tab=spend"],
+    [
+      5,
+      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
+    ],
+  ] as const)("maps Loop %s to its eligibility destination", (id, url) => {
+    expect(LoopCardsData.find((loop) => loop.id === id)?.eligibilityUrl).toBe(
+      url
+    )
   })
 })

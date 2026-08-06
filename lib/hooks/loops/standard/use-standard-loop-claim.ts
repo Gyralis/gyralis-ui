@@ -15,7 +15,10 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
-import { deriveStandardLoopClaimStatus } from "@/lib/loops/standard-loop-state"
+import {
+  deriveStandardLoopClaimStatus,
+  type StandardLoopSubmissionStage,
+} from "@/lib/loops/standard-loop-state"
 import { useToast } from "@/components/ui/use-toast"
 
 import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-registration"
@@ -69,9 +72,10 @@ export function useStandardLoopClaim({
   onConfirmed,
 }: UseStandardLoopClaimParams) {
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
   const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
+  const [submissionStage, setSubmissionStage] =
+    useState<StandardLoopSubmissionStage>("idle")
   const [txHash, setTxHash] = useState<`0x${string}`>()
   const { address: connectedAccount } = useAccount()
   const currentChainId = useChainId()
@@ -106,11 +110,21 @@ export function useStandardLoopClaim({
       refetchOnWindowFocus: false,
     },
   })
+  const claimerStatus = claimerStatusQuery.data as
+    | readonly [boolean, boolean]
+    | undefined
+  const isRegistered = Boolean(claimerStatus?.[0])
+  const hasClaimed = Boolean(claimerStatus?.[1])
+  const shouldCheckNextPeriodRegistration =
+    validAddress &&
+    Boolean(connectedAccount) &&
+    claimerStatus != null &&
+    !hasClaimed
   const registration = useStandardLoopWalletRegistration({
     address,
     chainId,
     currentPeriod,
-    enabled: validAddress && Boolean(connectedAccount),
+    enabled: shouldCheckNextPeriodRegistration,
     user: connectedAccount,
   })
   const receipt = useWaitForTransactionReceipt({
@@ -121,19 +135,17 @@ export function useStandardLoopClaim({
   const refetchClaimerStatus = claimerStatusQuery.refetch
   const refetchPayout = payoutQuery.refetch
   const refetchRegistration = registration.refetch
+  const refreshAccountState = useCallback(async () => {
+    await Promise.allSettled([refetchClaimerStatus(), refetchPayout()])
+  }, [refetchClaimerStatus, refetchPayout])
   const refetch = useCallback(async () => {
-    await Promise.allSettled([
-      refetchClaimerStatus(),
-      refetchPayout(),
-      refetchRegistration(),
-    ])
-  }, [refetchClaimerStatus, refetchPayout, refetchRegistration])
-
-  const claimerStatus = claimerStatusQuery.data as
-    | readonly [boolean, boolean]
-    | undefined
-  const isRegistered = Boolean(claimerStatus?.[0])
-  const hasClaimed = Boolean(claimerStatus?.[1])
+    await refreshAccountState()
+    if (shouldCheckNextPeriodRegistration) await refetchRegistration()
+  }, [
+    refetchRegistration,
+    refreshAccountState,
+    shouldCheckNextPeriodRegistration,
+  ])
   const claimableAmount =
     typeof payoutQuery.data === "bigint" ? payoutQuery.data : 0n
   const isClaimable = isRegistered && !hasClaimed && claimableAmount > 0n
@@ -158,7 +170,7 @@ export function useStandardLoopClaim({
     isLoading,
   })
   const isConfirming = receipt.isLoading
-  const isPending = isSubmitting || isConfirming
+  const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = txHash
     ? `${
@@ -169,6 +181,8 @@ export function useStandardLoopClaim({
   useEffect(() => {
     setHasEnteredNextPeriod(false)
     setLastClaimedAmount(undefined)
+    setPendingAction("enter")
+    setSubmissionStage("idle")
     setTxHash(undefined)
   }, [address, chainId, connectedAccount, currentPeriod])
 
@@ -195,14 +209,14 @@ export function useStandardLoopClaim({
         : undefined,
     } as any)
 
-    void refetch().finally(() => {
+    void refreshAccountState().finally(() => {
       void onConfirmed?.()
     })
   }, [
     claimableAmount,
     onConfirmed,
     pendingAction,
-    refetch,
+    refreshAccountState,
     receipt.isSuccess,
     toast,
     transactionUrl,
@@ -247,7 +261,9 @@ export function useStandardLoopClaim({
       return
     }
 
-    setIsSubmitting(true)
+    const action: PendingAction = isClaimable ? "claim" : "enter"
+    setPendingAction(action)
+    setSubmissionStage("checkingEligibility")
 
     try {
       const response = await fetch(ELIGIBILITY_ENDPOINTS[eligibilityProvider], {
@@ -289,8 +305,7 @@ export function useStandardLoopClaim({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      const action: PendingAction = isClaimable ? "claim" : "enter"
-      setPendingAction(action)
+      setSubmissionStage("awaitingWallet")
       const hash = await writeContractAsync({
         address,
         abi,
@@ -314,7 +329,7 @@ export function useStandardLoopClaim({
         variant: "destructive",
       })
     } finally {
-      setIsSubmitting(false)
+      setSubmissionStage("idle")
     }
   }
 
@@ -324,11 +339,11 @@ export function useStandardLoopClaim({
     execute,
     isConfirming,
     isPending,
-    isSubmitting,
     lastClaimedAmount,
     pendingAction,
     refetch,
     status,
+    submissionStage,
     transactionUrl,
     wrongNetwork,
   }

@@ -7,7 +7,7 @@ import type { LoopCardData } from "@/data/loops-data"
 import { useQuery } from "@tanstack/react-query"
 import {
   LuExternalLink,
-  LuFlame,
+  // LuFlame,
   LuInfo,
   LuShield,
   LuShieldCheck,
@@ -140,7 +140,7 @@ export function LoopCardShell({
               <button
                 type="button"
                 onClick={() => setIsSponsorModalOpen(true)}
-                className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1.5 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-[165px] md:justify-start"
+                className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-[165px] md:justify-start"
               >
                 <SponsorBadgeMark
                   logoUrl={sponsor.logoUrl}
@@ -160,11 +160,11 @@ export function LoopCardShell({
 
           <div className="h-px bg-border/80" />
 
-          <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-muted/20 md:grid-cols-[1fr_minmax(118px,0.72fr)_1fr]">
-            <div className="min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
+          <div className="grid overflow-hidden rounded-2xl border border-border/80 bg-muted/20 md:grid-cols-[minmax(0,1fr)_minmax(118px,0.72fr)_minmax(0,1fr)]">
+            <div className="min-w-0 max-w-full min-h-[94px] border-b border-border/80 bg-primary/5 px-3.5 py-3 md:border-b-0 md:border-r">
               {distribution.status === "error" ? (
                 <LoopSectionError
-                  label="Rewards"
+                  label="Daily rewards"
                   message={distribution.message}
                   onRetry={distribution.retry}
                 />
@@ -178,7 +178,9 @@ export function LoopCardShell({
                     distribution.status === "loading" ||
                     distributionData?.isLoading
                   }
+                  labelDetail={distributionData?.labelDetail}
                   value={getDistributionValue(distribution)}
+                  valueMuted={distributionData?.valueMuted}
                   valueUnit={distributionData?.valueUnit}
                   detail={distributionData?.detail}
                   tooltip={distributionData?.tooltip ?? "Loading Loop rewards."}
@@ -197,7 +199,7 @@ export function LoopCardShell({
               />
             </div>
 
-            <div className="min-h-[94px] px-3.5 py-3">
+            <div className="min-w-0 max-w-full min-h-[94px] px-3.5 py-3">
               {period.status === "error" ? (
                 <LoopSectionError
                   label="Period"
@@ -224,9 +226,25 @@ export function LoopCardShell({
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Eligibility
               </p>
-              <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-foreground">
-                {eligibilityLabel}
-              </p>
+              {loop.eligibilityUrl ? (
+                <Link
+                  href={loop.eligibilityUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group mt-0.5 inline-flex max-w-full items-center gap-1.5 text-sm font-semibold leading-5 text-foreground transition-colors hover:text-primary focus:outline-none focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <span className="line-clamp-2 min-w-0">
+                    {eligibilityLabel}
+                  </span>
+                  <span className="grid w-0 shrink-0 overflow-hidden opacity-0 transition-all duration-200 group-hover:w-3.5 group-hover:opacity-100 group-focus-visible:w-3.5 group-focus-visible:opacity-100">
+                    <LuExternalLink aria-hidden="true" className="size-3.5" />
+                  </span>
+                </Link>
+              ) : (
+                <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-foreground">
+                  {eligibilityLabel}
+                </p>
+              )}
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <PassportScoreBadge
@@ -243,7 +261,8 @@ export function LoopCardShell({
 
           {action}
 
-          {isConnected ? <LoopStreakSection /> : null}
+          {/* Temporarily hidden until Loop Streaks is ready.
+          {isConnected ? <LoopStreakSection /> : null} */}
         </div>
 
         {loopersModalEnabled ? (
@@ -312,14 +331,19 @@ function PassportScoreBadge({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative inline-flex size-10 shrink-0 cursor-help items-center justify-center rounded-full text-primary drop-shadow-[0_0_8px_rgba(28,231,131,0.48)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary/10 hover:drop-shadow-[0_0_14px_rgba(28,231,131,0.64)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className={[
+            "relative inline-flex size-8 shrink-0 cursor-help items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+            hasPassed
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground",
+          ].join(" ")}
           aria-label={label}
           role="button"
           tabIndex={0}
         >
-          <ShieldIcon className="absolute inset-0 size-full fill-none stroke-[1.8]" />
+          <ShieldIcon className="absolute inset-0 size-full fill-none stroke-[1.5]" />
           {hasPassed ? null : (
-            <span className="relative translate-y-[-0.5px] font-mono text-[10px] font-black leading-none tabular-nums">
+            <span className="relative font-mono text-[8px] font-bold leading-none tabular-nums">
               {value}
             </span>
           )}
@@ -330,7 +354,7 @@ function PassportScoreBadge({
   )
 }
 
-function LoopStreakSection() {
+/* function LoopStreakSection() {
   return (
     <div className="flex min-h-11 items-center rounded-2xl bg-primary/5 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex items-center gap-2">
@@ -344,7 +368,7 @@ function LoopStreakSection() {
       </div>
     </div>
   )
-}
+} */
 
 function HeaderIconBadges({
   chainName,
@@ -409,7 +433,7 @@ function SponsorBadgeMark({
       className={
         large
           ? "mx-auto flex size-16 items-center justify-center rounded-2xl bg-background/45 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-          : "flex size-8 shrink-0 items-center justify-center rounded-full bg-background/70 p-1"
+          : "flex h-8 w-9 shrink-0 items-center justify-center rounded-xl bg-background/70 p-1"
       }
     >
       <Image
@@ -418,9 +442,7 @@ function SponsorBadgeMark({
         width={large ? 42 : 22}
         height={large ? 42 : 22}
         className={
-          large
-            ? "size-11 object-contain"
-            : "size-[22px] rounded-full object-cover"
+          large ? "size-11 object-contain" : "size-[22px] object-contain"
         }
       />
     </div>
