@@ -18,6 +18,7 @@ export interface LoopCardData {
 
   shieldScore: string
   eligibility: string
+  eligibilityUrl?: string
   chainBadgeColor: string
   shieldAccount?: string
   shieldValue?: string
@@ -54,6 +55,8 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
     eligibility: "Join 1Hive community in Gardens required",
+    eligibilityUrl:
+      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -81,6 +84,7 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score +15",
     eligibility: "Redeem Gyralis offer in Blockscout Merits",
+    eligibilityUrl: "https://merits.blockscout.com/?tab=spend",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -108,6 +112,8 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score 15+",
     eligibility: "Join Markee community in Gardens required",
+    eligibilityUrl:
+      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",

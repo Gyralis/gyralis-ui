@@ -18,7 +18,7 @@ export function LoopIdentityMark({ loop }: LoopIdentityMarkProps) {
   if (!primaryLogoUrl) return null
 
   return (
-    <div className="relative flex size-14 shrink-0 items-center justify-center rounded-full border border-border bg-background/70 p-2.5">
+    <div className="relative flex size-14 shrink-0 items-center justify-center rounded-2xl bg-background/70 p-2.5">
       <Image
         src={primaryLogoUrl}
         alt={
@@ -28,7 +28,7 @@ export function LoopIdentityMark({ loop }: LoopIdentityMarkProps) {
         }
         width={32}
         height={32}
-        className="size-8 rounded-full object-contain"
+        className="size-8 object-contain"
       />
       {showsGardensCommunity ? (
         <span
