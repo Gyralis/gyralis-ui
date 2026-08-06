@@ -15,7 +15,10 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
-import { deriveStandardLoopClaimStatus } from "@/lib/loops/standard-loop-state"
+import {
+  deriveStandardLoopClaimStatus,
+  type StandardLoopSubmissionStage,
+} from "@/lib/loops/standard-loop-state"
 import { useToast } from "@/components/ui/use-toast"
 
 import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-registration"
@@ -69,9 +72,10 @@ export function useStandardLoopClaim({
   onConfirmed,
 }: UseStandardLoopClaimParams) {
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
   const [pendingAction, setPendingAction] = useState<PendingAction>("enter")
+  const [submissionStage, setSubmissionStage] =
+    useState<StandardLoopSubmissionStage>("idle")
   const [txHash, setTxHash] = useState<`0x${string}`>()
   const { address: connectedAccount } = useAccount()
   const currentChainId = useChainId()
@@ -158,7 +162,7 @@ export function useStandardLoopClaim({
     isLoading,
   })
   const isConfirming = receipt.isLoading
-  const isPending = isSubmitting || isConfirming
+  const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = txHash
     ? `${
@@ -169,6 +173,8 @@ export function useStandardLoopClaim({
   useEffect(() => {
     setHasEnteredNextPeriod(false)
     setLastClaimedAmount(undefined)
+    setPendingAction("enter")
+    setSubmissionStage("idle")
     setTxHash(undefined)
   }, [address, chainId, connectedAccount, currentPeriod])
 
@@ -247,7 +253,9 @@ export function useStandardLoopClaim({
       return
     }
 
-    setIsSubmitting(true)
+    const action: PendingAction = isClaimable ? "claim" : "enter"
+    setPendingAction(action)
+    setSubmissionStage("checkingEligibility")
 
     try {
       const response = await fetch(ELIGIBILITY_ENDPOINTS[eligibilityProvider], {
@@ -289,8 +297,7 @@ export function useStandardLoopClaim({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
-      const action: PendingAction = isClaimable ? "claim" : "enter"
-      setPendingAction(action)
+      setSubmissionStage("awaitingWallet")
       const hash = await writeContractAsync({
         address,
         abi,
@@ -314,7 +321,7 @@ export function useStandardLoopClaim({
         variant: "destructive",
       })
     } finally {
-      setIsSubmitting(false)
+      setSubmissionStage("idle")
     }
   }
 
@@ -324,11 +331,11 @@ export function useStandardLoopClaim({
     execute,
     isConfirming,
     isPending,
-    isSubmitting,
     lastClaimedAmount,
     pendingAction,
     refetch,
     status,
+    submissionStage,
     transactionUrl,
     wrongNetwork,
   }

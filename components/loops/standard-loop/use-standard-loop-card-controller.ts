@@ -10,6 +10,8 @@ import { useStandardLoopParticipation } from "@/lib/hooks/loops/standard/use-sta
 import { useStandardLoopSettings } from "@/lib/hooks/loops/standard/use-standard-loop-settings"
 import {
   getStandardLoopActionLabel,
+  getStandardLoopActionPresentation,
+  getStandardLoopActionTooltip,
   getStandardLoopTimerTitle,
 } from "@/lib/loops/standard-loop-state"
 import { trimFormattedBalance } from "@/lib/utils"
@@ -136,16 +138,16 @@ export function useStandardLoopCardController(loop: LoopCardData) {
 
     if (settings.data && balance.data) {
       const percent = Number(settings.data.percentPerPeriod)
-      const value = percent === 0 ? "Infinite" : `${percent}%`
-      const distributedAmount =
+      const distributionRate = percent === 0 ? "Infinite" : `${percent}%`
+      const distributedAmountValue =
         settings.data.percentPerPeriod > 0n
-          ? `${trimFormattedBalance(
+          ? trimFormattedBalance(
               formatUnits(
                 (balance.data.value * settings.data.percentPerPeriod) / 100n,
                 balance.data.decimals
               ),
-              4
-            )} ${balance.data.symbol}`
+              2
+            )
           : undefined
       const balanceDetail = `${trimFormattedBalance(
         formatUnits(balance.data.value, balance.data.decimals),
@@ -155,12 +157,15 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       data = {
         balanceDetail,
         balanceDetailLabel: "Balance",
-        detail: distributedAmount,
+        labelDetail:
+          settings.data.percentPerPeriod > 0n ? distributionRate : undefined,
         tooltip:
           settings.data.percentPerPeriod > 0n
-            ? `Each period releases ${value} of the remaining balance, split evenly among registered users.`
+            ? `Each claim period distributes ${distributionRate} of the balance remaining after the previous period among registered Loopers.`
             : "The loop balance is distributed evenly among registered users each period.",
-        value,
+        value: distributedAmountValue ?? distributionRate,
+        valueUnit:
+          settings.data.percentPerPeriod > 0n ? balance.data.symbol : undefined,
       }
     }
 
@@ -248,17 +253,19 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       : "entering"
     : claim.status
   const hasClaimError = claim.status === "error"
+  const actionTooltip =
+    claim.isPending || claim.wrongNetwork
+      ? undefined
+      : getStandardLoopActionTooltip(claim.status)
   const action: LoopActionViewModel = {
     status: actionStatus,
-    label: hasClaimError
-      ? "Retry claim status"
-      : getStandardLoopActionLabel({
-          amountLabel,
-          isConfirming: claim.isConfirming,
-          isSubmitting: claim.isSubmitting,
-          pendingAction: claim.pendingAction,
-          status: claim.status,
-        }),
+    label: getStandardLoopActionLabel({
+      amountLabel,
+      isConfirming: claim.isConfirming,
+      pendingAction: claim.pendingAction,
+      status: claim.status,
+      submissionStage: claim.submissionStage,
+    }),
     amountLabel,
     disabled:
       !claim.wrongNetwork &&
@@ -267,6 +274,12 @@ export function useStandardLoopCardController(loop: LoopCardData) {
         !isAddress(address) ||
         ["checking", "entered", "claimed"].includes(claim.status)),
     isPending: claim.isPending,
+    presentation: getStandardLoopActionPresentation({
+      isPending: claim.isPending,
+      status: claim.status,
+      wrongNetwork: claim.wrongNetwork,
+    }),
+    tooltip: actionTooltip,
     execute: hasClaimError ? claim.refetch : claim.execute,
   }
 

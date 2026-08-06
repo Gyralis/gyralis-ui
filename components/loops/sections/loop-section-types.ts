@@ -37,6 +37,7 @@ export interface LoopDistributionViewData {
   balanceDetailLabel: string
   detail?: string
   isLoading?: boolean
+  labelDetail?: string
   tooltip: string
   value: string
   valueMuted?: boolean

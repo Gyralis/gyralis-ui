@@ -6,6 +6,13 @@ export type StandardLoopClaimStatus =
   | "claimed"
   | "error"
 
+export type StandardLoopSubmissionStage =
+  | "idle"
+  | "checkingEligibility"
+  | "awaitingWallet"
+
+export type StandardLoopActionPresentation = "button" | "neutral" | "success"
+
 interface StandardLoopParticipationInput {
   claimedUsers: readonly string[]
   registeredUsers: readonly string[]
@@ -70,22 +77,19 @@ export function getStandardLoopTimerTitle(status: StandardLoopClaimStatus) {
 export function getStandardLoopActionLabel({
   amountLabel,
   isConfirming,
-  isSubmitting,
   pendingAction,
   status,
+  submissionStage,
 }: {
   amountLabel?: string
   isConfirming: boolean
-  isSubmitting: boolean
   pendingAction: "enter" | "claim"
   status: StandardLoopClaimStatus
+  submissionStage: StandardLoopSubmissionStage
 }) {
-  if (isSubmitting) {
-    if (status === "claimable") {
-      return amountLabel ? `Claiming ${amountLabel}...` : "Claiming..."
-    }
-    return "Entering the Loop..."
-  }
+  if (submissionStage === "checkingEligibility")
+    return "Checking eligibility..."
+  if (submissionStage === "awaitingWallet") return "Confirm in wallet..."
 
   if (isConfirming) {
     return pendingAction === "claim"
@@ -99,12 +103,49 @@ export function getStandardLoopActionLabel({
     case "claimable":
       return amountLabel ? `Claim ${amountLabel}` : "Claim"
     case "entered":
-      return "You are in the loop"
+      return "You are in the Loop"
     case "checking":
-      return "Checking claim status..."
+      return "Checking your Loop status..."
     case "error":
-      return "Claim unavailable"
+      return "Retry status check"
     default:
       return "Enter the Loop"
+  }
+}
+
+export function getStandardLoopActionPresentation({
+  isPending,
+  status,
+  wrongNetwork,
+}: {
+  isPending: boolean
+  status: StandardLoopClaimStatus
+  wrongNetwork: boolean
+}): StandardLoopActionPresentation {
+  if (wrongNetwork || isPending) return "button"
+  if (status === "entered") return "neutral"
+  if (status === "claimed") return "success"
+  return "button"
+}
+
+export function getStandardLoopActionTooltip(status: StandardLoopClaimStatus) {
+  switch (status) {
+    case "entered":
+      return {
+        title: "You’re registered for the next claim period.",
+        description: "Your rewards will be available when it opens.",
+      }
+    case "claimed":
+      return {
+        title: "Your rewards were claimed successfully.",
+        description: "You’re registered for the next claim period.",
+      }
+    case "error":
+      return {
+        title: "We couldn’t load your Loop status.",
+        description: "Try checking again.",
+      }
+    default:
+      return undefined
   }
 }

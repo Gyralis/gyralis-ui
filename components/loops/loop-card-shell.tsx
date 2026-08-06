@@ -178,6 +178,7 @@ export function LoopCardShell({
                     distribution.status === "loading" ||
                     distributionData?.isLoading
                   }
+                  labelDetail={distributionData?.labelDetail}
                   value={getDistributionValue(distribution)}
                   valueMuted={distributionData?.valueMuted}
                   valueUnit={distributionData?.valueUnit}

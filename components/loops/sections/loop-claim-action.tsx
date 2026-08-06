@@ -100,18 +100,34 @@ export function LoopClaimAction({
     )
   }
 
+  const button = (
+    <Button
+      chainId={chainId}
+      onClick={model.execute}
+      disabled={model.disabled}
+      icon={icon}
+      isLoading={model.isPending || isChecking}
+      className={buttonClassName}
+    >
+      {label}
+    </Button>
+  )
+
   return (
     <div className={compact ? "inline-flex" : "w-full"}>
-      <Button
-        chainId={chainId}
-        onClick={model.execute}
-        disabled={model.disabled}
-        icon={icon}
-        isLoading={model.isPending || isChecking}
-        className={buttonClassName}
-      >
-        {label}
-      </Button>
+      {model.tooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={compact ? "inline-flex" : "w-full"}>{button}</div>
+          </TooltipTrigger>
+          <StatusTooltipContent
+            fallback={model.label}
+            tooltip={model.tooltip}
+          />
+        </Tooltip>
+      ) : (
+        button
+      )}
     </div>
   )
 }

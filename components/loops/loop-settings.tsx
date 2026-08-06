@@ -265,6 +265,7 @@ export const LoopDistributionStat = ({
   balanceDetailLabel = "Balance",
   compact = false,
   isLoading = false,
+  labelDetail,
   value,
   valueMuted = false,
   valueUnit,
@@ -276,6 +277,7 @@ export const LoopDistributionStat = ({
   balanceDetailLabel?: string
   compact?: boolean
   isLoading?: boolean
+  labelDetail?: string
   value: string
   valueMuted?: boolean
   valueUnit?: string
@@ -304,9 +306,16 @@ export const LoopDistributionStat = ({
             role="button"
             tabIndex={0}
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Daily rewards
-            </p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                Daily rewards
+              </p>
+              {labelDetail ? (
+                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  - {labelDetail}
+                </span>
+              ) : null}
+            </div>
             <div className="mt-4 flex min-w-0 max-w-full flex-nowrap items-baseline gap-x-2 gap-y-1 text-foreground">
               {showValueSkeleton ? (
                 <Skeleton className="h-[26px] w-28 shrink-0 rounded-xs bg-muted" />
