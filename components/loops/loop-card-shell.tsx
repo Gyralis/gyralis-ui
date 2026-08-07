@@ -140,17 +140,17 @@ export function LoopCardShell({
               <button
                 type="button"
                 onClick={() => setIsSponsorModalOpen(true)}
-                className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-[165px] md:justify-start"
+                className="flex min-h-[42px] w-full max-w-full items-center justify-center gap-1 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-left text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_12px_24px_-18px_rgba(15,23,42,0.22)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)] dark:hover:bg-background dark:hover:text-white dark:hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_24px_-18px_rgba(0,0,0,0.8)] md:w-auto md:min-w-[165px] md:flex-none md:justify-start"
               >
                 <SponsorBadgeMark
                   logoUrl={sponsor.logoUrl}
                   sponsorName={sponsor.name}
                 />
-                <div className="min-w-0">
+                <div className="shrink-0">
                   <p className="text-[8px] font-semibold uppercase leading-none tracking-widest text-muted-foreground">
                     Sponsored by
                   </p>
-                  <p className="mt-1 truncate text-[11px] font-semibold leading-none text-foreground">
+                  <p className="mt-1 whitespace-nowrap text-[11px] font-semibold leading-none text-foreground">
                     {sponsor.name}
                   </p>
                 </div>

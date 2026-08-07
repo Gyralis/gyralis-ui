@@ -95,13 +95,13 @@ describe("SuperLoop reward estimate", () => {
         isEstimateLoading: true,
         status: "active",
       })
-    ).toBe("Estimated daily rewards: Calculating...")
+    ).toBe("Est. daily rewards: Calculating...")
     expect(
       getSuperLoopRewardTooltip({
         isEstimateLoading: false,
         status: "active",
       })
-    ).toBe("Estimated daily rewards: 0")
+    ).toBe("Est. daily rewards: 0")
   })
 
   it("shows state-specific reward tooltip copy", () => {
@@ -123,7 +123,7 @@ describe("SuperLoop reward estimate", () => {
         isEstimateLoading: false,
         status: "active",
       })
-    ).toBe("Estimated daily rewards: +1.25 MARK")
+    ).toBe("Est. daily rewards: +1.25 MARK")
     expect(
       getSuperLoopRewardTooltip({
         claimableRewardLabel: "1.2 MARK",
