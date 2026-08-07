@@ -11,6 +11,6 @@ describe("formatMonthlyIncoming", () => {
         maximumFractionDigits: 2,
         symbol: "HNY",
       })
-    ).toBe("318.82 HNY/mo")
+    ).toBe("318.82 HNY / mo")
   })
 })

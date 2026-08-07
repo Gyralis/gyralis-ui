@@ -254,7 +254,7 @@ export function useSuperLoopClaim({
             title: "Not eligible yet",
             description: getProviderEligibilityMessage(eligibilityProvider),
             type: "warning",
-            link: { href: "/eligibilities", label: "See how to access" },
+            link: { href: "/eligibilities", label: "How to enter" },
           })
           return
         }

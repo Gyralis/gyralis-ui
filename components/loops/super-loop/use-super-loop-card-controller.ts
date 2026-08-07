@@ -240,7 +240,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                   maximumFractionDigits: 2,
                   symbol: balance.data.symbol,
                 }),
-            balanceDetailLabel: "Flow Rate",
+            balanceDetailLabel: "Inflow",
             detail: superLoopRewardShowsToken(status)
               ? balance.data.symbol
               : undefined,

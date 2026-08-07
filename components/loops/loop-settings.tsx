@@ -215,7 +215,7 @@ export function useLoopSettingsDetails({
 
     return `${balance}${symbol}`
   }, [isLoading, isSuperLoop, loopBalance])
-  const balanceDetailLabel = isSuperLoop ? "Flow Rate" : "Balance"
+  const balanceDetailLabel = isSuperLoop ? "Inflow" : "Balance"
   const distributionTooltip = isSuperLoop
     ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
     : settings && settings.percentPerPeriod > 0n

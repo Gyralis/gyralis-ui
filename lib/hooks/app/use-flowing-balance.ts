@@ -106,5 +106,5 @@ export function formatMonthlyIncoming({
 
   return `${monthly.toLocaleString(undefined, {
     maximumFractionDigits,
-  })} ${symbol}/mo`
+  })} ${symbol} / mo`
 }

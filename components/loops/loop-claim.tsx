@@ -571,7 +571,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             type: "warning",
             link: {
               href: "/eligibilities",
-              label: "See how to access",
+              label: "How to enter",
             },
           })
           return
