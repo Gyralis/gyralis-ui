@@ -19,8 +19,8 @@ const footerColumns = [
   {
     title: "Community",
     links: [
-      { label: "Discord", href: "https://discord.gg/xavmRJdqd" },
-      { label: "Twitter", href: "https://x.com/gyralis_xyz" },
+      { label: "Discord", href: "https://discord.gg/tXQDg9cf8" },
+      { label: "X", href: "https://x.com/gyralis_xyz" },
     ],
   },
   {
@@ -49,7 +49,7 @@ export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
               </span>
             </Link>
             <p className="max-w-xs text-[0.92rem] leading-7 text-muted-foreground">
-              Infrastructure protocol for recurring on-chain participation.
+              The Participation Layer For All Web3.
             </p>
             <div className="mt-5 flex gap-3">
               <a
@@ -71,7 +71,7 @@ export function Footer({ className, ...props }: HTMLAttributes<HTMLElement>) {
                 <FaGithub className="size-5" />
               </a>
               <a
-                href="https://discord.gg/xavmRJdqd"
+                href="https://discord.gg/tXQDg9cf8"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Gyralis Discord"

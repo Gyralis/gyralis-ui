@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
@@ -14,6 +14,7 @@ import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +23,12 @@ import {
 } from "@/components/ui/tooltip"
 import { LoopClaim, LoopClaimStatus } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
+
+import type { PeriodRewardAnimationViewModel } from "./sections/loop-section-types"
+import {
+  formatAnimatedReward,
+  usePeriodRewardCountUp,
+} from "./sections/use-period-reward-count-up"
 
 interface LoopSettingsComponentProps {
   address: Address
@@ -158,7 +165,12 @@ export function useLoopSettingsDetails({
 
   const distributionAmountLabel = useMemo(() => {
     if (isLoading) return undefined
-    if (!settings || !loopBalance || settings.percentPerPeriod === 0n) {
+    if (
+      !settings ||
+      !loopBalance ||
+      loopBalance.value == null ||
+      settings.percentPerPeriod === 0n
+    ) {
       return undefined
     }
 
@@ -188,24 +200,27 @@ export function useLoopSettingsDetails({
         : formatMonthlyIncoming({
             flowRatePerSecond: loopBalance.flowRatePerSecond,
             decimals: loopBalance.decimals,
+            maximumFractionDigits: 2,
             symbol: loopBalance.symbol,
           })
     }
 
+    if (loopBalance.value == null) return undefined
+
     const balance = trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),
-      4
+      2
     )
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
     return `${balance}${symbol}`
   }, [isLoading, isSuperLoop, loopBalance])
-  const balanceDetailLabel = isSuperLoop ? "Flow Rate" : "Balance"
+  const balanceDetailLabel = isSuperLoop ? "Inflow" : "Balance"
   const distributionTooltip = isSuperLoop
     ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
     : settings && settings.percentPerPeriod > 0n
-      ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
-      : "The loop balance is distributed evenly among registered users each period."
+    ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
+    : "The loop balance is distributed evenly among registered users each period."
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
@@ -253,51 +268,117 @@ export function useLoopSettingsDetails({
 }
 
 export const LoopDistributionStat = ({
+  animation,
   balanceDetail,
   balanceDetailLabel = "Balance",
   compact = false,
+  isLoading = false,
+  labelDetail,
   value,
+  valueMuted = false,
   valueUnit,
   detail,
   tooltip,
 }: {
+  animation?: PeriodRewardAnimationViewModel
   balanceDetail?: string
   balanceDetailLabel?: string
   compact?: boolean
+  isLoading?: boolean
+  labelDetail?: string
   value: string
+  valueMuted?: boolean
   valueUnit?: string
   detail?: string
   tooltip: string
 }) => {
+  const animatedValue = usePeriodRewardCountUp(animation)
+  const displayedValue = animation?.enabled
+    ? animatedValue ?? "Loading..."
+    : value
+  const showValueSkeleton =
+    isLoading || (animation?.enabled === true && animatedValue == null)
+  const animationEndValue = animation?.enabled
+    ? formatAnimatedReward(
+        animation.estimatedPeriodPayout,
+        animation.tokenDecimals
+      )
+    : undefined
+
   if (compact) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="group flex h-full cursor-help flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="group flex h-full min-w-0 max-w-full cursor-help flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             role="button"
             tabIndex={0}
           >
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-              Rewards
-            </p>
-            <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-foreground">
-              <p className="text-[1.6rem] font-bold leading-none text-foreground">
-                {value}
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                Daily rewards
               </p>
+              {labelDetail ? (
+                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  - {labelDetail}
+                </span>
+              ) : null}
+            </div>
+            <div className="mt-4 flex min-w-0 max-w-full flex-nowrap items-baseline gap-x-2 gap-y-1 text-foreground">
+              {showValueSkeleton ? (
+                <Skeleton className="h-[26px] w-28 shrink-0 rounded-xs bg-muted" />
+              ) : (
+                <div
+                  className={animationEndValue ? "grid shrink-0" : "shrink-0"}
+                >
+                  {animationEndValue ? (
+                    <span
+                      aria-hidden="true"
+                      className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums"
+                    >
+                      {animationEndValue}
+                    </span>
+                  ) : null}
+                  <p
+                    className={[
+                      "whitespace-nowrap text-[1.6rem] leading-none tabular-nums",
+                      valueMuted
+                        ? "font-normal text-muted-foreground"
+                        : "font-bold text-foreground",
+                      animationEndValue ? "col-start-1 row-start-1" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    {displayedValue}
+                  </p>
+                </div>
+              )}
               {valueUnit ? (
-                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                <p
+                  className={[
+                    "min-w-0 truncate text-[11px] font-semibold leading-4",
+                    valueMuted ? "text-muted-foreground" : "text-foreground",
+                  ].join(" ")}
+                  title={valueUnit}
+                >
                   {valueUnit}
                 </p>
               ) : null}
               {detail ? (
-                <p className="text-[11px] font-semibold leading-4 text-foreground">
+                <p
+                  className={[
+                    "min-w-0 truncate text-[11px] font-semibold leading-4",
+                    valueMuted ? "text-muted-foreground" : "text-foreground",
+                  ].join(" ")}
+                  title={detail}
+                >
                   {detail}
                 </p>
               ) : null}
             </div>
             {balanceDetail ? (
-              <div className="mt-2 border-t border-border/80 pt-1.5">
+              <div className="mt-2 flex min-h-5 items-center justify-start border-t border-border/80 pt-1.5 text-left">
                 <p className="text-[10px] font-semibold leading-none text-muted-foreground">
                   {balanceDetailLabel}:{" "}
                   <span className="text-foreground">{balanceDetail}</span>
@@ -306,15 +387,17 @@ export const LoopDistributionStat = ({
             ) : null}
           </div>
         </TooltipTrigger>
-        <TooltipContent>{tooltip}</TooltipContent>
+        <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
+          {tooltip}
+        </TooltipContent>
       </Tooltip>
     )
   }
 
   return (
     <SettingStatCard
-      label="Rewards"
-      value={value}
+      label="Daily rewards"
+      value={displayedValue}
       detail={valueUnit ?? detail}
       tooltip={tooltip}
     />
@@ -326,6 +409,7 @@ export const LoopPeriodStat = ({
   compact = false,
   isLoading,
   nextPeriodStart,
+  onCountdownComplete,
   timerTitle,
   onViewLoopers,
   showLoopersTrigger = true,
@@ -334,6 +418,7 @@ export const LoopPeriodStat = ({
   compact?: boolean
   isLoading: boolean
   nextPeriodStart?: bigint
+  onCountdownComplete?: () => void | Promise<void>
   timerTitle: string
   onViewLoopers: () => void
   showLoopersTrigger?: boolean
@@ -348,7 +433,10 @@ export const LoopPeriodStat = ({
           {timerTitle}
         </p>
         {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-          <CountdownInline nextPeriodStart={nextPeriodStart} />
+          <CountdownInline
+            nextPeriodStart={nextPeriodStart}
+            onComplete={onCountdownComplete}
+          />
         ) : (
           <p className="mt-2 text-xs font-medium text-muted-foreground">
             {isLoading ? "Loading..." : "Timer unavailable."}
@@ -367,7 +455,10 @@ export const LoopPeriodStat = ({
       </div>
 
       {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-        <Countdown nextPeriodStart={nextPeriodStart} />
+        <Countdown
+          nextPeriodStart={nextPeriodStart}
+          onComplete={onCountdownComplete}
+        />
       ) : (
         <p className="pt-2.5 text-center text-sm text-muted-foreground">
           {isLoading ? "Loading timer..." : "Timer unavailable."}
@@ -517,15 +608,24 @@ const SettingStatCard = ({
           <LuInfo className="size-3.5 shrink-0 text-primary" />
         </div>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   )
 }
 
-const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
+const Countdown = ({
+  nextPeriodStart,
+  onComplete,
+}: {
+  nextPeriodStart: bigint
+  onComplete?: () => void | Promise<void>
+}) => {
   const [currentTime, setCurrentTime] = useState<number>(
     Math.floor(Date.now() / 1000)
   )
+  const completedTargetRef = useRef<bigint>()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -539,6 +639,13 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
     const diff = Number(nextPeriodStart) - currentTime
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
+
+  useEffect(() => {
+    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
+
+    completedTargetRef.current = nextPeriodStart
+    void onComplete?.()
+  }, [nextPeriodStart, onComplete, remaining])
 
   const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours
@@ -559,10 +666,17 @@ const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   )
 }
 
-const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
+const CountdownInline = ({
+  nextPeriodStart,
+  onComplete,
+}: {
+  nextPeriodStart: bigint
+  onComplete?: () => void | Promise<void>
+}) => {
   const [currentTime, setCurrentTime] = useState<number>(
     Math.floor(Date.now() / 1000)
   )
+  const completedTargetRef = useRef<bigint>()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -576,6 +690,13 @@ const CountdownInline = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
     const diff = Number(nextPeriodStart) - currentTime
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
+
+  useEffect(() => {
+    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
+
+    completedTargetRef.current = nextPeriodStart
+    void onComplete?.()
+  }, [nextPeriodStart, onComplete, remaining])
 
   const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours

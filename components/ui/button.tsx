@@ -1,8 +1,16 @@
 "use client"
 
 import React from "react"
+import Image from "next/image"
 import type { Chain } from "viem"
 import { useAccount, useChainId, useChains, useSwitchChain } from "wagmi"
+
+const CHAIN_ICON_SRC: Partial<Record<number, string>> = {
+  100: "/icons/NetworkGnosis.svg",
+  8453: "/icons/NetworkBaseTest.svg",
+  10200: "/icons/NetworkGnosis.svg",
+  84532: "/icons/NetworkBaseTest.svg",
+}
 
 type ButtonProps = {
   type?: "button" | "submit" | "reset"
@@ -41,6 +49,10 @@ export function Button({
     : undefined
 
   const wrongNetwork = chainId != null && currentChainId !== chainId
+  const switchingNetwork =
+    requireWallet && isConnected && wrongNetwork && Boolean(targetChain)
+  const chainIconSrc =
+    switchingNetwork && targetChain ? CHAIN_ICON_SRC[targetChain.id] : undefined
 
   const baseClass =
     variant === "primary" ? "tamagotchi-button" : "tamagotchi-button-secondary"
@@ -63,11 +75,10 @@ export function Button({
     ? `Switch to ${targetChain.name}`
     : children
 
-  const effectiveButtonLabel = !requireWallet
-    ? children
-    : buttonLabel
+  const effectiveButtonLabel = !requireWallet ? children : buttonLabel
 
-  const showTooltip = requireWallet && !isConnected ? "tooltip tooltip-bottom" : ""
+  const showTooltip =
+    requireWallet && !isConnected ? "tooltip tooltip-bottom" : ""
   const isDisabled = disabled || isLoading || (requireWallet && !isConnected)
   const ariaDisabled = isDisabled ? "true" : "false"
 
@@ -90,7 +101,17 @@ export function Button({
         {isLoading && (
           <span className="loading loading-spinner loading-sm text-inherit" />
         )}
-        {icon && !isLoading && icon}
+        {chainIconSrc && !isLoading ? (
+          <Image
+            src={chainIconSrc}
+            alt=""
+            width={16}
+            height={16}
+            className="size-4 shrink-0 rounded-full"
+          />
+        ) : icon && !isLoading ? (
+          icon
+        ) : null}
         {effectiveButtonLabel}
       </button>
     </div>

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { LuCheck } from "react-icons/lu"
 import { Address, formatUnits, parseAbiItem } from "viem"
 import {
   useAccount,
@@ -14,6 +13,10 @@ import {
 } from "wagmi"
 
 import {
+  BLOCKSCOUT_TRANSACTION_LABEL,
+  getBlockscoutTransactionUrl,
+} from "@/lib/blockscout"
+import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   getLoopContractAbi,
   getLoopContractMethods,
@@ -22,10 +25,19 @@ import {
 import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import {
+  getClaimedTokenTitle,
+  getConfirmationDelayedToast,
+  getRevertedTransactionToast,
+} from "@/lib/transaction-toast-messages"
 import { trimFormattedBalance } from "@/lib/utils"
 
-import { Button } from "../ui/button"
 import { useToast } from "../ui/use-toast"
+import { LoopClaimAction } from "./sections/loop-claim-action"
+import type {
+  LoopActionStatus,
+  LoopActionViewModel,
+} from "./sections/loop-section-types"
 
 interface LoopClaimProps {
   address: Address
@@ -40,15 +52,10 @@ interface LoopClaimProps {
 }
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
-  garden_1hive: "/api/garden-1hive",
+  gardens: "/api/gardens",
   blockscout: "/api/blockscout",
 }
 
-const BLOCKSCOUT_TX_BASE_URLS: Record<number, string> = {
-  100: "https://gnosis.blockscout.com/tx",
-  10200: "https://gnosis-chiado.blockscout.com/tx",
-  8453: "https://basescan.org/tx",
-}
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
 
@@ -66,8 +73,8 @@ function getProviderEligibilityMessage(
   switch (eligibilityProvider) {
     case "blockscout":
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
-    case "garden_1hive":
-      return "Join the 1Hive community in GardensV2 to enter this loop."
+    case "gardens":
+      return "Join the Gardens community required by this loop to enter."
   }
 }
 
@@ -277,19 +284,19 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     ? "entered"
     : "default"
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash: txHash,
-      chainId,
-      query: {
-        enabled: !!txHash,
-      },
-    })
-  const blockscoutTxUrl = txHash
-    ? `${
-        BLOCKSCOUT_TX_BASE_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"
-      }/${txHash}`
-    : undefined
+  const {
+    data: transactionReceipt,
+    isError: isReceiptError,
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+  } = useWaitForTransactionReceipt({
+    hash: txHash,
+    chainId,
+    query: {
+      enabled: !!txHash,
+    },
+  })
+  const blockscoutTxUrl = getBlockscoutTransactionUrl(chainId, txHash)
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -390,7 +397,23 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   }, [claimStatus, onStatusChange])
 
   useEffect(() => {
-    if (!isConfirmed || !txHash) return
+    if (!isConfirmed || !transactionReceipt?.status || !txHash) return
+
+    const completedTransactionUrl = blockscoutTxUrl
+    setTxHash(undefined)
+
+    if (transactionReceipt.status === "reverted") {
+      toast({
+        ...getRevertedTransactionToast(pendingAction),
+        link: completedTransactionUrl
+          ? {
+              href: completedTransactionUrl,
+              label: BLOCKSCOUT_TRANSACTION_LABEL,
+            }
+          : undefined,
+      })
+      return
+    }
 
     if (pendingAction === "enter" || pendingAction === "remain") {
       setHasEnteredNextPeriod(true)
@@ -405,7 +428,11 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           ? "Entered the Loop"
           : pendingAction === "remain"
           ? "Remaining Active"
-          : "Transaction confirmed",
+          : getClaimedTokenTitle({
+              amount: claimableAmount,
+              decimals: loopBalance?.decimals,
+              symbol: loopBalance?.symbol,
+            }),
       description:
         pendingAction === "enter"
           ? isSuperLoop
@@ -416,15 +443,16 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
             ? "You will remain active next period."
             : "You are registered for the next period."
           : isSuperLoop
-          ? "Claim confirmed. You are registered for the next active period."
-          : "Claim was confirmed onchain.",
+          ? "You’re registered for the next accumulation period."
+          : "You’re registered for the next claim period.",
+      type: "success",
       link: blockscoutTxUrl
         ? {
             href: blockscoutTxUrl,
-            label: "View transaction",
+            label: BLOCKSCOUT_TRANSACTION_LABEL,
           }
         : undefined,
-    } as any)
+    })
 
     void Promise.all([
       refetchClaimerStatus(),
@@ -436,10 +464,9 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       setRegistrationRefreshKey((key) => key + 1)
       onSuccess?.()
     })
-
-    setTxHash(undefined)
   }, [
     isConfirmed,
+    transactionReceipt?.status,
     txHash,
     pendingAction,
     refetchClaimerStatus,
@@ -454,11 +481,28 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     toast,
   ])
 
+  useEffect(() => {
+    if (!isReceiptError || !txHash) return
+
+    const delayedTransactionUrl = blockscoutTxUrl
+    setTxHash(undefined)
+    toast({
+      ...getConfirmationDelayedToast(),
+      link: delayedTransactionUrl
+        ? {
+            href: delayedTransactionUrl,
+            label: BLOCKSCOUT_TRANSACTION_LABEL,
+          }
+        : undefined,
+    })
+  }, [blockscoutTxUrl, isReceiptError, toast, txHash])
+
   const handleClaim = async () => {
     if (!connectedAccount) {
       toast({
         title: "Wallet not connected",
         description: "Connect your wallet to claim.",
+        type: "info",
       })
       return
     }
@@ -467,7 +511,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       toast({
         title: "Loop config error",
         description: "Loop address is missing or invalid.",
-        variant: "destructive",
+        type: "error",
       })
       return
     }
@@ -476,10 +520,17 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       toast({
         title: "Already claimed",
         description: "You already claimed in this period.",
+        type: "info",
       })
       return
     }
 
+    const nextAction: PendingAction = isClaimableNow
+      ? "claim"
+      : isActiveThisPeriod
+      ? "remain"
+      : "enter"
+    setPendingAction(nextAction)
     setIsSubmitting(true)
 
     try {
@@ -508,7 +559,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
-            variant: "destructive",
+            type: "warning",
           })
           return
         }
@@ -517,10 +568,10 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           toast({
             title: "Not eligible yet",
             description: getProviderEligibilityMessage(eligibilityProvider),
-            variant: "destructive",
+            type: "warning",
             link: {
               href: "/eligibilities",
-              label: "See how to access",
+              label: "How to enter",
             },
           })
           return
@@ -528,13 +579,6 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
 
         throw new Error(payload.error ?? "Eligibility check failed")
       }
-
-      const nextAction: PendingAction = isClaimableNow
-        ? "claim"
-        : isActiveThisPeriod
-        ? "remain"
-        : "enter"
-      setPendingAction(nextAction)
 
       const hash = await writeContractAsync({
         address,
@@ -544,22 +588,14 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         chainId,
       })
       setTxHash(hash)
-
+    } catch {
       toast({
-        title: "Transaction sent",
+        title: nextAction === "claim" ? "Claim failed" : "Entry failed",
         description:
           nextAction === "claim"
-            ? "Claim submitted. Waiting for confirmation..."
-            : nextAction === "remain"
-            ? "Registering for the next period..."
-            : "Entering the Loop. Waiting for confirmation...",
-      })
-    } catch (error) {
-      toast({
-        title: "Claim failed",
-        description:
-          error instanceof Error ? error.message : "Unable to claim tokens.",
-        variant: "destructive",
+            ? "No rewards were claimed. Try again."
+            : "Your entry was not confirmed. Try again.",
+        type: "error",
       })
     } finally {
       setIsSubmitting(false)
@@ -612,22 +648,31 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
     (isSuperLoop
       ? isActiveThisPeriod || isEnteredForNextPeriod
       : isEnteredForNextPeriod)
-  const buttonClassName = compact
-    ? "min-h-10 min-w-[7.75rem] whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold tracking-normal"
-    : "min-h-12 w-full rounded-full px-5 py-3 text-sm font-semibold tracking-[0.01em]"
+  const actionStatus: LoopActionStatus =
+    isSubmitting || isConfirming
+      ? isClaimableNow
+        ? "claiming"
+        : "entering"
+      : hasClaimed
+      ? "claimed"
+      : isClaimableNow
+      ? "claimable"
+      : isActiveThisPeriod
+      ? "active"
+      : isEnteredForNextPeriod
+      ? "entered"
+      : isLoadingOnchainState
+      ? "checking"
+      : "enter"
+  const actionModel: LoopActionViewModel = {
+    status: actionStatus,
+    label: actionLabel,
+    disabled: !wrongNetwork && isActionDisabled,
+    isPending: isSubmitting || isConfirming,
+    execute: handleClaim,
+  }
 
   return (
-    <div className={compact ? "inline-flex" : "w-full"}>
-      <Button
-        chainId={chainId}
-        onClick={handleClaim}
-        disabled={!wrongNetwork && isActionDisabled}
-        isLoading={isSubmitting || isConfirming}
-        className={buttonClassName}
-      >
-        {actionLabel}
-        {hasClaimed ? <LuCheck className="size-4 shrink-0" /> : null}
-      </Button>
-    </div>
+    <LoopClaimAction chainId={chainId} compact={compact} model={actionModel} />
   )
 }
