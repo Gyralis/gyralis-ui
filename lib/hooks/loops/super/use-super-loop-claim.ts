@@ -11,6 +11,10 @@ import {
 } from "wagmi"
 
 import {
+  BLOCKSCOUT_TRANSACTION_LABEL,
+  getBlockscoutTransactionUrl,
+} from "@/lib/blockscout"
+import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
@@ -18,17 +22,16 @@ import type {
   SuperLoopConfirmedAction,
   SuperLoopSubmissionStage,
 } from "@/lib/loops/super-loop-status"
+import {
+  getClaimedTokenTitle,
+  getConfirmationDelayedToast,
+  getRevertedTransactionToast,
+} from "@/lib/transaction-toast-messages"
 import { useToast } from "@/components/ui/use-toast"
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
-}
-
-const BLOCK_EXPLORER_TX_URLS: Record<number, string> = {
-  100: "https://gnosis.blockscout.com/tx",
-  10200: "https://gnosis-chiado.blockscout.com/tx",
-  8453: "https://basescan.org/tx",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
@@ -45,6 +48,8 @@ interface UseSuperLoopClaimParams {
   hasClaimed: boolean
   isClaimable: boolean
   onConfirmed?: () => void | Promise<void>
+  tokenDecimals?: number
+  tokenSymbol?: string
 }
 
 function getPassportScoreRequiredMessage(error?: string) {
@@ -73,6 +78,8 @@ export function useSuperLoopClaim({
   hasClaimed,
   isClaimable,
   onConfirmed,
+  tokenDecimals,
+  tokenSymbol,
 }: UseSuperLoopClaimParams) {
   const [submissionStage, setSubmissionStage] =
     useState<SuperLoopSubmissionStage>("idle")
@@ -95,11 +102,8 @@ export function useSuperLoopClaim({
   const isConfirming = receipt.isLoading
   const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
-  const transactionUrl = txHash
-    ? `${
-        BLOCK_EXPLORER_TX_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"
-      }/${txHash}`
-    : undefined
+  const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
+  const receiptStatus = receipt.data?.status
 
   useEffect(() => {
     setLastClaimedAmount(undefined)
@@ -113,26 +117,46 @@ export function useSuperLoopClaim({
   }, [address, chainId, connectedAccount])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !txHash) return
+    if (!receipt.isSuccess || !receiptStatus || !txHash) return
 
     const completedAction = pendingAction
+    const completedTransactionUrl = transactionUrl
+    setTxHash(undefined)
+
+    if (receiptStatus === "reverted") {
+      toast({
+        ...getRevertedTransactionToast(completedAction),
+        link: completedTransactionUrl
+          ? {
+              href: completedTransactionUrl,
+              label: BLOCKSCOUT_TRANSACTION_LABEL,
+            }
+          : undefined,
+      })
+      return
+    }
+
     setConfirmedAction({ action: completedAction, period: currentPeriod })
     if (completedAction === "claim") setLastClaimedAmount(claimableAmount)
-    setTxHash(undefined)
 
     toast({
       title:
         completedAction === "claim"
-          ? "Transaction confirmed"
+          ? getClaimedTokenTitle({
+              amount: claimableAmount,
+              decimals: tokenDecimals,
+              symbol: tokenSymbol,
+            })
           : "Entered the Loop",
       description:
         completedAction === "claim"
-          ? "Claim confirmed. You are registered for the next active period."
-          : "You are in the loop. Accumulation starts next period.",
+          ? "You’re registered for the next accumulation period."
+          : "Your rewards will start accumulating next period.",
+      type: "success",
       link: transactionUrl
-        ? { href: transactionUrl, label: "View transaction" }
+        ? { href: transactionUrl, label: BLOCKSCOUT_TRANSACTION_LABEL }
         : undefined,
-    } as any)
+    })
 
     void onConfirmed?.()
   }, [
@@ -141,7 +165,10 @@ export function useSuperLoopClaim({
     onConfirmed,
     pendingAction,
     receipt.isSuccess,
+    receiptStatus,
     toast,
+    tokenDecimals,
+    tokenSymbol,
     transactionUrl,
     txHash,
   ])
@@ -149,26 +176,25 @@ export function useSuperLoopClaim({
   useEffect(() => {
     if (!receipt.isError || !txHash) return
 
-    const failedTransactionUrl = transactionUrl
+    const delayedTransactionUrl = transactionUrl
     setTxHash(undefined)
     toast({
-      title: "Transaction failed",
-      description:
-        receipt.error instanceof Error
-          ? receipt.error.message
-          : "The transaction was not confirmed.",
-      variant: "destructive",
-      link: failedTransactionUrl
-        ? { href: failedTransactionUrl, label: "View transaction" }
+      ...getConfirmationDelayedToast(),
+      link: delayedTransactionUrl
+        ? {
+            href: delayedTransactionUrl,
+            label: BLOCKSCOUT_TRANSACTION_LABEL,
+          }
         : undefined,
-    } as any)
-  }, [receipt.error, receipt.isError, toast, transactionUrl, txHash])
+    })
+  }, [receipt.isError, toast, transactionUrl, txHash])
 
   const execute = async () => {
     if (!connectedAccount) {
       toast({
         title: "Wallet not connected",
         description: "Connect your wallet to enter or claim.",
+        type: "info",
       })
       return
     }
@@ -177,7 +203,7 @@ export function useSuperLoopClaim({
       toast({
         title: "Loop config error",
         description: "Loop address is missing or invalid.",
-        variant: "destructive",
+        type: "error",
       })
       return
     }
@@ -186,6 +212,7 @@ export function useSuperLoopClaim({
       toast({
         title: "Already claimed",
         description: "You already claimed in this period.",
+        type: "info",
       })
       return
     }
@@ -217,7 +244,7 @@ export function useSuperLoopClaim({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
-            variant: "destructive",
+            type: "warning",
           })
           return
         }
@@ -226,9 +253,9 @@ export function useSuperLoopClaim({
           toast({
             title: "Not eligible yet",
             description: getProviderEligibilityMessage(eligibilityProvider),
-            variant: "destructive",
+            type: "warning",
             link: { href: "/eligibilities", label: "See how to access" },
-          } as any)
+          })
           return
         }
 
@@ -244,19 +271,14 @@ export function useSuperLoopClaim({
         chainId,
       })
       setTxHash(hash)
+    } catch {
       toast({
-        title: "Transaction sent",
+        title: action === "claim" ? "Claim failed" : "Entry failed",
         description:
           action === "claim"
-            ? "Claim submitted. Waiting for confirmation..."
-            : "Entering the Loop. Waiting for confirmation...",
-      })
-    } catch (cause) {
-      toast({
-        title: "Claim failed",
-        description:
-          cause instanceof Error ? cause.message : "Unable to claim tokens.",
-        variant: "destructive",
+            ? "No rewards were claimed. Try again."
+            : "Your entry was not confirmed. Try again.",
+        type: "error",
       })
     } finally {
       setSubmissionStage("idle")

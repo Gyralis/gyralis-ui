@@ -96,6 +96,8 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     currentPeriod: settings.data?.currentPeriod,
     eligibilityProvider: loop.eligibilityProvider,
     onConfirmed: refreshCardData,
+    tokenDecimals: balance.data?.decimals,
+    tokenSymbol: balance.data?.symbol,
   })
 
   const balanceState = useMemo<SectionState<LoopBalanceViewData>>(() => {

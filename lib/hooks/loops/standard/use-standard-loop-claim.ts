@@ -12,6 +12,10 @@ import {
 } from "wagmi"
 
 import {
+  BLOCKSCOUT_TRANSACTION_LABEL,
+  getBlockscoutTransactionUrl,
+} from "@/lib/blockscout"
+import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
@@ -19,6 +23,11 @@ import {
   deriveStandardLoopClaimStatus,
   type StandardLoopSubmissionStage,
 } from "@/lib/loops/standard-loop-state"
+import {
+  getClaimedTokenTitle,
+  getConfirmationDelayedToast,
+  getRevertedTransactionToast,
+} from "@/lib/transaction-toast-messages"
 import { useToast } from "@/components/ui/use-toast"
 
 import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-registration"
@@ -26,12 +35,6 @@ import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-re
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
-}
-
-const BLOCK_EXPLORER_TX_URLS: Record<number, string> = {
-  100: "https://gnosis.blockscout.com/tx",
-  10200: "https://gnosis-chiado.blockscout.com/tx",
-  8453: "https://basescan.org/tx",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
@@ -45,6 +48,8 @@ interface UseStandardLoopClaimParams {
   currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
   onConfirmed?: () => void | Promise<void>
+  tokenDecimals?: number
+  tokenSymbol?: string
 }
 
 function getPassportScoreRequiredMessage(error?: string) {
@@ -70,6 +75,8 @@ export function useStandardLoopClaim({
   currentPeriod,
   eligibilityProvider,
   onConfirmed,
+  tokenDecimals,
+  tokenSymbol,
 }: UseStandardLoopClaimParams) {
   const [hasEnteredNextPeriod, setHasEnteredNextPeriod] = useState(false)
   const [lastClaimedAmount, setLastClaimedAmount] = useState<bigint>()
@@ -172,11 +179,8 @@ export function useStandardLoopClaim({
   const isConfirming = receipt.isLoading
   const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
-  const transactionUrl = txHash
-    ? `${
-        BLOCK_EXPLORER_TX_URLS[chainId] ?? "https://gnosis.blockscout.com/tx"
-      }/${txHash}`
-    : undefined
+  const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
+  const receiptStatus = receipt.data?.status
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -187,27 +191,44 @@ export function useStandardLoopClaim({
   }, [address, chainId, connectedAccount, currentPeriod])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !txHash) return
+    if (!receipt.isSuccess || !receiptStatus || !txHash) return
 
     const confirmedAction = pendingAction
     const claimedAmount = claimableAmount
+    const completedTransactionUrl = transactionUrl
+    setTxHash(undefined)
+
+    if (receiptStatus === "reverted") {
+      toast({
+        ...getRevertedTransactionToast(confirmedAction),
+        link: completedTransactionUrl
+          ? {
+              href: completedTransactionUrl,
+              label: BLOCKSCOUT_TRANSACTION_LABEL,
+            }
+          : undefined,
+      })
+      return
+    }
+
     setHasEnteredNextPeriod(true)
     if (confirmedAction === "claim") setLastClaimedAmount(claimedAmount)
-    setTxHash(undefined)
 
     toast({
       title:
         confirmedAction === "claim"
-          ? "Transaction confirmed"
+          ? getClaimedTokenTitle({
+              amount: claimedAmount,
+              decimals: tokenDecimals,
+              symbol: tokenSymbol,
+            })
           : "Entered the Loop",
-      description:
-        confirmedAction === "claim"
-          ? "Claim was confirmed onchain."
-          : "You are registered for the next period claim.",
+      description: "You’re registered for the next claim period.",
+      type: "success",
       link: transactionUrl
-        ? { href: transactionUrl, label: "View transaction" }
+        ? { href: transactionUrl, label: BLOCKSCOUT_TRANSACTION_LABEL }
         : undefined,
-    } as any)
+    })
 
     void refreshAccountState().finally(() => {
       void onConfirmed?.()
@@ -218,7 +239,10 @@ export function useStandardLoopClaim({
     pendingAction,
     refreshAccountState,
     receipt.isSuccess,
+    receiptStatus,
     toast,
+    tokenDecimals,
+    tokenSymbol,
     transactionUrl,
     txHash,
   ])
@@ -226,20 +250,18 @@ export function useStandardLoopClaim({
   useEffect(() => {
     if (!receipt.isError || !txHash) return
 
-    const failedTransactionUrl = transactionUrl
+    const delayedTransactionUrl = transactionUrl
     setTxHash(undefined)
     toast({
-      title: "Transaction failed",
-      description:
-        receipt.error instanceof Error
-          ? receipt.error.message
-          : "The transaction was not confirmed.",
-      variant: "destructive",
-      link: failedTransactionUrl
-        ? { href: failedTransactionUrl, label: "View transaction" }
+      ...getConfirmationDelayedToast(),
+      link: delayedTransactionUrl
+        ? {
+            href: delayedTransactionUrl,
+            label: BLOCKSCOUT_TRANSACTION_LABEL,
+          }
         : undefined,
-    } as any)
-  }, [receipt.error, receipt.isError, toast, transactionUrl, txHash])
+    })
+  }, [receipt.isError, toast, transactionUrl, txHash])
 
   const execute = async () => {
     if (!connectedAccount) return
@@ -248,7 +270,7 @@ export function useStandardLoopClaim({
       toast({
         title: "Loop config error",
         description: "Loop address is missing or invalid.",
-        variant: "destructive",
+        type: "error",
       })
       return
     }
@@ -257,6 +279,7 @@ export function useStandardLoopClaim({
       toast({
         title: "Already claimed",
         description: "You already claimed in this period.",
+        type: "info",
       })
       return
     }
@@ -287,7 +310,7 @@ export function useStandardLoopClaim({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
-            variant: "destructive",
+            type: "warning",
           })
           return
         }
@@ -296,9 +319,9 @@ export function useStandardLoopClaim({
           toast({
             title: "Not eligible yet",
             description: getProviderEligibilityMessage(eligibilityProvider),
-            variant: "destructive",
+            type: "warning",
             link: { href: "/eligibilities", label: "See how to access" },
-          } as any)
+          })
           return
         }
 
@@ -314,19 +337,14 @@ export function useStandardLoopClaim({
         chainId,
       })
       setTxHash(hash)
+    } catch {
       toast({
-        title: "Transaction sent",
+        title: action === "claim" ? "Claim failed" : "Entry failed",
         description:
           action === "claim"
-            ? "Claim submitted. Waiting for confirmation..."
-            : "Entering the Loop. Waiting for confirmation...",
-      })
-    } catch (cause) {
-      toast({
-        title: "Claim failed",
-        description:
-          cause instanceof Error ? cause.message : "Unable to claim tokens.",
-        variant: "destructive",
+            ? "No rewards were claimed. Try again."
+            : "Your entry was not confirmed. Try again.",
+        type: "error",
       })
     } finally {
       setSubmissionStage("idle")
