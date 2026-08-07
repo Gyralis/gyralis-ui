@@ -104,7 +104,7 @@ export const LoopCardsData: LoopCardData[] = [
     id: 5,
     title: "Markee",
     by: "Markee cooperative",
-    address: "0x3a5972524cc121D6d8A9a7e79d6F49dbfe71857b",
+    address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",

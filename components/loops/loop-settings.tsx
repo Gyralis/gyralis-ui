@@ -200,6 +200,7 @@ export function useLoopSettingsDetails({
         : formatMonthlyIncoming({
             flowRatePerSecond: loopBalance.flowRatePerSecond,
             decimals: loopBalance.decimals,
+            maximumFractionDigits: 2,
             symbol: loopBalance.symbol,
           })
     }
@@ -208,7 +209,7 @@ export function useLoopSettingsDetails({
 
     const balance = trimFormattedBalance(
       formatUnits(loopBalance.value, loopBalance.decimals),
-      4
+      2
     )
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 

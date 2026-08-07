@@ -153,7 +153,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
           : undefined
       const balanceDetail = `${trimFormattedBalance(
         formatUnits(balance.data.value, balance.data.decimals),
-        4
+        2
       )} ${balance.data.symbol}`
 
       data = {

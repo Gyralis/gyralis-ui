@@ -237,6 +237,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
               : formatMonthlyIncoming({
                   flowRatePerSecond: balance.data.flowRatePerSecond,
                   decimals: balance.data.decimals,
+                  maximumFractionDigits: 2,
                   symbol: balance.data.symbol,
                 }),
             balanceDetailLabel: "Flow Rate",
