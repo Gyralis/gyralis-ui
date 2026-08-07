@@ -108,6 +108,8 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     hasClaimed: Boolean(claimerStatus?.hasClaimed),
     isClaimable: statusReads.data.isClaimable === true,
     onConfirmed: refreshAfterAction,
+    tokenDecimals: balance.data?.decimals,
+    tokenSymbol: balance.data?.symbol,
   })
   const status = reconcileSuperLoopConfirmedStatus({
     confirmedAction: claim.confirmedAction,

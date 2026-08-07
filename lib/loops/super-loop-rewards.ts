@@ -95,11 +95,11 @@ export function getSuperLoopRewardTooltip({
       return "Your rewards will start accumulating next period."
     case "active":
       if (estimatedPeriodPayoutLabel) {
-        return `Estimated daily rewards: +${estimatedPeriodPayoutLabel}`
+        return `Est. daily rewards: +${estimatedPeriodPayoutLabel}`
       }
       return isEstimateLoading
-        ? "Estimated daily rewards: Calculating..."
-        : "Estimated daily rewards: 0"
+        ? "Est. daily rewards: Calculating..."
+        : "Est. daily rewards: 0"
     case "claimable":
       return `Daily rewards available: +${claimableRewardLabel ?? "0"}`
     case "claimed":

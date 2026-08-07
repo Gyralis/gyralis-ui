@@ -415,6 +415,34 @@
     0 8px 18px -16px rgba(28, 231, 131, 0.48);
 }
 
+.sileo-external-link-button {
+  gap: 0.3rem;
+}
+
+.sileo-external-link-button::after {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+  content: "";
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M15%203h6v6'/%3E%3Cpath%20d='M10%2014%2021%203'/%3E%3Cpath%20d='M18%2013v6a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2V8a2%202%200%200%201%202-2h6'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M15%203h6v6'/%3E%3Cpath%20d='M10%2014%2021%203'/%3E%3Cpath%20d='M18%2013v6a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2V8a2%202%200%200%201%202-2h6'/%3E%3C/svg%3E");
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.dark .sileo-external-link-button {
+  background-color: rgb(255 255 255 / 0.1) !important;
+}
+
+.dark .sileo-external-link-button:hover {
+  background-color: rgb(255 255 255 / 0.15) !important;
+}
+
 /* Enhanced button styling with gradients and animations */
 .tamagotchi-button {
   background: linear-gradient(135deg, #1ce783 0%, #4ade80 100%);

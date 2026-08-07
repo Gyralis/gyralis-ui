@@ -12,7 +12,7 @@ export function LoopTypeBadge({ isSuper, className }: LoopTypeBadgeProps) {
     ? "super-loop-badge text-primary"
     : "standard-loop-badge text-muted-foreground"
   const badgeClassName = [
-    "inline-flex min-h-[22px] shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold uppercase leading-none tracking-widest",
+    "inline-flex min-h-[22px] w-max shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[10px] font-semibold uppercase leading-none tracking-widest",
     variantClassName,
     className,
   ]
