@@ -1,7 +1,7 @@
 import type { GetLogsParameters, Log, PublicClient } from "viem"
 
-const DEFAULT_LOG_CHUNK_SIZE = 9_999n
-const ALCHEMY_FREE_TIER_LOG_CHUNK_SIZE = 9n
+const DEFAULT_LOG_CHUNK_SIZE = 10_000n
+const ALCHEMY_FREE_TIER_LOG_CHUNK_SIZE = 10n
 
 type TransportValueWithUrl = {
   url?: unknown
@@ -46,10 +46,12 @@ export async function getLogsChunked(
   for (
     let fromBlock = params.fromBlock;
     fromBlock <= toBlock;
-    fromBlock += chunkSize + 1n
+    fromBlock += chunkSize
   ) {
     const chunkToBlock =
-      fromBlock + chunkSize > toBlock ? toBlock : fromBlock + chunkSize
+      fromBlock + chunkSize - 1n > toBlock
+        ? toBlock
+        : fromBlock + chunkSize - 1n
 
     const chunkLogs = await publicClient.getLogs({
       ...params,

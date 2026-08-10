@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
-import { motion } from "framer-motion"
-import { LuLayoutGrid, LuList, LuX } from "react-icons/lu"
+// import { motion } from "framer-motion"
+import { LuX } from "react-icons/lu"
+
+// import { LuLayoutGrid, LuList } from "react-icons/lu"
 
 import {
   Tooltip,
@@ -14,14 +16,14 @@ import {
 } from "@/components/ui/tooltip"
 import LoopCard from "@/components/loops/loop-card"
 import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
-import { LoopsTable } from "@/components/loops/loops-table"
+// import { LoopsTable } from "@/components/loops/loops-table"
 import {
   EcosystemMetricData,
   ParticipationProfile,
   ParticipationProfileData,
 } from "@/components/loops/participation-profile"
 
-type ViewMode = "grid" | "list"
+// type ViewMode = "grid" | "list"
 
 type LoopsPageClientProps = {
   ecosystemMetrics: [
@@ -53,7 +55,7 @@ export function LoopsPageClient({
   statsLastUpdatedLabel,
 }: LoopsPageClientProps) {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
-  const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  // const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [showUpgradeNotice, setShowUpgradeNotice] = useState(false)
 
   useEffect(() => {
@@ -153,9 +155,10 @@ export function LoopsPageClient({
 
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-2xl overflow-visible px-4 pb-8 pt-2 sm:pt-4"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-8 sm:pt-10"
         >
-          <div className="mx-auto mb-5 flex max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
+          <div className="mx-auto hidden max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
+            {/* Table view is temporarily disabled while its data path is refactored.
             <div className="flex items-center gap-3">
               <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 View
@@ -210,6 +213,7 @@ export function LoopsPageClient({
                 ))}
               </div>
             </div>
+            */}
 
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -311,6 +315,7 @@ export function LoopsPageClient({
             </DropdownMenu> */}
           </div>
 
+          {/* Table view is temporarily disabled while its data path is refactored.
           {viewMode === "grid" ? (
             <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
               {cards.map((loop) => (
@@ -328,6 +333,19 @@ export function LoopsPageClient({
               <LoopsTable loops={cards} />
             </div>
           )}
+          */}
+
+          <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
+            {cards.map((loop) => (
+              <div key={loop.id} id={`loop-card-${loop.id}`}>
+                {loop.enabled ? (
+                  <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />
+                ) : (
+                  <LoopCardInactive loop={loop} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -361,9 +379,9 @@ function LoopsUpgradeNotice({
             </button>
           </div>
           <p className="mt-1 text-sm leading-6 text-foreground/80">
-            We&apos;re improving real-time user stats across Loops, Profile,
-            and Leaderboard. During this upgrade, claim counts and rankings may
-            not reflect.
+            We&apos;re improving real-time user stats across Loops, Profile, and
+            Leaderboard. During this upgrade, claim counts and rankings may not
+            reflect.
           </p>
         </div>
       </div>

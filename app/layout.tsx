@@ -49,8 +49,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             fontBaloo.variable
           )}
         >
-          <RootProvider>{children}</RootProvider>
-          <Toaster />
+          <RootProvider>
+            {children}
+            <Toaster />
+          </RootProvider>
         </body>
       </html>
     </>

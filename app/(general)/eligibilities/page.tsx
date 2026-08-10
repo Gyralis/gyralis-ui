@@ -15,20 +15,22 @@ const eligibilityRequirements = [
     id: 1,
     name: "Gardens",
     description:
-      "Gardens is a bottom-up governance framework for web3 ecosystems. Register as a member in 1Hive community and participate in decentralized decision making.",
-    requirement: "1Hive Membership",
+      "Gyralis connects Loops with Gardens communities such as 1Hive and Markee. Join the community required by a Loop to participate in its governance and start claiming daily rewards.",
+    modalDescription:
+      "Join the Gardens community required by your Loop. Gyralis verifies your connected wallet’s membership automatically.",
+    requirement: "Community Membership",
+    network: "Gnosis / Base",
     status: "active",
     icon: LuLaptop,
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Go to Gardens app, search for 1Hive community and connect your wallet.",
-      "Click Join and complete membership.",
-      "Stake 3 HNY tokens to activate your membership.",
-      "Come back to Gyralis and enter the 1Hive loop. Claim daily rewards.",
+      "Open the Gardens community required by the Loop, such as 1Hive or Markee.",
+      "Connect the same wallet you use in Gyralis.",
+      "Review the community covenant, select Join, and stake the required community token.",
+      "Return to Gyralis and enter the Loop. Your membership will be verified automatically.",
     ],
-    protocolUrl:
-      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    protocolUrl: "https://app.gardens.fund/gardens",
     coverUrl: "/gardens-cover.png",
     logoUrl: "/gardens-logo.png",
     type: "loop",
@@ -37,14 +39,17 @@ const eligibilityRequirements = [
     id: 2,
     name: "Blockscout Merits",
     description:
-      "Blockscout Merits is a gamified rewards program that lets users earn points (“Merits”) by exploring the blockchain, completing tasks, using tools, and inviting others.",
+      "Use Blockscout Merits to redeem the Gyralis offer, verify your wallet, and unlock daily rewards from the Blockscout Loop.",
+    modalDescription:
+      "Redeem the Gyralis Loop Rewards offer with Blockscout Merits. Gyralis verifies the connected wallet’s redemption automatically.",
     requirement: "Redeem Gyralis Offer",
+    network: "Gnosis",
     status: "active",
     icon: LuLaptop,
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Go to the Blockscout Merits Explorer and connect your wallet.You’ll receive 100 Merits.",
+      "Go to the Blockscout Merits Explorer and connect your wallet. You’ll receive 100 Merits.",
       "Open the Spend Merits tab and find the Gyralis Loop Rewards.",
       "Redeem the offer for 50 Merits.",
       "Come back to Gyralis and enter the Blockscout Merits loop. Claim daily rewards.",
@@ -60,7 +65,7 @@ const eligibilityRequirements = [
     id: 3,
     name: "Human Passport",
     description:
-      "Verify your Humanity. Collect stamps and build your unique passport score of +15 and pass the loop shield to be eligible.",
+      "Build your Human Passport score to prove you’re a unique participant, pass a Loop’s shield, and unlock its rewards.",
     requirement: "Passport Score",
     status: "active",
     color: "text-pink-500",
@@ -103,10 +108,9 @@ export default function ElegibilityPage() {
                   Eligibilities
                 </span>
               </h1>
-              <p className="max-w-3xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
-                Live loops eligibility requirements for checking access,
-                protocol steps, and reward readiness across the Gyralis
-                ecosystem.
+              <p className="max-w-5xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
+                Enter the Loops and claim daily rewards by meeting the
+                eligibility requirements across the Gyralis ecosystem.
               </p>
             </div>
           </div>
@@ -125,19 +129,19 @@ export default function ElegibilityPage() {
                 <div className="mb-4 flex items-center space-x-2 sm:space-x-4">
                   <div className="rounded-3xl bg-white/55 p-3 backdrop-blur-md dark:bg-white/10 shrink-0 border border-white/30 shadow-lg dark:border-white/20">
                     {requirement.logoUrl && (
-                      <div className="flex h-6 w-6 items-center justify-center sm:h-8 sm:w-8">
+                      <div className="flex size-6 items-center justify-center sm:size-8">
                         <Image
                           src={requirement.logoUrl}
                           alt={`${requirement.name} logo`}
                           width={28}
                           height={28}
-                          className="h-6 w-6 object-contain sm:h-8 sm:w-8"
+                          className="size-6 object-contain sm:size-8"
                         />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
+                    <div className="flex items-center justify-between gap-2">
                       <h3 className="font-heading text-lg font-semibold leading-tight  sm:text-xl">
                         {requirement.name}
                       </h3>
@@ -178,21 +182,20 @@ export default function ElegibilityPage() {
           })}
         </div>
 
-        <div className="tamagotchi-card mt-8">
-          <h2 className="mb-4 font-heading text-xl font-semibold  sm:mb-6 sm:text-2xl">
+        <div className="tamagotchi-card pointer-events-none mt-8">
+          <h2 className="mb-4 font-heading text-xl font-semibold sm:mb-6 sm:text-2xl">
             How Eligibility Works
           </h2>
-          <div className="space-y-3 font-body text-sm  opacity-80 sm:space-y-4 sm:text-base">
-            <p>• Each loop has different eligibility requirements.</p>
-
+          <div className="space-y-3 font-body text-sm leading-6 text-muted-foreground sm:space-y-4 sm:text-base">
             <p>
-              • Each loop may have its own unique Human Passport score to meet.
+              • Each Loop defines its own eligibility requirement and Gyralis
+              verifies it automatically.
             </p>
-
             <p>
-              • Elegibilities are checked every time you attempt to enter or
-              claim.
+              • Requirements are checked against the wallet connected to
+              Gyralis, so use the same wallet with each eligibility provider.
             </p>
+            <p>• Eligibility is verified whenever you enter or claim.</p>
           </div>
         </div>
 
@@ -224,6 +227,32 @@ export default function ElegibilityPage() {
                 height={320}
                 className="w-full object-contain"
               />
+
+              {selectedEligibility.modalDescription && (
+                <div className="space-y-4">
+                  <p className="font-body text-sm leading-6 text-muted-foreground">
+                    {selectedEligibility.modalDescription}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-muted/35 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Requirement
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {selectedEligibility.requirement}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border bg-muted/35 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Network
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {selectedEligibility.network}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h3 className="mb-4 text-lg font-bold text-foreground">

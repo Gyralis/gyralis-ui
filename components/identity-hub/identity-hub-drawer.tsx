@@ -250,6 +250,7 @@ export const IdentityHubDrawer = ({
         title: "Passport score updated",
         description:
           "GyraHub requested your latest Passport score for this wallet.",
+        type: "success",
       })
     } catch (error) {
       const message =
@@ -257,6 +258,7 @@ export const IdentityHubDrawer = ({
       toast({
         title: "Submit failed",
         description: message,
+        type: "error",
       })
     }
   }, [address, refetchScore, submitPassport, toast])
