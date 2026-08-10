@@ -348,6 +348,12 @@ export interface RawHistoryLoopSnapshot {
   totalRegistrationsCount?: number
   totalClaimsCount?: number
   claimRatePercent?: string | number | null
+  maxRegistrationsInPeriodCount?: number
+  maxRegistrationsInPeriodNumber?: string | null
+  maxRegistrationsInPeriodEndedAt?: string | null
+  maxClaimsInPeriodCount?: number
+  maxClaimsInPeriodNumber?: string | null
+  maxClaimsInPeriodEndedAt?: string | null
   totalDistributedAmountRaw?: string | null
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null
@@ -361,6 +367,14 @@ export interface RawHistoryGlobalSnapshot {
   totalRegistrationsCount?: number
   totalClaimsCount?: number
   claimRatePercent?: string | number | null
+  maxRegistrationsInLoopPeriodCount?: number
+  maxRegistrationsInLoopPeriodLoopKey?: string | null
+  maxRegistrationsInLoopPeriodNumber?: string | null
+  maxRegistrationsInLoopPeriodEndedAt?: string | null
+  maxClaimsInLoopPeriodCount?: number
+  maxClaimsInLoopPeriodLoopKey?: string | null
+  maxClaimsInLoopPeriodNumber?: string | null
+  maxClaimsInLoopPeriodEndedAt?: string | null
   totalDistributedAmountRaw?: string | null
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null

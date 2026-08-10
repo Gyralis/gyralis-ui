@@ -643,7 +643,45 @@ function formatUnixSecondsAsIso(value) {
   return new Date(seconds * 1000).toISOString()
 }
 
+function computeLoopSnapshotMaxima(loopEntry, upToPeriodValue) {
+  const upToPeriod = Number.parseInt(upToPeriodValue ?? "", 10)
+  const periods = Object.values(loopEntry?.periods ?? {})
+    .filter((periodEntry) => {
+      const periodNumber = Number.parseInt(periodEntry?.periodNumber ?? "", 10)
+      if (!Number.isFinite(periodNumber)) return false
+      return Number.isFinite(upToPeriod) ? periodNumber <= upToPeriod : true
+    })
+    .sort(
+      (left, right) =>
+        Number.parseInt(left?.periodNumber ?? "0", 10) -
+        Number.parseInt(right?.periodNumber ?? "0", 10)
+    )
+
+  const maxRegistrationsPeriod = periods.reduce((best, periodEntry) => {
+    const count = periodEntry?.registeredUserCount ?? 0
+    if (best == null || count > (best.registeredUserCount ?? 0)) return periodEntry
+    return best
+  }, null)
+  const maxClaimsPeriod = periods.reduce((best, periodEntry) => {
+    const count = periodEntry?.claimEventCount ?? 0
+    if (best == null || count > (best.claimEventCount ?? 0)) return periodEntry
+    return best
+  }, null)
+
+  return {
+    maxRegistrationsInPeriodCount: maxRegistrationsPeriod?.registeredUserCount ?? 0,
+    maxRegistrationsInPeriodNumber: maxRegistrationsPeriod?.periodNumber ?? null,
+    maxRegistrationsInPeriodEndedAt:
+      maxRegistrationsPeriod?.periodEndExclusive?.utc ?? null,
+    maxClaimsInPeriodCount: maxClaimsPeriod?.claimEventCount ?? 0,
+    maxClaimsInPeriodNumber: maxClaimsPeriod?.periodNumber ?? null,
+    maxClaimsInPeriodEndedAt: maxClaimsPeriod?.periodEndExclusive?.utc ?? null,
+  }
+}
+
 function buildLoopHistorySnapshot(loopKey, loopEntry) {
+  const maxima = computeLoopSnapshotMaxima(loopEntry, loopEntry.lastProcessedPeriod)
+
   return {
     loopKey,
     loopName: loopEntry.loopName ?? loopKey,
@@ -654,6 +692,7 @@ function buildLoopHistorySnapshot(loopKey, loopEntry) {
     totalRegistrationsCount: loopEntry.stats?.totalRegistrationsCount ?? 0,
     totalClaimsCount: loopEntry.stats?.totalClaimsCount ?? 0,
     claimRatePercent: loopEntry.stats?.claimRatePercent ?? "0.00",
+    ...maxima,
     totalDistributedAmountRaw: loopEntry.stats?.totalRegisteredAmountRaw ?? "0",
     totalDistributedAmountFormatted:
       loopEntry.stats?.totalRegisteredAmountFormatted ?? "0",
@@ -720,6 +759,64 @@ function upsertHistorySnapshot(history, cache, cacheFile, recordedAt) {
   else history.snapshots[existingSnapshotIndex] = snapshotEntry
 
   history.snapshots.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+function normalizeHistoryPeriodMaxima(history, cache) {
+  for (const snapshot of history.snapshots ?? []) {
+    const loopMaximaEntries = Object.entries(snapshot?.loops ?? {}).map(
+      ([loopKey, loopSnapshot]) => {
+        const cacheLoop = cache.loops?.[loopKey]
+        if (!cacheLoop || !loopSnapshot) return null
+
+        const maxima = computeLoopSnapshotMaxima(
+          cacheLoop,
+          loopSnapshot.lastProcessedPeriod
+        )
+        Object.assign(loopSnapshot, maxima)
+
+        return {
+          loopKey,
+          ...maxima,
+        }
+      }
+    )
+
+    const comparableLoopMaxima = loopMaximaEntries.filter(Boolean)
+
+    if (!snapshot?.global) continue
+
+    const maxRegistrations = comparableLoopMaxima.reduce((best, entry) => {
+      if (
+        best == null ||
+        entry.maxRegistrationsInPeriodCount > best.maxRegistrationsInPeriodCount
+      ) {
+        return entry
+      }
+      return best
+    }, null)
+    const maxClaims = comparableLoopMaxima.reduce((best, entry) => {
+      if (best == null || entry.maxClaimsInPeriodCount > best.maxClaimsInPeriodCount) {
+        return entry
+      }
+      return best
+    }, null)
+
+    snapshot.global.maxRegistrationsInLoopPeriodCount =
+      maxRegistrations?.maxRegistrationsInPeriodCount ?? 0
+    snapshot.global.maxRegistrationsInLoopPeriodLoopKey =
+      maxRegistrations?.loopKey ?? null
+    snapshot.global.maxRegistrationsInLoopPeriodNumber =
+      maxRegistrations?.maxRegistrationsInPeriodNumber ?? null
+    snapshot.global.maxRegistrationsInLoopPeriodEndedAt =
+      maxRegistrations?.maxRegistrationsInPeriodEndedAt ?? null
+    snapshot.global.maxClaimsInLoopPeriodCount =
+      maxClaims?.maxClaimsInPeriodCount ?? 0
+    snapshot.global.maxClaimsInLoopPeriodLoopKey = maxClaims?.loopKey ?? null
+    snapshot.global.maxClaimsInLoopPeriodNumber =
+      maxClaims?.maxClaimsInPeriodNumber ?? null
+    snapshot.global.maxClaimsInLoopPeriodEndedAt =
+      maxClaims?.maxClaimsInPeriodEndedAt ?? null
+  }
 }
 
 function normalizeHistoryClaimRates(history) {
@@ -794,6 +891,13 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
           totalRegistrationsCount: periodEntry.registeredUserCount ?? 0,
           totalClaimsCount: periodEntry.claimEventCount ?? 0,
           claimRatePercent: periodEntry.claimRatePercent ?? "0.00",
+          maxRegistrationsInPeriodCount: periodEntry.registeredUserCount ?? 0,
+          maxRegistrationsInPeriodNumber: periodEntry.periodNumber ?? null,
+          maxRegistrationsInPeriodEndedAt:
+            periodEntry.periodEndExclusive?.utc ?? null,
+          maxClaimsInPeriodCount: periodEntry.claimEventCount ?? 0,
+          maxClaimsInPeriodNumber: periodEntry.periodNumber ?? null,
+          maxClaimsInPeriodEndedAt: periodEntry.periodEndExclusive?.utc ?? null,
           totalDistributedAmountRaw: periodEntry.totalRegisteredAmountRaw ?? "0",
           totalDistributedAmountFormatted:
             periodEntry.totalRegisteredAmountFormatted ?? "0",
@@ -818,6 +922,75 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
       totalRegistrationsCount,
       totalClaimsCount,
       claimRatePercent: formatPercent(totalClaimsCount, totalRegistrationsCount),
+      maxRegistrationsInLoopPeriodCount: loopEntries.reduce(
+        (best, { periodEntry }) =>
+          Math.max(best, periodEntry.registeredUserCount ?? 0),
+        0
+      ),
+      maxRegistrationsInLoopPeriodLoopKey:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.registeredUserCount ?? 0
+            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.loopKey ?? null,
+      maxRegistrationsInLoopPeriodNumber:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.registeredUserCount ?? 0
+            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.periodEntry.periodNumber ?? null,
+      maxRegistrationsInLoopPeriodEndedAt:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.registeredUserCount ?? 0
+            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.periodEntry.periodEndExclusive?.utc ?? null,
+      maxClaimsInLoopPeriodCount: loopEntries.reduce(
+        (best, { periodEntry }) => Math.max(best, periodEntry.claimEventCount ?? 0),
+        0
+      ),
+      maxClaimsInLoopPeriodLoopKey:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.claimEventCount ?? 0
+            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.loopKey ?? null,
+      maxClaimsInLoopPeriodNumber:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.claimEventCount ?? 0
+            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.periodEntry.periodNumber ?? null,
+      maxClaimsInLoopPeriodEndedAt:
+        loopEntries
+          .reduce((best, entry) => {
+            const count = entry.periodEntry.claimEventCount ?? 0
+            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+              return entry
+            }
+            return best
+          }, null)
+          ?.periodEntry.periodEndExclusive?.utc ?? null,
       totalDistributedAmountRaw: totalDistributedAmountRaw.toString(),
       totalDistributedAmountFormatted: formatUnits(totalDistributedAmountRaw, 18),
       tokenSymbol: primaryLoopEntry?.loopEntry.token?.symbol ?? null,
@@ -1181,6 +1354,7 @@ async function main() {
     upsertInitialGnosisHistorySeed(history, cache, args.cacheFile)
     upsertHistorySnapshot(history, cache, args.cacheFile, runTimestamp)
     normalizeHistoryClaimRates(history)
+    normalizeHistoryPeriodMaxima(history, cache)
     saveHistory(args.historyFile, history)
   }
 
