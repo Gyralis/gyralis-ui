@@ -18,6 +18,12 @@ import { LuArrowDown, LuChevronDown } from "react-icons/lu"
 
 import { cn } from "@/lib/utils"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type HeroHistorySummary = {
   totalClaims: number
@@ -110,24 +116,35 @@ const eligibilityPartners = [
     description:
       "Community connected to Gyralis for checking loop eligibility through Gardens.",
     logoUrl: "/1Hive-logo.png",
+    types: ["Community"],
+  },
+  {
+    title: "Markee",
+    description:
+      "Cooperative community using Gardens membership to power loop eligibility.",
+    logoUrl: "/markee-logo.png",
+    types: ["Community"],
   },
   {
     title: "Blockscout",
     description:
       "Blockscout community Merits Program integration for checking loop eligibility.",
     logoUrl: "/blockscout-logo.png",
-  },
-  {
-    title: "Human Passport",
-    description:
-      "Verifies humanity and score through GyraHub to keep loop access human-first.",
-    logoUrl: "/passport-logo.svg",
+    types: ["Community"],
   },
   {
     title: "Gardens",
     description:
       "DAO coordination framework powering community membership checks.",
     logoUrl: "/gardens-logo.png",
+    types: ["Protocol"],
+  },
+  {
+    title: "Human Passport",
+    description:
+      "Verifies humanity and score through GyraHub to keep loop access human-first.",
+    logoUrl: "/passport-logo.svg",
+    types: ["Protocol"],
   },
 ] as const
 
@@ -181,9 +198,11 @@ function SurfaceIcon({
 function LandingFeatureCard({
   children,
   className = "",
+  contentClassName = "",
 }: {
   children: ReactNode
   className?: string
+  contentClassName?: string
 }) {
   return (
     <div className={cn("group h-full list-none", className)}>
@@ -195,7 +214,12 @@ function LandingFeatureCard({
           proximity={64}
           inactiveZone={0.01}
         />
-        <div className="relative flex h-full flex-col rounded-[1.2rem] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
+        <div
+          className={cn(
+            "relative flex h-full flex-col rounded-[1.2rem] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] p-6 shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]",
+            contentClassName
+          )}
+        >
           {children}
         </div>
       </div>
@@ -764,26 +788,25 @@ export default function HomePage() {
               <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">
-                    Total Distributed
+                    Engagement Rate
                   </div>
                   <div className="mt-1 font-mono text-[2rem] font-semibold tracking-tight text-foreground sm:text-[2.4rem]">
-                    {heroSummary.totalDistributedAmount == null ? (
+                    {heroSummary.claimRatePercent == null ? (
                       "--"
                     ) : (
                       <>
                         <AnimatedStatValue
-                          value={Number(heroSummary.totalDistributedAmount)}
+                          value={heroSummary.claimRatePercent}
                           decimals={2}
                         />{" "}
-                        <span className="text-base font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                          {heroSummary.totalDistributedSymbol}
-                        </span>
+                        %
                       </>
                     )}
                   </div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    Across {heroSummary.totalClaims.toLocaleString()} on-chain
-                    claim events
+                    {heroSummary.totalClaims.toLocaleString()} claims across{" "}
+                    {heroSummary.totalRegistrations.toLocaleString()}{" "}
+                    registrations
                   </div>
                 </div>
 
@@ -1007,37 +1030,61 @@ export default function HomePage() {
                 </div>
               </Reveal>
 
-              <div className="grid auto-rows-fr gap-4 sm:grid-cols-2">
-                {eligibilityPartners.map((partner, index) => (
-                  <Reveal
-                    key={partner.title}
-                    delay={index * 0.07}
-                    className="h-full"
-                  >
-                    <LandingFeatureCard>
-                      <div className="flex h-full flex-col gap-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/65">
-                            <Image
-                              src={partner.logoUrl}
-                              alt={`${partner.title} logo`}
-                              width={30}
-                              height={30}
-                              className="size-8 object-contain"
-                            />
-                          </div>
-                          <h3 className="font-heading text-lg font-semibold">
-                            {partner.title}
-                          </h3>
-                        </div>
-                        <p className="text-sm leading-7 text-muted-foreground">
-                          {partner.description}
-                        </p>
-                      </div>
-                    </LandingFeatureCard>
-                  </Reveal>
-                ))}
-              </div>
+              <TooltipProvider delayDuration={180}>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {eligibilityPartners.map((partner, index) => (
+                    <Reveal
+                      key={partner.title}
+                      delay={index * 0.07}
+                      className="h-full"
+                    >
+                      <LandingFeatureCard contentClassName="!p-0">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="group/badge flex size-full items-center gap-2.5 rounded-[1.2rem] p-2.5 text-left transition-colors hover:bg-card/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                            >
+                              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/70">
+                                <Image
+                                  src={partner.logoUrl}
+                                  alt={`${partner.title} logo`}
+                                  width={20}
+                                  height={20}
+                                  className="size-5 object-contain"
+                                />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block truncate font-heading text-sm font-semibold text-foreground">
+                                  {partner.title}
+                                </span>
+                                <span className="mt-1 flex flex-wrap gap-1">
+                                  {partner.types.map((type) => (
+                                    <span
+                                      key={type}
+                                      className={cn(
+                                        "inline-flex rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em]",
+                                        type === "Community"
+                                          ? "border-primary/25 bg-primary/10 text-primary"
+                                          : "border-border bg-muted/70 text-muted-foreground"
+                                      )}
+                                    >
+                                      {type}
+                                    </span>
+                                  ))}
+                                </span>
+                              </span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" sideOffset={8}>
+                            {partner.description}
+                          </TooltipContent>
+                        </Tooltip>
+                      </LandingFeatureCard>
+                    </Reveal>
+                  ))}
+                </div>
+              </TooltipProvider>
             </div>
           </div>
         </section>

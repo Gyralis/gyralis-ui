@@ -432,9 +432,9 @@ export default async function DashboardPage() {
                 progress={{
                   label: "Registered Users Claimed",
                   value: formatPercent(
-                    data.overview.claimParticipationRatePercent
+                    data.overview.registeredUsersClaimedRatePercent
                   ),
-                  percent: data.overview.claimParticipationRatePercent ?? 0,
+                  percent: data.overview.registeredUsersClaimedRatePercent ?? 0,
                 }}
                 substats={[
                   {
@@ -680,10 +680,10 @@ export default async function DashboardPage() {
             <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
               <FaInfoCircle className="mt-1 size-4 shrink-0 text-primary" />
               <p>
-                Charts use the day each period ended, show the latest seven
-                completed dates from the cache, and compare{" "}
-                {data.loopSummaries.length} Gnosis loops with synchronized
-                labels and shared token accounting.
+                Charts use saved snapshot dates from the cached history so you
+                can compare cumulative growth across{" "}
+                {data.loopSummaries.length} Gnosis loops over time with shared
+                token accounting.
               </p>
             </div>
 
@@ -701,13 +701,17 @@ export default async function DashboardPage() {
                 }
               })}
               tokenSymbol={tokenSummary?.tokenSymbol ?? null}
-              registrationsByPeriod={data.charts.registrationsByPeriod}
-              claimsByPeriod={data.charts.claimsByPeriod}
-              claimRateByPeriod={data.charts.claimRateByPeriod}
-              cumulativeUniqueUsersByPeriod={
-                data.charts.cumulativeUniqueUsersByPeriod
+              claimParticipationRatePercent={
+                data.overview.claimParticipationRatePercent
               }
-              distributionByPeriod={data.charts.distributionByPeriod}
+              uniqueUsersBySnapshot={data.charts.uniqueUsersBySnapshot}
+              uniqueClaimUsersBySnapshot={data.charts.uniqueClaimUsersBySnapshot}
+              registrationsBySnapshot={data.charts.registrationsBySnapshot}
+              claimsBySnapshot={data.charts.claimsBySnapshot}
+              claimRateBySnapshot={data.charts.claimRateBySnapshot}
+              distributedAmountBySnapshot={
+                data.charts.distributedAmountBySnapshot
+              }
             />
           </section>
 

@@ -67,6 +67,13 @@ const upgradedClaimEvent = parseAbiItem(
 
 const DEFAULT_CACHE_FILE = "data/loop-registration-cache.json"
 const DEFAULT_HISTORY_FILE = "data/history/loop-stats-history.json"
+const INITIAL_GNOSIS_HISTORY_SEED = {
+  date: "2026-05-06",
+  loopPeriods: {
+    "1hive": "2",
+    blockscout: "2",
+  },
+}
 
 function loadEnvFile(fileName) {
   const filePath = resolve(process.cwd(), fileName)
@@ -630,6 +637,12 @@ function getSingleTokenTotal(tokenTotals) {
   return tokenTotals[0]
 }
 
+function formatUnixSecondsAsIso(value) {
+  const seconds = Number(value)
+  if (!Number.isFinite(seconds)) return null
+  return new Date(seconds * 1000).toISOString()
+}
+
 function buildLoopHistorySnapshot(loopKey, loopEntry) {
   return {
     loopKey,
@@ -640,6 +653,7 @@ function buildLoopHistorySnapshot(loopKey, loopEntry) {
     uniqueClaimUserCount: loopEntry.uniqueClaimUserCount ?? 0,
     totalRegistrationsCount: loopEntry.stats?.totalRegistrationsCount ?? 0,
     totalClaimsCount: loopEntry.stats?.totalClaimsCount ?? 0,
+    claimRatePercent: loopEntry.stats?.claimRatePercent ?? "0.00",
     totalDistributedAmountRaw: loopEntry.stats?.totalRegisteredAmountRaw ?? "0",
     totalDistributedAmountFormatted:
       loopEntry.stats?.totalRegisteredAmountFormatted ?? "0",
@@ -657,6 +671,7 @@ function buildGlobalHistorySnapshot(globalCache) {
     uniqueClaimUserCount: globalCache?.uniqueClaimUserCount ?? 0,
     totalRegistrationsCount: globalCache?.stats?.totalRegistrationsCount ?? 0,
     totalClaimsCount: globalCache?.stats?.totalClaimsCount ?? 0,
+    claimRatePercent: globalCache?.stats?.claimRatePercent ?? "0.00",
     totalDistributedAmountRaw:
       primaryTokenTotal?.totalRegisteredAmountRaw ?? null,
     totalDistributedAmountFormatted:
@@ -699,6 +714,143 @@ function upsertHistorySnapshot(history, cache, cacheFile, recordedAt) {
 
   const existingSnapshotIndex = history.snapshots.findIndex(
     (snapshot) => snapshot?.date === snapshotDate
+  )
+
+  if (existingSnapshotIndex === -1) history.snapshots.push(snapshotEntry)
+  else history.snapshots[existingSnapshotIndex] = snapshotEntry
+
+  history.snapshots.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+function normalizeHistoryClaimRates(history) {
+  for (const snapshot of history.snapshots ?? []) {
+    if (snapshot?.global) {
+      snapshot.global.claimRatePercent = formatPercent(
+        snapshot.global.totalClaimsCount ?? 0,
+        snapshot.global.totalRegistrationsCount ?? 0
+      )
+    }
+
+    for (const loopSnapshot of Object.values(snapshot?.loops ?? {})) {
+      if (!loopSnapshot) continue
+
+      loopSnapshot.claimRatePercent = formatPercent(
+        loopSnapshot.totalClaimsCount ?? 0,
+        loopSnapshot.totalRegistrationsCount ?? 0
+      )
+    }
+  }
+}
+
+function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
+  const loopEntries = Object.entries(INITIAL_GNOSIS_HISTORY_SEED.loopPeriods)
+    .map(([loopKey, periodNumber]) => {
+      const loopEntry = cache.loops?.[loopKey]
+      const periodEntry = loopEntry?.periods?.[periodNumber]
+      return loopEntry && periodEntry
+        ? { loopKey, loopEntry, periodEntry }
+        : null
+    })
+    .filter(Boolean)
+
+  if (loopEntries.length === 0) return
+
+  const recordedAt =
+    loopEntries
+      .map(({ periodEntry }) => formatUnixSecondsAsIso(periodEntry.periodStart?.unix))
+      .filter(Boolean)
+      .sort()
+      .at(-1) ?? `${INITIAL_GNOSIS_HISTORY_SEED.date}T00:00:00.000Z`
+
+  const uniqueUsers = new Set()
+  const uniqueClaimUsers = new Set()
+  let totalRegistrationsCount = 0
+  let totalClaimsCount = 0
+  let totalDistributedAmountRaw = 0n
+  let totalClaimedAmountRaw = 0n
+  let totalUnclaimedAmountRaw = 0n
+
+  const loopsSnapshot = Object.fromEntries(
+    loopEntries.map(({ loopKey, loopEntry, periodEntry }) => {
+      for (const user of periodEntry.registeredUsers ?? []) uniqueUsers.add(user)
+      for (const user of periodEntry.claimUsers ?? []) uniqueClaimUsers.add(user)
+
+      totalRegistrationsCount += periodEntry.registeredUserCount ?? 0
+      totalClaimsCount += periodEntry.claimEventCount ?? 0
+      totalDistributedAmountRaw += BigInt(periodEntry.totalRegisteredAmountRaw ?? "0")
+      totalClaimedAmountRaw += BigInt(periodEntry.claimedAmountRaw ?? "0")
+      totalUnclaimedAmountRaw += BigInt(periodEntry.unclaimedAmountRaw ?? "0")
+
+      return [
+        loopKey,
+        {
+          loopKey,
+          loopName: loopEntry.loopName ?? loopKey,
+          updatedAt: recordedAt,
+          lastProcessedPeriod: periodEntry.periodNumber ?? null,
+          uniqueUserCount:
+            periodEntry.cumulativeUniqueUserCount ?? periodEntry.registeredUserCount ?? 0,
+          uniqueClaimUserCount: periodEntry.claimUserCount ?? 0,
+          totalRegistrationsCount: periodEntry.registeredUserCount ?? 0,
+          totalClaimsCount: periodEntry.claimEventCount ?? 0,
+          claimRatePercent: periodEntry.claimRatePercent ?? "0.00",
+          totalDistributedAmountRaw: periodEntry.totalRegisteredAmountRaw ?? "0",
+          totalDistributedAmountFormatted:
+            periodEntry.totalRegisteredAmountFormatted ?? "0",
+          tokenSymbol: loopEntry.token?.symbol ?? null,
+        },
+      ]
+    })
+  )
+
+  const [primaryLoopEntry] = loopEntries
+  const snapshotEntry = {
+    date: INITIAL_GNOSIS_HISTORY_SEED.date,
+    recordedAt,
+    cacheFile,
+    cacheUpdatedAt: recordedAt,
+    loops: loopsSnapshot,
+    global: {
+      updatedAt: recordedAt,
+      loopsIncluded: Object.keys(loopsSnapshot).sort(),
+      uniqueUserCount: uniqueUsers.size,
+      uniqueClaimUserCount: uniqueClaimUsers.size,
+      totalRegistrationsCount,
+      totalClaimsCount,
+      claimRatePercent: formatPercent(totalClaimsCount, totalRegistrationsCount),
+      totalDistributedAmountRaw: totalDistributedAmountRaw.toString(),
+      totalDistributedAmountFormatted: formatUnits(totalDistributedAmountRaw, 18),
+      tokenSymbol: primaryLoopEntry?.loopEntry.token?.symbol ?? null,
+      tokenTotals:
+        primaryLoopEntry == null
+          ? []
+          : [
+              {
+                tokenAddress: primaryLoopEntry.loopEntry.token?.address ?? null,
+                tokenSymbol: primaryLoopEntry.loopEntry.token?.symbol ?? null,
+                tokenDecimals: primaryLoopEntry.loopEntry.token?.decimals ?? 18,
+                totalDistributedAmountRaw: totalDistributedAmountRaw.toString(),
+                totalDistributedAmountFormatted: formatUnits(
+                  totalDistributedAmountRaw,
+                  primaryLoopEntry.loopEntry.token?.decimals ?? 18
+                ),
+                totalClaimedAmountRaw: totalClaimedAmountRaw.toString(),
+                totalClaimedAmountFormatted: formatUnits(
+                  totalClaimedAmountRaw,
+                  primaryLoopEntry.loopEntry.token?.decimals ?? 18
+                ),
+                totalUnclaimedAmountRaw: totalUnclaimedAmountRaw.toString(),
+                totalUnclaimedAmountFormatted: formatUnits(
+                  totalUnclaimedAmountRaw,
+                  primaryLoopEntry.loopEntry.token?.decimals ?? 18
+                ),
+              },
+            ],
+    },
+  }
+
+  const existingSnapshotIndex = history.snapshots.findIndex(
+    (snapshot) => snapshot?.date === INITIAL_GNOSIS_HISTORY_SEED.date
   )
 
   if (existingSnapshotIndex === -1) history.snapshots.push(snapshotEntry)
@@ -1026,7 +1178,9 @@ async function main() {
   if (args.upToPeriod == null && !args.skipHistory) {
     const history = loadHistory(args.historyFile)
     history.generatedFromCacheFile = args.cacheFile
+    upsertInitialGnosisHistorySeed(history, cache, args.cacheFile)
     upsertHistorySnapshot(history, cache, args.cacheFile, runTimestamp)
+    normalizeHistoryClaimRates(history)
     saveHistory(args.historyFile, history)
   }
 
