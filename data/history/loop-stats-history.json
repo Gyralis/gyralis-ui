@@ -3,6 +3,70 @@
   "generatedFromCacheFile": "data/loop-registration-cache.json",
   "snapshots": [
     {
+      "date": "2026-05-06",
+      "recordedAt": "2026-05-06T22:23:40.000Z",
+      "cacheFile": "data/loop-registration-cache.json",
+      "cacheUpdatedAt": "2026-05-06T22:23:40.000Z",
+      "loops": {
+        "blockscout": {
+          "loopKey": "blockscout",
+          "loopName": "Blockscout Merits",
+          "updatedAt": "2026-05-06T22:23:40.000Z",
+          "lastProcessedPeriod": "2",
+          "uniqueUserCount": 3,
+          "uniqueClaimUserCount": 1,
+          "totalRegistrationsCount": 3,
+          "totalClaimsCount": 1,
+          "totalDistributedAmountRaw": "199999999999999998",
+          "totalDistributedAmountFormatted": "0.199999999999999998",
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "33.33"
+        },
+        "1hive": {
+          "loopKey": "1hive",
+          "loopName": "1Hive Gardens",
+          "updatedAt": "2026-05-06T22:23:40.000Z",
+          "lastProcessedPeriod": "2",
+          "uniqueUserCount": 1,
+          "uniqueClaimUserCount": 1,
+          "totalRegistrationsCount": 1,
+          "totalClaimsCount": 1,
+          "totalDistributedAmountRaw": "500000000000000000",
+          "totalDistributedAmountFormatted": "0.5",
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "100.00"
+        }
+      },
+      "global": {
+        "updatedAt": "2026-05-06T22:23:40.000Z",
+        "loopsIncluded": [
+          "1hive",
+          "blockscout"
+        ],
+        "uniqueUserCount": 3,
+        "uniqueClaimUserCount": 1,
+        "totalRegistrationsCount": 4,
+        "totalClaimsCount": 2,
+        "totalDistributedAmountRaw": "699999999999999998",
+        "totalDistributedAmountFormatted": "0.699999999999999998",
+        "tokenSymbol": "HNY",
+        "tokenTotals": [
+          {
+            "tokenAddress": "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+            "tokenSymbol": "HNY",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "699999999999999998",
+            "totalDistributedAmountFormatted": "0.699999999999999998",
+            "totalClaimedAmountRaw": "566666666666666666",
+            "totalClaimedAmountFormatted": "0.566666666666666666",
+            "totalUnclaimedAmountRaw": "133333333333333332",
+            "totalUnclaimedAmountFormatted": "0.133333333333333332"
+          }
+        ],
+        "claimRatePercent": "50.00"
+      }
+    },
+    {
       "date": "2026-06-08",
       "recordedAt": "2026-06-08T14:51:43.385Z",
       "cacheFile": "data/loop-registration-cache.json",
@@ -19,7 +83,8 @@
           "totalClaimsCount": 1086,
           "totalDistributedAmountRaw": "62213158403490113326",
           "totalDistributedAmountFormatted": "62.213158403490113326",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "82.90"
         },
         "1hive": {
           "loopKey": "1hive",
@@ -32,7 +97,8 @@
           "totalClaimsCount": 358,
           "totalDistributedAmountRaw": "63160037159296164197",
           "totalDistributedAmountFormatted": "63.160037159296164197",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "84.83"
         }
       },
       "global": {
@@ -60,7 +126,8 @@
             "totalUnclaimedAmountRaw": "18773710804840965291",
             "totalUnclaimedAmountFormatted": "18.773710804840965291"
           }
-        ]
+        ],
+        "claimRatePercent": "83.37"
       }
     },
     {
@@ -80,7 +147,8 @@
           "totalClaimsCount": 1491,
           "totalDistributedAmountRaw": "70206312655123844896",
           "totalDistributedAmountFormatted": "70.206312655123844896",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "84.62"
         },
         "1hive": {
           "loopKey": "1hive",
@@ -93,7 +161,8 @@
           "totalClaimsCount": 461,
           "totalDistributedAmountRaw": "70973413221861986899",
           "totalDistributedAmountFormatted": "70.973413221861986899",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "85.85"
         },
         "test-superloops": {
           "loopKey": "test-superloops",
@@ -106,7 +175,8 @@
           "totalClaimsCount": 1,
           "totalDistributedAmountRaw": "0",
           "totalDistributedAmountFormatted": "0",
-          "tokenSymbol": "MST"
+          "tokenSymbol": "MST",
+          "claimRatePercent": "25.00"
         }
       },
       "global": {
@@ -146,7 +216,8 @@
             "totalUnclaimedAmountRaw": "-120000000000000000000",
             "totalUnclaimedAmountFormatted": "-120"
           }
-        ]
+        ],
+        "claimRatePercent": "84.80"
       }
     },
     {
@@ -166,7 +237,8 @@
           "totalClaimsCount": 2164,
           "totalDistributedAmountRaw": "95101259470481036613",
           "totalDistributedAmountFormatted": "95.101259470481036613",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "84.83"
         },
         "1hive": {
           "loopKey": "1hive",
@@ -179,7 +251,8 @@
           "totalClaimsCount": 693,
           "totalDistributedAmountRaw": "93130302642363029306",
           "totalDistributedAmountFormatted": "93.130302642363029306",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "87.28"
         },
         "test-superloops": {
           "loopKey": "test-superloops",
@@ -192,7 +265,8 @@
           "totalClaimsCount": 1,
           "totalDistributedAmountRaw": "0",
           "totalDistributedAmountFormatted": "0",
-          "tokenSymbol": "MST"
+          "tokenSymbol": "MST",
+          "claimRatePercent": "25.00"
         }
       },
       "global": {
@@ -232,7 +306,8 @@
             "totalUnclaimedAmountRaw": "-120000000000000000000",
             "totalUnclaimedAmountFormatted": "-120"
           }
-        ]
+        ],
+        "claimRatePercent": "85.34"
       }
     },
     {
@@ -252,7 +327,8 @@
           "totalClaimsCount": 3054,
           "totalDistributedAmountRaw": "118361484903592175875",
           "totalDistributedAmountFormatted": "118.361484903592175875",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "85.81"
         },
         "1hive": {
           "loopKey": "1hive",
@@ -265,7 +341,8 @@
           "totalClaimsCount": 985,
           "totalDistributedAmountRaw": "115192947013709038831",
           "totalDistributedAmountFormatted": "115.192947013709038831",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "87.63"
         },
         "test-superloops": {
           "loopKey": "test-superloops",
@@ -278,7 +355,8 @@
           "totalClaimsCount": 1,
           "totalDistributedAmountRaw": "0",
           "totalDistributedAmountFormatted": "0",
-          "tokenSymbol": "MST"
+          "tokenSymbol": "MST",
+          "claimRatePercent": "25.00"
         }
       },
       "global": {
@@ -318,7 +396,8 @@
             "totalUnclaimedAmountRaw": "-120000000000000000000",
             "totalUnclaimedAmountFormatted": "-120"
           }
-        ]
+        ],
+        "claimRatePercent": "86.20"
       }
     },
     {
@@ -338,7 +417,8 @@
           "totalClaimsCount": 3753,
           "totalDistributedAmountRaw": "125419100348303967784",
           "totalDistributedAmountFormatted": "125.419100348303967784",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "86.26"
         },
         "1hive": {
           "loopKey": "1hive",
@@ -351,7 +431,8 @@
           "totalClaimsCount": 1274,
           "totalDistributedAmountRaw": "122088602410156713083",
           "totalDistributedAmountFormatted": "122.088602410156713083",
-          "tokenSymbol": "HNY"
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "88.23"
         },
         "test-superloops": {
           "loopKey": "test-superloops",
@@ -364,7 +445,8 @@
           "totalClaimsCount": 1,
           "totalDistributedAmountRaw": "0",
           "totalDistributedAmountFormatted": "0",
-          "tokenSymbol": "MST"
+          "tokenSymbol": "MST",
+          "claimRatePercent": "25.00"
         }
       },
       "global": {
@@ -404,7 +486,98 @@
             "totalUnclaimedAmountRaw": "-120000000000000000000",
             "totalUnclaimedAmountFormatted": "-120"
           }
-        ]
+        ],
+        "claimRatePercent": "86.70"
+      }
+    },
+    {
+      "date": "2026-08-10",
+      "recordedAt": "2026-08-10T02:53:09.825Z",
+      "cacheFile": "data/loop-registration-cache.json",
+      "cacheUpdatedAt": "2026-08-10T02:53:09.825Z",
+      "loops": {
+        "blockscout": {
+          "loopKey": "blockscout",
+          "loopName": "Blockscout Merits",
+          "updatedAt": "2026-08-10T02:53:09.825Z",
+          "lastProcessedPeriod": "96",
+          "uniqueUserCount": 193,
+          "uniqueClaimUserCount": 142,
+          "totalRegistrationsCount": 5086,
+          "totalClaimsCount": 4359,
+          "totalDistributedAmountRaw": "146144795079343755501",
+          "totalDistributedAmountFormatted": "146.144795079343755501",
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "85.71"
+        },
+        "1hive": {
+          "loopKey": "1hive",
+          "loopName": "1Hive Gardens",
+          "updatedAt": "2026-08-10T02:52:23.185Z",
+          "lastProcessedPeriod": "96",
+          "uniqueUserCount": 43,
+          "uniqueClaimUserCount": 40,
+          "totalRegistrationsCount": 1730,
+          "totalClaimsCount": 1524,
+          "totalDistributedAmountRaw": "142228155142017143369",
+          "totalDistributedAmountFormatted": "142.228155142017143369",
+          "tokenSymbol": "HNY",
+          "claimRatePercent": "88.09"
+        },
+        "test-superloops": {
+          "loopKey": "test-superloops",
+          "loopName": "TEST SUPERLOOPS",
+          "updatedAt": "2026-06-15T14:55:13.028Z",
+          "lastProcessedPeriod": "18825",
+          "uniqueUserCount": 2,
+          "uniqueClaimUserCount": 1,
+          "totalRegistrationsCount": 4,
+          "totalClaimsCount": 1,
+          "totalDistributedAmountRaw": "0",
+          "totalDistributedAmountFormatted": "0",
+          "tokenSymbol": "MST",
+          "claimRatePercent": "25.00"
+        }
+      },
+      "global": {
+        "updatedAt": "2026-08-10T02:53:09.825Z",
+        "loopsIncluded": [
+          "1hive",
+          "blockscout",
+          "test-superloops"
+        ],
+        "uniqueUserCount": 198,
+        "uniqueClaimUserCount": 147,
+        "totalRegistrationsCount": 6820,
+        "totalClaimsCount": 5884,
+        "totalDistributedAmountRaw": null,
+        "totalDistributedAmountFormatted": null,
+        "tokenSymbol": null,
+        "tokenTotals": [
+          {
+            "tokenAddress": "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+            "tokenSymbol": "HNY",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "288372950221360898870",
+            "totalDistributedAmountFormatted": "288.37295022136089887",
+            "totalClaimedAmountRaw": "250329185155611152276",
+            "totalClaimedAmountFormatted": "250.329185155611152276",
+            "totalUnclaimedAmountRaw": "38043765065749746594",
+            "totalUnclaimedAmountFormatted": "38.043765065749746594"
+          },
+          {
+            "tokenAddress": "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
+            "tokenSymbol": "MST",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "0",
+            "totalDistributedAmountFormatted": "0",
+            "totalClaimedAmountRaw": "120000000000000000000",
+            "totalClaimedAmountFormatted": "120",
+            "totalUnclaimedAmountRaw": "-120000000000000000000",
+            "totalUnclaimedAmountFormatted": "-120"
+          }
+        ],
+        "claimRatePercent": "86.28"
       }
     }
   ]
