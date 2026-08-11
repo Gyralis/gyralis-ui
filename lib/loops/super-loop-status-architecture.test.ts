@@ -58,6 +58,8 @@ describe("SuperLoop card architecture", () => {
     expect(controller).toContain("useSuperLoopSettings")
     expect(controller).toContain("useSuperLoopParticipation")
     expect(controller).toContain("useLoopTokenBalance")
+    expect(controller).toContain("payoutToken: loop.payoutToken")
+    expect(controller).toContain("tokenSymbol: balance.data?.payoutSymbol")
     expect(controller).toContain("LoopActionViewModel")
   })
 
@@ -80,6 +82,8 @@ describe("SuperLoop card architecture", () => {
 
     expect(balanceHook).toContain('functionName: "decimals"')
     expect(balanceHook).toContain('functionName: "symbol"')
+    expect(balanceHook).toContain("payoutToken ?? token ?? zeroAddress")
+    expect(balanceHook).toContain("payoutSymbol: payoutSymbol ?? symbol")
     expect(balanceHook).toContain('functionName: "getAccountFlowrate"')
     expect(balanceHook).not.toContain("realtimeAvailableNow")
     expect(balanceHook).not.toContain("getLoopContractMethods")

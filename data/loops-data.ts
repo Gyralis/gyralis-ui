@@ -13,6 +13,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  payoutToken?: Address
   communityLogoUrl?: string
   eligibilityLogoUrl?: string
 
@@ -51,6 +52,7 @@ export const LoopCardsData: LoopCardData[] = [
     description:
       "The first SuperLoop on Base, streaming rewards you can claim daily.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
     communityLogoUrl: "/markee-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score 15+",
@@ -139,6 +141,7 @@ export const LoopCardsData: LoopCardData[] = [
     address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
     description: "Engage Daily. Earn Fairly with Gyralis superLoops.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
     eligibilityLogoUrl: "/gyralis-logo.svg",
     shieldScore: "Passport Score 15+",
     eligibility: "+50 Claims in Gyralis",
