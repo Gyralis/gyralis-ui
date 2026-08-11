@@ -183,6 +183,7 @@ export interface DashboardOverviewCards {
   globalUniqueRegisteredUsers: number
   globalUniqueClaimUsers: number
   globalRegisteredButNeverClaimedUsers: number
+  registeredUsersClaimedRatePercent: number | null
   totalRegistrations: number
   totalClaims: number
   claimParticipationRatePercent: number | null
@@ -239,6 +240,13 @@ export interface DashboardDistributionByPeriodRow {
   distributedAmount: string | null
   claimedAmount: string | null
   unclaimedAmount: string | null
+}
+
+export interface DashboardHistoryMetricRow {
+  snapshotDate: string
+  snapshotShortLabel: string | null
+  snapshotLongLabel: string | null
+  values: Partial<Record<DashboardLoopKey, number | null>>
 }
 
 export interface DashboardPeriodTableRow {
@@ -299,6 +307,12 @@ export interface DashboardCharts {
   claimRateByPeriod: DashboardMetricByPeriodRow[]
   cumulativeUniqueUsersByPeriod: DashboardMetricByPeriodRow[]
   distributionByPeriod: DashboardDistributionByPeriodRow[]
+  uniqueUsersBySnapshot: DashboardHistoryMetricRow[]
+  uniqueClaimUsersBySnapshot: DashboardHistoryMetricRow[]
+  registrationsBySnapshot: DashboardHistoryMetricRow[]
+  claimsBySnapshot: DashboardHistoryMetricRow[]
+  claimRateBySnapshot: DashboardHistoryMetricRow[]
+  distributedAmountBySnapshot: DashboardHistoryMetricRow[]
 }
 
 export interface DashboardTables {
@@ -333,6 +347,13 @@ export interface RawHistoryLoopSnapshot {
   uniqueClaimUserCount?: number
   totalRegistrationsCount?: number
   totalClaimsCount?: number
+  claimRatePercent?: string | number | null
+  maxRegistrationsInPeriodCount?: number
+  maxRegistrationsInPeriodNumber?: string | null
+  maxRegistrationsInPeriodEndedAt?: string | null
+  maxClaimsInPeriodCount?: number
+  maxClaimsInPeriodNumber?: string | null
+  maxClaimsInPeriodEndedAt?: string | null
   totalDistributedAmountRaw?: string | null
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null
@@ -345,6 +366,15 @@ export interface RawHistoryGlobalSnapshot {
   uniqueClaimUserCount?: number
   totalRegistrationsCount?: number
   totalClaimsCount?: number
+  claimRatePercent?: string | number | null
+  maxRegistrationsInLoopPeriodCount?: number
+  maxRegistrationsInLoopPeriodLoopKey?: string | null
+  maxRegistrationsInLoopPeriodNumber?: string | null
+  maxRegistrationsInLoopPeriodEndedAt?: string | null
+  maxClaimsInLoopPeriodCount?: number
+  maxClaimsInLoopPeriodLoopKey?: string | null
+  maxClaimsInLoopPeriodNumber?: string | null
+  maxClaimsInLoopPeriodEndedAt?: string | null
   totalDistributedAmountRaw?: string | null
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null

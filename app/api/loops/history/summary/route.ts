@@ -9,6 +9,7 @@ type GlobalHistorySnapshot = {
   uniqueClaimUserCount?: number
   totalRegistrationsCount?: number
   totalClaimsCount?: number
+  claimRatePercent?: string | number | null
   totalDistributedAmountFormatted?: string | null
   tokenSymbol?: string | null
   tokenTotals?: Array<{
@@ -47,8 +48,12 @@ export async function GET() {
 
   const totalClaims = globalStats.totalClaimsCount ?? 0
   const totalRegistrations = globalStats.totalRegistrationsCount ?? 0
-  const claimRatePercent =
-    totalRegistrations > 0 ? (totalClaims / totalRegistrations) * 100 : null
+  const storedClaimRate = Number(globalStats.claimRatePercent)
+  const claimRatePercent = Number.isFinite(storedClaimRate)
+    ? storedClaimRate
+    : totalRegistrations > 0
+      ? (totalClaims / totalRegistrations) * 100
+      : null
   const distributedToken =
     globalStats.tokenTotals?.find((token) => {
       const amount = Number(token.totalDistributedAmountFormatted ?? "0")

@@ -9,6 +9,7 @@ import { defaultDashboardLoopKeys, loopDashboardMeta } from "@/data/loop-dashboa
 import type {
   DashboardCurrentPeriodOverview,
   DashboardDistributionByPeriodRow,
+  DashboardHistoryMetricRow,
   DashboardGrowthStat,
   DashboardLoopKey,
   DashboardLoopSummary,
@@ -20,6 +21,7 @@ import type {
   DashboardPeriodTableRow,
   DashboardTokenSummary,
   GetDashboardDataOptions,
+  RawHistoryLoopSnapshot,
   RawHistorySnapshotEntry,
   RawLoopStatsHistory,
   RawGlobalTokenTotal,
@@ -40,6 +42,12 @@ const periodEndedShortFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 })
 const periodEndedLongFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+})
+const historySnapshotLongFormatter = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
   year: "numeric",
@@ -264,6 +272,10 @@ function buildOverview(
     globalRegisteredButNeverClaimedUsers: Math.max(
       uniqueRegisteredUsers - uniqueClaimUsers,
       0
+    ),
+    registeredUsersClaimedRatePercent: formatNumberPercent(
+      uniqueClaimUsers,
+      uniqueRegisteredUsers
     ),
     totalRegistrations: loopSummaries.reduce(
       (total, loop) => total + loop.totalRegistrationsCount,
@@ -570,6 +582,32 @@ function formatHistoryDateLabel(value: string | null | undefined) {
   return periodEndedShortFormatter.format(parsed)
 }
 
+function formatHistoryLongDateLabel(value: string | null | undefined) {
+  if (!value) return null
+
+  const parsed = new Date(`${value}T00:00:00Z`)
+  if (Number.isNaN(parsed.getTime())) return value
+
+  return historySnapshotLongFormatter.format(parsed)
+}
+
+function buildSnapshotMetricRows(
+  history: RawLoopStatsHistory | null,
+  selectedLoopKeys: DashboardLoopKey[],
+  selector: (snapshot: RawHistoryLoopSnapshot | undefined) => number | null
+): DashboardHistoryMetricRow[] {
+  const snapshots = getSortedHistorySnapshots(history)
+
+  return snapshots.map((snapshot) => ({
+    snapshotDate: snapshot.date ?? "",
+    snapshotShortLabel: formatHistoryDateLabel(snapshot.date),
+    snapshotLongLabel: formatHistoryLongDateLabel(snapshot.date),
+    values: Object.fromEntries(
+      selectedLoopKeys.map((loopKey) => [loopKey, selector(snapshot.loops?.[loopKey])])
+    ) as Partial<Record<DashboardLoopKey, number | null>>,
+  }))
+}
+
 function computeGrowthPercent(current: number, previous: number): number | null {
   if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null
   return Number((((current - previous) / previous) * 100).toFixed(2))
@@ -774,6 +812,51 @@ export async function getDashboardPageData(
         (period) => period.cumulativeUniqueUserCount
       ),
       distributionByPeriod: buildDistributionRows(loopSummaries, windowPeriods),
+      uniqueUsersBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => parseCount(snapshot?.uniqueUserCount)
+      ),
+      uniqueClaimUsersBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => parseCount(snapshot?.uniqueClaimUserCount)
+      ),
+      registrationsBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => parseCount(snapshot?.totalRegistrationsCount)
+      ),
+      claimsBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => parseCount(snapshot?.totalClaimsCount)
+      ),
+      claimRateBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => {
+          const storedClaimRate = parsePercent(snapshot?.claimRatePercent)
+          if (storedClaimRate != null) return storedClaimRate
+
+          const claims = parseCount(snapshot?.totalClaimsCount)
+          const registrations = parseCount(snapshot?.totalRegistrationsCount)
+          if (registrations === 0) return 0
+
+          return Number(((claims / registrations) * 100).toFixed(2))
+        }
+      ),
+      distributedAmountBySnapshot: buildSnapshotMetricRows(
+        history,
+        selectedLoopKeys,
+        (snapshot) => {
+          const amount = snapshot?.totalDistributedAmountFormatted
+          if (!amount) return 0
+
+          const parsed = Number.parseFloat(amount)
+          return Number.isFinite(parsed) ? parsed : 0
+        }
+      ),
     },
     tables: {
       loopSummary: buildLoopTableRows(loopSummaries),
