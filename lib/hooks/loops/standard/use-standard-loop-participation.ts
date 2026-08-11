@@ -36,14 +36,30 @@ export function useStandardLoopParticipation({
         throw new Error("Loop participation is not ready")
       }
 
-      const periodData = await publicClient.readContract({
-        address,
-        abi: getLoopContractAbi(chainId, "loop"),
-        functionName: loopContractMethods.loop.getCurrentPeriodData,
+      const abi = getLoopContractAbi(chainId, "loop")
+      const [periodData, individualPayout] = await publicClient.multicall({
+        allowFailure: false,
+        contracts: [
+          {
+            address,
+            abi,
+            functionName: loopContractMethods.loop.getCurrentPeriodData,
+          },
+          {
+            address,
+            abi,
+            functionName: loopContractMethods.loop.getPeriodIndividualPayout,
+            args: [currentPeriod],
+          },
+        ],
       })
       const [registeredCount] = periodData as readonly [bigint, bigint]
+      const periodIndividualPayout = individualPayout as bigint
 
-      return { registeredCount: Number(registeredCount) }
+      return {
+        registeredCount: Number(registeredCount),
+        totalPeriodPayout: periodIndividualPayout * registeredCount,
+      }
     },
     enabled:
       enabled &&
