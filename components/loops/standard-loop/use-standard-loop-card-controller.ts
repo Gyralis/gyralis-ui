@@ -80,8 +80,12 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     void refetchParticipation()
   }, [refetchParticipation])
   const retryDistribution = useCallback(() => {
-    void Promise.allSettled([refetchSettings(), refetchBalance()])
-  }, [refetchBalance, refetchSettings])
+    void Promise.allSettled([
+      refetchSettings(),
+      refetchBalance(),
+      refetchParticipation(),
+    ])
+  }, [refetchBalance, refetchParticipation, refetchSettings])
   const refreshCardData = useCallback(async () => {
     setModalRefreshKey((key) => key + 1)
     await Promise.allSettled([
@@ -138,19 +142,16 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   >(() => {
     let data: LoopDistributionViewData | undefined
 
-    if (settings.data && balance.data) {
+    if (settings.data && balance.data && participation.data) {
       const percent = Number(settings.data.percentPerPeriod)
       const distributionRate = percent === 0 ? "Infinite" : `${percent}%`
-      const distributedAmountValue =
-        settings.data.percentPerPeriod > 0n
-          ? trimFormattedBalance(
-              formatUnits(
-                (balance.data.value * settings.data.percentPerPeriod) / 100n,
-                balance.data.decimals
-              ),
-              2
-            )
-          : undefined
+      const distributedAmountValue = trimFormattedBalance(
+        formatUnits(
+          participation.data.totalPeriodPayout,
+          balance.data.decimals
+        ),
+        2
+      )
       const balanceDetail = `${trimFormattedBalance(
         formatUnits(balance.data.value, balance.data.decimals),
         2
@@ -159,25 +160,25 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       data = {
         balanceDetail,
         balanceDetailLabel: "Balance",
-        labelDetail:
-          settings.data.percentPerPeriod > 0n ? distributionRate : undefined,
         tooltip:
           settings.data.percentPerPeriod > 0n
             ? `Each claim period distributes ${distributionRate} of the balance remaining after the previous period among registered Loopers.`
             : "The loop balance is distributed evenly among registered users each period.",
-        value: distributedAmountValue ?? distributionRate,
-        valueUnit:
-          settings.data.percentPerPeriod > 0n ? balance.data.symbol : undefined,
+        value: distributedAmountValue,
+        valueUnit: balance.data.symbol,
       }
     }
 
-    const error = !settings.data ? settings.error ?? configError : balance.error
+    const error = !settings.data
+      ? settings.error ?? configError
+      : balance.error ?? participation.error
 
     return createLoopSectionState({
       data,
       error,
       errorMessage: "Failed to fetch reward distribution",
-      isFetching: settings.isFetching || balance.isFetching,
+      isFetching:
+        settings.isFetching || balance.isFetching || participation.isFetching,
       loadingMessage: "Loading rewards...",
       retry: retryDistribution,
     })
@@ -186,6 +187,9 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     balance.error,
     balance.isFetching,
     configError,
+    participation.data,
+    participation.error,
+    participation.isFetching,
     retryDistribution,
     settings.data,
     settings.error,
