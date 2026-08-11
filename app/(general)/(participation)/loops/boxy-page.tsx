@@ -64,6 +64,7 @@ export default function LoopsBoxyPage() {
     <ParticipationProfile
       profile={participationPreview}
       ecosystemMetrics={ecosystemMetrics}
+      statsLastUpdatedLabel="Preview data"
       preview
     />
   )
