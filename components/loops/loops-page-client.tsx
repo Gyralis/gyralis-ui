@@ -10,43 +10,30 @@ import { LuX } from "react-icons/lu"
 import LoopCard from "@/components/loops/loop-card"
 import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
 // import { LoopsTable } from "@/components/loops/loops-table"
-import {
-  EcosystemMetricData,
-  ParticipationProfile,
-  ParticipationProfileData,
-} from "@/components/loops/participation-profile"
+// import {
+//   EcosystemMetricData,
+//   ParticipationProfile,
+//   ParticipationProfileData,
+// } from "@/components/loops/participation-profile"
 
 // type ViewMode = "grid" | "list"
 
-type LoopsPageClientProps = {
-  ecosystemMetrics: [
-    EcosystemMetricData,
-    EcosystemMetricData,
-    EcosystemMetricData,
-    EcosystemMetricData
-  ]
-  statsLastUpdatedLabel: string
-}
-
-const participationPreview: ParticipationProfileData = {
-  rank: 4,
-  percentile: "Top 5%",
-  identityLabel: "True Looper",
-  streak: 14,
-  tierLabel: "Core Looper",
-  claims: 42,
-  points: 58,
-  earnings: 100,
-  earningsSymbol: "HNY",
-  activeLoops: 2,
-}
+// const participationPreview: ParticipationProfileData = {
+//   rank: 4,
+//   percentile: "Top 5%",
+//   identityLabel: "True Looper",
+//   streak: 14,
+//   tierLabel: "Core Looper",
+//   claims: 42,
+//   points: 58,
+//   earnings: 100,
+//   earningsSymbol: "HNY",
+//   activeLoops: 2,
+// }
 
 const UPGRADE_NOTICE_STORAGE_KEY = "gyralis-loops-upgrade-notice-dismissed"
 
-export function LoopsPageClient({
-  ecosystemMetrics,
-  statsLastUpdatedLabel,
-}: LoopsPageClientProps) {
+export function LoopsPageClient() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
   // const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [showUpgradeNotice, setShowUpgradeNotice] = useState(false)
@@ -84,6 +71,7 @@ export function LoopsPageClient({
           onDismiss={dismissUpgradeNotice}
         />
 
+        {/* Participation profile / hero stats temporarily disabled.
         <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
           <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 sm:gap-10">
             <ParticipationProfile
@@ -94,6 +82,7 @@ export function LoopsPageClient({
             />
           </div>
         </header>
+        */}
 
         <div
           id="loops-grid"

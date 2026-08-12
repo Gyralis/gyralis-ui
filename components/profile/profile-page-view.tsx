@@ -1,9 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import { ProfileCopyButton } from "@/components/profile/profile-copy-button"
 import {
-  formatProfileAddress,
   getBlockExplorerAddressUrl,
   ProfileLoopStats,
   ProfilePageData,
@@ -16,15 +14,6 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value)
 }
 
-function formatDate(value: Date | string | null | undefined) {
-  if (!value) return "Never"
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value))
-}
-
 function getLoopLogo(loop: ProfileLoopStats) {
   return (
     loop.metadata.communityLogoUrl ??
@@ -34,28 +23,18 @@ function getLoopLogo(loop: ProfileLoopStats) {
 }
 
 export function ProfilePageView({ data }: { data: ProfilePageData }) {
-  const displayName =
-    data.profile?.ensName ?? formatProfileAddress(data.address)
-  const heroStats = [
-    {
-      label: "Total points",
-      value: data.globalStats?.totalPoints ?? 0,
-      detail: "Claims plus streak bonuses",
-    },
+  const headerStats = [
     {
       label: "Total claims",
-      value: data.globalStats?.totalClaims ?? 0,
-      detail: "Across all scored loops",
-    },
-    {
-      label: "Active loop streaks",
-      value: data.globalStats?.activeLoopStreaks ?? 0,
-      detail: "Loops with a current streak",
+      value: formatNumber(data.globalStats?.totalClaims ?? 0),
     },
     {
       label: "Longest streak",
-      value: data.globalStats?.longestStreak ?? 0,
-      detail: "Best per-loop streak",
+      value: formatNumber(data.globalStats?.longestStreak ?? 0),
+    },
+    {
+      label: "All time points",
+      value: formatNumber(data.globalStats?.totalPoints ?? 0),
     },
   ]
 
@@ -75,83 +54,35 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
                     className="size-full rounded-[2rem] object-cover"
                   />
                 ) : (
-                  displayName.slice(0, 2).toUpperCase()
+                  "LP"
                 )}
               </div>
 
-              <div className="min-w-0 flex-1 space-y-4">
+              <div className="min-w-0 flex-1">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                    Gyralis profile
+                    Participation identity
                   </p>
                   <h1 className="mt-2 break-words font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                    {displayName}
+                    Looper Profile
                   </h1>
                   <p className="mt-3 break-all font-mono text-sm text-muted-foreground">
                     {data.address}
                   </p>
                 </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <ProfileCopyButton value={data.address}>
-                    Copy address
-                  </ProfileCopyButton>
-                  <Link
-                    href={`https://gnosisscan.io/address/${data.address}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-10 items-center justify-center rounded-full border border-border/80 bg-background/70 px-4 text-xs font-semibold text-muted-foreground transition hover:border-primary/60 hover:text-primary"
-                  >
-                    Explorer
-                  </Link>
-                  <Link
-                    href="/profile"
-                    className="inline-flex h-10 items-center justify-center rounded-full border border-border/80 bg-background/70 px-4 text-xs font-semibold text-muted-foreground transition hover:border-primary/60 hover:text-primary"
-                  >
-                    Search another
-                  </Link>
-                </div>
               </div>
             </div>
 
             <div className="grid gap-3 rounded-[1.75rem] border border-border/70 bg-background/70 p-4">
-              <ProfileFact
-                label="Human Passport"
-                value={
-                  data.profile?.humanPassportScore == null
-                    ? "Not synced"
-                    : data.profile.humanPassportScore.toFixed(2)
-                }
-              />
-              <ProfileFact
-                label="Loops participated"
-                value={String(data.globalStats?.loopCount ?? data.loopStats.length)}
-              />
-              <ProfileFact
-                label="Profile created"
-                value={formatDate(data.profile?.createdAt)}
-              />
+              {headerStats.map((stat) => (
+                <ProfileFact
+                  key={stat.label}
+                  label={stat.label}
+                  value={stat.value}
+                />
+              ))}
             </div>
           </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {heroStats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-[1.75rem] border border-border/70 bg-card/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {stat.label}
-              </p>
-              <p className="mt-3 font-heading text-4xl font-bold text-foreground">
-                {formatNumber(stat.value)}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {stat.detail}
-              </p>
-            </div>
-          ))}
         </section>
 
         {!data.hasActivity ? (
