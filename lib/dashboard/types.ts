@@ -1,6 +1,10 @@
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 
-export type DashboardLoopKey = "1hive" | "blockscout" | "test-superloops"
+export type DashboardLoopKey =
+  | "1hive"
+  | "blockscout"
+  | "base-superloop"
+  | "test-superloops"
 
 export interface DashboardLoopMeta {
   loopKey: DashboardLoopKey
@@ -96,6 +100,7 @@ export interface DashboardDistributionByPeriodRow {
   periodEndedLongLabel: string | null
   loopKey: DashboardLoopKey
   loopName: string
+  tokenSymbol: string
   distributedAmount: string | null
   claimedAmount: string | null
   unclaimedAmount: string | null
@@ -108,6 +113,7 @@ export interface DashboardPeriodTableRow {
   periodEndedLongLabel: string | null
   loopKey: DashboardLoopKey
   loopName: string
+  tokenSymbol: string
   registrations: number
   claims: number
   claimRatePercent: number | null

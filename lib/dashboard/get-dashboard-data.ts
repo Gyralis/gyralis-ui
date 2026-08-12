@@ -5,8 +5,14 @@ import {
   loopDashboardMeta,
 } from "@/data/loop-dashboard-meta"
 import { env } from "@/env.mjs"
-import { createPublicClient, formatUnits, http, parseAbi } from "viem"
-import { gnosis } from "viem/chains"
+import {
+  createPublicClient,
+  formatUnits,
+  http,
+  parseAbi,
+  type Chain,
+} from "viem"
+import { base, gnosis } from "viem/chains"
 
 import type {
   DashboardCurrentPeriodOverview,
@@ -27,6 +33,8 @@ const DEFAULT_PERIODS_BACK = 7
 const loopAbi = parseAbi([
   "function getCurrentPeriod() view returns (uint256)",
   "function getLoopDetails() view returns (address token, uint256 periodLength, uint256 percentPerPeriod, uint256 firstPeriodStart)",
+  "function getStreamingCurrentPeriod() view returns (uint256)",
+  "function getStreamingLoopDetails() view returns (address token, uint256 periodLength, uint256 percentPerPeriod, uint256 firstPeriodStart)",
 ])
 const erc20Abi = parseAbi([
   "function symbol() view returns (string)",
@@ -37,12 +45,31 @@ const liveLoopSources = {
   "1hive": {
     subgraphId: "3",
     address: "0x8995641fb3E452bC1359E79A738a6DE556015696",
+    chain: gnosis,
+    contractType: "loop",
+    fallbackTokenSymbol: "HNY",
+    getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
   blockscout: {
     subgraphId: "4",
     address: "0xaB25dBaFD11b1eb606B2455Eecec67e6746E409b",
+    chain: gnosis,
+    contractType: "loop",
+    fallbackTokenSymbol: "HNY",
+    getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
+  },
+  "base-superloop": {
+    subgraphId: "0xf10834f301206f3d6e5a9c9641b12edea712a428",
+    address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
+    chain: base,
+    contractType: "superLoop",
+    fallbackTokenSymbol: "SUP",
+    getEndpoint: () => env.GYRALIS_BASE_SUBGRAPH_URL,
   },
 } as const
+
+type LiveLoopKey = keyof typeof liveLoopSources
+type LiveLoopSource = (typeof liveLoopSources)[LiveLoopKey]
 
 interface SubgraphPeriod {
   periodNumber: string
@@ -122,14 +149,11 @@ function eventQuery(entity: "registerEvents" | "claimEvents") {
 }
 
 async function querySubgraph<T>(
+  endpoint: string,
   query: string,
   variables: Record<string, unknown>
 ): Promise<T> {
-  if (!env.GYRALIS_SUBGRAPH_URL) {
-    throw new Error("GYRALIS_SUBGRAPH_URL is required for the live dashboard")
-  }
-
-  const response = await fetch(env.GYRALIS_SUBGRAPH_URL, {
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
@@ -155,6 +179,7 @@ async function querySubgraph<T>(
 }
 
 async function fetchAllEvents(
+  endpoint: string,
   entity: "registerEvents" | "claimEvents",
   loopId: string
 ): Promise<SubgraphEvent[]> {
@@ -163,6 +188,7 @@ async function fetchAllEvents(
 
   while (true) {
     const data = await querySubgraph<Record<typeof entity, SubgraphEvent[]>>(
+      endpoint,
       eventQuery(entity),
       { loopId, first: EVENT_PAGE_SIZE, afterId }
     )
@@ -174,23 +200,34 @@ async function fetchAllEvents(
 }
 
 async function fetchLoopSchedule(
-  address: `0x${string}`,
+  source: LiveLoopSource,
   fallbackPeriod: number,
   fallbackToken: string | null
 ): Promise<LoopSchedule> {
-  const client = createPublicClient({ chain: gnosis, transport: http() })
+  const client = createPublicClient({
+    chain: source.chain as Chain,
+    transport: http(),
+  })
+  const currentPeriodFunction =
+    source.contractType === "superLoop"
+      ? "getStreamingCurrentPeriod"
+      : "getCurrentPeriod"
+  const detailsFunction =
+    source.contractType === "superLoop"
+      ? "getStreamingLoopDetails"
+      : "getLoopDetails"
 
   try {
     const [currentPeriod, details] = await Promise.all([
       client.readContract({
-        address,
+        address: source.address,
         abi: loopAbi,
-        functionName: "getCurrentPeriod",
+        functionName: currentPeriodFunction,
       }),
       client.readContract({
-        address,
+        address: source.address,
         abi: loopAbi,
-        functionName: "getLoopDetails",
+        functionName: detailsFunction,
       }),
     ])
     const tokenAddress = details[0]
@@ -216,13 +253,16 @@ async function fetchLoopSchedule(
       tokenDecimals,
     }
   } catch (error) {
-    console.error(`[dashboard] failed to read schedule for ${address}`, error)
+    console.error(
+      `[dashboard] failed to read schedule for ${source.address}`,
+      error
+    )
     return {
       currentPeriod: fallbackPeriod,
       firstPeriodStart: 0n,
       periodLength: 0n,
       tokenAddress: fallbackToken,
-      tokenSymbol: "HNY",
+      tokenSymbol: source.fallbackTokenSymbol,
       tokenDecimals: 18,
     }
   }
@@ -433,6 +473,7 @@ function buildDistributionRows(
         periodEndedLongLabel: period?.periodEndedLongLabel ?? null,
         loopKey: loop.loopKey,
         loopName: loop.meta.title,
+        tokenSymbol: loop.meta.tokenSymbol,
         distributedAmount: period?.totalRegisteredAmount ?? null,
         claimedAmount: period?.totalClaimedAmount ?? null,
         unclaimedAmount: period?.totalUnclaimedAmount ?? null,
@@ -477,42 +518,101 @@ function buildCurrentPeriodOverview(
 export async function getDashboardPageData(
   options: GetDashboardDataOptions = {}
 ): Promise<DashboardPageData> {
-  const selectedLoopKeys = (
+  const requestedLoopKeys = (
     options.loopKeys?.length ? options.loopKeys : [...defaultDashboardLoopKeys]
   ).filter(
     (key): key is keyof typeof liveLoopSources =>
       loopDashboardMeta[key]?.isVisibleInDashboard && key in liveLoopSources
   )
-  const loopIds = selectedLoopKeys.map((key) => liveLoopSources[key].subgraphId)
-  const dashboard = await querySubgraph<{
-    _meta: { block: { number: number }; hasIndexingErrors: boolean }
-    loops: SubgraphLoop[]
-  }>(dashboardQuery, { loopIds })
+  const configuredSources = requestedLoopKeys
+    .map((loopKey) => ({
+      loopKey,
+      source: liveLoopSources[loopKey],
+      endpoint: liveLoopSources[loopKey].getEndpoint(),
+    }))
+    .filter(
+      (
+        entry
+      ): entry is typeof entry & {
+        endpoint: string
+      } => Boolean(entry.endpoint)
+    )
 
-  const liveLoops = await Promise.all(
-    selectedLoopKeys.map(async (loopKey): Promise<LiveLoopData> => {
-      const source = liveLoopSources[loopKey]
-      const loop = dashboard.loops.find((item) => item.id === source.subgraphId)
-      if (!loop)
-        throw new Error(`Subgraph loop ${source.subgraphId} is missing`)
-      const fallbackPeriod = loop.periods.reduce(
-        (latest, period) =>
-          Number(period.totalClaims) > 0
-            ? Math.max(latest, Number(period.periodNumber))
-            : latest,
-        0
+  if (!configuredSources.length) {
+    throw new Error(
+      "At least one dashboard subgraph endpoint must be configured"
+    )
+  }
+
+  const groups = new Map<
+    string,
+    {
+      endpoint: string
+      chain: Chain
+      sources: typeof configuredSources
+    }
+  >()
+  for (const entry of configuredSources) {
+    const groupKey = `${entry.source.chain.id}:${entry.endpoint}`
+    const group = groups.get(groupKey)
+    if (group) {
+      group.sources.push(entry)
+    } else {
+      groups.set(groupKey, {
+        endpoint: entry.endpoint,
+        chain: entry.source.chain as Chain,
+        sources: [entry],
+      })
+    }
+  }
+
+  const subgraphResults = await Promise.all(
+    [...groups.values()].map(async (group) => {
+      const dashboard = await querySubgraph<{
+        _meta: { block: { number: number }; hasIndexingErrors: boolean }
+        loops: SubgraphLoop[]
+      }>(group.endpoint, dashboardQuery, {
+        loopIds: group.sources.map((entry) => entry.source.subgraphId),
+      })
+      const liveLoops = await Promise.all(
+        group.sources.map(async (entry): Promise<LiveLoopData> => {
+          const { loopKey, source } = entry
+          const loop = dashboard.loops.find(
+            (item) => item.id.toLowerCase() === source.subgraphId.toLowerCase()
+          )
+          if (!loop)
+            throw new Error(`Subgraph loop ${source.subgraphId} is missing`)
+          const fallbackPeriod = loop.periods.reduce(
+            (latest, period) =>
+              Number(period.totalClaims) > 0
+                ? Math.max(latest, Number(period.periodNumber))
+                : latest,
+            0
+          )
+          const [registerEvents, claimEvents, schedule] = await Promise.all([
+            fetchAllEvents(group.endpoint, "registerEvents", loop.id),
+            fetchAllEvents(group.endpoint, "claimEvents", loop.id),
+            fetchLoopSchedule(source, fallbackPeriod, loop.token),
+          ])
+          return { loopKey, loop, registerEvents, claimEvents, schedule }
+        })
       )
-      const [registerEvents, claimEvents, schedule] = await Promise.all([
-        fetchAllEvents("registerEvents", loop.id),
-        fetchAllEvents("claimEvents", loop.id),
-        fetchLoopSchedule(source.address, fallbackPeriod, loop.token),
-      ])
-      return { loopKey, loop, registerEvents, claimEvents, schedule }
+      return {
+        chain: group.chain,
+        meta: dashboard._meta,
+        liveLoops,
+      }
     })
   )
+  const liveLoops = subgraphResults.flatMap((result) => result.liveLoops)
 
   const loopSummaries = liveLoops.map(buildLoopSummary)
-  const maxPeriod = loopSummaries.reduce(
+  // Period numbers and cadences are chain-specific. The comparative charts stay
+  // on the Gnosis cohort while all loop cards and claim totals are cross-chain.
+  const chartLoopSummaries = loopSummaries.filter(
+    (loop) => loop.meta.chainName === "Gnosis"
+  )
+  const maxPeriod = chartLoopSummaries.reduce(
     (latest, loop) => Math.max(latest, loop.lastProcessedPeriod ?? 0),
     0
   )
@@ -539,33 +639,49 @@ export async function getDashboardPageData(
     (sum, loop) => sum + loop.totalClaimsCount,
     0
   )
-  const totalDistributedAmount = loopSummaries
-    .reduce((sum, loop) => sum + Number(loop.totalDistributedAmount ?? 0), 0)
-    .toString()
-  const totalClaimedAmount = loopSummaries
-    .reduce((sum, loop) => sum + Number(loop.totalClaimedAmount ?? 0), 0)
-    .toString()
-  const totalUnclaimedAmount = Math.max(
-    Number(totalDistributedAmount) - Number(totalClaimedAmount),
-    0
-  ).toString()
-  const token = liveLoops[0]?.schedule
-  const tokenSummaries: DashboardTokenSummary[] = token
-    ? [
-        {
-          tokenAddress: token.tokenAddress,
-          tokenSymbol: token.tokenSymbol,
-          tokenDecimals: token.tokenDecimals,
-          totalDistributedAmount,
-          totalClaimedAmount,
-          totalUnclaimedAmount,
-          claimedAmountRatePercent: percent(
-            Number(totalClaimedAmount),
-            Number(totalDistributedAmount)
-          ),
-        },
-      ]
-    : []
+  const tokenSummaryMap = new Map<
+    string,
+    DashboardTokenSummary & {
+      distributed: number
+      claimed: number
+      unclaimed: number
+    }
+  >()
+  for (const liveLoop of liveLoops) {
+    const summary = loopSummaries.find(
+      (loop) => loop.loopKey === liveLoop.loopKey
+    )
+    if (!summary) continue
+    const tokenKey = `${loopDashboardMeta[liveLoop.loopKey].chainName}:${(
+      liveLoop.schedule.tokenAddress ?? liveLoop.schedule.tokenSymbol
+    ).toLowerCase()}`
+    const current = tokenSummaryMap.get(tokenKey) ?? {
+      tokenAddress: liveLoop.schedule.tokenAddress,
+      tokenSymbol: liveLoop.schedule.tokenSymbol,
+      tokenDecimals: liveLoop.schedule.tokenDecimals,
+      totalDistributedAmount: "0",
+      totalClaimedAmount: "0",
+      totalUnclaimedAmount: "0",
+      claimedAmountRatePercent: null,
+      distributed: 0,
+      claimed: 0,
+      unclaimed: 0,
+    }
+    current.distributed += Number(summary.totalDistributedAmount ?? 0)
+    current.claimed += Number(summary.totalClaimedAmount ?? 0)
+    current.unclaimed += Number(summary.totalUnclaimedAmount ?? 0)
+    tokenSummaryMap.set(tokenKey, current)
+  }
+  const tokenSummaries: DashboardTokenSummary[] = [...tokenSummaryMap.values()]
+    .map(({ distributed, claimed, unclaimed, ...token }) => ({
+      ...token,
+      totalDistributedAmount: distributed.toString(),
+      totalClaimedAmount: claimed.toString(),
+      totalUnclaimedAmount: unclaimed.toString(),
+      claimedAmountRatePercent: percent(claimed, distributed),
+    }))
+    .sort((a, b) => (a.tokenSymbol ?? "").localeCompare(b.tokenSymbol ?? ""))
+  const aggregateToken = tokenSummaries.length === 1 ? tokenSummaries[0] : null
   const generatedAt =
     loopSummaries
       .map((loop) => loop.updatedAt)
@@ -575,17 +691,15 @@ export async function getDashboardPageData(
 
   return {
     generatedAt,
-    indexedBlocks: [
-      {
-        chainId: gnosis.id,
-        chainName: "Gnosis",
-        blockNumber: dashboard._meta.block.number,
-        hasIndexingErrors: dashboard._meta.hasIndexingErrors,
-      },
-    ],
+    indexedBlocks: subgraphResults.map((result) => ({
+      chainId: result.chain.id,
+      chainName: result.chain.name,
+      blockNumber: result.meta.block.number,
+      hasIndexingErrors: result.meta.hasIndexingErrors,
+    })),
     filters: {
-      selectedLoopKeys,
-      availableLoopKeys: [...defaultDashboardLoopKeys],
+      selectedLoopKeys: configuredSources.map((entry) => entry.loopKey),
+      availableLoopKeys: configuredSources.map((entry) => entry.loopKey),
       availablePeriodRange: {
         min: periods[0] ?? null,
         max: periods.at(-1) ?? null,
@@ -602,45 +716,46 @@ export async function getDashboardPageData(
       totalRegistrations,
       totalClaims,
       claimParticipationRatePercent: percent(totalClaims, totalRegistrations),
-      totalDistributedAmount,
-      totalClaimedAmount,
-      totalUnclaimedAmount,
-      claimedAmountRatePercent: percent(
-        Number(totalClaimedAmount),
-        Number(totalDistributedAmount)
-      ),
+      totalDistributedAmount: aggregateToken?.totalDistributedAmount ?? null,
+      totalClaimedAmount: aggregateToken?.totalClaimedAmount ?? null,
+      totalUnclaimedAmount: aggregateToken?.totalUnclaimedAmount ?? null,
+      claimedAmountRatePercent:
+        aggregateToken?.claimedAmountRatePercent ?? null,
       currentPeriod: maxPeriod,
       newUsersThisPeriod: loopSummaries.reduce(
         (sum, loop) => sum + (loop.currentPeriodStats?.newUserCount ?? 0),
         0
       ),
     },
-    currentPeriodOverview: buildCurrentPeriodOverview(loopSummaries, maxPeriod),
+    currentPeriodOverview: buildCurrentPeriodOverview(
+      chartLoopSummaries,
+      maxPeriod
+    ),
     loopSummaries,
     tokenSummaries,
     charts: {
       periods,
       registrationsByPeriod: buildMetricRows(
-        loopSummaries,
+        chartLoopSummaries,
         periods,
         (period) => period.registeredUserCount
       ),
       claimsByPeriod: buildMetricRows(
-        loopSummaries,
+        chartLoopSummaries,
         periods,
         (period) => period.claimEventCount
       ),
       claimRateByPeriod: buildMetricRows(
-        loopSummaries,
+        chartLoopSummaries,
         periods,
         (period) => period.claimRatePercent
       ),
       cumulativeUniqueUsersByPeriod: buildMetricRows(
-        loopSummaries,
+        chartLoopSummaries,
         periods,
         (period) => period.cumulativeUniqueUserCount
       ),
-      distributionByPeriod: buildDistributionRows(loopSummaries, periods),
+      distributionByPeriod: buildDistributionRows(chartLoopSummaries, periods),
     },
     tables: {
       loopSummary: loopSummaries.map((loop) => ({
@@ -657,25 +772,23 @@ export async function getDashboardPageData(
         totalUnclaimedAmount: loop.totalUnclaimedAmount,
         claimedAmountRatePercent: loop.claimedAmountRatePercent,
       })),
-      periodSummary: periods.flatMap((periodNumber) =>
-        loopSummaries.map((loop) => {
-          const period = loop.periods.find(
-            (item) => item.period === periodNumber
-          )
+      periodSummary: loopSummaries.flatMap((loop) =>
+        loop.periods.slice(-periodsBack).map((period) => {
           return {
-            period: periodNumber,
-            periodEndedAtUnix: period?.periodEndedAtUnix ?? null,
-            periodEndedShortLabel: period?.periodEndedShortLabel ?? null,
-            periodEndedLongLabel: period?.periodEndedLongLabel ?? null,
+            period: period.period,
+            periodEndedAtUnix: period.periodEndedAtUnix,
+            periodEndedShortLabel: period.periodEndedShortLabel,
+            periodEndedLongLabel: period.periodEndedLongLabel,
             loopKey: loop.loopKey,
             loopName: loop.meta.title,
-            registrations: period?.registeredUserCount ?? 0,
-            claims: period?.claimEventCount ?? 0,
-            claimRatePercent: period?.claimRatePercent ?? null,
-            distributedAmount: period?.totalRegisteredAmount ?? null,
-            claimedAmount: period?.totalClaimedAmount ?? null,
-            unclaimedAmount: period?.totalUnclaimedAmount ?? null,
-            newUsers: period?.newUserCount ?? 0,
+            tokenSymbol: loop.meta.tokenSymbol,
+            registrations: period.registeredUserCount,
+            claims: period.claimEventCount,
+            claimRatePercent: period.claimRatePercent,
+            distributedAmount: period.totalRegisteredAmount,
+            claimedAmount: period.totalClaimedAmount,
+            unclaimedAmount: period.totalUnclaimedAmount,
+            newUsers: period.newUserCount,
           }
         })
       ),
