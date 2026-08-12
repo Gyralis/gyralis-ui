@@ -577,11 +577,18 @@ export async function getDashboardPageData(
       const liveLoops = await Promise.all(
         group.sources.map(async (entry): Promise<LiveLoopData> => {
           const { loopKey, source } = entry
-          const loop = dashboard.loops.find(
+          // A loop entity is created by the subgraph only after its first
+          // activity event. Until then, its absence is the indexed zero state.
+          const loop: SubgraphLoop = dashboard.loops.find(
             (item) => item.id.toLowerCase() === source.subgraphId.toLowerCase()
-          )
-          if (!loop)
-            throw new Error(`Subgraph loop ${source.subgraphId} is missing`)
+          ) ?? {
+            id: source.subgraphId,
+            token: null,
+            registersCount: "0",
+            claimsCount: "0",
+            totalPayout: "0",
+            periods: [],
+          }
           const fallbackPeriod = loop.periods.reduce(
             (latest, period) =>
               Number(period.totalClaims) > 0
