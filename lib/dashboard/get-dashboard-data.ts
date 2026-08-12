@@ -1,339 +1,465 @@
 import "server-only"
 
-import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
-import { formatUnits } from "viem"
-
-import { defaultDashboardLoopKeys, loopDashboardMeta } from "@/data/loop-dashboard-meta"
+import {
+  defaultDashboardLoopKeys,
+  loopDashboardMeta,
+} from "@/data/loop-dashboard-meta"
+import { env } from "@/env.mjs"
+import { createPublicClient, formatUnits, http, parseAbi } from "viem"
+import { gnosis } from "viem/chains"
 
 import type {
   DashboardCurrentPeriodOverview,
   DashboardDistributionByPeriodRow,
-  DashboardHistoryMetricRow,
-  DashboardGrowthStat,
   DashboardLoopKey,
   DashboardLoopSummary,
-  DashboardLoopTableRow,
   DashboardMetricByPeriodRow,
-  DashboardOverviewCards,
   DashboardPageData,
   DashboardPeriodStats,
-  DashboardPeriodTableRow,
   DashboardTokenSummary,
   GetDashboardDataOptions,
-  RawHistoryLoopSnapshot,
-  RawHistorySnapshotEntry,
-  RawLoopStatsHistory,
-  RawGlobalTokenTotal,
-  RawLoopCacheEntry,
-  RawLoopPeriodEntry,
-  RawLoopRegistrationCache,
 } from "./types"
 
-const DEFAULT_CACHE_FILE_PATH = resolve(process.cwd(), "data/loop-registration-cache.json")
-const DEFAULT_HISTORY_FILE_PATH = resolve(
-  process.cwd(),
-  "data/history/loop-stats-history.json"
-)
-const DEFAULT_PERIODS_BACK = 6
-const periodEndedShortFormatter = new Intl.DateTimeFormat("en-US", {
+const REVALIDATE_SECONDS = 300
+const EVENT_PAGE_SIZE = 1000
+const DEFAULT_PERIODS_BACK = 7
+
+const loopAbi = parseAbi([
+  "function getCurrentPeriod() view returns (uint256)",
+  "function getLoopDetails() view returns (address token, uint256 periodLength, uint256 percentPerPeriod, uint256 firstPeriodStart)",
+])
+const erc20Abi = parseAbi([
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+])
+
+const liveLoopSources = {
+  "1hive": {
+    subgraphId: "3",
+    address: "0x8995641fb3E452bC1359E79A738a6DE556015696",
+  },
+  blockscout: {
+    subgraphId: "4",
+    address: "0xaB25dBaFD11b1eb606B2455Eecec67e6746E409b",
+  },
+} as const
+
+interface SubgraphPeriod {
+  periodNumber: string
+  totalRegisteredUsers: string
+  totalClaims: string
+  totalPayout: string
+}
+
+interface SubgraphLoop {
+  id: string
+  token: string | null
+  registersCount: string
+  claimsCount: string
+  totalPayout: string
+  periods: SubgraphPeriod[]
+}
+
+interface SubgraphEvent {
+  id: string
+  periodNumber: string
+  timestamp: string
+  account: { id: string }
+}
+
+interface LoopSchedule {
+  currentPeriod: number
+  firstPeriodStart: bigint
+  periodLength: bigint
+  tokenAddress: string | null
+  tokenSymbol: string
+  tokenDecimals: number
+}
+
+interface LiveLoopData {
+  loopKey: DashboardLoopKey
+  loop: SubgraphLoop
+  registerEvents: SubgraphEvent[]
+  claimEvents: SubgraphEvent[]
+  schedule: LoopSchedule
+}
+
+const dashboardQuery = `
+  query Dashboard($loopIds: [ID!]!) {
+    _meta { block { number } hasIndexingErrors }
+    loops(where: { id_in: $loopIds }, orderBy: id, orderDirection: asc) {
+      id
+      token
+      registersCount
+      claimsCount
+      totalPayout
+      periods(first: 1000, orderBy: periodNumber, orderDirection: asc) {
+        periodNumber
+        totalRegisteredUsers
+        totalClaims
+        totalPayout
+      }
+    }
+  }
+`
+
+function eventQuery(entity: "registerEvents" | "claimEvents") {
+  return `
+    query Events($loopId: ID!, $first: Int!, $afterId: ID!) {
+      ${entity}(
+        first: $first
+        orderBy: id
+        orderDirection: asc
+        where: { loop: $loopId, id_gt: $afterId }
+      ) {
+        id
+        periodNumber
+        timestamp
+        account { id }
+      }
+    }
+  `
+}
+
+async function querySubgraph<T>(
+  query: string,
+  variables: Record<string, unknown>
+): Promise<T> {
+  if (!env.GYRALIS_SUBGRAPH_URL) {
+    throw new Error("GYRALIS_SUBGRAPH_URL is required for the live dashboard")
+  }
+
+  const response = await fetch(env.GYRALIS_SUBGRAPH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: REVALIDATE_SECONDS },
+  })
+  if (!response.ok) {
+    throw new Error(
+      `Dashboard subgraph request failed with status ${response.status}`
+    )
+  }
+
+  const payload = (await response.json()) as {
+    data?: T
+    errors?: Array<{ message: string }>
+  }
+  if (payload.errors?.length || !payload.data) {
+    throw new Error(
+      payload.errors?.map((error) => error.message).join("; ") ??
+        "Dashboard subgraph returned no data"
+    )
+  }
+  return payload.data
+}
+
+async function fetchAllEvents(
+  entity: "registerEvents" | "claimEvents",
+  loopId: string
+): Promise<SubgraphEvent[]> {
+  const events: SubgraphEvent[] = []
+  let afterId = ""
+
+  while (true) {
+    const data = await querySubgraph<Record<typeof entity, SubgraphEvent[]>>(
+      eventQuery(entity),
+      { loopId, first: EVENT_PAGE_SIZE, afterId }
+    )
+    const page = data[entity]
+    events.push(...page)
+    if (page.length < EVENT_PAGE_SIZE) return events
+    afterId = page[page.length - 1]?.id ?? afterId
+  }
+}
+
+async function fetchLoopSchedule(
+  address: `0x${string}`,
+  fallbackPeriod: number,
+  fallbackToken: string | null
+): Promise<LoopSchedule> {
+  const client = createPublicClient({ chain: gnosis, transport: http() })
+
+  try {
+    const [currentPeriod, details] = await Promise.all([
+      client.readContract({
+        address,
+        abi: loopAbi,
+        functionName: "getCurrentPeriod",
+      }),
+      client.readContract({
+        address,
+        abi: loopAbi,
+        functionName: "getLoopDetails",
+      }),
+    ])
+    const tokenAddress = details[0]
+    const [tokenSymbol, tokenDecimals] = await Promise.all([
+      client.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "symbol",
+      }),
+      client.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: "decimals",
+      }),
+    ])
+
+    return {
+      currentPeriod: Number(currentPeriod),
+      firstPeriodStart: details[3],
+      periodLength: details[1],
+      tokenAddress,
+      tokenSymbol,
+      tokenDecimals,
+    }
+  } catch (error) {
+    console.error(`[dashboard] failed to read schedule for ${address}`, error)
+    return {
+      currentPeriod: fallbackPeriod,
+      firstPeriodStart: 0n,
+      periodLength: 0n,
+      tokenAddress: fallbackToken,
+      tokenSymbol: "HNY",
+      tokenDecimals: 18,
+    }
+  }
+}
+
+function percent(numerator: number, denominator: number): number | null {
+  if (denominator === 0) return null
+  return Number(((numerator / denominator) * 100).toFixed(2))
+}
+
+function eventTimestamp(events: SubgraphEvent[]): number {
+  return events.reduce(
+    (latest, event) => Math.max(latest, Number(event.timestamp)),
+    0
+  )
+}
+
+function periodWindow(schedule: LoopSchedule, period: number) {
+  if (schedule.firstPeriodStart === 0n || schedule.periodLength === 0n) {
+    return { start: null, end: null }
+  }
+  const start =
+    schedule.firstPeriodStart + BigInt(period) * schedule.periodLength
+  const end = start + schedule.periodLength
+  return {
+    start: new Date(Number(start) * 1000),
+    end: new Date(Number(end) * 1000),
+  }
+}
+
+const shortDate = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
   timeZone: "UTC",
 })
-const periodEndedLongFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-})
-const historySnapshotLongFormatter = new Intl.DateTimeFormat("en-US", {
+const longDate = new Intl.DateTimeFormat("en-US", {
   month: "long",
   day: "numeric",
   year: "numeric",
   timeZone: "UTC",
 })
 
-function parseInteger(value: string | number | undefined | null): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value !== "string" || value.trim() === "") return null
-
-  const parsed = Number.parseInt(value, 10)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-function parseCount(value: string | number | undefined | null): number {
-  return parseInteger(value) ?? 0
-}
-
-function parsePercent(value: string | number | undefined | null): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value !== "string" || value.trim() === "") return null
-
-  const parsed = Number.parseFloat(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-function parseAmount(value: string | undefined | null): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null
-}
-
-function formatBigIntPercent(
-  numeratorRaw: string | undefined | null,
-  denominatorRaw: string | undefined | null
-): number | null {
-  if (!numeratorRaw || !denominatorRaw) return null
-
-  const numerator = BigInt(numeratorRaw)
-  const denominator = BigInt(denominatorRaw)
-  if (denominator === 0n) return null
-
-  const scaled = (numerator * 10000n) / denominator
-  return Number(scaled) / 100
-}
-
-function filterLoopKeys(loopKeys?: DashboardLoopKey[]): DashboardLoopKey[] {
-  const requested = loopKeys?.length ? loopKeys : [...defaultDashboardLoopKeys]
-  return requested.filter((loopKey) => loopDashboardMeta[loopKey]?.isVisibleInDashboard)
-}
-
-function formatPeriodEndedLabels(periodEndUnix: string | null) {
-  if (!periodEndUnix) {
-    return {
-      periodEndedShortLabel: null,
-      periodEndedLongLabel: null,
-    }
+function buildPeriodStats(data: LiveLoopData): DashboardPeriodStats[] {
+  const firstRegistrationPeriod = new Map<string, number>()
+  for (const event of data.registerEvents) {
+    const account = event.account.id.toLowerCase()
+    const period = Number(event.periodNumber)
+    const current = firstRegistrationPeriod.get(account)
+    if (current == null || period < current)
+      firstRegistrationPeriod.set(account, period)
   }
 
-  const timestampMs = Number.parseInt(periodEndUnix, 10) * 1000
-  if (!Number.isFinite(timestampMs)) {
-    return {
-      periodEndedShortLabel: null,
-      periodEndedLongLabel: null,
-    }
+  let cumulativeUniqueUsers = 0
+  const newUsersByPeriod = new Map<number, number>()
+  for (const period of firstRegistrationPeriod.values()) {
+    newUsersByPeriod.set(period, (newUsersByPeriod.get(period) ?? 0) + 1)
   }
 
-  const date = new Date(timestampMs)
-  return {
-    periodEndedShortLabel: periodEndedShortFormatter.format(date),
-    periodEndedLongLabel: periodEndedLongFormatter.format(date),
-  }
+  return data.loop.periods
+    .filter(
+      (period) => Number(period.periodNumber) <= data.schedule.currentPeriod
+    )
+    .sort((a, b) => Number(a.periodNumber) - Number(b.periodNumber))
+    .map((period) => {
+      const periodNumber = Number(period.periodNumber)
+      const registrations = Number(period.totalRegisteredUsers)
+      const claims = Number(period.totalClaims)
+      const claimedRaw = BigInt(period.totalPayout)
+      const payoutPerUser = claims > 0 ? claimedRaw / BigInt(claims) : 0n
+      const distributedRaw = payoutPerUser * BigInt(registrations)
+      const unclaimedRaw =
+        distributedRaw > claimedRaw ? distributedRaw - claimedRaw : 0n
+      const newUsers = newUsersByPeriod.get(periodNumber) ?? 0
+      cumulativeUniqueUsers += newUsers
+      const window = periodWindow(data.schedule, periodNumber)
+
+      return {
+        period: periodNumber,
+        periodStartUtc: window.start?.toUTCString() ?? null,
+        periodEndUtc: window.end?.toUTCString() ?? null,
+        periodEndedAtUnix: window.end
+          ? Math.floor(window.end.getTime() / 1000).toString()
+          : null,
+        periodEndedShortLabel: window.end ? shortDate.format(window.end) : null,
+        periodEndedLongLabel: window.end ? longDate.format(window.end) : null,
+        registeredUserCount: registrations,
+        claimEventCount: claims,
+        claimRatePercent: percent(claims, registrations),
+        totalRegisteredAmount: formatUnits(
+          distributedRaw,
+          data.schedule.tokenDecimals
+        ),
+        totalClaimedAmount: formatUnits(
+          claimedRaw,
+          data.schedule.tokenDecimals
+        ),
+        totalUnclaimedAmount: formatUnits(
+          unclaimedRaw,
+          data.schedule.tokenDecimals
+        ),
+        newUserCount: newUsers,
+        cumulativeUniqueUserCount: cumulativeUniqueUsers,
+      }
+    })
 }
 
-function toPeriodStats(
-  period: number,
-  periodEntry: RawLoopPeriodEntry | undefined,
-  includeForDashboard: boolean
-): DashboardPeriodStats | null {
-  if (!periodEntry || !includeForDashboard) return null
-
-  const periodEndedAtUnix = periodEntry.periodEndExclusive?.unix ?? null
-  const { periodEndedShortLabel, periodEndedLongLabel } =
-    formatPeriodEndedLabels(periodEndedAtUnix)
-
-  return {
-    period,
-    periodStartUtc: periodEntry.periodStart?.utc ?? null,
-    periodEndUtc: periodEntry.periodEndExclusive?.utc ?? null,
-    periodEndedAtUnix,
-    periodEndedShortLabel,
-    periodEndedLongLabel,
-    registeredUserCount: parseCount(
-      periodEntry.registeredUserCount ?? periodEntry.registeredUsers?.length
-    ),
-    claimEventCount: parseCount(periodEntry.claimEventCount),
-    claimRatePercent: parsePercent(periodEntry.claimRatePercent),
-    totalRegisteredAmount: parseAmount(periodEntry.totalRegisteredAmountFormatted),
-    totalClaimedAmount: parseAmount(periodEntry.claimedAmountFormatted),
-    totalUnclaimedAmount: parseAmount(periodEntry.unclaimedAmountFormatted),
-    newUserCount: parseCount(periodEntry.newUserCount),
-    cumulativeUniqueUserCount:
-      periodEntry.cumulativeUniqueUserCount == null
-        ? null
-        : parseCount(periodEntry.cumulativeUniqueUserCount),
-  }
+function sumAmounts(
+  periods: DashboardPeriodStats[],
+  key: "totalRegisteredAmount" | "totalClaimedAmount" | "totalUnclaimedAmount"
+) {
+  return periods
+    .reduce((total, period) => total + Number(period[key] ?? 0), 0)
+    .toString()
 }
 
-function buildLoopSummary(loopKey: DashboardLoopKey, rawLoop: RawLoopCacheEntry): DashboardLoopSummary {
-  const meta = loopDashboardMeta[loopKey]
-  const currentPeriod = parseInteger(rawLoop.currentPeriod)
-  const lastProcessedPeriod = parseInteger(rawLoop.lastProcessedPeriod)
-  const uniqueUserCount = parseCount(rawLoop.uniqueUserCount ?? rawLoop.uniqueUsers?.length)
-  const uniqueClaimUserCount = parseCount(
-    rawLoop.uniqueClaimUserCount ?? rawLoop.uniqueClaimUsers?.length
+function buildLoopSummary(data: LiveLoopData): DashboardLoopSummary {
+  const periods = buildPeriodStats(data)
+  const uniqueUsers = new Set(
+    data.registerEvents.map((event) => event.account.id.toLowerCase())
+  )
+  const uniqueClaimUsers = new Set(
+    data.claimEvents.map((event) => event.account.id.toLowerCase())
+  )
+  const registrations = Number(data.loop.registersCount)
+  const claims = Number(data.loop.claimsCount)
+  const totalDistributedAmount = sumAmounts(periods, "totalRegisteredAmount")
+  const totalClaimedAmount = formatUnits(
+    BigInt(data.loop.totalPayout),
+    data.schedule.tokenDecimals
+  )
+  const totalUnclaimedAmount = Math.max(
+    Number(totalDistributedAmount) - Number(totalClaimedAmount),
+    0
+  ).toString()
+  const latestTimestamp = Math.max(
+    eventTimestamp(data.registerEvents),
+    eventTimestamp(data.claimEvents)
   )
 
-  const periods = Object.entries(rawLoop.periods ?? {})
-    .map(([periodKey, periodEntry]) => {
-      const period = parseInteger(periodKey)
-      if (period == null) return null
-
-      return toPeriodStats(
-        period,
-        periodEntry,
-        lastProcessedPeriod == null || period <= lastProcessedPeriod
-      )
-    })
-    .filter((period): period is DashboardPeriodStats => period != null)
-    .sort((a, b) => a.period - b.period)
-
-  const currentPeriodStats =
-    lastProcessedPeriod == null
-      ? null
-      : periods.find((period) => period.period === lastProcessedPeriod) ?? null
-
   return {
-    loopKey,
-    meta,
-    currentPeriod,
-    lastProcessedPeriod,
-    uniqueUserCount,
-    uniqueClaimUserCount,
-    registeredButNeverClaimedCount: Math.max(uniqueUserCount - uniqueClaimUserCount, 0),
-    claimParticipationRatePercent: parsePercent(rawLoop.stats?.claimRatePercent),
-    totalRegistrationsCount: parseCount(rawLoop.stats?.totalRegistrationsCount),
-    totalClaimsCount: parseCount(rawLoop.stats?.totalClaimsCount),
-    totalDistributedAmount: parseAmount(rawLoop.stats?.totalRegisteredAmountFormatted),
-    totalClaimedAmount: parseAmount(rawLoop.stats?.totalClaimedAmountFormatted),
-    totalUnclaimedAmount: parseAmount(rawLoop.stats?.totalUnclaimedAmountFormatted),
-    claimedAmountRatePercent: formatBigIntPercent(
-      rawLoop.stats?.totalClaimedAmountRaw,
-      rawLoop.stats?.totalRegisteredAmountRaw
+    loopKey: data.loopKey,
+    meta: loopDashboardMeta[data.loopKey],
+    currentPeriod: data.schedule.currentPeriod,
+    lastProcessedPeriod: data.schedule.currentPeriod,
+    uniqueUserCount: uniqueUsers.size,
+    uniqueClaimUserCount: uniqueClaimUsers.size,
+    registeredButNeverClaimedCount: Math.max(
+      uniqueUsers.size - uniqueClaimUsers.size,
+      0
     ),
-    tokenSnapshots: {
-      balanceAtPeriod1: rawLoop.token?.snapshots?.balanceAtPeriod1
-        ? {
-            periodNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtPeriod1.periodNumber
-            ),
-            blockNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtPeriod1.blockNumber
-            ),
-            raw: rawLoop.token.snapshots.balanceAtPeriod1.raw ?? null,
-            formatted:
-              rawLoop.token.snapshots.balanceAtPeriod1.formatted ?? null,
-          }
-        : null,
-      balanceAtPeriod2: rawLoop.token?.snapshots?.balanceAtPeriod2
-        ? {
-            periodNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtPeriod2.periodNumber
-            ),
-            blockNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtPeriod2.blockNumber
-            ),
-            raw: rawLoop.token.snapshots.balanceAtPeriod2.raw ?? null,
-            formatted:
-              rawLoop.token.snapshots.balanceAtPeriod2.formatted ?? null,
-          }
-        : null,
-      balanceAtLastProcessedPeriod: rawLoop.token?.snapshots
-        ?.balanceAtLastProcessedPeriod
-        ? {
-            periodNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.periodNumber
-            ),
-            blockNumber: parseInteger(
-              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.blockNumber
-            ),
-            raw:
-              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.raw ?? null,
-            formatted:
-              rawLoop.token.snapshots.balanceAtLastProcessedPeriod.formatted ??
-              null,
-          }
-        : null,
-    },
+    claimParticipationRatePercent: percent(claims, registrations),
+    totalRegistrationsCount: registrations,
+    totalClaimsCount: claims,
+    totalDistributedAmount,
+    totalClaimedAmount,
+    totalUnclaimedAmount,
+    claimedAmountRatePercent: percent(
+      Number(totalClaimedAmount),
+      Number(totalDistributedAmount)
+    ),
     periods,
-    currentPeriodStats,
-    updatedAt: rawLoop.updatedAt ?? null,
+    currentPeriodStats:
+      periods.find((period) => period.period === data.schedule.currentPeriod) ??
+      null,
+    updatedAt: latestTimestamp
+      ? new Date(latestTimestamp * 1000).toISOString()
+      : null,
   }
 }
 
-function buildOverview(
-  loopSummaries: DashboardLoopSummary[],
-  tokenSummary: DashboardTokenSummary | undefined,
-  uniqueRegisteredUsers: number,
-  uniqueClaimUsers: number,
-  weekOverWeek: DashboardOverviewCards["weekOverWeek"]
-): DashboardOverviewCards {
-  const currentPeriod = loopSummaries.reduce<number | null>((maxPeriod, loop) => {
-    if (loop.lastProcessedPeriod == null) return maxPeriod
-    return maxPeriod == null ? loop.lastProcessedPeriod : Math.max(maxPeriod, loop.lastProcessedPeriod)
-  }, null)
-
-  const currentPeriodStats = loopSummaries
-    .map((loop) => loop.currentPeriodStats)
-    .filter((period): period is DashboardPeriodStats => period != null && period.period === currentPeriod)
-
-  return {
-    globalUniqueRegisteredUsers: uniqueRegisteredUsers,
-    globalUniqueClaimUsers: uniqueClaimUsers,
-    globalRegisteredButNeverClaimedUsers: Math.max(
-      uniqueRegisteredUsers - uniqueClaimUsers,
-      0
-    ),
-    registeredUsersClaimedRatePercent: formatNumberPercent(
-      uniqueClaimUsers,
-      uniqueRegisteredUsers
-    ),
-    totalRegistrations: loopSummaries.reduce(
-      (total, loop) => total + loop.totalRegistrationsCount,
-      0
-    ),
-    totalClaims: loopSummaries.reduce((total, loop) => total + loop.totalClaimsCount, 0),
-    claimParticipationRatePercent: formatNumberPercent(
-      loopSummaries.reduce((total, loop) => total + loop.totalClaimsCount, 0),
-      loopSummaries.reduce((total, loop) => total + loop.totalRegistrationsCount, 0)
-    ),
-    totalDistributedAmount: tokenSummary?.totalDistributedAmount ?? null,
-    totalClaimedAmount: tokenSummary?.totalClaimedAmount ?? null,
-    totalUnclaimedAmount: tokenSummary?.totalUnclaimedAmount ?? null,
-    claimedAmountRatePercent: tokenSummary?.claimedAmountRatePercent ?? null,
-    currentPeriod,
-    newUsersThisPeriod: currentPeriodStats.reduce(
-      (total, period) => total + period.newUserCount,
-      0
-    ),
-    weekOverWeek,
-  }
+function buildMetricRows(
+  loops: DashboardLoopSummary[],
+  periods: number[],
+  select: (period: DashboardPeriodStats) => number | null
+): DashboardMetricByPeriodRow[] {
+  return periods.map((periodNumber) => {
+    const reference = loops
+      .flatMap((loop) => loop.periods)
+      .find((period) => period.period === periodNumber)
+    return {
+      period: periodNumber,
+      periodEndedAtUnix: reference?.periodEndedAtUnix ?? null,
+      periodEndedShortLabel: reference?.periodEndedShortLabel ?? null,
+      periodEndedLongLabel: reference?.periodEndedLongLabel ?? null,
+      values: Object.fromEntries(
+        loops.map((loop) => {
+          const period = loop.periods.find(
+            (item) => item.period === periodNumber
+          )
+          return [loop.loopKey, period ? select(period) : 0]
+        })
+      ),
+    }
+  })
 }
 
-function formatNumberPercent(numerator: number, denominator: number): number | null {
-  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
-    return null
-  }
-
-  return Number(((numerator / denominator) * 100).toFixed(2))
+function buildDistributionRows(
+  loops: DashboardLoopSummary[],
+  periods: number[]
+): DashboardDistributionByPeriodRow[] {
+  return periods.flatMap((periodNumber) =>
+    loops.map((loop) => {
+      const period = loop.periods.find((item) => item.period === periodNumber)
+      return {
+        period: periodNumber,
+        periodEndedAtUnix: period?.periodEndedAtUnix ?? null,
+        periodEndedShortLabel: period?.periodEndedShortLabel ?? null,
+        periodEndedLongLabel: period?.periodEndedLongLabel ?? null,
+        loopKey: loop.loopKey,
+        loopName: loop.meta.title,
+        distributedAmount: period?.totalRegisteredAmount ?? null,
+        claimedAmount: period?.totalClaimedAmount ?? null,
+        unclaimedAmount: period?.totalUnclaimedAmount ?? null,
+      }
+    })
+  )
 }
 
 function buildCurrentPeriodOverview(
-  loopSummaries: DashboardLoopSummary[],
+  loops: DashboardLoopSummary[],
   currentPeriod: number | null
 ): DashboardCurrentPeriodOverview | null {
   if (currentPeriod == null) return null
-
-  const periods = loopSummaries
-    .map((loop) => loop.currentPeriodStats)
-    .filter((period): period is DashboardPeriodStats => period != null && period.period === currentPeriod)
-
-  if (periods.length === 0) return null
-
-  const registrations = periods.reduce((total, period) => total + period.registeredUserCount, 0)
-  const claims = periods.reduce((total, period) => total + period.claimEventCount, 0)
-  const distributedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalRegisteredAmount ?? "0"),
+  const periods = loops
+    .map((loop) =>
+      loop.periods.find((period) => period.period === currentPeriod)
+    )
+    .filter((period): period is DashboardPeriodStats => period != null)
+  if (!periods.length) return null
+  const registrations = periods.reduce(
+    (sum, period) => sum + period.registeredUserCount,
     0
   )
-  const claimedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalClaimedAmount ?? "0"),
+  const claims = periods.reduce(
+    (sum, period) => sum + period.claimEventCount,
     0
   )
-  const unclaimedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalUnclaimedAmount ?? "0"),
-    0
-  )
-
   return {
     period: currentPeriod,
     periodEndedAtUnix: periods[0]?.periodEndedAtUnix ?? null,
@@ -341,526 +467,218 @@ function buildCurrentPeriodOverview(
     periodEndedLongLabel: periods[0]?.periodEndedLongLabel ?? null,
     registrations,
     claims,
-    claimRatePercent: formatNumberPercent(claims, registrations),
-    distributedAmount: distributedAmount.toString(),
-    claimedAmount: claimedAmount.toString(),
-    unclaimedAmount: unclaimedAmount.toString(),
-  }
-}
-
-function buildWindowPeriods(loopSummaries: DashboardLoopSummary[], periodsBack: number): number[] {
-  const maxPeriod = loopSummaries.reduce<number | null>((max, loop) => {
-    if (loop.lastProcessedPeriod == null) return max
-    return max == null ? loop.lastProcessedPeriod : Math.max(max, loop.lastProcessedPeriod)
-  }, null)
-
-  if (maxPeriod == null) return []
-
-  const startPeriod = Math.max(maxPeriod - periodsBack + 1, 1)
-  return Array.from({ length: maxPeriod - startPeriod + 1 }, (_, index) => startPeriod + index)
-}
-
-function findReferencePeriod(
-  loopSummaries: DashboardLoopSummary[],
-  period: number
-): DashboardPeriodStats {
-  return (
-    loopSummaries
-      .flatMap((loop) => loop.periods)
-      .find((periodEntry) => periodEntry.period === period) ?? nullPeriod(period)
-  )
-}
-
-function buildMetricRows(
-  loopSummaries: DashboardLoopSummary[],
-  periods: number[],
-  selector: (period: DashboardPeriodStats) => number | null
-): DashboardMetricByPeriodRow[] {
-  return periods.map((period) => {
-    const referencePeriod = findReferencePeriod(loopSummaries, period)
-
-    return {
-      period,
-      periodEndedAtUnix: referencePeriod.periodEndedAtUnix,
-      periodEndedShortLabel: referencePeriod.periodEndedShortLabel,
-      periodEndedLongLabel: referencePeriod.periodEndedLongLabel,
-      values: Object.fromEntries(
-        loopSummaries.map((loop) => [
-          loop.loopKey,
-          selector(loop.periods.find((loopPeriod) => loopPeriod.period === period) ?? nullPeriod(period)),
-        ])
-      ) as Partial<Record<DashboardLoopKey, number | null>>,
-    }
-  })
-}
-
-function nullPeriod(period: number): DashboardPeriodStats {
-  return {
-    period,
-    periodStartUtc: null,
-    periodEndUtc: null,
-    periodEndedAtUnix: null,
-    periodEndedShortLabel: null,
-    periodEndedLongLabel: null,
-    registeredUserCount: 0,
-    claimEventCount: 0,
-    claimRatePercent: null,
-    totalRegisteredAmount: null,
-    totalClaimedAmount: null,
-    totalUnclaimedAmount: null,
-    newUserCount: 0,
-    cumulativeUniqueUserCount: null,
-  }
-}
-
-function buildDistributionRows(
-  loopSummaries: DashboardLoopSummary[],
-  periods: number[]
-): DashboardDistributionByPeriodRow[] {
-  return periods.flatMap((period) =>
-    loopSummaries.map((loop) => {
-      const loopPeriod = loop.periods.find((entry) => entry.period === period) ?? nullPeriod(period)
-
-      return {
-        period,
-        periodEndedAtUnix: loopPeriod.periodEndedAtUnix,
-        periodEndedShortLabel: loopPeriod.periodEndedShortLabel,
-        periodEndedLongLabel: loopPeriod.periodEndedLongLabel,
-        loopKey: loop.loopKey,
-        loopName: loop.meta.title,
-        distributedAmount: loopPeriod.totalRegisteredAmount,
-        claimedAmount: loopPeriod.totalClaimedAmount,
-        unclaimedAmount: loopPeriod.totalUnclaimedAmount,
-      }
-    })
-  )
-}
-
-function buildLoopTableRows(loopSummaries: DashboardLoopSummary[]): DashboardLoopTableRow[] {
-  return loopSummaries.map((loop) => ({
-    loopKey: loop.loopKey,
-    loopName: loop.meta.title,
-    uniqueUsers: loop.uniqueUserCount,
-    uniqueClaimUsers: loop.uniqueClaimUserCount,
-    registeredButNeverClaimedCount: loop.registeredButNeverClaimedCount,
-    totalRegistrations: loop.totalRegistrationsCount,
-    totalClaims: loop.totalClaimsCount,
-    claimParticipationRatePercent: loop.claimParticipationRatePercent,
-    totalDistributedAmount: loop.totalDistributedAmount,
-    totalClaimedAmount: loop.totalClaimedAmount,
-    totalUnclaimedAmount: loop.totalUnclaimedAmount,
-    claimedAmountRatePercent: loop.claimedAmountRatePercent,
-  }))
-}
-
-function buildPeriodTableRows(
-  loopSummaries: DashboardLoopSummary[],
-  periods: number[]
-): DashboardPeriodTableRow[] {
-  return periods.flatMap((period) =>
-    loopSummaries.map((loop) => {
-      const loopPeriod = loop.periods.find((entry) => entry.period === period) ?? nullPeriod(period)
-
-      return {
-        period,
-        periodEndedAtUnix: loopPeriod.periodEndedAtUnix,
-        periodEndedShortLabel: loopPeriod.periodEndedShortLabel,
-        periodEndedLongLabel: loopPeriod.periodEndedLongLabel,
-        loopKey: loop.loopKey,
-        loopName: loop.meta.title,
-        registrations: loopPeriod.registeredUserCount,
-        claims: loopPeriod.claimEventCount,
-        claimRatePercent: loopPeriod.claimRatePercent,
-        distributedAmount: loopPeriod.totalRegisteredAmount,
-        claimedAmount: loopPeriod.totalClaimedAmount,
-        unclaimedAmount: loopPeriod.totalUnclaimedAmount,
-        newUsers: loopPeriod.newUserCount,
-      }
-    })
-  )
-}
-
-function toTokenSummary(rawTokenTotal: RawGlobalTokenTotal): DashboardTokenSummary {
-  return {
-    tokenAddress: rawTokenTotal.tokenAddress ?? null,
-    tokenSymbol: rawTokenTotal.tokenSymbol ?? null,
-    tokenDecimals:
-      typeof rawTokenTotal.tokenDecimals === "number" ? rawTokenTotal.tokenDecimals : null,
-    totalDistributedAmount: parseAmount(rawTokenTotal.totalRegisteredAmountFormatted),
-    totalClaimedAmount: parseAmount(rawTokenTotal.totalClaimedAmountFormatted),
-    totalUnclaimedAmount: parseAmount(rawTokenTotal.totalUnclaimedAmountFormatted),
-    claimedAmountRatePercent: formatBigIntPercent(
-      rawTokenTotal.totalClaimedAmountRaw,
-      rawTokenTotal.totalRegisteredAmountRaw
-    ),
-  }
-}
-
-function buildTokenSummariesFromSelectedLoops(
-  cache: RawLoopRegistrationCache,
-  selectedLoopKeys: DashboardLoopKey[]
-): DashboardTokenSummary[] {
-  const totalsByToken = new Map<
-    string,
-    {
-      tokenAddress: string
-      tokenSymbol: string | null
-      tokenDecimals: number | null
-      totalRegisteredAmountRaw: bigint
-      totalClaimedAmountRaw: bigint
-      totalUnclaimedAmountRaw: bigint
-    }
-  >()
-
-  for (const loopKey of selectedLoopKeys) {
-    const rawLoop = cache.loops?.[loopKey]
-    const tokenAddress = rawLoop?.token?.address
-    if (!rawLoop || !tokenAddress) continue
-
-    const existing = totalsByToken.get(tokenAddress) ?? {
-      tokenAddress,
-      tokenSymbol: rawLoop.token?.symbol ?? loopDashboardMeta[loopKey].tokenSymbol,
-      tokenDecimals:
-        typeof rawLoop.token?.decimals === "number" ? rawLoop.token.decimals : null,
-      totalRegisteredAmountRaw: 0n,
-      totalClaimedAmountRaw: 0n,
-      totalUnclaimedAmountRaw: 0n,
-    }
-
-    existing.totalRegisteredAmountRaw += BigInt(rawLoop.stats?.totalRegisteredAmountRaw ?? "0")
-    existing.totalClaimedAmountRaw += BigInt(rawLoop.stats?.totalClaimedAmountRaw ?? "0")
-    existing.totalUnclaimedAmountRaw += BigInt(rawLoop.stats?.totalUnclaimedAmountRaw ?? "0")
-
-    totalsByToken.set(tokenAddress, existing)
-  }
-
-  return Array.from(totalsByToken.values()).map((entry) => {
-    const decimals = entry.tokenDecimals ?? 18
-
-    return toTokenSummary({
-      tokenAddress: entry.tokenAddress,
-      tokenSymbol: entry.tokenSymbol,
-      tokenDecimals: entry.tokenDecimals ?? undefined,
-      totalRegisteredAmountRaw: entry.totalRegisteredAmountRaw.toString(),
-      totalRegisteredAmountFormatted: formatUnits(entry.totalRegisteredAmountRaw, decimals),
-      totalClaimedAmountRaw: entry.totalClaimedAmountRaw.toString(),
-      totalClaimedAmountFormatted: formatUnits(entry.totalClaimedAmountRaw, decimals),
-      totalUnclaimedAmountRaw: entry.totalUnclaimedAmountRaw.toString(),
-      totalUnclaimedAmountFormatted: formatUnits(entry.totalUnclaimedAmountRaw, decimals),
-    })
-  })
-}
-
-async function readLoopRegistrationCache(cacheFilePath: string): Promise<RawLoopRegistrationCache> {
-  const contents = await readFile(cacheFilePath, "utf8")
-  return JSON.parse(contents) as RawLoopRegistrationCache
-}
-
-async function readLoopStatsHistory(historyFilePath: string): Promise<RawLoopStatsHistory | null> {
-  try {
-    const contents = await readFile(historyFilePath, "utf8")
-    return JSON.parse(contents) as RawLoopStatsHistory
-  } catch {
-    return null
-  }
-}
-
-function getSortedHistorySnapshots(
-  history: RawLoopStatsHistory | null
-): RawHistorySnapshotEntry[] {
-  return [...(history?.snapshots ?? [])]
-    .filter((snapshot) => typeof snapshot?.date === "string" && snapshot.date.length > 0)
-    .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
-}
-
-function formatHistoryDateLabel(value: string | null | undefined) {
-  if (!value) return null
-
-  const parsed = new Date(`${value}T00:00:00Z`)
-  if (Number.isNaN(parsed.getTime())) return value
-
-  return periodEndedShortFormatter.format(parsed)
-}
-
-function formatHistoryLongDateLabel(value: string | null | undefined) {
-  if (!value) return null
-
-  const parsed = new Date(`${value}T00:00:00Z`)
-  if (Number.isNaN(parsed.getTime())) return value
-
-  return historySnapshotLongFormatter.format(parsed)
-}
-
-function buildSnapshotMetricRows(
-  history: RawLoopStatsHistory | null,
-  selectedLoopKeys: DashboardLoopKey[],
-  selector: (snapshot: RawHistoryLoopSnapshot | undefined) => number | null
-): DashboardHistoryMetricRow[] {
-  const snapshots = getSortedHistorySnapshots(history)
-
-  return snapshots.map((snapshot) => ({
-    snapshotDate: snapshot.date ?? "",
-    snapshotShortLabel: formatHistoryDateLabel(snapshot.date),
-    snapshotLongLabel: formatHistoryLongDateLabel(snapshot.date),
-    values: Object.fromEntries(
-      selectedLoopKeys.map((loopKey) => [loopKey, selector(snapshot.loops?.[loopKey])])
-    ) as Partial<Record<DashboardLoopKey, number | null>>,
-  }))
-}
-
-function computeGrowthPercent(current: number, previous: number): number | null {
-  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null
-  return Number((((current - previous) / previous) * 100).toFixed(2))
-}
-
-function buildNumberGrowthStat(
-  currentValue: number,
-  previousValue: number | undefined,
-  previousDate: string | null | undefined
-): DashboardGrowthStat | null {
-  if (typeof previousValue !== "number") return null
-
-  return {
-    currentValue: currentValue.toString(),
-    previousValue: previousValue.toString(),
-    deltaValue: (currentValue - previousValue).toString(),
-    deltaPercent: computeGrowthPercent(currentValue, previousValue),
-    previousDate: formatHistoryDateLabel(previousDate),
-  }
-}
-
-function buildAmountGrowthStat(
-  currentValue: string | null,
-  previousValue: string | null | undefined,
-  previousDate: string | null | undefined
-): DashboardGrowthStat | null {
-  if (!currentValue || !previousValue) return null
-
-  const current = Number.parseFloat(currentValue)
-  const previous = Number.parseFloat(previousValue)
-  if (!Number.isFinite(current) || !Number.isFinite(previous)) return null
-
-  return {
-    currentValue,
-    previousValue,
-    deltaValue: (current - previous).toString(),
-    deltaPercent: computeGrowthPercent(current, previous),
-    previousDate: formatHistoryDateLabel(previousDate),
-  }
-}
-
-function buildOverviewGrowth(
-  history: RawLoopStatsHistory | null,
-  selectedLoopKeys: DashboardLoopKey[],
-  uniqueRegisteredUsers: number,
-  totalDistributedAmount: string | null,
-  totalRegistrations: number,
-  totalClaims: number
-): DashboardOverviewCards["weekOverWeek"] {
-  const snapshots = getSortedHistorySnapshots(history)
-  const previousSnapshot = snapshots.length > 1 ? snapshots[snapshots.length - 2] : null
-
-  const previousDate = previousSnapshot?.date ?? null
-
-  const previousTotals = selectedLoopKeys.reduce(
-    (totals, loopKey) => {
-      const loopSnapshot = previousSnapshot?.loops?.[loopKey]
-      if (!loopSnapshot) return totals
-
-      totals.uniqueUsers += loopSnapshot.uniqueUserCount ?? 0
-      totals.totalRegistrations += loopSnapshot.totalRegistrationsCount ?? 0
-      totals.totalClaims += loopSnapshot.totalClaimsCount ?? 0
-      totals.totalDistributedRaw += BigInt(loopSnapshot.totalDistributedAmountRaw ?? "0")
-      return totals
-    },
-    {
-      uniqueUsers: 0,
-      totalRegistrations: 0,
-      totalClaims: 0,
-      totalDistributedRaw: 0n,
-    }
-  )
-  const previousLoopsIncluded = new Set(previousSnapshot?.global?.loopsIncluded ?? [])
-  const selectedLoopsMatchPreviousGlobal =
-    previousLoopsIncluded.size === selectedLoopKeys.length &&
-    selectedLoopKeys.every((loopKey) => previousLoopsIncluded.has(loopKey))
-  const previousUniqueRegisteredUsers = selectedLoopsMatchPreviousGlobal
-    ? previousSnapshot?.global?.uniqueUserCount
-    : undefined
-
-  return {
-    uniqueRegisteredUsers:
-      previousSnapshot == null || previousUniqueRegisteredUsers == null
-        ? null
-        : buildNumberGrowthStat(
-            uniqueRegisteredUsers,
-            previousUniqueRegisteredUsers,
-            previousDate
-          ),
-    totalDistributedAmount:
-      previousSnapshot == null
-        ? null
-        : buildAmountGrowthStat(
-            totalDistributedAmount,
-            formatUnits(previousTotals.totalDistributedRaw, 18),
-            previousDate
-          ),
-    totalRegistrations:
-      previousSnapshot == null
-        ? null
-        : buildNumberGrowthStat(
-            totalRegistrations,
-            previousTotals.totalRegistrations,
-            previousDate
-          ),
-    totalClaims:
-      previousSnapshot == null
-        ? null
-        : buildNumberGrowthStat(totalClaims, previousTotals.totalClaims, previousDate),
+    claimRatePercent: percent(claims, registrations),
+    distributedAmount: sumAmounts(periods, "totalRegisteredAmount"),
+    claimedAmount: sumAmounts(periods, "totalClaimedAmount"),
+    unclaimedAmount: sumAmounts(periods, "totalUnclaimedAmount"),
   }
 }
 
 export async function getDashboardPageData(
   options: GetDashboardDataOptions = {}
 ): Promise<DashboardPageData> {
-  const cacheFilePath = options.cacheFilePath
-    ? resolve(process.cwd(), options.cacheFilePath)
-    : DEFAULT_CACHE_FILE_PATH
-  const historyFilePath = options.historyFilePath
-    ? resolve(process.cwd(), options.historyFilePath)
-    : DEFAULT_HISTORY_FILE_PATH
-  const selectedLoopKeys = filterLoopKeys(options.loopKeys)
-  const periodsBack = options.periodsBack ?? DEFAULT_PERIODS_BACK
-  const [cache, history] = await Promise.all([
-    readLoopRegistrationCache(cacheFilePath),
-    readLoopStatsHistory(historyFilePath),
-  ])
-
-  const loopSummaries = selectedLoopKeys
-    .map((loopKey) => {
-      const rawLoop = cache.loops?.[loopKey]
-      return rawLoop ? buildLoopSummary(loopKey, rawLoop) : null
-    })
-    .filter((loop): loop is DashboardLoopSummary => loop != null)
-
-  const windowPeriods = buildWindowPeriods(loopSummaries, periodsBack)
-  const tokenSummaries = buildTokenSummariesFromSelectedLoops(cache, selectedLoopKeys)
-  const primaryTokenSummary = tokenSummaries[0]
-
-  const uniqueUsers = new Set(
-    selectedLoopKeys.flatMap((loopKey) => cache.loops?.[loopKey]?.uniqueUsers ?? [])
+  const selectedLoopKeys = (
+    options.loopKeys?.length ? options.loopKeys : [...defaultDashboardLoopKeys]
+  ).filter(
+    (key): key is keyof typeof liveLoopSources =>
+      loopDashboardMeta[key]?.isVisibleInDashboard && key in liveLoopSources
   )
-  const uniqueClaimUsers = new Set(
-    selectedLoopKeys.flatMap((loopKey) => cache.loops?.[loopKey]?.uniqueClaimUsers ?? [])
+  const loopIds = selectedLoopKeys.map((key) => liveLoopSources[key].subgraphId)
+  const dashboard = await querySubgraph<{
+    _meta: { block: { number: number }; hasIndexingErrors: boolean }
+    loops: SubgraphLoop[]
+  }>(dashboardQuery, { loopIds })
+
+  const liveLoops = await Promise.all(
+    selectedLoopKeys.map(async (loopKey): Promise<LiveLoopData> => {
+      const source = liveLoopSources[loopKey]
+      const loop = dashboard.loops.find((item) => item.id === source.subgraphId)
+      if (!loop)
+        throw new Error(`Subgraph loop ${source.subgraphId} is missing`)
+      const fallbackPeriod = loop.periods.reduce(
+        (latest, period) =>
+          Number(period.totalClaims) > 0
+            ? Math.max(latest, Number(period.periodNumber))
+            : latest,
+        0
+      )
+      const [registerEvents, claimEvents, schedule] = await Promise.all([
+        fetchAllEvents("registerEvents", loop.id),
+        fetchAllEvents("claimEvents", loop.id),
+        fetchLoopSchedule(source.address, fallbackPeriod, loop.token),
+      ])
+      return { loopKey, loop, registerEvents, claimEvents, schedule }
+    })
+  )
+
+  const loopSummaries = liveLoops.map(buildLoopSummary)
+  const maxPeriod = loopSummaries.reduce(
+    (latest, loop) => Math.max(latest, loop.lastProcessedPeriod ?? 0),
+    0
+  )
+  const periodsBack = options.periodsBack ?? DEFAULT_PERIODS_BACK
+  const periods = Array.from(
+    { length: Math.min(periodsBack, maxPeriod) },
+    (_, index) => maxPeriod - Math.min(periodsBack, maxPeriod) + 1 + index
+  )
+  const globalUsers = new Set(
+    liveLoops.flatMap((loop) =>
+      loop.registerEvents.map((event) => event.account.id.toLowerCase())
+    )
+  )
+  const globalClaimUsers = new Set(
+    liveLoops.flatMap((loop) =>
+      loop.claimEvents.map((event) => event.account.id.toLowerCase())
+    )
   )
   const totalRegistrations = loopSummaries.reduce(
-    (total, loop) => total + loop.totalRegistrationsCount,
+    (sum, loop) => sum + loop.totalRegistrationsCount,
     0
   )
   const totalClaims = loopSummaries.reduce(
-    (total, loop) => total + loop.totalClaimsCount,
+    (sum, loop) => sum + loop.totalClaimsCount,
     0
   )
-  const weekOverWeek = buildOverviewGrowth(
-    history,
-    selectedLoopKeys,
-    uniqueUsers.size,
-    primaryTokenSummary?.totalDistributedAmount ?? null,
-    totalRegistrations,
-    totalClaims
-  )
-
-  const overview = buildOverview(
-    loopSummaries,
-    primaryTokenSummary,
-    uniqueUsers.size,
-    uniqueClaimUsers.size,
-    weekOverWeek
-  )
+  const totalDistributedAmount = loopSummaries
+    .reduce((sum, loop) => sum + Number(loop.totalDistributedAmount ?? 0), 0)
+    .toString()
+  const totalClaimedAmount = loopSummaries
+    .reduce((sum, loop) => sum + Number(loop.totalClaimedAmount ?? 0), 0)
+    .toString()
+  const totalUnclaimedAmount = Math.max(
+    Number(totalDistributedAmount) - Number(totalClaimedAmount),
+    0
+  ).toString()
+  const token = liveLoops[0]?.schedule
+  const tokenSummaries: DashboardTokenSummary[] = token
+    ? [
+        {
+          tokenAddress: token.tokenAddress,
+          tokenSymbol: token.tokenSymbol,
+          tokenDecimals: token.tokenDecimals,
+          totalDistributedAmount,
+          totalClaimedAmount,
+          totalUnclaimedAmount,
+          claimedAmountRatePercent: percent(
+            Number(totalClaimedAmount),
+            Number(totalDistributedAmount)
+          ),
+        },
+      ]
+    : []
+  const generatedAt =
+    loopSummaries
+      .map((loop) => loop.updatedAt)
+      .filter((value): value is string => value != null)
+      .sort()
+      .at(-1) ?? null
 
   return {
-    generatedAt: cache.global?.updatedAt ?? null,
+    generatedAt,
+    indexedBlocks: [
+      {
+        chainId: gnosis.id,
+        chainName: "Gnosis",
+        blockNumber: dashboard._meta.block.number,
+        hasIndexingErrors: dashboard._meta.hasIndexingErrors,
+      },
+    ],
     filters: {
       selectedLoopKeys,
       availableLoopKeys: [...defaultDashboardLoopKeys],
       availablePeriodRange: {
-        min: windowPeriods.length > 0 ? windowPeriods[0] : null,
-        max: windowPeriods.length > 0 ? windowPeriods[windowPeriods.length - 1] : null,
+        min: periods[0] ?? null,
+        max: periods.at(-1) ?? null,
       },
       periodsBack,
     },
-    overview,
-    currentPeriodOverview: buildCurrentPeriodOverview(loopSummaries, overview.currentPeriod),
+    overview: {
+      globalUniqueRegisteredUsers: globalUsers.size,
+      globalUniqueClaimUsers: globalClaimUsers.size,
+      globalRegisteredButNeverClaimedUsers: Math.max(
+        globalUsers.size - globalClaimUsers.size,
+        0
+      ),
+      totalRegistrations,
+      totalClaims,
+      claimParticipationRatePercent: percent(totalClaims, totalRegistrations),
+      totalDistributedAmount,
+      totalClaimedAmount,
+      totalUnclaimedAmount,
+      claimedAmountRatePercent: percent(
+        Number(totalClaimedAmount),
+        Number(totalDistributedAmount)
+      ),
+      currentPeriod: maxPeriod,
+      newUsersThisPeriod: loopSummaries.reduce(
+        (sum, loop) => sum + (loop.currentPeriodStats?.newUserCount ?? 0),
+        0
+      ),
+    },
+    currentPeriodOverview: buildCurrentPeriodOverview(loopSummaries, maxPeriod),
     loopSummaries,
     tokenSummaries,
     charts: {
-      periods: windowPeriods,
+      periods,
       registrationsByPeriod: buildMetricRows(
         loopSummaries,
-        windowPeriods,
+        periods,
         (period) => period.registeredUserCount
       ),
-      claimsByPeriod: buildMetricRows(loopSummaries, windowPeriods, (period) => period.claimEventCount),
+      claimsByPeriod: buildMetricRows(
+        loopSummaries,
+        periods,
+        (period) => period.claimEventCount
+      ),
       claimRateByPeriod: buildMetricRows(
         loopSummaries,
-        windowPeriods,
+        periods,
         (period) => period.claimRatePercent
       ),
       cumulativeUniqueUsersByPeriod: buildMetricRows(
         loopSummaries,
-        windowPeriods,
+        periods,
         (period) => period.cumulativeUniqueUserCount
       ),
-      distributionByPeriod: buildDistributionRows(loopSummaries, windowPeriods),
-      uniqueUsersBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => parseCount(snapshot?.uniqueUserCount)
-      ),
-      uniqueClaimUsersBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => parseCount(snapshot?.uniqueClaimUserCount)
-      ),
-      registrationsBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => parseCount(snapshot?.totalRegistrationsCount)
-      ),
-      claimsBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => parseCount(snapshot?.totalClaimsCount)
-      ),
-      claimRateBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => {
-          const storedClaimRate = parsePercent(snapshot?.claimRatePercent)
-          if (storedClaimRate != null) return storedClaimRate
-
-          const claims = parseCount(snapshot?.totalClaimsCount)
-          const registrations = parseCount(snapshot?.totalRegistrationsCount)
-          if (registrations === 0) return 0
-
-          return Number(((claims / registrations) * 100).toFixed(2))
-        }
-      ),
-      distributedAmountBySnapshot: buildSnapshotMetricRows(
-        history,
-        selectedLoopKeys,
-        (snapshot) => {
-          const amount = snapshot?.totalDistributedAmountFormatted
-          if (!amount) return 0
-
-          const parsed = Number.parseFloat(amount)
-          return Number.isFinite(parsed) ? parsed : 0
-        }
-      ),
+      distributionByPeriod: buildDistributionRows(loopSummaries, periods),
     },
     tables: {
-      loopSummary: buildLoopTableRows(loopSummaries),
-      periodSummary: buildPeriodTableRows(loopSummaries, windowPeriods),
+      loopSummary: loopSummaries.map((loop) => ({
+        loopKey: loop.loopKey,
+        loopName: loop.meta.title,
+        uniqueUsers: loop.uniqueUserCount,
+        uniqueClaimUsers: loop.uniqueClaimUserCount,
+        registeredButNeverClaimedCount: loop.registeredButNeverClaimedCount,
+        totalRegistrations: loop.totalRegistrationsCount,
+        totalClaims: loop.totalClaimsCount,
+        claimParticipationRatePercent: loop.claimParticipationRatePercent,
+        totalDistributedAmount: loop.totalDistributedAmount,
+        totalClaimedAmount: loop.totalClaimedAmount,
+        totalUnclaimedAmount: loop.totalUnclaimedAmount,
+        claimedAmountRatePercent: loop.claimedAmountRatePercent,
+      })),
+      periodSummary: periods.flatMap((periodNumber) =>
+        loopSummaries.map((loop) => {
+          const period = loop.periods.find(
+            (item) => item.period === periodNumber
+          )
+          return {
+            period: periodNumber,
+            periodEndedAtUnix: period?.periodEndedAtUnix ?? null,
+            periodEndedShortLabel: period?.periodEndedShortLabel ?? null,
+            periodEndedLongLabel: period?.periodEndedLongLabel ?? null,
+            loopKey: loop.loopKey,
+            loopName: loop.meta.title,
+            registrations: period?.registeredUserCount ?? 0,
+            claims: period?.claimEventCount ?? 0,
+            claimRatePercent: period?.claimRatePercent ?? null,
+            distributedAmount: period?.totalRegisteredAmount ?? null,
+            claimedAmount: period?.totalClaimedAmount ?? null,
+            unclaimedAmount: period?.totalUnclaimedAmount ?? null,
+            newUsers: period?.newUserCount ?? 0,
+          }
+        })
+      ),
     },
   }
 }

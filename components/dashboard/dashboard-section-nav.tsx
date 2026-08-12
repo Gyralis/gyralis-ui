@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { LuLayoutDashboard } from "react-icons/lu"
 import { FaChartLine, FaRegCircle, FaTable } from "react-icons/fa"
+import { LuLayoutDashboard } from "react-icons/lu"
 import { SiLoop } from "react-icons/si"
 
-import { NavLogoMark } from "@/components/layout/main-nav"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { NavLogoMark } from "@/components/layout/main-nav"
 
 type DashboardSectionNavItem = {
   id: string
@@ -88,7 +88,7 @@ export function DashboardSectionNav({
   return (
     <>
       <nav
-        aria-label="Stats sections"
+        aria-label="Dashboard sections"
         className={cn(
           "rounded-2xl border border-border/70 bg-card/80 p-3 shadow-[0_24px_70px_-40px_hsl(var(--foreground)/0.22)] backdrop-blur supports-[backdrop-filter]:bg-card/80 lg:hidden",
           className
@@ -128,7 +128,7 @@ export function DashboardSectionNav({
       </nav>
 
       <nav
-        aria-label="Stats sections"
+        aria-label="Dashboard sections"
         className={cn(
           "group hidden h-[calc(100vh-7rem)] w-[5.5rem] flex-col rounded-[2rem] border border-border/70 bg-card/80 px-3 py-5 text-card-foreground shadow-[24px_0_90px_-52px_hsl(var(--foreground)/0.28)] backdrop-blur-xl transition-[width,transform] duration-500 hover:w-64 lg:flex",
           className
@@ -185,7 +185,7 @@ export function DashboardSectionNav({
 
         <div className="border-t border-border/60 pt-4 text-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <p className="text-xs leading-5 text-muted-foreground">
-            {footerNote ?? "Built from cached JSON data."} Last updated:{" "}
+            {footerNote ?? "Built from live indexed data."} Source:{" "}
             <span className="text-foreground/80">
               {footerTimestamp ?? "Unknown"}
             </span>

@@ -16,127 +16,6 @@ export interface DashboardLoopMeta {
   isVisibleInDashboard: boolean
 }
 
-export interface RawTimestamp {
-  unix: string
-  utc: string
-}
-
-export interface RawPeriodWindow {
-  periodStart?: RawTimestamp
-  periodEndExclusive?: RawTimestamp
-}
-
-export interface RawLoopPeriodEntry extends RawPeriodWindow {
-  registeredUsers?: string[]
-  registeredUserCount?: number
-  claimUsers?: string[]
-  claimUserCount?: number
-  claimEventCount?: number
-  payoutPerUserRaw?: string | null
-  payoutPerUserFormatted?: string | null
-  claimedAmountRaw?: string | null
-  claimedAmountFormatted?: string | null
-  totalRegisteredAmountRaw?: string | null
-  totalRegisteredAmountFormatted?: string | null
-  unclaimedAmountRaw?: string | null
-  unclaimedAmountFormatted?: string | null
-  claimRatePercent?: string | null
-  newUsers?: string[]
-  newUserCount?: number
-  cumulativeUniqueUserCount?: number | null
-}
-
-export interface RawLoopStats {
-  totalRegistrationsCount?: number
-  totalClaimsCount?: number
-  totalRegisteredAmountRaw?: string
-  totalRegisteredAmountFormatted?: string
-  totalClaimedAmountRaw?: string
-  totalClaimedAmountFormatted?: string
-  totalUnclaimedAmountRaw?: string
-  totalUnclaimedAmountFormatted?: string
-  claimRatePercent?: string
-}
-
-export interface RawLoopTokenInfo {
-  address?: string
-  symbol?: string | null
-  decimals?: number
-  snapshots?: {
-    balanceAtPeriod1?: {
-      periodNumber?: string
-      blockNumber?: string
-      raw?: string
-      formatted?: string
-    }
-    balanceAtPeriod2?: {
-      periodNumber?: string
-      blockNumber?: string
-      raw?: string
-      formatted?: string
-    }
-    balanceAtLastProcessedPeriod?: {
-      periodNumber?: string
-      blockNumber?: string
-      raw?: string
-      formatted?: string
-    }
-  }
-}
-
-export interface DashboardLoopTokenSnapshot {
-  periodNumber: number | null
-  blockNumber: number | null
-  raw: string | null
-  formatted: string | null
-}
-
-export interface RawLoopCacheEntry {
-  loopName?: string
-  loopAddress?: string
-  chainId?: number
-  contractType?: string
-  token?: RawLoopTokenInfo
-  currentPeriod?: string
-  lastProcessedPeriod?: string
-  uniqueUsers?: string[]
-  uniqueUserCount?: number
-  uniqueClaimUsers?: string[]
-  uniqueClaimUserCount?: number
-  stats?: RawLoopStats
-  periods?: Record<string, RawLoopPeriodEntry>
-  updatedAt?: string
-}
-
-export interface RawGlobalTokenTotal {
-  tokenAddress?: string
-  tokenSymbol?: string | null
-  tokenDecimals?: number
-  totalRegisteredAmountRaw?: string
-  totalRegisteredAmountFormatted?: string
-  totalClaimedAmountRaw?: string
-  totalClaimedAmountFormatted?: string
-  totalUnclaimedAmountRaw?: string
-  totalUnclaimedAmountFormatted?: string
-}
-
-export interface RawGlobalCache {
-  loopsIncluded?: string[]
-  uniqueUsers?: string[]
-  uniqueUserCount?: number
-  uniqueClaimUsers?: string[]
-  uniqueClaimUserCount?: number
-  stats?: RawLoopStats
-  tokenTotals?: RawGlobalTokenTotal[]
-  updatedAt?: string
-}
-
-export interface RawLoopRegistrationCache {
-  version?: number
-  loops?: Partial<Record<DashboardLoopKey, RawLoopCacheEntry>>
-  global?: RawGlobalCache | null
-}
-
 export interface DashboardPeriodStats {
   period: number
   periodStartUtc: string | null
@@ -169,11 +48,6 @@ export interface DashboardLoopSummary {
   totalClaimedAmount: string | null
   totalUnclaimedAmount: string | null
   claimedAmountRatePercent: number | null
-  tokenSnapshots: {
-    balanceAtPeriod1: DashboardLoopTokenSnapshot | null
-    balanceAtPeriod2: DashboardLoopTokenSnapshot | null
-    balanceAtLastProcessedPeriod: DashboardLoopTokenSnapshot | null
-  }
   periods: DashboardPeriodStats[]
   currentPeriodStats: DashboardPeriodStats | null
   updatedAt: string | null
@@ -183,7 +57,6 @@ export interface DashboardOverviewCards {
   globalUniqueRegisteredUsers: number
   globalUniqueClaimUsers: number
   globalRegisteredButNeverClaimedUsers: number
-  registeredUsersClaimedRatePercent: number | null
   totalRegistrations: number
   totalClaims: number
   claimParticipationRatePercent: number | null
@@ -193,20 +66,6 @@ export interface DashboardOverviewCards {
   claimedAmountRatePercent: number | null
   currentPeriod: number | null
   newUsersThisPeriod: number
-  weekOverWeek: {
-    uniqueRegisteredUsers: DashboardGrowthStat | null
-    totalDistributedAmount: DashboardGrowthStat | null
-    totalRegistrations: DashboardGrowthStat | null
-    totalClaims: DashboardGrowthStat | null
-  }
-}
-
-export interface DashboardGrowthStat {
-  currentValue: string
-  previousValue: string
-  deltaValue: string
-  deltaPercent: number | null
-  previousDate: string | null
 }
 
 export interface DashboardCurrentPeriodOverview {
@@ -240,13 +99,6 @@ export interface DashboardDistributionByPeriodRow {
   distributedAmount: string | null
   claimedAmount: string | null
   unclaimedAmount: string | null
-}
-
-export interface DashboardHistoryMetricRow {
-  snapshotDate: string
-  snapshotShortLabel: string | null
-  snapshotLongLabel: string | null
-  values: Partial<Record<DashboardLoopKey, number | null>>
 }
 
 export interface DashboardPeriodTableRow {
@@ -307,12 +159,6 @@ export interface DashboardCharts {
   claimRateByPeriod: DashboardMetricByPeriodRow[]
   cumulativeUniqueUsersByPeriod: DashboardMetricByPeriodRow[]
   distributionByPeriod: DashboardDistributionByPeriodRow[]
-  uniqueUsersBySnapshot: DashboardHistoryMetricRow[]
-  uniqueClaimUsersBySnapshot: DashboardHistoryMetricRow[]
-  registrationsBySnapshot: DashboardHistoryMetricRow[]
-  claimsBySnapshot: DashboardHistoryMetricRow[]
-  claimRateBySnapshot: DashboardHistoryMetricRow[]
-  distributedAmountBySnapshot: DashboardHistoryMetricRow[]
 }
 
 export interface DashboardTables {
@@ -322,6 +168,12 @@ export interface DashboardTables {
 
 export interface DashboardPageData {
   generatedAt: string | null
+  indexedBlocks: Array<{
+    chainId: number
+    chainName: string
+    blockNumber: number
+    hasIndexingErrors: boolean
+  }>
   filters: DashboardFilters
   overview: DashboardOverviewCards
   currentPeriodOverview: DashboardCurrentPeriodOverview | null
@@ -334,63 +186,4 @@ export interface DashboardPageData {
 export interface GetDashboardDataOptions {
   loopKeys?: DashboardLoopKey[]
   periodsBack?: number
-  cacheFilePath?: string
-  historyFilePath?: string
-}
-
-export interface RawHistoryLoopSnapshot {
-  loopKey?: string
-  loopName?: string
-  updatedAt?: string | null
-  lastProcessedPeriod?: string | null
-  uniqueUserCount?: number
-  uniqueClaimUserCount?: number
-  totalRegistrationsCount?: number
-  totalClaimsCount?: number
-  claimRatePercent?: string | number | null
-  maxRegistrationsInPeriodCount?: number
-  maxRegistrationsInPeriodNumber?: string | null
-  maxRegistrationsInPeriodEndedAt?: string | null
-  maxClaimsInPeriodCount?: number
-  maxClaimsInPeriodNumber?: string | null
-  maxClaimsInPeriodEndedAt?: string | null
-  totalDistributedAmountRaw?: string | null
-  totalDistributedAmountFormatted?: string | null
-  tokenSymbol?: string | null
-}
-
-export interface RawHistoryGlobalSnapshot {
-  updatedAt?: string | null
-  loopsIncluded?: string[]
-  uniqueUserCount?: number
-  uniqueClaimUserCount?: number
-  totalRegistrationsCount?: number
-  totalClaimsCount?: number
-  claimRatePercent?: string | number | null
-  maxRegistrationsInLoopPeriodCount?: number
-  maxRegistrationsInLoopPeriodLoopKey?: string | null
-  maxRegistrationsInLoopPeriodNumber?: string | null
-  maxRegistrationsInLoopPeriodEndedAt?: string | null
-  maxClaimsInLoopPeriodCount?: number
-  maxClaimsInLoopPeriodLoopKey?: string | null
-  maxClaimsInLoopPeriodNumber?: string | null
-  maxClaimsInLoopPeriodEndedAt?: string | null
-  totalDistributedAmountRaw?: string | null
-  totalDistributedAmountFormatted?: string | null
-  tokenSymbol?: string | null
-}
-
-export interface RawHistorySnapshotEntry {
-  date?: string
-  recordedAt?: string
-  cacheFile?: string
-  cacheUpdatedAt?: string
-  loops?: Record<string, RawHistoryLoopSnapshot>
-  global?: RawHistoryGlobalSnapshot
-}
-
-export interface RawLoopStatsHistory {
-  version?: number
-  generatedFromCacheFile?: string
-  snapshots?: RawHistorySnapshotEntry[]
 }

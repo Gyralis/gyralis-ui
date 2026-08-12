@@ -9,7 +9,6 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "check-loop-user": "node scripts/check-loop-user.mjs",
-    "inspect-loop-registrations": "node scripts/inspect-loop-registrations.mjs",
     "lint": "eslint . --ext .ts,.tsx",
     "lint-fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier . --list-different",

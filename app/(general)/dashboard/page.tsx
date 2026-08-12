@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react"
-import { unstable_noStore as noStore } from "next/cache"
 import Image from "next/image"
 import type { IconType } from "react-icons"
 import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
@@ -9,9 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
 import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card"
-import { BackToLoopsLink } from "@/components/layout/back-to-loops-link"
 import { LoopTypeBadge } from "@/components/loops/loop-type-badge"
-import { HighlightStatCard } from "@/components/stats/highlight-stat-card"
 
 type OverviewStatGroupProps = {
   title: string
@@ -41,7 +37,7 @@ type LoopRateStatCardProps = {
   value: number | null
 }
 
-export const dynamic = "force-dynamic"
+export const revalidate = 300
 
 const sectionItems = [
   { id: "overview", label: "Overview" },
@@ -70,35 +66,6 @@ const loopChartColors: Record<
 const fallbackLoopChartColors = {
   color: "hsl(var(--secondary))",
   softColor: "hsl(var(--secondary) / 0.35)",
-}
-
-const periodDetailRowStyles: Record<
-  string,
-  {
-    background: string
-    accent: string
-  }
-> = {
-  "1hive": {
-    background:
-      "linear-gradient(90deg, hsl(var(--primary) / 0.14), hsl(var(--primary) / 0.04) 42%, transparent)",
-    accent: "hsl(var(--primary))",
-  },
-  blockscout: {
-    background:
-      "linear-gradient(90deg, rgb(43 108 176 / 0.16), rgb(43 108 176 / 0.05) 42%, transparent)",
-    accent: "#2B6CB0",
-  },
-}
-
-function getPeriodDetailRowStyle(loopKey: string): CSSProperties {
-  const rowStyle = periodDetailRowStyles[loopKey]
-  if (!rowStyle) return {}
-
-  return {
-    background: rowStyle.background,
-    boxShadow: `inset 3px 0 0 ${rowStyle.accent}`,
-  }
 }
 
 function formatNumber(value: number) {
@@ -152,28 +119,6 @@ function formatTokenAmountParts(
   }
 }
 
-function formatUpdatedAt(value: string | null) {
-  if (!value) return "Unknown"
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(value))
-}
-
-function formatSidebarUpdatedAt(value: string | null) {
-  if (!value) return "Unknown"
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(value))
-}
-
 function OverviewStatGroup({
   title,
   mainValue,
@@ -206,7 +151,7 @@ function OverviewStatGroup({
             {title}
           </p>
           <div
-            className={`flex flex-wrap items-center gap-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
+            className={`flex flex-wrap items-baseline gap-x-2 text-5xl font-semibold tracking-tight sm:text-6xl ${
               isPrimary ? "text-primary" : "text-secondary"
             }`}
           >
@@ -356,20 +301,26 @@ function LoopRateStatCard({ label, value }: LoopRateStatCardProps) {
 }
 
 export default async function DashboardPage() {
-  noStore()
-
   const data = await getDashboardPageData({ periodsBack: 7 })
   const tokenSummary = data.tokenSummaries[0]
+  const indexedBlockLabel = data.indexedBlocks
+    .map(
+      (entry) =>
+        `${entry.chainName} block ${new Intl.NumberFormat("en-US").format(
+          entry.blockNumber
+        )}`
+    )
+    .join(" · ")
   const totalDistributedOverview = formatTokenAmountParts(
     data.overview.totalDistributedAmount,
     tokenSummary?.tokenSymbol,
     2
   )
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,hsl(var(--primary)/0.08),transparent_24%),radial-gradient(circle_at_82%_14%,hsl(var(--secondary)/0.1),transparent_22%)]" />
-        <div className="absolute inset-y-0 left-0 w-40 bg-[linear-gradient(90deg,hsl(var(--muted)/0.58),transparent)] lg:w-64" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.14),transparent_28%),radial-gradient(circle_at_top_right,hsl(var(--secondary)/0.16),transparent_26%),linear-gradient(180deg,hsl(var(--background)/0.98),hsl(var(--background)))]" />
+        <div className="absolute inset-y-0 left-0 w-40 bg-[linear-gradient(90deg,hsl(var(--muted)/0.65),transparent)] lg:w-64" />
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-16 pt-6 sm:px-6 lg:pl-32 lg:pr-8 lg:pt-8 xl:pl-36 xl:pr-10">
@@ -381,8 +332,8 @@ export default async function DashboardPage() {
               title: "Gyralis",
               version: "v2.1.0",
             }}
-            footerNote="Local cache snapshot from the shared JSON dataset."
-            footerTimestamp={formatSidebarUpdatedAt(data.generatedAt)}
+            footerNote="Live indexed data, refreshed every five minutes."
+            footerTimestamp={indexedBlockLabel}
           />
         </div>
 
@@ -396,13 +347,12 @@ export default async function DashboardPage() {
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
-          <BackToLoopsLink className="absolute left-5 top-5 z-20 border-white/15 bg-black/35 text-slate-200 hover:border-primary/45 hover:bg-primary/15 hover:text-primary sm:left-6 sm:top-6" />
           <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
             <div className="space-y-3">
               <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
                 Gyralis{" "}
                 <span className="bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)] bg-clip-text text-transparent">
-                  Statistics
+                  Dashboard
                 </span>
               </h1>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -411,7 +361,7 @@ export default async function DashboardPage() {
                   token distribution across the Gyralis ecosystem.
                 </p>
                 <div className="inline-flex w-fit shrink-0 rounded-full bg-black/45 px-4 py-2 text-sm font-medium text-slate-200 ring-1 ring-white/10 backdrop-blur">
-                  Last updated {formatUpdatedAt(data.generatedAt)}
+                  Indexed through {indexedBlockLabel}
                 </div>
               </div>
             </div>
@@ -425,16 +375,16 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <HighlightStatCard
+              <OverviewStatGroup
                 title="Unique Registered Users"
+                tone="primary"
                 icon={FaUsers}
-                value={formatNumber(data.overview.globalUniqueRegisteredUsers)}
-                progress={{
+                mainValue={formatNumber(
+                  data.overview.globalUniqueRegisteredUsers
+                )}
+                rate={{
                   label: "Registered Users Claimed",
-                  value: formatPercent(
-                    data.overview.registeredUsersClaimedRatePercent
-                  ),
-                  percent: data.overview.registeredUsersClaimedRatePercent ?? 0,
+                  value: data.overview.claimParticipationRatePercent,
                 }}
                 substats={[
                   {
@@ -499,50 +449,6 @@ export default async function DashboardPage() {
 
             <div className="grid gap-5 xl:grid-cols-2">
               {data.loopSummaries.map((loop) => {
-                const startingBalanceSnapshot =
-                  loop.tokenSnapshots.balanceAtPeriod2 ??
-                  loop.tokenSnapshots.balanceAtPeriod1
-                const startingBalancePeriodNumber =
-                  startingBalanceSnapshot?.periodNumber
-                const latestBalancePeriodNumber =
-                  loop.tokenSnapshots.balanceAtLastProcessedPeriod?.periodNumber
-                const startingBalancePeriod = loop.periods.find(
-                  (period) => period.period === startingBalancePeriodNumber
-                )
-                const latestBalancePeriod = loop.periods.find(
-                  (period) => period.period === latestBalancePeriodNumber
-                )
-                const startingBalanceDate =
-                  startingBalancePeriod?.periodEndedShortLabel ??
-                  "Date unavailable"
-                const latestBalanceDate =
-                  latestBalancePeriod?.periodEndedShortLabel ??
-                  "Date unavailable"
-                const maxRegistrationsPeriod = loop.periods.reduce<
-                  (typeof loop.periods)[number] | null
-                >((best, period) => {
-                  if (
-                    best == null ||
-                    period.registeredUserCount > best.registeredUserCount
-                  ) {
-                    return period
-                  }
-
-                  return best
-                }, null)
-                const maxClaimsPeriod = loop.periods.reduce<
-                  (typeof loop.periods)[number] | null
-                >((best, period) => {
-                  if (
-                    best == null ||
-                    period.claimEventCount > best.claimEventCount
-                  ) {
-                    return period
-                  }
-
-                  return best
-                }, null)
-
                 return (
                   <Card
                     key={loop.loopKey}
@@ -569,7 +475,6 @@ export default async function DashboardPage() {
                             />
                           </div>
                         </div>
-
                       </div>
                     </CardHeader>
 
@@ -596,7 +501,7 @@ export default async function DashboardPage() {
                         />
                       </div>
 
-                      <div className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
+                      <div>
                         <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
                           <div className="flex items-center justify-between gap-4">
                             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
@@ -644,82 +549,6 @@ export default async function DashboardPage() {
                               </p>
                             </div>
                           </div>
-
-                          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                            <div className="rounded-2xl border border-border/60 bg-background/35 p-4">
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                                Max Regs
-                              </p>
-                              <p className="mt-1 text-lg font-semibold text-card-foreground">
-                                {formatNumber(
-                                  maxRegistrationsPeriod?.registeredUserCount ?? 0
-                                )}
-                              </p>
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {maxRegistrationsPeriod?.periodEndedShortLabel ??
-                                  "Date unavailable"}
-                              </p>
-                            </div>
-
-                            <div className="rounded-2xl border border-border/60 bg-background/35 p-4">
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                                Max Claims
-                              </p>
-                              <p className="mt-1 text-lg font-semibold text-card-foreground">
-                                {formatNumber(
-                                  maxClaimsPeriod?.claimEventCount ?? 0
-                                )}
-                              </p>
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {maxClaimsPeriod?.periodEndedShortLabel ??
-                                  "Date unavailable"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-border/60 bg-muted/20 p-5">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                            Token Balance Snapshots
-                          </p>
-                          <div className="mt-4 space-y-4">
-                            <div>
-                              <div className="flex items-center justify-between gap-4">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Starting Balance
-                                </p>
-                                <p className="text-right text-xs text-muted-foreground">
-                                  {startingBalanceDate}
-                                </p>
-                              </div>
-                              <p className="mt-1 text-lg font-semibold text-card-foreground">
-                                {formatTokenAmount(
-                                  startingBalanceSnapshot?.formatted ?? null,
-                                  loop.meta.tokenSymbol,
-                                  2
-                                )}
-                              </p>
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between gap-4">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                  Latest Balance
-                                </p>
-                                <p className="text-right text-xs text-muted-foreground">
-                                  {latestBalanceDate}
-                                </p>
-                              </div>
-                              <p className="mt-1 text-lg font-semibold text-card-foreground">
-                                {formatTokenAmount(
-                                  loop.tokenSnapshots
-                                    ?.balanceAtLastProcessedPeriod
-                                    ?.formatted ?? null,
-                                  loop.meta.tokenSymbol,
-                                  2
-                                )}
-                              </p>
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -737,10 +566,10 @@ export default async function DashboardPage() {
             <div className="flex gap-3 rounded-2xl border border-border/70 bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
               <FaInfoCircle className="mt-1 size-4 shrink-0 text-primary" />
               <p>
-                Charts use saved snapshot dates from the cached history so you
-                can compare cumulative growth across{" "}
-                {data.loopSummaries.length} Gnosis loops over time with shared
-                token accounting.
+                Charts use the day each period ended, show the latest seven
+                completed dates from live indexed data, and compare{" "}
+                {data.loopSummaries.length} Gnosis loops with synchronized
+                labels and shared token accounting.
               </p>
             </div>
 
@@ -758,17 +587,13 @@ export default async function DashboardPage() {
                 }
               })}
               tokenSymbol={tokenSummary?.tokenSymbol ?? null}
-              claimParticipationRatePercent={
-                data.overview.claimParticipationRatePercent
+              registrationsByPeriod={data.charts.registrationsByPeriod}
+              claimsByPeriod={data.charts.claimsByPeriod}
+              claimRateByPeriod={data.charts.claimRateByPeriod}
+              cumulativeUniqueUsersByPeriod={
+                data.charts.cumulativeUniqueUsersByPeriod
               }
-              uniqueUsersBySnapshot={data.charts.uniqueUsersBySnapshot}
-              uniqueClaimUsersBySnapshot={data.charts.uniqueClaimUsersBySnapshot}
-              registrationsBySnapshot={data.charts.registrationsBySnapshot}
-              claimsBySnapshot={data.charts.claimsBySnapshot}
-              claimRateBySnapshot={data.charts.claimRateBySnapshot}
-              distributedAmountBySnapshot={
-                data.charts.distributedAmountBySnapshot
-              }
+              distributionByPeriod={data.charts.distributionByPeriod}
             />
           </section>
 
@@ -807,8 +632,7 @@ export default async function DashboardPage() {
                       {data.tables.periodSummary.map((row) => (
                         <tr
                           key={`${row.loopKey}-${row.period}`}
-                          className="transition-[background,box-shadow,filter] hover:brightness-[1.03]"
-                          style={getPeriodDetailRowStyle(row.loopKey)}
+                          className="bg-transparent"
                         >
                           <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                             {row.periodEndedLongLabel ?? `Period ${row.period}`}
