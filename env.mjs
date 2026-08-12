@@ -3,13 +3,18 @@ import { z } from "zod"
 
 export const DEFAULT_NEXTAUTH_SECRET =
   "complex_password_at_least_32_characters_long"
+export const DEFAULT_GYRALIS_SUBGRAPH_URL =
+  "https://api.studio.thegraph.com/query/33583/gyralis-gnosis/version/latest"
 
 export const env = createEnv({
   server: {
     // Iron session requires a secret of at least 32 characters
     NEXTAUTH_SECRET: z.string().min(32).default(DEFAULT_NEXTAUTH_SECRET),
     DATABASE_URL: z.string().url().optional(),
-    GYRALIS_SUBGRAPH_URL: z.string().url().optional(),
+    GYRALIS_SUBGRAPH_URL: z
+      .string()
+      .url()
+      .default(DEFAULT_GYRALIS_SUBGRAPH_URL),
     GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),
     SCORING_SYNC_BATCH_SIZE: z.coerce.number().int().positive().default(500),
     CRON_SECRET: z.string().min(32).optional(),
