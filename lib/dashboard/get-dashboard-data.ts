@@ -49,6 +49,7 @@ const liveLoopSources = {
     contractType: "loop",
     fallbackTokenSymbol: "HNY",
     fallbackTokenDecimals: 18,
+    payoutTokenAddress: null,
     getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
   blockscout: {
@@ -58,15 +59,17 @@ const liveLoopSources = {
     contractType: "loop",
     fallbackTokenSymbol: "HNY",
     fallbackTokenDecimals: 18,
+    payoutTokenAddress: null,
     getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
   "base-superloop": {
-    subgraphId: "0xf10834f301206f3d6e5a9c9641b12edea712a428",
-    address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
+    subgraphId: "0x213310e1dbd6991cd488ab247c81fad82cd88e7a",
+    address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
     chain: base,
     contractType: "superLoop",
-    fallbackTokenSymbol: "SUP",
+    fallbackTokenSymbol: "MARKEE",
     fallbackTokenDecimals: 18,
+    payoutTokenAddress: "0xF6627cF19317C33B457f77452876e6e297c4942F",
     getEndpoint: () => env.GYRALIS_BASE_SUBGRAPH_URL,
   },
 } as const
@@ -237,7 +240,7 @@ async function fetchLoopSchedule(
         functionName: detailsFunction,
       }),
     ])
-    const tokenAddress = details[0]
+    const tokenAddress = source.payoutTokenAddress ?? details[0]
     const [tokenSymbolResult, tokenDecimalsResult] = await Promise.allSettled([
       client.readContract({
         address: tokenAddress,

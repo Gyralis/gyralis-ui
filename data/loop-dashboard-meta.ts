@@ -39,15 +39,15 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
   "base-superloop": {
     loopKey: "base-superloop",
     contractType: "superLoop",
-    title: "Blockscout SuperLoop",
-    shortTitle: "Base SuperLoop",
-    by: "Gyralis Team",
+    title: "Markee SuperLoop",
+    shortTitle: "Markee",
+    by: "Markee",
     description:
-      "The production SuperLoop receiving live SUP flow on Base for eligible loopers.",
-    logoSrc: "/blockscout-logo.png",
+      "The production SuperLoop distributing MARKEE rewards on Base.",
+    logoSrc: "/markee-logo.png",
     brandColor: "#0052FF",
     chainName: "Base",
-    tokenSymbol: "SUP",
+    tokenSymbol: "MARKEE",
     isVisibleInDashboard: true,
   },
   "test-superloops": {
