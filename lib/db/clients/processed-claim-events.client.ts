@@ -66,22 +66,6 @@ export async function markProcessedClaimEvents(events: ClaimScoringEvent[]) {
   return { count: inputs.length }
 }
 
-export async function createProcessedClaimEvents(events: ClaimScoringEvent[]) {
-  const inputs = events
-    .map(processedClaimInput)
-    .filter((input): input is NonNullable<typeof input> => input != null)
-
-  let count = 0
-  for (let index = 0; index < inputs.length; index += 1000) {
-    const result = await prisma.processedClaimEvent.createMany({
-      data: inputs.slice(index, index + 1000),
-    })
-    count += result.count
-  }
-
-  return { count }
-}
-
 export async function clearProcessedClaimEvents() {
   await prisma.processedClaimEvent.deleteMany()
 }

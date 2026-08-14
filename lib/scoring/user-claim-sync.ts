@@ -30,10 +30,7 @@ import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
 import { parseEarnedStreakBonuses } from "./responses"
 import { computeLoopStatsFromClaims, normalizeAddress } from "./rules"
-import {
-  fetchAllClaimEventsForUserLoop,
-  getScoringSubgraphSource,
-} from "./subgraph-client"
+import { fetchAllClaimEventsForUserLoop } from "./subgraph-client"
 import { ClaimScoringEvent, UserLoopScoringStats } from "./types"
 
 const canonicalClaimEvent = parseAbiItem(
@@ -145,7 +142,7 @@ export function extractClaimEventsFromReceiptLogs(input: {
     }
 
     const loopId = stringifyUint(args.loopId)
-    if (loopId != null && loopId !== expectedLoopId) continue
+    if (loopId !== expectedLoopId) continue
 
     events.push({
       id: claimEventId(input.txHash, log.logIndex),
@@ -222,7 +219,11 @@ async function recomputeUserLoopAndGlobalStats(input: {
 }
 
 export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
-  const source = getScoringSubgraphSource(input.chainId)
+  if (input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
+    throw new Error(
+      "Requested chainId does not match GYRALIS_SUBGRAPH_CHAIN_ID"
+    )
+  }
 
   const client = createPublicClient({
     chain: getViemChain(input.chainId),
@@ -267,7 +268,6 @@ export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
   )
   const alreadySynced = processedEvents.every(Boolean)
   const historicalEvents = await fetchAllClaimEventsForUserLoop({
-    source,
     userAddress: input.userAddress,
     loopId: input.loopId,
     batchSize: env.SCORING_SYNC_BATCH_SIZE,

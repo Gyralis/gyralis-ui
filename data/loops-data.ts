@@ -1,8 +1,10 @@
 import { Address } from "viem"
 
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "garden_1hive" | "blockscout"
+export type LoopEligibilityProvider = "gardens" | "blockscout"
+export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
   id: number
@@ -11,10 +13,13 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  payoutToken?: Address
+  communityLogoUrl?: string
   eligibilityLogoUrl?: string
 
   shieldScore: string
   eligibility: string
+  eligibilityUrl?: string
   chainBadgeColor: string
   shieldAccount?: string
   shieldValue?: string
@@ -23,15 +28,54 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
+  historyLoopKey: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
+  gardensCommunity?: GardensCommunityKey
   passportMinScore: number
   enabled: boolean
   claimAmount?: string // New: Amount user can claim
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
+  rewardsSummary?: string
+  statusLabel?: string
+  sponsorName?: string
+  sponsorLogoUrl?: string
+  sponsorUrl?: string
 }
 
 export const LoopCardsData: LoopCardData[] = [
+  {
+    id: 5,
+    title: "Markee",
+    by: "Markee cooperative",
+    address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
+    description:
+      "The first SuperLoop on Base, streaming rewards you can claim daily.",
+    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
+    communityLogoUrl: "/markee-logo.png",
+    eligibilityLogoUrl: "/gardens-logo.png",
+    shieldScore: "Passport Score 15+",
+    eligibility: "Join Markee community in Gardens required",
+    eligibilityUrl:
+      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: true,
+    contractType: "superLoop",
+    chainId: 8453,
+    chainName: "Base",
+    historyLoopKey: "test-superloops",
+    eligibilityProvider: "gardens",
+    gardensCommunity: "markee",
+    passportMinScore: 0,
+    enabled: true,
+    rewardsSummary: "1000 markee tokens",
+    sponsorName: "Markee Cooperative",
+    sponsorLogoUrl: "/markee-logo.png",
+    sponsorUrl: "https://www.markee.xyz/",
+  },
   {
     id: 3,
     title: "1Hive Gardens",
@@ -40,9 +84,12 @@ export const LoopCardsData: LoopCardData[] = [
     description:
       "Claim HNY token if you meet the 1Hive membership requirement.",
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+    communityLogoUrl: "/1Hive-logo.png",
     eligibilityLogoUrl: "/gardens-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "1Hive membership required",
+    eligibility: "Join 1Hive community in Gardens required",
+    eligibilityUrl:
+      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -50,9 +97,14 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
-    eligibilityProvider: "garden_1hive",
-    passportMinScore: 15,
+    historyLoopKey: "1hive",
+    eligibilityProvider: "gardens",
+    gardensCommunity: "1hive",
+    passportMinScore: 0,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
   {
     id: 4,
@@ -64,7 +116,8 @@ export const LoopCardsData: LoopCardData[] = [
     token: "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
     eligibilityLogoUrl: "/blockscout-logo.png",
     shieldScore: "Passport Score +15",
-    eligibility: "Gyralis offer redemption required",
+    eligibility: "Redeem Gyralis offer in Blockscout Merits",
+    eligibilityUrl: "https://merits.blockscout.com/?tab=spend",
     chainBadgeColor: "bg-custom-green",
     shieldAccount: "0xtt...453",
     shieldValue: "26",
@@ -72,41 +125,41 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "loop",
     chainId: 100,
     chainName: "Gnosis",
+    historyLoopKey: "blockscout",
     eligibilityProvider: "blockscout",
     passportMinScore: 15,
     enabled: true,
+    sponsorName: "1Hive",
+    sponsorLogoUrl: "/1Hive-logo.png",
+    sponsorUrl: "https://1hive.org",
   },
-  // {
-  //   id: 5,
-  //   title: "Blockscout Merits",
-  //   by: "Gyralis Team",
-  //   address: "0xf10834f301206F3D6E5a9C9641B12EDEA712A428",
-  //   description:
-  //     "The first SuperLoop now receiving live SUP flow on Base. Eligible loopers can enter and claim each distribution period.",
-  //   token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-  //   eligibilityLogoUrl: "/blockscout-logo.png",
-  //   shieldScore: "Passport Score 15+",
-  //   eligibility: "Gyralis offer redemption required",
-  //   chainBadgeColor: "bg-custom-green",
-  //   shieldAccount: "0xtt...453",
-  //   shieldValue: "26",
-  //   super: true,
-  //   contractType: "superLoop",
-  //   chainId: 8453,
-  //   chainName: "Base",
-  //   eligibilityProvider: "blockscout",
-  //   passportMinScore: 0,
-  //   enabled: true,
-  // },
+
+  {
+    id: 6,
+    title: "True Loopers",
+    by: "Gyralis",
+    address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
+    description: "Engage Daily. Earn Fairly with Gyralis superLoops.",
+    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
+    eligibilityLogoUrl: "/gyralis-logo.svg",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: false,
+    contractType: "superLoop",
+    chainId: 8453,
+    chainName: "Base",
+    historyLoopKey: "test-superloops",
+    eligibilityProvider: "blockscout",
+    passportMinScore: 0,
+    enabled: false,
+    rewardsSummary: "Up to $50 USDC",
+    statusLabel: "Preparing",
+    sponsorName: "TBA",
+    sponsorLogoUrl: "/gyralis-logo.svg",
+    sponsorUrl: "/",
+  },
 ]
-
-export function getLoopCardById(loopId: number | string) {
-  const parsedLoopId = Number(loopId)
-  if (!Number.isSafeInteger(parsedLoopId)) return undefined
-  return LoopCardsData.find((loop) => loop.id === parsedLoopId)
-}
-
-export function getEnabledLoopCardById(loopId: number | string) {
-  const loop = getLoopCardById(loopId)
-  return loop?.enabled ? loop : undefined
-}

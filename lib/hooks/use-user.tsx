@@ -2,13 +2,18 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/services/user.service"
 import { useQuery } from "@tanstack/react-query"
 
+interface User {
+  isLoggedIn: boolean
+  address?: string
+  isAdmin?: boolean
+}
+
 export function useUser({ redirectTo = "", redirectIfFound = false } = {}) {
-  const { data: user, refetch: mutateUser } = useQuery({
+  const { data: user, refetch: mutateUser } = useQuery<User>({
     queryKey: ["user"],
-    queryFn: getCurrentUser,
+    queryFn: () => fetch("/api/app/user").then((res) => res.json()),
   })
 
   const Router = useRouter()

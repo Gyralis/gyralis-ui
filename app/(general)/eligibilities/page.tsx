@@ -7,6 +7,7 @@ import { LuLaptop } from "react-icons/lu"
 
 import { Button } from "@/components/ui/button"
 import Modal from "@/components/ui/modal"
+import { BackToLoopsLink } from "@/components/layout/back-to-loops-link"
 import { LinkComponent } from "@/components/shared/link-component"
 
 const eligibilityRequirements = [
@@ -14,20 +15,22 @@ const eligibilityRequirements = [
     id: 1,
     name: "Gardens",
     description:
-      "Gardens is a bottom-up governance framework for web3 ecosystems. Register as a member in 1Hive community and participate in decentralized decision making.",
-    requirement: "1Hive Membership",
+      "Gyralis connects Loops with Gardens communities such as 1Hive and Markee. Join the community required by a Loop to participate in its governance and start claiming daily rewards.",
+    modalDescription:
+      "Join the Gardens community required by your Loop. Gyralis verifies your connected wallet’s membership automatically.",
+    requirement: "Community Membership",
+    network: "Gnosis / Base",
     status: "active",
     icon: LuLaptop,
     color: "text-yellow-500",
     bgColor: "bg-yellow-50 dark:bg-yellow-900/20",
     steps: [
-      "Go to Gardens app, search for 1Hive community and connect your wallet.",
-      "Click Join and complete membership.",
-      "Stake 3 HNY tokens to activate your membership.",
-      "Come back to Gyralis and enter the 1Hive loop. Claim daily rewards.",
+      "Open the Gardens community required by the Loop, such as 1Hive or Markee.",
+      "Connect the same wallet you use in Gyralis.",
+      "Review the community covenant, select Join, and stake the required community token.",
+      "Return to Gyralis and enter the Loop. Your membership will be verified automatically.",
     ],
-    protocolUrl:
-      "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
+    protocolUrl: "https://app.gardens.fund/gardens",
     coverUrl: "/gardens-cover.png",
     logoUrl: "/gardens-logo.png",
     type: "loop",
@@ -36,14 +39,17 @@ const eligibilityRequirements = [
     id: 2,
     name: "Blockscout Merits",
     description:
-      "Blockscout Merits is a gamified rewards program that lets users earn points (“Merits”) by exploring the blockchain, completing tasks, using tools, and inviting others.",
+      "Use Blockscout Merits to redeem the Gyralis offer, verify your wallet, and unlock daily rewards from the Blockscout Loop.",
+    modalDescription:
+      "Redeem the Gyralis Loop Rewards offer with Blockscout Merits. Gyralis verifies the connected wallet’s redemption automatically.",
     requirement: "Redeem Gyralis Offer",
+    network: "Gnosis",
     status: "active",
     icon: LuLaptop,
     color: "text-orange-500",
     bgColor: "bg-orange-50 dark:bg-orange-900/20",
     steps: [
-      "Go to the Blockscout Merits Explorer and connect your wallet.You’ll receive 100 Merits.",
+      "Go to the Blockscout Merits Explorer and connect your wallet. You’ll receive 100 Merits.",
       "Open the Spend Merits tab and find the Gyralis Loop Rewards.",
       "Redeem the offer for 50 Merits.",
       "Come back to Gyralis and enter the Blockscout Merits loop. Claim daily rewards.",
@@ -59,7 +65,7 @@ const eligibilityRequirements = [
     id: 3,
     name: "Human Passport",
     description:
-      "Verify your Humanity. Collect stamps and build your unique passport score of +15 and pass the loop shield to be eligible.",
+      "Build your Human Passport score to prove you’re a unique participant, pass a Loop’s shield, and unlock its rewards.",
     requirement: "Passport Score",
     status: "active",
     color: "text-pink-500",
@@ -81,17 +87,34 @@ export default function ElegibilityPage() {
     (typeof eligibilityRequirements)[0] | null
   >(null)
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl px-4 py-8 font-body">
-        <div className="mb-6 md:mb-8">
-          <h1 className="mb-3 font-heading text-2xl font-bold  md:mb-4 md:text-3xl">
-            Eligibility Requirements
-          </h1>
-          <p className="font-body text-sm opacity-70 md:text-base">
-            Meet these requirements to participate in various loops and claim
-            rewards.
-          </p>
-        </div>
+    <div className="relative min-h-screen overflow-hidden text-foreground">
+      <div className="relative z-10 mx-auto flex max-w-screen-2xl flex-col gap-8 px-4 pb-16 pt-6 font-body sm:px-6 lg:pl-32 lg:pr-8 lg:pt-8 xl:pl-36 xl:pr-10">
+        <header className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border border-border/70 bg-transparent sm:min-h-[380px] dark:bg-slate-950">
+          <Image
+            src="/eligibilities-header.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1536px) 1360px, (min-width: 1024px) calc(100vw - 11rem), calc(100vw - 2rem)"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
+          <BackToLoopsLink className="absolute left-5 top-5 z-20 border-white/15 bg-black/35 text-slate-200 hover:border-primary/45 hover:bg-primary/15 hover:text-primary sm:left-6 sm:top-6" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+            <div className="space-y-3">
+              <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
+                Gyralis{" "}
+                <span className="bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)] bg-clip-text text-transparent">
+                  Eligibilities
+                </span>
+              </h1>
+              <p className="max-w-5xl text-base leading-7 text-slate-300 sm:text-xl sm:leading-8">
+                Enter the Loops and claim daily rewards by meeting the
+                eligibility requirements across the Gyralis ecosystem.
+              </p>
+            </div>
+          </div>
+        </header>
 
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8">
           {eligibilityRequirements.map((requirement) => {
@@ -106,19 +129,19 @@ export default function ElegibilityPage() {
                 <div className="mb-4 flex items-center space-x-2 sm:space-x-4">
                   <div className="rounded-3xl bg-white/55 p-3 backdrop-blur-md dark:bg-white/10 shrink-0 border border-white/30 shadow-lg dark:border-white/20">
                     {requirement.logoUrl && (
-                      <div className="flex h-6 w-6 items-center justify-center sm:h-8 sm:w-8">
+                      <div className="flex size-6 items-center justify-center sm:size-8">
                         <Image
                           src={requirement.logoUrl}
                           alt={`${requirement.name} logo`}
                           width={28}
                           height={28}
-                          className="h-6 w-6 object-contain sm:h-8 sm:w-8"
+                          className="size-6 object-contain sm:size-8"
                         />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
+                    <div className="flex items-center justify-between gap-2">
                       <h3 className="font-heading text-lg font-semibold leading-tight  sm:text-xl">
                         {requirement.name}
                       </h3>
@@ -159,21 +182,20 @@ export default function ElegibilityPage() {
           })}
         </div>
 
-        <div className="tamagotchi-card mt-8">
-          <h2 className="mb-4 font-heading text-xl font-semibold  sm:mb-6 sm:text-2xl">
+        <div className="tamagotchi-card pointer-events-none mt-8">
+          <h2 className="mb-4 font-heading text-xl font-semibold sm:mb-6 sm:text-2xl">
             How Eligibility Works
           </h2>
-          <div className="space-y-3 font-body text-sm  opacity-80 sm:space-y-4 sm:text-base">
-            <p>• Each loop has different eligibility requirements.</p>
-
+          <div className="space-y-3 font-body text-sm leading-6 text-muted-foreground sm:space-y-4 sm:text-base">
             <p>
-              • Each loop may have its own unique Human Passport score to meet.
+              • Each Loop defines its own eligibility requirement and Gyralis
+              verifies it automatically.
             </p>
-
             <p>
-              • Elegibilities are checked every time you attempt to enter or
-              claim.
+              • Requirements are checked against the wallet connected to
+              Gyralis, so use the same wallet with each eligibility provider.
             </p>
+            <p>• Eligibility is verified whenever you enter or claim.</p>
           </div>
         </div>
 
@@ -205,6 +227,32 @@ export default function ElegibilityPage() {
                 height={320}
                 className="w-full object-contain"
               />
+
+              {selectedEligibility.modalDescription && (
+                <div className="space-y-4">
+                  <p className="font-body text-sm leading-6 text-muted-foreground">
+                    {selectedEligibility.modalDescription}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-border bg-muted/35 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Requirement
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {selectedEligibility.requirement}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-border bg-muted/35 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Network
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {selectedEligibility.network}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h3 className="mb-4 text-lg font-bold text-foreground">

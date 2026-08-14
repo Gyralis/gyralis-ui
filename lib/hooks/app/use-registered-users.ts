@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { parseAbiItem, type Address } from "viem"
+import { parseAbiItem, type Address, type Log } from "viem"
 import { usePublicClient } from "wagmi"
+
+import { getLogsChunked } from "./get-logs-chunked"
 
 const legacyRegisterEventAbiItem = parseAbiItem(
   "event Register(address indexed sender, uint256 indexed periodNumber)"
@@ -12,8 +14,17 @@ const upgradedRegisterEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
+const PERIOD_LOG_CHUNK_SIZE = 10_000n
+type RegisterLog = Log<bigint, number, false, typeof legacyRegisterEventAbiItem>
+type UpgradedRegisterLog = Log<
+  bigint,
+  number,
+  false,
+  typeof upgradedRegisterEventAbiItem
+>
 
 interface UseRegisteredUsersResult {
+  error: unknown
   users: Address[]
   loading: boolean
 }
@@ -23,15 +34,18 @@ export function useRegisteredUsers(
   chainId: number,
   periodNumber?: bigint,
   refreshKey = 0,
-  enabled = true
+  enabled = true,
+  blockRange?: { fromBlock: bigint; toBlock: bigint }
 ): UseRegisteredUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
+  const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
+      setError(null)
       setLoading(false)
       return
     }
@@ -39,33 +53,45 @@ export function useRegisteredUsers(
     let cancelled = false
 
     const fetchLogs = async () => {
+      setError(null)
       setLoading(true)
 
       try {
         const latestBlock = await publicClient.getBlockNumber()
         const fromBlock =
-          latestBlock > LOG_LOOKBACK_BLOCKS
+          blockRange?.fromBlock ??
+          (latestBlock > LOG_LOOKBACK_BLOCKS
             ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n
+            : 0n)
+        const toBlock = blockRange?.toBlock ?? latestBlock
+        const chunkSize = blockRange ? PERIOD_LOG_CHUNK_SIZE : undefined
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          publicClient.getLogs({
-            address: loopAddress,
-            event: legacyRegisterEventAbiItem,
-            args: {
-              periodNumber,
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: legacyRegisterEventAbiItem,
+              args: {
+                periodNumber,
+              },
+              fromBlock,
+              toBlock,
             },
-            fromBlock,
-            toBlock: "latest",
-          }),
-          publicClient.getLogs({
-            address: loopAddress,
-            event: upgradedRegisterEventAbiItem,
-            args: {
-              periodNumber,
+            chunkSize
+          ).then((logs) => logs as RegisterLog[]),
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: upgradedRegisterEventAbiItem,
+              args: {
+                periodNumber,
+              },
+              fromBlock,
+              toBlock,
             },
-            fromBlock,
-            toBlock: "latest",
-          }),
+            chunkSize
+          ).then((logs) => logs as UpgradedRegisterLog[]),
         ])
 
         if (cancelled) {
@@ -79,6 +105,7 @@ export function useRegisteredUsers(
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching Register logs:", error)
+          setError(error)
           setUsers([])
         }
       } finally {
@@ -93,7 +120,16 @@ export function useRegisteredUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
+  }, [
+    blockRange?.fromBlock,
+    blockRange?.toBlock,
+    chainId,
+    enabled,
+    loopAddress,
+    periodNumber,
+    publicClient,
+    refreshKey,
+  ])
 
-  return { users, loading }
+  return { error, users, loading }
 }

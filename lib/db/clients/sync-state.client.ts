@@ -2,31 +2,22 @@ import { prisma } from "@/lib/db/client"
 
 export const SCORING_SYNC_STATE_ID = "scoring-sync"
 
-function scoringSyncStateId(chainId: number) {
-  return chainId === 100
-    ? SCORING_SYNC_STATE_ID
-    : `${SCORING_SYNC_STATE_ID}-${chainId}`
-}
-
-export async function getScoringSyncState(chainId: number) {
-  const id = scoringSyncStateId(chainId)
+export async function getScoringSyncState() {
   return prisma.scoringSyncState.upsert({
-    where: { id },
-    create: { id },
+    where: { id: SCORING_SYNC_STATE_ID },
+    create: { id: SCORING_SYNC_STATE_ID },
     update: {},
   })
 }
 
 export async function updateScoringSyncState(input: {
-  chainId: number
   lastBlockNumber: number
   lastEventId?: string
 }) {
-  const id = scoringSyncStateId(input.chainId)
   return prisma.scoringSyncState.upsert({
-    where: { id },
+    where: { id: SCORING_SYNC_STATE_ID },
     create: {
-      id,
+      id: SCORING_SYNC_STATE_ID,
       lastBlockNumber: input.lastBlockNumber,
       lastEventId: input.lastEventId,
       lastSyncedAt: new Date(),

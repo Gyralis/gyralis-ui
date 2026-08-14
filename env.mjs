@@ -3,14 +3,25 @@ import { z } from "zod"
 
 export const DEFAULT_NEXTAUTH_SECRET =
   "complex_password_at_least_32_characters_long"
+export const DEFAULT_GYRALIS_SUBGRAPH_URL =
+  "https://api.studio.thegraph.com/query/33583/gyralis-gnosis/version/latest"
+export const DEFAULT_GYRALIS_BASE_SUBGRAPH_URL =
+  "https://api.studio.thegraph.com/query/33583/gyralis-base/version/latest"
 
 export const env = createEnv({
   server: {
     // Iron session requires a secret of at least 32 characters
     NEXTAUTH_SECRET: z.string().min(32).default(DEFAULT_NEXTAUTH_SECRET),
     DATABASE_URL: z.string().url().optional(),
-    GYRALIS_SUBGRAPH_URL: z.string().url().optional(),
-    GYRALIS_BASE_SUBGRAPH_URL: z.string().url().optional(),
+    GYRALIS_SUBGRAPH_URL: z
+      .string()
+      .url()
+      .default(DEFAULT_GYRALIS_SUBGRAPH_URL),
+    GYRALIS_BASE_SUBGRAPH_URL: z
+      .string()
+      .url()
+      .default(DEFAULT_GYRALIS_BASE_SUBGRAPH_URL),
+    BASE_RPC_URL: z.string().url().optional(),
     GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),
     SCORING_SYNC_BATCH_SIZE: z.coerce.number().int().positive().default(500),
     CRON_SECRET: z.string().min(32).optional(),
@@ -28,12 +39,14 @@ export const env = createEnv({
     MORALIS_API_KEY: z.string().min(1).optional(),
     GITCOIN_PASSPORT_SCORER_ID: z.string().min(1).optional(),
     GITCOIN_PASSPORT_API_KEY: z.string().min(1).optional(),
-    GARDENS_SUBGRAPH_VERSION: z.string().min(1).optional(),
+    GARDENS_1HIVE_SUBGRAPH_ENDPOINT: z.string().url().optional(),
+    GARDENS_MARKEE_SUBGRAPH_ENDPOINT: z.string().url().optional(),
   },
   client: {
     NEXT_PUBLIC_USE_PUBLIC_PROVIDER: z.enum(["true", "false"]).default("true"),
     NEXT_PUBLIC_PROD_NETWORKS_DEV: z.enum(["true", "false"]).default("false"),
     NEXT_PUBLIC_ALCHEMY_API_KEY: z.string().min(1).optional(),
+    NEXT_PUBLIC_BASE_RPC_URL: z.string().url().optional(),
     NEXT_PUBLIC_INFURA_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_LIVEPEER_API_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
@@ -47,6 +60,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     GYRALIS_SUBGRAPH_URL: process.env.GYRALIS_SUBGRAPH_URL,
     GYRALIS_BASE_SUBGRAPH_URL: process.env.GYRALIS_BASE_SUBGRAPH_URL,
+    BASE_RPC_URL: process.env.BASE_RPC_URL,
     GYRALIS_SUBGRAPH_CHAIN_ID: process.env.GYRALIS_SUBGRAPH_CHAIN_ID,
     SCORING_SYNC_BATCH_SIZE: process.env.SCORING_SYNC_BATCH_SIZE,
     CRON_SECRET: process.env.CRON_SECRET,
@@ -61,10 +75,14 @@ export const env = createEnv({
     MORALIS_API_KEY: process.env.MORALIS_API_KEY,
     GITCOIN_PASSPORT_SCORER_ID: process.env.GITCOIN_PASSPORT_SCORER_ID,
     GITCOIN_PASSPORT_API_KEY: process.env.GITCOIN_PASSPORT_API_KEY,
-    GARDENS_SUBGRAPH_VERSION: process.env.GARDENS_SUBGRAPH_VERSION,
+    GARDENS_1HIVE_SUBGRAPH_ENDPOINT:
+      process.env.GARDENS_1HIVE_SUBGRAPH_ENDPOINT,
+    GARDENS_MARKEE_SUBGRAPH_ENDPOINT:
+      process.env.GARDENS_MARKEE_SUBGRAPH_ENDPOINT,
     NEXT_PUBLIC_USE_PUBLIC_PROVIDER:
       process.env.NEXT_PUBLIC_USE_PUBLIC_PROVIDER,
     NEXT_PUBLIC_ALCHEMY_API_KEY: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+    NEXT_PUBLIC_BASE_RPC_URL: process.env.NEXT_PUBLIC_BASE_RPC_URL,
     NEXT_PUBLIC_INFURA_API_KEY: process.env.NEXT_PUBLIC_INFURA_API_KEY,
     NEXT_PUBLIC_LIVEPEER_API_KEY: process.env.NEXT_PUBLIC_LIVEPEER_API_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,

@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { parseAbiItem, type Address } from "viem"
+import { parseAbiItem, type Address, type Log } from "viem"
 import { usePublicClient } from "wagmi"
+
+import { getLogsChunked } from "./get-logs-chunked"
 
 const legacyClaimEventAbiItem = parseAbiItem(
   "event Claim(address indexed claimer, uint256 periodNumber, uint256 payout)"
@@ -12,8 +14,17 @@ const upgradedClaimEventAbiItem = parseAbiItem(
 )
 
 const LOG_LOOKBACK_BLOCKS = 100_000n
+const PERIOD_LOG_CHUNK_SIZE = 10_000n
+type ClaimLog = Log<bigint, number, false, typeof legacyClaimEventAbiItem>
+type UpgradedClaimLog = Log<
+  bigint,
+  number,
+  false,
+  typeof upgradedClaimEventAbiItem
+>
 
 interface UseClaimedUsersResult {
+  error: unknown
   users: Address[]
   payouts: Record<string, bigint>
   loading: boolean
@@ -24,17 +35,20 @@ export function useClaimedUsers(
   chainId: number,
   periodNumber?: bigint,
   refreshKey = 0,
-  enabled = true
+  enabled = true,
+  blockRange?: { fromBlock: bigint; toBlock: bigint }
 ): UseClaimedUsersResult {
   const publicClient = usePublicClient({ chainId })
   const [users, setUsers] = useState<Address[]>([])
   const [payouts, setPayouts] = useState<Record<string, bigint>>({})
+  const [error, setError] = useState<unknown>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!enabled || !publicClient || periodNumber == null) {
       setUsers([])
       setPayouts({})
+      setError(null)
       setLoading(false)
       return
     }
@@ -42,27 +56,39 @@ export function useClaimedUsers(
     let cancelled = false
 
     const fetchLogs = async () => {
+      setError(null)
       setLoading(true)
 
       try {
         const latestBlock = await publicClient.getBlockNumber()
         const fromBlock =
-          latestBlock > LOG_LOOKBACK_BLOCKS
+          blockRange?.fromBlock ??
+          (latestBlock > LOG_LOOKBACK_BLOCKS
             ? latestBlock - LOG_LOOKBACK_BLOCKS
-            : 0n
+            : 0n)
+        const toBlock = blockRange?.toBlock ?? latestBlock
+        const chunkSize = blockRange ? PERIOD_LOG_CHUNK_SIZE : undefined
         const [legacyLogs, upgradedLogs] = await Promise.all([
-          publicClient.getLogs({
-            address: loopAddress,
-            event: legacyClaimEventAbiItem,
-            fromBlock,
-            toBlock: "latest",
-          }),
-          publicClient.getLogs({
-            address: loopAddress,
-            event: upgradedClaimEventAbiItem,
-            fromBlock,
-            toBlock: "latest",
-          }),
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: legacyClaimEventAbiItem,
+              fromBlock,
+              toBlock,
+            },
+            chunkSize
+          ).then((logs) => logs as ClaimLog[]),
+          getLogsChunked(
+            publicClient,
+            {
+              address: loopAddress,
+              event: upgradedClaimEventAbiItem,
+              fromBlock,
+              toBlock,
+            },
+            chunkSize
+          ).then((logs) => logs as UpgradedClaimLog[]),
         ])
 
         if (cancelled) {
@@ -98,6 +124,7 @@ export function useClaimedUsers(
       } catch (error) {
         if (!cancelled) {
           console.error("Error fetching Claim logs:", error)
+          setError(error)
           setUsers([])
           setPayouts({})
         }
@@ -113,7 +140,16 @@ export function useClaimedUsers(
     return () => {
       cancelled = true
     }
-  }, [chainId, enabled, loopAddress, periodNumber, publicClient, refreshKey])
+  }, [
+    blockRange?.fromBlock,
+    blockRange?.toBlock,
+    chainId,
+    enabled,
+    loopAddress,
+    periodNumber,
+    publicClient,
+    refreshKey,
+  ])
 
-  return { users, payouts, loading }
+  return { error, users, payouts, loading }
 }

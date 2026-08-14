@@ -10,23 +10,45 @@ export const DEFAULT_LOOP_CONTRACT_TYPE: LoopContractType = "loop"
 
 export const loopContractMethods = {
   loop: {
+    claim: "claim",
     claimAndRegister: "claimAndRegister",
+    getClaimerStatus: "getClaimerStatus",
     getCurrentPeriod: "getCurrentPeriod",
+    getCurrentPeriodData: "getCurrentPeriodData",
     getDetails: "getLoopDetails",
+    getPeriodIndividualPayout: "getPeriodIndividualPayout",
   },
   superLoop: {
     claimAndRegister: "streamingClaimAndRegister",
+    getClaimerStatus: "getStreamingClaimerStatus",
     getCurrentPeriod: "getStreamingCurrentPeriod",
+    getCurrentPeriodData: "getStreamingCurrentPeriodData",
     getDetails: "getStreamingLoopDetails",
+    getPeriodIndividualPayout: "getStreamingPeriodIndividualPayout",
+    getUserPhase: "getUserPhase",
+    owedToMe: "owedToMe",
   },
-} as const satisfies Record<
-  LoopContractType,
-  {
+} as const satisfies {
+  loop: {
+    claim?: string
     claimAndRegister: string
+    getClaimerStatus: string
     getCurrentPeriod: string
+    getCurrentPeriodData: string
     getDetails: string
+    getPeriodIndividualPayout: string
   }
->
+  superLoop: {
+    claimAndRegister: string
+    getClaimerStatus: string
+    getCurrentPeriod: string
+    getCurrentPeriodData: string
+    getDetails: string
+    getPeriodIndividualPayout: string
+    getUserPhase: string
+    owedToMe: string
+  }
+}
 
 type LoopContractEntry = {
   abi: Abi
