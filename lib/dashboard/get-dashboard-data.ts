@@ -48,6 +48,7 @@ const liveLoopSources = {
     chain: gnosis,
     contractType: "loop",
     fallbackTokenSymbol: "HNY",
+    fallbackTokenDecimals: 18,
     getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
   blockscout: {
@@ -56,6 +57,7 @@ const liveLoopSources = {
     chain: gnosis,
     contractType: "loop",
     fallbackTokenSymbol: "HNY",
+    fallbackTokenDecimals: 18,
     getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
   "base-superloop": {
@@ -64,6 +66,7 @@ const liveLoopSources = {
     chain: base,
     contractType: "superLoop",
     fallbackTokenSymbol: "SUP",
+    fallbackTokenDecimals: 18,
     getEndpoint: () => env.GYRALIS_BASE_SUBGRAPH_URL,
   },
 } as const
@@ -206,7 +209,11 @@ async function fetchLoopSchedule(
 ): Promise<LoopSchedule> {
   const client = createPublicClient({
     chain: source.chain as Chain,
-    transport: http(),
+    transport: http(
+      source.chain.id === base.id
+        ? env.BASE_RPC_URL ?? env.NEXT_PUBLIC_BASE_RPC_URL
+        : undefined
+    ),
   })
   const currentPeriodFunction =
     source.contractType === "superLoop"
@@ -231,7 +238,7 @@ async function fetchLoopSchedule(
       }),
     ])
     const tokenAddress = details[0]
-    const [tokenSymbol, tokenDecimals] = await Promise.all([
+    const [tokenSymbolResult, tokenDecimalsResult] = await Promise.allSettled([
       client.readContract({
         address: tokenAddress,
         abi: erc20Abi,
@@ -243,6 +250,23 @@ async function fetchLoopSchedule(
         functionName: "decimals",
       }),
     ])
+    const tokenSymbol =
+      tokenSymbolResult.status === "fulfilled"
+        ? tokenSymbolResult.value
+        : source.fallbackTokenSymbol
+    const tokenDecimals =
+      tokenDecimalsResult.status === "fulfilled"
+        ? tokenDecimalsResult.value
+        : source.fallbackTokenDecimals
+
+    if (
+      tokenSymbolResult.status === "rejected" ||
+      tokenDecimalsResult.status === "rejected"
+    ) {
+      console.warn(
+        `[dashboard] using fallback token metadata for ${tokenAddress}`
+      )
+    }
 
     return {
       currentPeriod: Number(currentPeriod),
@@ -255,7 +279,7 @@ async function fetchLoopSchedule(
   } catch (error) {
     console.error(
       `[dashboard] failed to read schedule for ${source.address}`,
-      error
+      error instanceof Error ? error.message : error
     )
     return {
       currentPeriod: fallbackPeriod,
@@ -263,7 +287,7 @@ async function fetchLoopSchedule(
       periodLength: 0n,
       tokenAddress: fallbackToken,
       tokenSymbol: source.fallbackTokenSymbol,
-      tokenDecimals: 18,
+      tokenDecimals: source.fallbackTokenDecimals,
     }
   }
 }
@@ -373,9 +397,25 @@ function sumAmounts(
   periods: DashboardPeriodStats[],
   key: "totalRegisteredAmount" | "totalClaimedAmount" | "totalUnclaimedAmount"
 ) {
-  return periods
-    .reduce((total, period) => total + Number(period[key] ?? 0), 0)
-    .toString()
+  return sumDecimalAmounts(periods.map((period) => period[key] ?? "0"))
+}
+
+function sumDecimalAmounts(amounts: string[]): string {
+  const decimals = amounts.reduce(
+    (maximum, amount) =>
+      Math.max(maximum, amount.split(".")[1]?.length ?? 0),
+    0
+  )
+  const total = amounts.reduce((sum, amount) => {
+    const [integer = "0", fraction = ""] = amount.split(".")
+    return sum + BigInt(`${integer}${fraction.padEnd(decimals, "0")}`)
+  }, 0n)
+  if (decimals === 0) return total.toString()
+
+  const padded = total.toString().padStart(decimals + 1, "0")
+  const integer = padded.slice(0, -decimals)
+  const fraction = padded.slice(-decimals).replace(/0+$/, "")
+  return fraction ? `${integer}.${fraction}` : integer
 }
 
 function buildLoopSummary(data: LiveLoopData): DashboardLoopSummary {
@@ -393,10 +433,7 @@ function buildLoopSummary(data: LiveLoopData): DashboardLoopSummary {
     BigInt(data.loop.totalPayout),
     data.schedule.tokenDecimals
   )
-  const totalUnclaimedAmount = Math.max(
-    Number(totalDistributedAmount) - Number(totalClaimedAmount),
-    0
-  ).toString()
+  const totalUnclaimedAmount = sumAmounts(periods, "totalUnclaimedAmount")
   const latestTimestamp = Math.max(
     eventTimestamp(data.registerEvents),
     eventTimestamp(data.claimEvents)
@@ -649,9 +686,9 @@ export async function getDashboardPageData(
   const tokenSummaryMap = new Map<
     string,
     DashboardTokenSummary & {
-      distributed: number
-      claimed: number
-      unclaimed: number
+      distributed: string
+      claimed: string
+      unclaimed: string
     }
   >()
   for (const liveLoop of liveLoops) {
@@ -670,22 +707,31 @@ export async function getDashboardPageData(
       totalClaimedAmount: "0",
       totalUnclaimedAmount: "0",
       claimedAmountRatePercent: null,
-      distributed: 0,
-      claimed: 0,
-      unclaimed: 0,
+      distributed: "0",
+      claimed: "0",
+      unclaimed: "0",
     }
-    current.distributed += Number(summary.totalDistributedAmount ?? 0)
-    current.claimed += Number(summary.totalClaimedAmount ?? 0)
-    current.unclaimed += Number(summary.totalUnclaimedAmount ?? 0)
+    current.distributed = sumDecimalAmounts([
+      current.distributed,
+      summary.totalDistributedAmount ?? "0",
+    ])
+    current.claimed = sumDecimalAmounts([
+      current.claimed,
+      summary.totalClaimedAmount ?? "0",
+    ])
+    current.unclaimed = sumDecimalAmounts([
+      current.unclaimed,
+      summary.totalUnclaimedAmount ?? "0",
+    ])
     tokenSummaryMap.set(tokenKey, current)
   }
   const tokenSummaries: DashboardTokenSummary[] = [...tokenSummaryMap.values()]
     .map(({ distributed, claimed, unclaimed, ...token }) => ({
       ...token,
-      totalDistributedAmount: distributed.toString(),
-      totalClaimedAmount: claimed.toString(),
-      totalUnclaimedAmount: unclaimed.toString(),
-      claimedAmountRatePercent: percent(claimed, distributed),
+      totalDistributedAmount: distributed,
+      totalClaimedAmount: claimed,
+      totalUnclaimedAmount: unclaimed,
+      claimedAmountRatePercent: percent(Number(claimed), Number(distributed)),
     }))
     .sort((a, b) => (a.tokenSymbol ?? "").localeCompare(b.tokenSymbol ?? ""))
   const aggregateToken = tokenSummaries.length === 1 ? tokenSummaries[0] : null
@@ -729,7 +775,7 @@ export async function getDashboardPageData(
       claimedAmountRatePercent:
         aggregateToken?.claimedAmountRatePercent ?? null,
       currentPeriod: maxPeriod,
-      newUsersThisPeriod: loopSummaries.reduce(
+      newUsersThisPeriod: chartLoopSummaries.reduce(
         (sum, loop) => sum + (loop.currentPeriodStats?.newUserCount ?? 0),
         0
       ),
