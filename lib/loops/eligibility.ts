@@ -2,11 +2,9 @@ import {
   LoopCardData,
   LoopCardsData,
   LoopEligibilityProvider,
-  type GardensCommunityKey,
 } from "@/data/loops-data"
-import { z } from "zod"
-
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
+import { z } from "zod"
 
 export const eligibilityRequestSchema = z.object({
   userAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
@@ -19,7 +17,6 @@ export interface AllowlistedLoop {
   chainId: number
   contractType: LoopContractType
   passportMinScore: number
-  gardensCommunity?: GardensCommunityKey
 }
 
 const normalizeAddress = (address: string) => address.toLowerCase()
@@ -47,6 +44,5 @@ export function findAllowlistedLoop(
     chainId: loop.chainId,
     contractType: loop.contractType,
     passportMinScore: loop.passportMinScore,
-    gardensCommunity: loop.gardensCommunity,
   }
 }

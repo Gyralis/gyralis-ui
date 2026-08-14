@@ -89,12 +89,10 @@ export function formatFlowingDisplayValue(
 export function formatMonthlyIncoming({
   flowRatePerSecond,
   decimals,
-  maximumFractionDigits = 4,
   symbol,
 }: {
   flowRatePerSecond?: bigint
   decimals: number
-  maximumFractionDigits?: number
   symbol: string
 }) {
   if (flowRatePerSecond == null) return "--"
@@ -105,6 +103,6 @@ export function formatMonthlyIncoming({
   if (!Number.isFinite(monthly)) return "--"
 
   return `${monthly.toLocaleString(undefined, {
-    maximumFractionDigits,
-  })} ${symbol} / mo`
+    maximumFractionDigits: 4,
+  })} ${symbol}/mo`
 }

@@ -316,16 +316,8 @@ function LoopRateStatCard({ label, value }: LoopRateStatCardProps) {
 
 export default async function DashboardPage() {
   const data = await getDashboardPageData({ periodsBack: 7 })
-  const activeTokenSummaries = data.tokenSummaries.filter(
-    (summary) => Number(summary.totalDistributedAmount ?? 0) > 0
-  )
-  const displayedTokenSummaries = activeTokenSummaries.length
-    ? activeTokenSummaries
-    : data.tokenSummaries
   const tokenSummary =
-    displayedTokenSummaries.length === 1
-      ? displayedTokenSummaries[0]
-      : undefined
+    data.tokenSummaries.length === 1 ? data.tokenSummaries[0] : undefined
   const chartTokenSummary = data.tokenSummaries.find(
     (summary) => summary.tokenSymbol === "HNY"
   )
@@ -339,7 +331,7 @@ export default async function DashboardPage() {
     .join(" · ")
   const totalDistributedOverview = tokenSummary
     ? formatTokenAmountParts(
-        tokenSummary.totalDistributedAmount,
+        data.overview.totalDistributedAmount,
         tokenSummary.tokenSymbol,
         2
       )
@@ -447,12 +439,12 @@ export default async function DashboardPage() {
                     label: "Total Claimed",
                     value: tokenSummary
                       ? formatTokenAmount(
-                          tokenSummary.totalClaimedAmount,
+                          data.overview.totalClaimedAmount,
                           tokenSummary.tokenSymbol,
                           2
                         )
                       : formatTokenSummaryAmounts(
-                          displayedTokenSummaries,
+                          data.tokenSummaries,
                           "totalClaimedAmount"
                         ),
                     tone: "positive",
@@ -461,12 +453,12 @@ export default async function DashboardPage() {
                     label: "Total Unclaimed",
                     value: tokenSummary
                       ? formatTokenAmount(
-                          tokenSummary.totalUnclaimedAmount,
+                          data.overview.totalUnclaimedAmount,
                           tokenSummary.tokenSymbol,
                           2
                         )
                       : formatTokenSummaryAmounts(
-                          displayedTokenSummaries,
+                          data.tokenSummaries,
                           "totalUnclaimedAmount"
                         ),
                     tone: "muted",

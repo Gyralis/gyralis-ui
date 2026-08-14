@@ -1,20 +1,17 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
 import { Address, formatUnits } from "viem"
-import { useAccount } from "wagmi"
 
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
   type LoopContractType,
 } from "@/lib/contracts/loop-contracts"
-import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
 import { trimFormattedBalance } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -24,12 +21,6 @@ import {
 import { LoopClaim, LoopClaimStatus } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
 
-import type { PeriodRewardAnimationViewModel } from "./sections/loop-section-types"
-import {
-  formatAnimatedReward,
-  usePeriodRewardCountUp,
-} from "./sections/use-period-reward-count-up"
-
 interface LoopSettingsComponentProps {
   address: Address
   chainId: number
@@ -38,14 +29,6 @@ interface LoopSettingsComponentProps {
   eligibilityLogoUrl?: string
   isSuper?: boolean
   loopTitle?: string
-  onClaimSuccess?: () => void
-}
-
-interface UseLoopSettingsDetailsParams {
-  address: Address
-  chainId: number
-  contractType?: LoopContractType
-  isSuper?: boolean
   onClaimSuccess?: () => void
 }
 
@@ -59,80 +42,11 @@ export const LoopSettings: React.FC<LoopSettingsComponentProps> = ({
   loopTitle,
   onClaimSuccess,
 }) => {
-  const details = useLoopSettingsDetails({
-    address,
-    chainId,
-    contractType,
-    isSuper,
-    onClaimSuccess,
-  })
-
-  return (
-    <TooltipProvider>
-      <div className="rounded-[1.65rem] border border-border/80 bg-background/35 p-6 md:p-7 lg:p-8">
-        <div className="flex items-center justify-center">
-          <LoopDistributionStat
-            value={details.distributionLabel}
-            valueUnit={details.distributionUnit}
-            detail={details.distributionDetail}
-            balanceDetail={details.balanceDetail}
-            balanceDetailLabel={details.balanceDetailLabel}
-            tooltip={details.distributionTooltip}
-          />
-        </div>
-
-        <LoopPeriodStat
-          className="mt-6"
-          isLoading={details.isLoading}
-          nextPeriodStart={details.nextPeriodStart}
-          timerTitle={details.timerTitle}
-          onViewLoopers={() => details.setIsLoopersModalOpen(true)}
-        />
-
-        <LoopSettingsClaimAction
-          address={address}
-          chainId={chainId}
-          contractType={contractType}
-          currentPeriod={details.currentPeriod}
-          eligibilityProvider={eligibilityProvider}
-          onStatusChange={details.handleClaimStatusChange}
-          onSuccess={details.handleClaimSuccess}
-        />
-
-        <LoopSettingsLoopersModal
-          address={address}
-          chainId={chainId}
-          contractType={contractType}
-          currentPeriod={details.currentPeriod}
-          eligibilityLogoUrl={eligibilityLogoUrl}
-          firstPeriodStart={details.settings?.firstPeriodStart}
-          isOpen={details.isLoopersModalOpen}
-          isSuper={isSuper}
-          loopTitle={loopTitle}
-          loopToken={details.settings?.token}
-          onOpenChange={details.setIsLoopersModalOpen}
-          periodLength={details.settings?.periodLength}
-          refreshKey={details.modalRefreshKey}
-        />
-      </div>
-    </TooltipProvider>
-  )
-}
-
-export function useLoopSettingsDetails({
-  address,
-  chainId,
-  contractType = DEFAULT_LOOP_CONTRACT_TYPE,
-  isSuper,
-  onClaimSuccess,
-}: UseLoopSettingsDetailsParams) {
   const { settings, currentPeriod, isLoading } = useLoopSettings(
     address,
     chainId,
     contractType
   )
-  const isSuperLoop = contractType === "superLoop" || Boolean(isSuper)
-  const { isConnected } = useAccount()
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const [claimStatus, setClaimStatus] = useState<LoopClaimStatus>("default")
@@ -151,26 +65,31 @@ export function useLoopSettingsDetails({
         BigInt(settings.periodLength) * (BigInt(currentPeriod) + BigInt(1))
       : undefined
 
+  const periodLengthLabel = useMemo(() => {
+    if (isLoading) return "Loading..."
+    if (!settings) return "--"
+
+    const periodLengthInSeconds = Number(settings.periodLength)
+    const minutes = Math.floor(periodLengthInSeconds / 60)
+
+    if (minutes >= 1 && periodLengthInSeconds % 60 === 0) {
+      return `${minutes} minute${minutes === 1 ? "" : "s"}`
+    }
+
+    return `${periodLengthInSeconds}s`
+  }, [isLoading, settings])
+
   const distributionLabel = useMemo(() => {
     if (isLoading) return "Loading..."
     if (!settings) return "--"
 
-    if (isSuperLoop) {
-      return "0"
-    }
-
     const percentPerPeriod = Number(settings.percentPerPeriod)
     return percentPerPeriod === 0 ? "Infinite" : `${percentPerPeriod}%`
-  }, [isLoading, isSuperLoop, settings])
+  }, [isLoading, settings])
 
   const distributionAmountLabel = useMemo(() => {
     if (isLoading) return undefined
-    if (
-      !settings ||
-      !loopBalance ||
-      loopBalance.value == null ||
-      settings.percentPerPeriod === 0n
-    ) {
+    if (!settings || !loopBalance || settings.percentPerPeriod === 0n) {
       return undefined
     }
 
@@ -185,57 +104,26 @@ export function useLoopSettingsDetails({
     return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
   }, [isLoading, settings, loopBalance])
 
-  const distributionDetail = isSuperLoop
-    ? loopBalance?.symbol
-      ? `${loopBalance.symbol} / mo`
-      : undefined
-    : distributionAmountLabel
-  const distributionUnit = undefined
-  const balanceDetail = useMemo(() => {
-    if (isLoading || !loopBalance) return undefined
-
-    if (isSuperLoop) {
-      return loopBalance.flowRateError
-        ? "Unavailable"
-        : formatMonthlyIncoming({
-            flowRatePerSecond: loopBalance.flowRatePerSecond,
-            decimals: loopBalance.decimals,
-            maximumFractionDigits: 2,
-            symbol: loopBalance.symbol,
-          })
-    }
-
-    if (loopBalance.value == null) return undefined
-
-    const balance = trimFormattedBalance(
-      formatUnits(loopBalance.value, loopBalance.decimals),
-      2
-    )
-    const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
-
-    return `${balance}${symbol}`
-  }, [isLoading, isSuperLoop, loopBalance])
-  const balanceDetailLabel = isSuperLoop ? "Inflow" : "Balance"
-  const distributionTooltip = isSuperLoop
-    ? "Each day, registered users in the loop earn an equal share of the streaming rewards."
-    : settings && settings.percentPerPeriod > 0n
-    ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
-    : "The loop balance is distributed evenly among registered users each period."
+  const distributionDetail = distributionAmountLabel
+    ? `${distributionAmountLabel} this period`
+    : undefined
+  const distributionTooltip =
+    settings && settings.percentPerPeriod > 0n
+      ? `Each period releases ${distributionLabel} of the remaining balance, split evenly among registered users.`
+      : "The loop balance is distributed evenly among registered users each period."
 
   const timerTitle = useMemo(() => {
     switch (claimStatus) {
-      case "active":
-        return isSuper ? "Accumulation ends in" : "Active period ends in"
       case "entered":
-        return isSuper ? "Accumulation starts in" : "Claim opens in"
+        return "Claim opens in"
       case "claimable":
         return "Claim period ends in"
       case "claimed":
         return "Next claim opens in"
       default:
-        return "Entry closes in"
+        return "Current period ends in"
     }
-  }, [claimStatus, isSuper])
+  }, [claimStatus])
 
   const handleClaimSuccess = () => {
     void refetchLoopBalance()
@@ -247,328 +135,70 @@ export function useLoopSettingsDetails({
     setClaimStatus(status)
   }, [])
 
-  return {
-    currentPeriod,
-    balanceDetail,
-    balanceDetailLabel,
-    distributionDetail,
-    distributionLabel,
-    distributionUnit,
-    distributionTooltip,
-    handleClaimStatusChange,
-    handleClaimSuccess,
-    isLoading,
-    isLoopersModalOpen,
-    modalRefreshKey,
-    nextPeriodStart,
-    setIsLoopersModalOpen,
-    settings,
-    timerTitle,
-  }
-}
-
-export const LoopDistributionStat = ({
-  animation,
-  balanceDetail,
-  balanceDetailLabel = "Balance",
-  compact = false,
-  isLoading = false,
-  labelDetail,
-  value,
-  valueMuted = false,
-  valueUnit,
-  detail,
-  tooltip,
-}: {
-  animation?: PeriodRewardAnimationViewModel
-  balanceDetail?: string
-  balanceDetailLabel?: string
-  compact?: boolean
-  isLoading?: boolean
-  labelDetail?: string
-  value: string
-  valueMuted?: boolean
-  valueUnit?: string
-  detail?: string
-  tooltip: string
-}) => {
-  const animatedValue = usePeriodRewardCountUp(animation)
-  const displayedValue = animation?.enabled
-    ? animatedValue ?? "Loading..."
-    : value
-  const showValueSkeleton =
-    isLoading || (animation?.enabled === true && animatedValue == null)
-  const animationEndValue = animation?.enabled
-    ? formatAnimatedReward(
-        animation.estimatedPeriodPayout,
-        animation.tokenDecimals
-      )
-    : undefined
-
-  if (compact) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            className="group flex h-full min-w-0 max-w-full cursor-help flex-col text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="flex items-center gap-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Daily rewards
-              </p>
-              {labelDetail ? (
-                <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                  - {labelDetail}
-                </span>
-              ) : null}
-            </div>
-            <div className="mt-4 flex min-w-0 max-w-full flex-nowrap items-baseline gap-x-2 gap-y-1 text-foreground">
-              {showValueSkeleton ? (
-                <Skeleton className="h-[26px] w-28 shrink-0 rounded-xs bg-muted" />
-              ) : (
-                <div
-                  className={animationEndValue ? "grid shrink-0" : "shrink-0"}
-                >
-                  {animationEndValue ? (
-                    <span
-                      aria-hidden="true"
-                      className="invisible col-start-1 row-start-1 whitespace-nowrap text-[1.6rem] font-bold leading-none tabular-nums"
-                    >
-                      {animationEndValue}
-                    </span>
-                  ) : null}
-                  <p
-                    className={[
-                      "whitespace-nowrap text-[1.6rem] leading-none tabular-nums",
-                      valueMuted
-                        ? "font-normal text-muted-foreground"
-                        : "font-bold text-foreground",
-                      animationEndValue ? "col-start-1 row-start-1" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                  >
-                    {displayedValue}
-                  </p>
-                </div>
-              )}
-              {valueUnit ? (
-                <p
-                  className={[
-                    "min-w-0 truncate text-[11px] font-semibold leading-4",
-                    valueMuted ? "text-muted-foreground" : "text-foreground",
-                  ].join(" ")}
-                  title={valueUnit}
-                >
-                  {valueUnit}
-                </p>
-              ) : null}
-              {detail ? (
-                <p
-                  className={[
-                    "min-w-0 truncate text-[11px] font-semibold leading-4",
-                    valueMuted ? "text-muted-foreground" : "text-foreground",
-                  ].join(" ")}
-                  title={detail}
-                >
-                  {detail}
-                </p>
-              ) : null}
-            </div>
-            {balanceDetail ? (
-              <div className="mt-2 flex min-h-5 items-center justify-start border-t border-border/80 pt-1.5 text-left">
-                <p className="text-[10px] font-semibold leading-none text-muted-foreground">
-                  {balanceDetailLabel}:{" "}
-                  <span className="text-foreground">{balanceDetail}</span>
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
-          {tooltip}
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
   return (
-    <SettingStatCard
-      label="Daily rewards"
-      value={displayedValue}
-      detail={valueUnit ?? detail}
-      tooltip={tooltip}
-    />
-  )
-}
-
-export const LoopPeriodStat = ({
-  className,
-  compact = false,
-  isLoading,
-  nextPeriodStart,
-  onCountdownComplete,
-  timerTitle,
-  onViewLoopers,
-  showLoopersTrigger = true,
-}: {
-  className?: string
-  compact?: boolean
-  isLoading: boolean
-  nextPeriodStart?: bigint
-  onCountdownComplete?: () => void | Promise<void>
-  timerTitle: string
-  onViewLoopers: () => void
-  showLoopersTrigger?: boolean
-}) => {
-  if (compact) {
-    return (
-      <div className={`relative flex flex-col text-left ${className ?? ""}`}>
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-          Period
-        </p>
-        <p className="mt-3 text-sm font-semibold leading-4 text-foreground">
-          {timerTitle}
-        </p>
-        {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-          <CountdownInline
-            nextPeriodStart={nextPeriodStart}
-            onComplete={onCountdownComplete}
+    <TooltipProvider>
+      <div className="rounded-[1.65rem] border border-border/80 bg-background/35 p-6 md:p-7 lg:p-8">
+        <div className="flex items-center justify-center">
+          <SettingStatCard
+            label="Distribution"
+            value={distributionLabel}
+            detail={distributionDetail}
+            tooltip={distributionTooltip}
           />
-        ) : (
-          <p className="mt-2 text-xs font-medium text-muted-foreground">
-            {isLoading ? "Loading..." : "Timer unavailable."}
-          </p>
-        )}
-      </div>
-    )
-  }
+        </div>
 
-  return (
-    <div className={`relative ${className ?? ""}`}>
-      <div className="text-center">
-        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-          {timerTitle}
-        </p>
-      </div>
+        <div className="relative mt-6">
+          <div className="text-center">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+              {timerTitle}
+            </p>
+          </div>
 
-      {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
-        <Countdown
-          nextPeriodStart={nextPeriodStart}
-          onComplete={onCountdownComplete}
+          {nextPeriodStart !== undefined && nextPeriodStart > 0n ? (
+            <Countdown nextPeriodStart={nextPeriodStart} />
+          ) : (
+            <p className="pt-2.5 text-center text-sm text-muted-foreground">
+              {isLoading ? "Loading timer..." : "Timer unavailable."}
+            </p>
+          )}
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsLoopersModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              View loopers
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <LoopClaim
+            address={address}
+            chainId={chainId}
+            contractType={contractType}
+            eligibilityProvider={eligibilityProvider}
+            onStatusChange={handleClaimStatusChange}
+            onSuccess={handleClaimSuccess}
+          />
+        </div>
+
+        <LoopersModal
+          chainId={chainId}
+          currentPeriod={currentPeriod}
+          eligibilityLogoUrl={eligibilityLogoUrl}
+          isOpen={isLoopersModalOpen}
+          loopAddress={address}
+          loopContractType={contractType}
+          loopIsSuper={isSuper}
+          loopToken={settings?.token}
+          loopTitle={loopTitle}
+          onOpenChange={setIsLoopersModalOpen}
+          refreshKey={modalRefreshKey}
         />
-      ) : (
-        <p className="pt-2.5 text-center text-sm text-muted-foreground">
-          {isLoading ? "Loading timer..." : "Timer unavailable."}
-        </p>
-      )}
-
-      {showLoopersTrigger ? (
-        <LoopersTrigger className="mt-4" onClick={onViewLoopers} />
-      ) : null}
-    </div>
-  )
-}
-
-export const LoopersTrigger = ({
-  className,
-  onClick,
-}: {
-  className?: string
-  onClick: () => void
-}) => {
-  return (
-    <div className={`text-center ${className ?? ""}`}>
-      <button
-        type="button"
-        onClick={onClick}
-        className="inline-flex items-center justify-center rounded-full border border-border/70 bg-background/70 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-      >
-        View loopers
-      </button>
-    </div>
-  )
-}
-
-const LoopSettingsClaimAction = ({
-  address,
-  chainId,
-  contractType,
-  currentPeriod,
-  eligibilityProvider,
-  onStatusChange,
-  onSuccess,
-}: {
-  address: Address
-  chainId: number
-  contractType: LoopContractType
-  currentPeriod?: bigint
-  eligibilityProvider: LoopEligibilityProvider
-  onStatusChange: (status: LoopClaimStatus) => void
-  onSuccess: () => void
-}) => {
-  return (
-    <div className="mt-5">
-      <LoopClaim
-        address={address}
-        chainId={chainId}
-        contractType={contractType}
-        currentPeriod={currentPeriod}
-        eligibilityProvider={eligibilityProvider}
-        onStatusChange={onStatusChange}
-        onSuccess={onSuccess}
-      />
-    </div>
-  )
-}
-
-const LoopSettingsLoopersModal = ({
-  address,
-  chainId,
-  contractType,
-  currentPeriod,
-  eligibilityLogoUrl,
-  firstPeriodStart,
-  isOpen,
-  isSuper,
-  loopTitle,
-  loopToken,
-  onOpenChange,
-  periodLength,
-  refreshKey,
-}: {
-  address: Address
-  chainId: number
-  contractType: LoopContractType
-  currentPeriod?: bigint
-  eligibilityLogoUrl?: string
-  firstPeriodStart?: bigint
-  isOpen: boolean
-  isSuper?: boolean
-  loopTitle?: string
-  loopToken?: Address
-  onOpenChange: (open: boolean) => void
-  periodLength?: bigint
-  refreshKey: number
-}) => {
-  return (
-    <LoopersModal
-      chainId={chainId}
-      currentPeriod={currentPeriod}
-      eligibilityLogoUrl={eligibilityLogoUrl}
-      isOpen={isOpen}
-      loopAddress={address}
-      loopContractType={contractType}
-      loopIsSuper={isSuper}
-      loopToken={loopToken}
-      loopTitle={loopTitle}
-      onOpenChange={onOpenChange}
-      firstPeriodStart={firstPeriodStart}
-      periodLength={periodLength}
-      refreshKey={refreshKey}
-    />
+      </div>
+    </TooltipProvider>
   )
 }
 
@@ -608,24 +238,15 @@ const SettingStatCard = ({
           <LuInfo className="size-3.5 shrink-0 text-primary" />
         </div>
       </TooltipTrigger>
-      <TooltipContent className="w-max max-w-[calc(100vw-2rem)]">
-        {tooltip}
-      </TooltipContent>
+      <TooltipContent>{tooltip}</TooltipContent>
     </Tooltip>
   )
 }
 
-const Countdown = ({
-  nextPeriodStart,
-  onComplete,
-}: {
-  nextPeriodStart: bigint
-  onComplete?: () => void | Promise<void>
-}) => {
+const Countdown = ({ nextPeriodStart }: { nextPeriodStart: bigint }) => {
   const [currentTime, setCurrentTime] = useState<number>(
     Math.floor(Date.now() / 1000)
   )
-  const completedTargetRef = useRef<bigint>()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -639,13 +260,6 @@ const Countdown = ({
     const diff = Number(nextPeriodStart) - currentTime
     return diff > 0 ? diff : 0
   }, [nextPeriodStart, currentTime])
-
-  useEffect(() => {
-    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
-
-    completedTargetRef.current = nextPeriodStart
-    void onComplete?.()
-  }, [nextPeriodStart, onComplete, remaining])
 
   const { days, hours, minutes, seconds } = formatTime(remaining)
   const totalHours = days * 24 + hours
@@ -663,51 +277,6 @@ const Countdown = ({
         <TimeLabel label="Sec" />
       </div>
     </div>
-  )
-}
-
-const CountdownInline = ({
-  nextPeriodStart,
-  onComplete,
-}: {
-  nextPeriodStart: bigint
-  onComplete?: () => void | Promise<void>
-}) => {
-  const [currentTime, setCurrentTime] = useState<number>(
-    Math.floor(Date.now() / 1000)
-  )
-  const completedTargetRef = useRef<bigint>()
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Math.floor(Date.now() / 1000))
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const remaining = useMemo(() => {
-    const diff = Number(nextPeriodStart) - currentTime
-    return diff > 0 ? diff : 0
-  }, [nextPeriodStart, currentTime])
-
-  useEffect(() => {
-    if (remaining > 0 || completedTargetRef.current === nextPeriodStart) return
-
-    completedTargetRef.current = nextPeriodStart
-    void onComplete?.()
-  }, [nextPeriodStart, onComplete, remaining])
-
-  const { days, hours, minutes, seconds } = formatTime(remaining)
-  const totalHours = days * 24 + hours
-
-  return (
-    <p className="mt-2.5 font-bold leading-none text-muted-foreground">
-      <span className="text-[1.6rem]">
-        {totalHours}h {minutes}m
-      </span>
-      <span className="ml-1.5 text-[15px]">{seconds}s</span>
-    </p>
   )
 }
 

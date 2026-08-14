@@ -1,7 +1,7 @@
-"use client"
-
 import { ReactNode } from "react"
 
+import { NetworkStatus } from "@/components/blockchain/network-status"
+import { WalletConnect } from "@/components/blockchain/wallet-connect"
 import { Footer } from "@/components/layout/footer"
 import { SiteHeader } from "@/components/layout/site-header"
 

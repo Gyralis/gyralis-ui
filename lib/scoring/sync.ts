@@ -16,6 +16,7 @@ import {
 } from "@/lib/db/clients/loop-stats.client"
 import {
   clearProcessedClaimEvents,
+  createProcessedClaimEvents,
   markProcessedClaimEvents,
 } from "@/lib/db/clients/processed-claim-events.client"
 import {
@@ -31,10 +32,14 @@ import { computeLoopStatsFromClaims } from "./rules"
 import {
   fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph,
+  getScoringSubgraphSource,
+  getScoringSubgraphSources,
+  ScoringSubgraphSource,
 } from "./subgraph-client"
 import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
 type SyncMode = "incremental" | "full"
+const PROJECTION_WRITE_CONCURRENCY = 20
 
 interface SyncInput {
   mode?: SyncMode
@@ -55,6 +60,16 @@ interface ScoringSyncCursor {
 
 function keyForAffectedLoop(key: AffectedLoopKey): string {
   return [key.chainId, key.loopId, key.userAddress.toLowerCase()].join("|")
+}
+
+async function mapWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  callback: (item: T) => Promise<void>
+) {
+  for (let index = 0; index < items.length; index += concurrency) {
+    await Promise.all(items.slice(index, index + concurrency).map(callback))
+  }
 }
 
 function parseEarnedBonuses(value: unknown): EarnedStreakBonus[] {
@@ -123,21 +138,19 @@ export function advanceScoringSyncCursor(
 
 export async function runScoringSync(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
-  if (mode === "full" && input.loopId != null) {
-    throw new Error("Full scoring recompute must run without a loop filter")
+  if (mode === "full" && (input.loopId != null || input.chainId != null)) {
+    throw new Error("Full scoring recompute must run without chain or loop filters")
   }
-  if (input.chainId && input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
-    throw new Error(
-      "Requested chainId does not match GYRALIS_SUBGRAPH_CHAIN_ID"
-    )
-  }
+
+  const configuredSources = getScoringSubgraphSources()
+  const sources = input.chainId
+    ? [getScoringSubgraphSource(input.chainId)]
+    : configuredSources
 
   if (mode === "full") {
     await clearScoringProjections()
   }
 
-  const syncState = mode === "incremental" ? await getScoringSyncState() : null
-  const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
   const batchSize = env.SCORING_SYNC_BATCH_SIZE
   const affectedLoops = new Map<string, AffectedLoopKey>()
   const fullModeClaimEventsByLoop = new Map<
@@ -145,103 +158,154 @@ export async function runScoringSync(input: SyncInput = {}) {
     Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
   >()
   let processedEvents = 0
-  let cursor: ScoringSyncCursor = {
-    lastBlockNumber: mode === "incremental" ? lastSyncedBlock : 0,
-    lastEventId: syncState?.lastEventId ?? undefined,
-  }
+  const sourceCursors = new Map<number, ScoringSyncCursor>()
+  const sourceResults: Array<{
+    chainId: number
+    processedEvents: number
+    lastBlockNumber: number
+  }> = []
 
-  function trackEvents(
-    events: Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
-  ) {
-    for (const event of events) {
-      const key = {
-        userAddress: event.userAddress,
-        loopId: event.loopId,
-        chainId: event.chainId,
-      }
-      const loopKey = keyForAffectedLoop(key)
-      affectedLoops.set(loopKey, key)
-      if (mode === "full") {
-        const eventsForLoop = fullModeClaimEventsByLoop.get(loopKey) ?? []
-        eventsForLoop.push(event)
-        fullModeClaimEventsByLoop.set(loopKey, eventsForLoop)
-      }
-      cursor = advanceScoringSyncCursor(cursor, event)
-      processedEvents += 1
+  async function fetchSource(source: ScoringSubgraphSource) {
+    const syncState =
+      mode === "incremental" ? await getScoringSyncState(source.chainId) : null
+    const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
+    const processedEventsBeforeSource = processedEvents
+    let cursor: ScoringSyncCursor = {
+      lastBlockNumber: mode === "incremental" ? lastSyncedBlock : 0,
+      lastEventId: syncState?.lastEventId ?? undefined,
     }
-  }
 
-  async function fetchCursorPages(pageInput: {
-    fromBlock?: number
-    blockNumber?: number
-    afterEventId?: string
-  }) {
-    let afterEventId = pageInput.afterEventId
+    function trackEvents(
+      events: Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+    ) {
+      for (const event of events) {
+        const key = {
+          userAddress: event.userAddress,
+          loopId: event.loopId,
+          chainId: event.chainId,
+        }
+        const loopKey = keyForAffectedLoop(key)
+        affectedLoops.set(loopKey, key)
+        if (mode === "full") {
+          const eventsForLoop = fullModeClaimEventsByLoop.get(loopKey) ?? []
+          eventsForLoop.push(event)
+          fullModeClaimEventsByLoop.set(loopKey, eventsForLoop)
+        }
+        cursor = advanceScoringSyncCursor(cursor, event)
+        processedEvents += 1
+      }
+    }
 
-    while (true) {
-      const events = await fetchClaimEventsFromSubgraph({
-        fromBlock: pageInput.fromBlock,
-        blockNumber: pageInput.blockNumber,
-        afterEventId,
-        first: batchSize,
-        loopId: input.loopId,
+    async function fetchCursorPages(pageInput: {
+      fromBlock?: number
+      blockNumber?: number
+      afterEventId?: string
+    }) {
+      let afterEventId = pageInput.afterEventId
+
+      while (true) {
+        const events = await fetchClaimEventsFromSubgraph({
+          source,
+          fromBlock: pageInput.fromBlock,
+          blockNumber: pageInput.blockNumber,
+          afterEventId,
+          first: batchSize,
+          loopId: input.loopId,
+        })
+
+        if (events.length === 0) break
+        trackEvents(events)
+        if (events.length < batchSize) break
+        afterEventId = events[events.length - 1]?.id
+      }
+    }
+
+    if (mode === "incremental" && syncState?.lastEventId) {
+      await fetchCursorPages({
+        blockNumber: lastSyncedBlock,
+        afterEventId: syncState.lastEventId,
       })
-
-      if (events.length === 0) break
-      trackEvents(events)
-      if (events.length < batchSize) break
-      afterEventId = events[events.length - 1]?.id
     }
-  }
 
-  if (mode === "incremental" && syncState?.lastEventId) {
     await fetchCursorPages({
-      blockNumber: lastSyncedBlock,
-      afterEventId: syncState.lastEventId,
+      fromBlock: mode === "incremental" ? lastSyncedBlock + 1 : 0,
+    })
+
+    sourceCursors.set(source.chainId, cursor)
+    sourceResults.push({
+      chainId: source.chainId,
+      processedEvents: processedEvents - processedEventsBeforeSource,
+      lastBlockNumber: cursor.lastBlockNumber,
     })
   }
 
-  await fetchCursorPages({
-    fromBlock: mode === "incremental" ? lastSyncedBlock + 1 : 0,
-  })
+  for (const source of sources) {
+    await fetchSource(source)
+  }
 
   const affectedUsers = new Set<string>()
-  for (const key of affectedLoops.values()) {
-    await ensureUserProfile(key.userAddress)
-    const loopKey = keyForAffectedLoop(key)
-    const claimEvents =
-      mode === "full"
-        ? fullModeClaimEventsByLoop.get(loopKey) ?? []
-        : await fetchAllClaimEventsForUserLoop({
-            userAddress: key.userAddress,
-            loopId: key.loopId,
-            batchSize,
-          })
-    const loopStats = computeLoopStatsFromClaims(
-      claimEvents,
-      scoringConfig,
-      key
+  await mapWithConcurrency(
+    [...affectedLoops.values()],
+    PROJECTION_WRITE_CONCURRENCY,
+    async (key) => {
+      await ensureUserProfile(key.userAddress)
+      const loopKey = keyForAffectedLoop(key)
+      const claimEvents =
+        mode === "full"
+          ? fullModeClaimEventsByLoop.get(loopKey) ?? []
+          : await fetchAllClaimEventsForUserLoop({
+              source: getScoringSubgraphSource(key.chainId),
+              userAddress: key.userAddress,
+              loopId: key.loopId,
+              batchSize,
+            })
+      const loopStats = computeLoopStatsFromClaims(
+        claimEvents,
+        scoringConfig,
+        key
+      )
+      await Promise.all([
+        upsertUserLoopStats(loopStats),
+        upsertLoopLeaderboardEntry(loopStats),
+        mode === "full"
+          ? Promise.resolve()
+          : markProcessedClaimEvents(claimEvents),
+      ])
+      affectedUsers.add(key.userAddress)
+    }
+  )
+
+  if (mode === "full") {
+    await createProcessedClaimEvents(
+      [...fullModeClaimEventsByLoop.values()].flat()
     )
-    await upsertUserLoopStats(loopStats)
-    await upsertLoopLeaderboardEntry(loopStats)
-    await markProcessedClaimEvents(claimEvents)
-    affectedUsers.add(key.userAddress)
   }
 
-  for (const userAddress of affectedUsers) {
-    const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
-      mapDbLoopStats
-    )
-    const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
-    await upsertUserGlobalStats(globalStats)
-    await upsertGlobalLeaderboardEntry(globalStats)
-  }
+  await mapWithConcurrency(
+    [...affectedUsers],
+    PROJECTION_WRITE_CONCURRENCY,
+    async (userAddress) => {
+      const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
+        mapDbLoopStats
+      )
+      const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
+      await Promise.all([
+        upsertUserGlobalStats(globalStats),
+        upsertGlobalLeaderboardEntry(globalStats),
+      ])
+    }
+  )
 
   if (input.loopId == null) {
-    await updateScoringSyncState({
-      lastBlockNumber: cursor.lastBlockNumber,
-      lastEventId: cursor.lastEventId,
-    })
+    for (const source of sources) {
+      const cursor = sourceCursors.get(source.chainId)
+      if (!cursor) continue
+      await updateScoringSyncState({
+        chainId: source.chainId,
+        lastBlockNumber: cursor.lastBlockNumber,
+        lastEventId: cursor.lastEventId,
+      })
+    }
   }
 
   return {
@@ -249,6 +313,6 @@ export async function runScoringSync(input: SyncInput = {}) {
     processedEvents,
     affectedLoops: affectedLoops.size,
     affectedUsers: affectedUsers.size,
-    lastBlockNumber: cursor.lastBlockNumber,
+    chains: sourceResults,
   }
 }

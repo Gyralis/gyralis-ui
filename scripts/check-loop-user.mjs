@@ -15,7 +15,7 @@ import { gnosis } from "viem/chains"
 const loops = {
   "1hive": {
     name: "1Hive Gardens",
-    provider: "gardens",
+    provider: "garden_1hive",
     address: "0x8995641fb3E452bC1359E79A738a6DE556015696",
     chain: gnosis,
   },
@@ -164,7 +164,7 @@ async function checkBlockscoutRedemption(userAddress) {
 }
 
 async function checkExternalEligibility(loop, userAddress) {
-  if (loop.provider === "gardens") return checkGardenMembership(userAddress)
+  if (loop.provider === "garden_1hive") return checkGardenMembership(userAddress)
   if (loop.provider === "blockscout") return checkBlockscoutRedemption(userAddress)
   throw new Error(`Unsupported loop provider: ${loop.provider}`)
 }
