@@ -3,6 +3,7 @@ import type { DashboardLoopKey, DashboardLoopMeta } from "@/lib/dashboard/types"
 export const defaultDashboardLoopKeys = [
   "1hive",
   "blockscout",
+  "base-superloop",
 ] as const satisfies readonly DashboardLoopKey[]
 
 export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
@@ -33,6 +34,20 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
     brandColor: "#2C7BE5",
     chainName: "Gnosis",
     tokenSymbol: "HNY",
+    isVisibleInDashboard: true,
+  },
+  "base-superloop": {
+    loopKey: "base-superloop",
+    contractType: "superLoop",
+    title: "Markee SuperLoop",
+    shortTitle: "Markee",
+    by: "Markee",
+    description:
+      "The production SuperLoop distributing MARKEE rewards on Base.",
+    logoSrc: "/markee-logo.png",
+    brandColor: "#0052FF",
+    chainName: "Base",
+    tokenSymbol: "MARKEE",
     isVisibleInDashboard: true,
   },
   "test-superloops": {

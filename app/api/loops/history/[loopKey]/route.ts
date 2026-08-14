@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic"
 const LOOP_KEYS = new Set<DashboardLoopKey>([
   "1hive",
   "blockscout",
+  "base-superloop",
   "test-superloops",
 ])
 
