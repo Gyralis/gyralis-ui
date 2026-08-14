@@ -186,7 +186,7 @@ async function fetchAllEvents(
   const events: SubgraphEvent[] = []
   let afterId = ""
 
-  while (true) {
+  for (;;) {
     const data = await querySubgraph<Record<typeof entity, SubgraphEvent[]>>(
       endpoint,
       eventQuery(entity),
