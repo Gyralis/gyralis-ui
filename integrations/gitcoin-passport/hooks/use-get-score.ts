@@ -28,11 +28,21 @@ export const useGetScore = (options: UseGetScoreOptions = {}) => {
     queryFn: async () => {
       if (!address) throw new Error("No address provided.")
       const response = await fetch(`/api/gitcoin-passport/${address}/score`)
-      const data = await response.json()
+      const contentType = response.headers.get("content-type") ?? ""
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text()
+
       if (response.status === 200) {
         return data as AddressScoreResponse
       }
-      if (data.detail) throw data.detail
+
+      if (data && typeof data === "object" && "detail" in data) {
+        throw data.detail
+      }
+      if (typeof data === "string" && data.length > 0) {
+        throw data
+      }
       throw new Error(response.statusText)
     },
   })
