@@ -38,10 +38,10 @@ export const useGetScore = (options: UseGetScoreOptions = {}) => {
       }
 
       if (data && typeof data === "object" && "detail" in data) {
-        throw data.detail
+        throw new Error(String(data.detail))
       }
       if (typeof data === "string" && data.length > 0) {
-        throw data
+        throw new Error(data)
       }
       throw new Error(response.statusText)
     },
