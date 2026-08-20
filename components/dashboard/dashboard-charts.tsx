@@ -9,7 +9,6 @@ import {
   Line,
   LineChart,
   ResponsiveContainer,
-  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -18,8 +17,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type {
-  DashboardHistoryMetricRow,
+  DashboardDistributionByPeriodRow,
   DashboardLoopKey,
+  DashboardMetricByPeriodRow,
 } from "@/lib/dashboard/types"
 
 type DashboardChartLoop = {
@@ -33,13 +33,11 @@ type DashboardChartLoop = {
 type DashboardChartsProps = {
   loops: DashboardChartLoop[]
   tokenSymbol: string | null
-  claimParticipationRatePercent: number | null
-  uniqueUsersBySnapshot: DashboardHistoryMetricRow[]
-  uniqueClaimUsersBySnapshot: DashboardHistoryMetricRow[]
-  registrationsBySnapshot: DashboardHistoryMetricRow[]
-  claimsBySnapshot: DashboardHistoryMetricRow[]
-  claimRateBySnapshot: DashboardHistoryMetricRow[]
-  distributedAmountBySnapshot: DashboardHistoryMetricRow[]
+  registrationsByPeriod: DashboardMetricByPeriodRow[]
+  claimsByPeriod: DashboardMetricByPeriodRow[]
+  claimRateByPeriod: DashboardMetricByPeriodRow[]
+  cumulativeUniqueUsersByPeriod: DashboardMetricByPeriodRow[]
+  distributionByPeriod: DashboardDistributionByPeriodRow[]
 }
 
 type ChartDataRow = {
@@ -95,15 +93,46 @@ function formatToken(value: number, tokenSymbol?: string | null) {
   return tokenSymbol ? `${formatted} ${tokenSymbol}` : formatted
 }
 
-function buildHistoryRows(
-  rows: DashboardHistoryMetricRow[],
+function buildMetricRows(
+  rows: DashboardMetricByPeriodRow[],
   loops: DashboardChartLoop[]
 ): ChartDataRow[] {
   return rows.map((row) => ({
-    label: row.snapshotShortLabel ?? row.snapshotDate,
-    fullLabel: row.snapshotLongLabel ?? row.snapshotDate,
+    label: row.periodEndedShortLabel ?? `Period ${row.period}`,
+    fullLabel: row.periodEndedLongLabel ?? `Period ${row.period}`,
     ...Object.fromEntries(
       loops.map((loop) => [loop.loopKey, Number(row.values[loop.loopKey] ?? 0)])
+    ),
+  }))
+}
+
+function buildDistributionRows(
+  rows: DashboardDistributionByPeriodRow[],
+  loops: DashboardChartLoop[]
+): ChartDataRow[] {
+  const grouped = new Map<number, ChartDataRow>()
+
+  for (const row of rows) {
+    const existing = grouped.get(row.period) ?? {
+      label: row.periodEndedShortLabel ?? `Period ${row.period}`,
+      fullLabel: row.periodEndedLongLabel ?? `Period ${row.period}`,
+    }
+
+    existing[`${row.loopKey}Claimed`] = Number.parseFloat(row.claimedAmount ?? "0")
+    existing[`${row.loopKey}Unclaimed`] = Number.parseFloat(
+      row.unclaimedAmount ?? "0"
+    )
+
+    grouped.set(row.period, existing)
+  }
+
+  return Array.from(grouped.values()).map((row) => ({
+    ...row,
+    ...Object.fromEntries(
+      loops.flatMap((loop) => [
+        [`${loop.loopKey}Claimed`, Number(row[`${loop.loopKey}Claimed`] ?? 0)],
+        [`${loop.loopKey}Unclaimed`, Number(row[`${loop.loopKey}Unclaimed`] ?? 0)],
+      ])
     ),
   }))
 }
@@ -183,113 +212,28 @@ function CustomTooltip({
 export function DashboardCharts({
   loops,
   tokenSymbol,
-  claimParticipationRatePercent,
-  uniqueUsersBySnapshot,
-  uniqueClaimUsersBySnapshot,
-  registrationsBySnapshot,
-  claimsBySnapshot,
-  claimRateBySnapshot,
-  distributedAmountBySnapshot,
+  registrationsByPeriod,
+  claimsByPeriod,
+  claimRateByPeriod,
+  cumulativeUniqueUsersByPeriod,
+  distributionByPeriod,
 }: DashboardChartsProps) {
-  const snapshotUniqueUsersData = buildHistoryRows(uniqueUsersBySnapshot, loops)
-  const snapshotUniqueClaimUsersData = buildHistoryRows(uniqueClaimUsersBySnapshot, loops)
-  const snapshotRegistrationsData = buildHistoryRows(registrationsBySnapshot, loops)
-  const snapshotClaimsData = buildHistoryRows(claimsBySnapshot, loops)
-  const snapshotClaimRateData = buildHistoryRows(claimRateBySnapshot, loops)
-  const snapshotDistributionData = buildHistoryRows(distributedAmountBySnapshot, loops)
+  const registrationsData = buildMetricRows(registrationsByPeriod, loops)
+  const claimsData = buildMetricRows(claimsByPeriod, loops)
+  const claimRateData = buildMetricRows(claimRateByPeriod, loops)
+  const cumulativeData = buildMetricRows(cumulativeUniqueUsersByPeriod, loops)
+  const distributionData = buildDistributionRows(distributionByPeriod, loops)
 
   return (
     <div className="space-y-5">
       <div className="grid gap-5 xl:grid-cols-2">
         <ChartCard
-          title="Unique Users by Snapshot Date"
-          description="Each saved stats snapshot becomes one X-axis date, so cumulative user growth can be compared update to update."
+          title="Registrations by Ended Date"
+          description="Grouped bars make it easy to compare participation volume across loops in the current seven-date window."
         >
           <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snapshotUniqueUsersData}>
-                <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis
-                  tick={{ fill: axisColor, fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(value) => formatCompactNumber(Number(value))}
-                />
-                <Tooltip
-                  content={
-                    <CustomTooltip
-                      valueFormatter={(value) => formatNumber(value)}
-                    />
-                  }
-                />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
-                {loops.map((loop) => (
-                  <Line
-                    key={loop.loopKey}
-                    type="monotone"
-                    dataKey={loop.loopKey}
-                    name={loop.shortTitle}
-                    stroke={loop.color}
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: loop.color, strokeWidth: 0 }}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard
-          title="Unique Claim Users by Snapshot Date"
-          description="This keeps claimer growth separate from raw registrations, which makes conversion trends easier to read."
-        >
-          <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snapshotUniqueClaimUsersData}>
-                <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis
-                  tick={{ fill: axisColor, fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(value) => formatCompactNumber(Number(value))}
-                />
-                <Tooltip
-                  content={
-                    <CustomTooltip
-                      valueFormatter={(value) => formatNumber(value)}
-                    />
-                  }
-                />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
-                {loops.map((loop) => (
-                  <Line
-                    key={loop.loopKey}
-                    type="monotone"
-                    dataKey={loop.loopKey}
-                    name={loop.shortTitle}
-                    stroke={loop.color}
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: loop.color, strokeWidth: 0 }}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-2">
-        <ChartCard
-          title="Registrations by Snapshot Date"
-          description="Cumulative registrations by saved update date show participation momentum between refreshes."
-        >
-          <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={snapshotRegistrationsData} barGap={10}>
+              <BarChart data={registrationsData} barGap={10}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
@@ -323,12 +267,12 @@ export function DashboardCharts({
         </ChartCard>
 
         <ChartCard
-          title="Claims by Snapshot Date"
-          description="Cumulative claims by saved update date make it easier to compare how quickly redemptions keep pace across loops."
+          title="Claims by Ended Date"
+          description="Claim activity over the same ended-date window, so the user can contrast registration interest with actual redemptions."
         >
           <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snapshotClaimsData}>
+              <LineChart data={claimsData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
@@ -365,12 +309,64 @@ export function DashboardCharts({
 
       <div className="grid gap-5 xl:grid-cols-2">
         <ChartCard
-          title="Claim Rate by Snapshot Date"
-          description="Cumulative claim rate by saved update date shows how efficiently each loop converts registrations into claims over time."
+          title="Claimed vs Unclaimed Amount"
+          description="Each ended date shows one stack per loop, split into claimed and unclaimed HNY so token flow is legible at a glance."
         >
-          <div className="h-[360px]">
+          <div className="h-[340px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snapshotClaimRateData}>
+              <BarChart data={distributionData} barGap={18}>
+                <CartesianGrid stroke={chartGridColor} vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(value) => formatCompactNumber(Number(value))}
+                />
+                <Tooltip
+                  cursor={{ fill: "hsl(var(--muted) / 0.35)" }}
+                  content={
+                    <CustomTooltip
+                      tokenSymbol={tokenSymbol}
+                      valueFormatter={(value, symbol) => formatToken(value, symbol)}
+                    />
+                  }
+                />
+                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                {loops.map((loop) => (
+                  <Bar
+                    key={`${loop.loopKey}-claimed`}
+                    dataKey={`${loop.loopKey}Claimed`}
+                    name={`${loop.shortTitle} Claimed`}
+                    stackId={`${loop.loopKey}-stack`}
+                    fill={loop.color}
+                    radius={[8, 8, 0, 0]}
+                    maxBarSize={24}
+                  />
+                ))}
+                {loops.map((loop) => (
+                  <Bar
+                    key={`${loop.loopKey}-unclaimed`}
+                    dataKey={`${loop.loopKey}Unclaimed`}
+                    name={`${loop.shortTitle} Unclaimed`}
+                    stackId={`${loop.loopKey}-stack`}
+                    fill={loop.softColor}
+                    radius={[8, 8, 0, 0]}
+                    maxBarSize={24}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+
+        <ChartCard
+          title="Claim Rate by Ended Date"
+          description="The percent of registrations that turned into claims in each ended period, compared side by side across loops."
+        >
+          <div className="h-[340px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={claimRateData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
@@ -400,66 +396,51 @@ export function DashboardCharts({
                     activeDot={{ r: 5 }}
                   />
                 ))}
-                {claimParticipationRatePercent != null && (
-                  <ReferenceLine
-                    y={claimParticipationRatePercent}
-                    stroke="hsl(var(--foreground) / 0.7)"
-                    strokeDasharray="8 6"
-                    strokeWidth={2}
-                    label={{
-                      value: `Avg claim rate: ${formatPercent(claimParticipationRatePercent)}`,
-                      position: "insideTopRight",
-                      fill: "hsl(var(--muted-foreground))",
-                      fontSize: 12,
-                    }}
-                  />
-                )}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard
-          title="Distributed Amount by Snapshot Date"
-          description="Snapshot-date HNY totals show the cumulative distribution story for each loop across the saved update history."
-        >
-          <div className="h-[360px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={snapshotDistributionData}>
-                <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis
-                  tick={{ fill: axisColor, fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(value) => formatCompactNumber(Number(value))}
-                />
-                <Tooltip
-                  content={
-                    <CustomTooltip
-                      tokenSymbol={tokenSymbol}
-                      valueFormatter={(value, symbol) => formatToken(value, symbol)}
-                    />
-                  }
-                />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
-                {loops.map((loop) => (
-                  <Line
-                    key={loop.loopKey}
-                    type="monotone"
-                    dataKey={loop.loopKey}
-                    name={loop.title}
-                    stroke={loop.color}
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: loop.color, strokeWidth: 0 }}
-                    activeDot={{ r: 5 }}
-                  />
-                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
       </div>
+
+      <ChartCard
+        title="Cumulative Unique Users"
+        description="This growth curve keeps the all-time participation story visible even while the dashboard only renders the latest seven ended dates."
+      >
+        <div className="h-[360px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={cumulativeData}>
+              <CartesianGrid stroke={chartGridColor} vertical={false} />
+              <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis
+                tick={{ fill: axisColor, fontSize: 12 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(value) => formatCompactNumber(Number(value))}
+              />
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    valueFormatter={(value) => formatNumber(value)}
+                  />
+                }
+              />
+              <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+              {loops.map((loop) => (
+                <Line
+                  key={loop.loopKey}
+                  type="monotone"
+                  dataKey={loop.loopKey}
+                  name={loop.title}
+                  stroke={loop.color}
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: loop.color, strokeWidth: 0 }}
+                  activeDot={{ r: 5 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartCard>
     </div>
   )
 }

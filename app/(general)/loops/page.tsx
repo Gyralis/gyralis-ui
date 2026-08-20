@@ -1,48 +1,8 @@
-import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
 import { unstable_noStore as noStore } from "next/cache"
 
 import { LoopsPageClient } from "@/components/loops/loops-page-client"
 import type { EcosystemMetricData } from "@/components/loops/participation-profile"
-
-type RawLoopRegistrationCache = {
-  loops?: Record<string, unknown>
-  global?: {
-    updatedAt?: string | null
-    uniqueUsers?: unknown[]
-    uniqueUserCount?: string | number | null
-    uniqueClaimUserCount?: string | number | null
-    uniqueClaimUsers?: unknown[]
-    stats?: {
-      totalRegistrationsCount?: string | number | null
-      totalClaimsCount?: string | number | null
-      claimRatePercent?: string | number | null
-    }
-  }
-}
-
-const CACHE_FILE_PATH = resolve(
-  process.cwd(),
-  "data/loop-registration-cache.json"
-)
-
-function parseCount(value: string | number | null | undefined): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value !== "string" || value.trim() === "") return 0
-
-  const parsed = Number.parseInt(value, 10)
-  return Number.isFinite(parsed) ? parsed : 0
-}
-
-function parsePercent(
-  value: string | number | null | undefined
-): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value !== "string" || value.trim() === "") return null
-
-  const parsed = Number.parseFloat(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
+import { getDashboardPageData } from "@/lib/dashboard"
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat("en-US").format(value)
@@ -75,29 +35,22 @@ function formatUpdatedAt(value: string | null | undefined): string {
 }
 
 async function getLoopsHeaderData(): Promise<LoopsHeaderData> {
-  const raw = await readFile(CACHE_FILE_PATH, "utf8")
-  const cache = JSON.parse(raw) as RawLoopRegistrationCache
-
-  const totalClaims = parseCount(cache.global?.stats?.totalClaimsCount)
-  const totalRegistrations = parseCount(
-    cache.global?.stats?.totalRegistrationsCount
-  )
-  const claimRate =
-    parsePercent(cache.global?.stats?.claimRatePercent) ??
-    (totalRegistrations > 0 ? (totalClaims / totalRegistrations) * 100 : null)
-  const uniqueUsers =
-    parseCount(cache.global?.uniqueUserCount) ||
-    (Array.isArray(cache.global?.uniqueUsers)
-      ? cache.global.uniqueUsers.length
-      : 0)
+  const dashboard = await getDashboardPageData()
+  const totalClaims = dashboard.overview.totalClaims
+  const totalRegistrations = dashboard.overview.totalRegistrations
+  const claimRate = dashboard.overview.claimParticipationRatePercent
+  const uniqueUsers = dashboard.overview.globalUniqueRegisteredUsers
   return {
     metrics: [
       { value: formatCount(uniqueUsers), label: "Unique Users" },
       { value: formatCount(totalClaims), label: "Claims" },
       { value: formatPercent(claimRate), label: "Claim rate" },
-      { value: "2", label: "Active Loop" },
+      {
+        value: formatCount(dashboard.loopSummaries.length),
+        label: "Active Loop",
+      },
     ],
-    updatedAtLabel: formatUpdatedAt(cache.global?.updatedAt),
+    updatedAtLabel: formatUpdatedAt(dashboard.generatedAt),
   }
 }
 
