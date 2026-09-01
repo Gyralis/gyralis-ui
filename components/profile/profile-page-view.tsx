@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { FaBolt, FaCheck, FaLock, FaTrophy } from "react-icons/fa"
+import { FaBolt, FaCheck, FaLock } from "react-icons/fa"
 import { FaFire } from "react-icons/fa6"
 import type { IconType } from "react-icons"
 
@@ -13,6 +13,11 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Tooltip,
   TooltipContent,
@@ -46,8 +51,12 @@ function getEarnedLoopsForMilestone(
   streak: number
 ) {
   return loops.filter((loop) =>
-    loop.earnedStreakBonuses.some((bonus) => bonus.streak === streak)
+    hasEarnedStreakBonus(loop, streak)
   )
+}
+
+function hasEarnedStreakBonus(loop: ProfileLoopStats, streak: number) {
+  return loop.earnedStreakBonuses.some((bonus) => bonus.streak === streak)
 }
 
 function getBestOverallStreak(loops: ProfileLoopStats[]) {
@@ -207,6 +216,7 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
                 rewardPoints={milestone.points}
                 creditedPoints={earnedLoops.length * milestone.points}
                 bestOverallStreak={bestOverallStreak}
+                loops={data.loopStats}
                 earnedLoops={earnedLoops}
               />
             )
@@ -222,12 +232,14 @@ function AchievementBonusCard({
   rewardPoints,
   creditedPoints,
   bestOverallStreak,
+  loops,
   earnedLoops,
 }: {
   streak: number
   rewardPoints: number
   creditedPoints: number
   bestOverallStreak: number
+  loops: ProfileLoopStats[]
   earnedLoops: ProfileLoopStats[]
 }) {
   const earned = earnedLoops.length > 0
@@ -244,7 +256,7 @@ function AchievementBonusCard({
     >
       <div
         className={cn(
-          "flex h-[118px] items-center justify-center",
+          "flex h-[92px] items-center justify-center",
           earned
             ? "bg-[linear-gradient(135deg,hsl(var(--primary)/0.14)_0%,hsl(var(--secondary)/0.10)_48%,hsl(var(--muted)/0.42)_100%)]"
             : "bg-[linear-gradient(135deg,hsl(var(--muted)/0.58)_0%,hsl(var(--muted)/0.28)_100%)]"
@@ -252,25 +264,22 @@ function AchievementBonusCard({
       >
         <div
           className={cn(
-            "flex size-14 items-center justify-center rounded-2xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.20)]",
+            "flex size-12 items-center justify-center rounded-2xl border shadow-[inset_0_1px_0_rgba(255,255,255,0.20)]",
             earned
               ? "border-primary/25 bg-primary/10 text-primary"
               : "border-border bg-background/50 text-muted-foreground"
           )}
         >
-          {earned ? (
-            <StreakMilestoneIcon
-              streak={streak}
-              glowing
-              className="size-6"
-            />
-          ) : (
-            <FaLock className="size-6" aria-hidden="true" />
-          )}
+          <StreakMilestoneIcon
+            streak={streak}
+            glowing={earned}
+            disabled={!earned}
+            className="size-5"
+          />
         </div>
       </div>
 
-      <CardContent className="flex min-h-[188px] flex-col gap-4 p-4">
+      <CardContent className="flex min-h-[132px] flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-base font-bold leading-tight text-foreground">
@@ -281,32 +290,49 @@ function AchievementBonusCard({
             </p>
           </div>
 
-          <Badge
-            variant="outline"
-            className={cn(
-              "shrink-0 rounded-lg px-2 py-1 text-[10px] font-bold",
-              earned
-                ? "border-primary/30 bg-primary/10 text-primary"
-                : "border-border bg-muted text-muted-foreground"
-            )}
-          >
-            {earned ? "Streaked" : "Locked"}
-          </Badge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="shrink-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                aria-label={`${earnedLoops.length} of ${loops.length} loops have earned the ${streak}-claim streak bonus`}
+              >
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "cursor-pointer rounded-lg px-2 py-1 text-[10px] font-bold",
+                    earned
+                      ? "border-primary/30 bg-primary/10 text-primary"
+                      : "border-border bg-muted text-muted-foreground"
+                  )}
+                >
+                  {earned
+                    ? `${earnedLoops.length}/${loops.length} loops`
+                    : "Locked"}
+                </Badge>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className="w-64 rounded-2xl border-border/70 bg-card p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
+            >
+              <AchievementLoopBonusList
+                loops={loops}
+                streak={streak}
+                rewardPoints={rewardPoints}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <p className="text-xs leading-5 text-muted-foreground">
-          {earned
-            ? `Earned in ${earnedLoops.length} ${
-                earnedLoops.length === 1 ? "loop" : "loops"
-              }. Bonus already credited.`
-            : `Reach a ${streak}-claim streak in any loop to unlock this bonus.`}
-        </p>
+        {!earned ? (
+          <p className="text-xs leading-5 text-muted-foreground">
+            Reach a {streak}-claim streak in any loop to unlock this bonus.
+          </p>
+        ) : null}
 
-        <div className="mt-auto space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-[11px] font-semibold text-muted-foreground">
-              Best streak {formatNumber(bestOverallStreak)} / {streak}
-            </span>
+        <div className="mt-auto space-y-2">
+          <div className="flex items-center justify-end">
             <span
               className={cn(
                 "font-mono text-xs font-bold",
@@ -324,35 +350,59 @@ function AchievementBonusCard({
             )}
           />
 
-          {earned ? (
-            <div className="flex items-center gap-1.5">
-              {earnedLoops.slice(0, 4).map((loop) => (
-                <span
-                  key={`${streak}-${loop.id}`}
-                  className={cn(
-                    "flex size-6 items-center justify-center rounded-full bg-gradient-to-br font-heading text-[10px] font-extrabold text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.24)]",
-                    getLoopAvatarClassName(loop)
-                  )}
-                  title={loop.metadata.title}
-                >
-                  {getLoopInitial(loop)}
-                </span>
-              ))}
-              {earnedLoops.length > 4 ? (
-                <span className="flex size-6 items-center justify-center rounded-full bg-muted font-mono text-[10px] font-bold text-muted-foreground">
-                  +{earnedLoops.length - 4}
-                </span>
-              ) : null}
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-muted-foreground">
-              <FaTrophy className="size-3" aria-hidden="true" />
-              Next bonus target
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function AchievementLoopBonusList({
+  loops,
+  streak,
+  rewardPoints,
+}: {
+  loops: ProfileLoopStats[]
+  streak: number
+  rewardPoints: number
+}) {
+  return (
+    <div className="space-y-1.5">
+      {loops.map((loop) => {
+        const earned = hasEarnedStreakBonus(loop, streak)
+
+        return (
+          <div
+            key={`${streak}-${loop.id}`}
+            className="flex items-center justify-between gap-3 rounded-xl bg-muted/35 px-2.5 py-2"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <StreakMilestoneIcon
+                streak={streak}
+                glowing={earned}
+                disabled={!earned}
+                className="size-3.5 shrink-0"
+              />
+              <span
+                className={cn(
+                  "truncate text-[11px] font-semibold",
+                  earned ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                {loop.metadata.title}
+              </span>
+            </div>
+            <span
+              className={cn(
+                "shrink-0 text-[11px] font-semibold tabular-nums",
+                earned ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              {earned ? `+${rewardPoints} GP` : "not yet"}
+            </span>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

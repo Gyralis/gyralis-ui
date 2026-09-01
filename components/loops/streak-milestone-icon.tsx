@@ -18,6 +18,7 @@ export function getStreakMilestoneIcon(streak: number) {
 export interface StreakMilestoneIconProps {
   streak: number
   glowing?: boolean
+  disabled?: boolean
   className?: string
   title?: string
 }
@@ -25,6 +26,7 @@ export interface StreakMilestoneIconProps {
 export function StreakMilestoneIcon({
   streak,
   glowing = false,
+  disabled = false,
   className,
   title,
 }: StreakMilestoneIconProps) {
@@ -34,7 +36,12 @@ export function StreakMilestoneIcon({
     <Icon
       aria-hidden={title ? undefined : true}
       className={cn(
-        glowing && "drop-shadow-[0_0_10px_hsl(var(--primary)/0.45)]",
+        disabled
+          ? "text-muted-foreground opacity-45"
+          : "text-primary",
+        glowing &&
+          !disabled &&
+          "drop-shadow-[0_0_10px_hsl(var(--primary)/0.45)]",
         className
       )}
       title={title}
