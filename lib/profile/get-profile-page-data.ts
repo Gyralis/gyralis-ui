@@ -4,6 +4,7 @@ import { isAddress } from "viem"
 
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import { getUserGlobalStats } from "@/lib/db/clients/global-stats.client"
+import { getGlobalLeaderboardRank } from "@/lib/db/clients/leaderboard.client"
 import { getUserLoopStatsForUser } from "@/lib/db/clients/loop-stats.client"
 import { getUserProfile } from "@/lib/db/clients/user-profile.client"
 import { normalizeDbAddress } from "@/lib/db/ids"
@@ -57,6 +58,7 @@ export interface ProfilePageData {
     : never
   loopStats: ProfileLoopStats[]
   hasActivity: boolean
+  globalRank: number | null
 }
 
 const chainNameById: Record<number, string> = {
@@ -138,10 +140,11 @@ export async function getProfilePageData(
   if (!isAddress(rawAddress)) return null
 
   const address = normalizeDbAddress(rawAddress)
-  const [profile, globalStats, loopStats] = await Promise.all([
+  const [profile, globalStats, loopStats, globalRank] = await Promise.all([
     getUserProfile(address),
     getUserGlobalStats(address),
     getUserLoopStatsForUser(address),
+    getGlobalLeaderboardRank(address),
   ])
 
   return {
@@ -163,5 +166,6 @@ export async function getProfilePageData(
       )
     }),
     hasActivity: Boolean(globalStats || loopStats.length > 0),
+    globalRank,
   }
 }
