@@ -25,6 +25,7 @@ interface ClaimEventsQueryFilters {
   blockNumber?: boolean
   afterEventId?: boolean
   loopId?: boolean
+  excludedLoopIds?: boolean
   userAddress?: boolean
 }
 
@@ -49,6 +50,10 @@ export function buildClaimEventsQuery(
   if (filters.loopId) {
     variables.push("$loopId: ID!")
     where.push("loop: $loopId")
+  }
+  if (filters.excludedLoopIds) {
+    variables.push("$excludedLoopIds: [ID!]")
+    where.push("loop_not_in: $excludedLoopIds")
   }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
@@ -84,6 +89,7 @@ export async function fetchClaimEventsFromSubgraph(input: {
   afterEventId?: string
   first: number
   loopId?: number
+  excludedLoopIds?: readonly number[]
 }): Promise<ClaimScoringEvent[]> {
   if (input.fromBlock != null && input.blockNumber != null) {
     throw new Error("Use either fromBlock or blockNumber, not both")
@@ -95,6 +101,7 @@ export async function fetchClaimEventsFromSubgraph(input: {
       blockNumber: input.blockNumber != null,
       afterEventId: input.afterEventId != null,
       loopId: input.loopId != null,
+      excludedLoopIds: Boolean(input.excludedLoopIds?.length),
     }),
     variables: {
       first: input.first,
@@ -102,6 +109,7 @@ export async function fetchClaimEventsFromSubgraph(input: {
       blockNumber: input.blockNumber,
       afterEventId: input.afterEventId,
       loopId: input.loopId?.toString(),
+      excludedLoopIds: input.excludedLoopIds?.map(String),
     },
   })
 }
@@ -113,8 +121,9 @@ export async function fetchAllClaimEventsForUserLoop(input: {
 }): Promise<ClaimScoringEvent[]> {
   const events: ClaimScoringEvent[] = []
   let afterEventId: string | undefined
+  let shouldFetchNextPage = true
 
-  while (true) {
+  while (shouldFetchNextPage) {
     const batch = await fetchClaimEventPage({
       query: buildClaimEventsQuery({
         afterEventId: afterEventId != null,
@@ -129,7 +138,10 @@ export async function fetchAllClaimEventsForUserLoop(input: {
       },
     })
     events.push(...batch)
-    if (batch.length < input.batchSize) break
+    if (batch.length < input.batchSize) {
+      shouldFetchNextPage = false
+      continue
+    }
     afterEventId = batch[batch.length - 1]?.id
   }
 

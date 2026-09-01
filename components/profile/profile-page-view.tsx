@@ -522,7 +522,7 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
             />
             <TableValue
               value={formatNumber(totals.totalPoints)}
-              highlight
+              total
               align="right"
             />
           </div>
@@ -570,7 +570,7 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
       <StreakBonusCell loop={loop} />
       <TableValue
         value={formatNumber(loop.totalPoints)}
-        highlight
+        total
         align="right"
       />
     </div>
@@ -743,19 +743,19 @@ function StreakBonusDetailCard({ loop }: { loop: ProfileLoopStats }) {
 function TableValue({
   value,
   suffix,
-  highlight,
+  total,
   align = "left",
 }: {
   value: string
   suffix?: string
-  highlight?: boolean
+  total?: boolean
   align?: "left" | "center" | "right"
 }) {
   return (
     <p
       className={cn(
         "leading-5 tabular-nums text-foreground",
-        highlight ? "text-base font-extrabold" : "text-sm font-normal",
+        total ? "text-base font-extrabold" : "text-sm font-normal",
         align === "center" && "text-center",
         align === "right" && "text-right"
       )}

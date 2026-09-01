@@ -8,6 +8,7 @@ import { getGlobalLeaderboardRank } from "@/lib/db/clients/leaderboard.client"
 import { getUserLoopStatsForUser } from "@/lib/db/clients/loop-stats.client"
 import { getUserProfile } from "@/lib/db/clients/user-profile.client"
 import { normalizeDbAddress } from "@/lib/db/ids"
+import { ignoredScoringLoopIds } from "@/lib/scoring/loop-filters"
 import { parseEarnedStreakBonuses } from "@/lib/scoring/responses"
 import { EarnedStreakBonus } from "@/lib/scoring/types"
 
@@ -66,14 +67,21 @@ const chainNameById: Record<number, string> = {
   8453: "Base",
 }
 
+function loopMetadataKey(chainId: number, loopId: number) {
+  return `${chainId}-${loopId}`
+}
+
+const loopMetadataByKey = new Map(
+  LoopCardsData.map((loop) => [loopMetadataKey(loop.chainId, loop.id), loop])
+)
+
 function truncateAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`
 }
 
 function toLoopMetadata(stats: LoopStatsRecord): ProfileLoopMetadata {
-  const loop = LoopCardsData.find(
-    (candidate) =>
-      candidate.id === stats.loopId && candidate.chainId === stats.chainId
+  const loop = loopMetadataByKey.get(
+    loopMetadataKey(stats.chainId, stats.loopId)
   )
 
   if (loop) {
@@ -143,7 +151,9 @@ export async function getProfilePageData(
   const [profile, globalStats, loopStats, globalRank] = await Promise.all([
     getUserProfile(address),
     getUserGlobalStats(address),
-    getUserLoopStatsForUser(address),
+    getUserLoopStatsForUser(address, {
+      excludedLoopIds: ignoredScoringLoopIds,
+    }),
     getGlobalLeaderboardRank(address),
   ])
 

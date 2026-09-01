@@ -37,9 +37,17 @@ export async function upsertUserLoopStats(stats: UserLoopScoringStats) {
   })
 }
 
-export async function getUserLoopStatsForUser(userAddress: string) {
+export async function getUserLoopStatsForUser(
+  userAddress: string,
+  options: { excludedLoopIds?: readonly number[] } = {}
+) {
   return prisma.userLoopStats.findMany({
-    where: { userAddress: userAddress.toLowerCase() },
+    where: {
+      userAddress: userAddress.toLowerCase(),
+      loopId: options.excludedLoopIds?.length
+        ? { notIn: [...options.excludedLoopIds] }
+        : undefined,
+    },
   })
 }
 
