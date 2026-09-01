@@ -1,5 +1,7 @@
 import Link from "next/link"
-import { FaBolt, FaCheck, FaFire, FaLock, FaTrophy } from "react-icons/fa"
+import Image from "next/image"
+import { FaBolt, FaCheck, FaLock, FaTrophy } from "react-icons/fa"
+import { FaFire } from "react-icons/fa6"
 import type { IconType } from "react-icons"
 
 import { scoringConfig } from "@/lib/scoring/config"
@@ -17,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { StreakMilestoneIcon } from "@/components/loops/streak-milestone-icon"
 import { ProfileWalletAddressSync } from "@/components/profile/profile-wallet-address-sync"
 
 function formatNumber(value: number) {
@@ -54,13 +57,31 @@ function getBestOverallStreak(loops: ProfileLoopStats[]) {
   )
 }
 
+function getLoopTotals(loops: ProfileLoopStats[]) {
+  return loops.reduce(
+    (acc, loop) => ({
+      claims: acc.claims + loop.totalClaims,
+      claimPoints: acc.claimPoints + loop.claimPoints,
+      streakPoints: acc.streakPoints + loop.streakBonusPoints,
+      totalPoints: acc.totalPoints + loop.totalPoints,
+      longestStreak: Math.max(acc.longestStreak, loop.longestStreak),
+    }),
+    {
+      claims: 0,
+      claimPoints: 0,
+      streakPoints: 0,
+      totalPoints: 0,
+      longestStreak: 0,
+    }
+  )
+}
+
 function getLooperLevelProgress(totalPoints: number) {
   if (totalPoints >= 250) {
     return {
       badgeLabel: "LooperX",
-      copy: "LooperX achieved",
       fromLabel: "True Looper",
-      toLabel: "LooperX",
+      toLabel: "LooperX · 250 GP",
       progress: 100,
     }
   }
@@ -68,16 +89,14 @@ function getLooperLevelProgress(totalPoints: number) {
   if (totalPoints >= 50) {
     return {
       badgeLabel: "True Looper",
-      copy: "Your progress to LooperX",
       fromLabel: "True Looper",
-      toLabel: "LooperX",
+      toLabel: "LooperX · 250 GP",
       progress: ((totalPoints - 50) / 200) * 100,
     }
   }
 
   return {
     badgeLabel: "Next: True Looper",
-    copy: "Your progress to True Looper",
     fromLabel: "0 GP",
     toLabel: "True Looper",
     progress: (totalPoints / 50) * 100,
@@ -85,6 +104,8 @@ function getLooperLevelProgress(totalPoints: number) {
 }
 
 export function ProfilePageView({ data }: { data: ProfilePageData }) {
+  const totals = getLoopTotals(data.loopStats)
+
   return (
     <div className="px-4 py-8 sm:py-12">
       <ProfileWalletAddressSync />
@@ -92,7 +113,7 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
         <ProfileHeader data={data} />
 
         {!data.hasActivity ? (
-          <section className="rounded-[2rem] border border-dashed border-border bg-card/80 p-8 text-center">
+          <section className="rounded-3xl border border-dashed border-border bg-card/80 p-8 text-center">
             <h2 className="font-heading text-2xl font-bold">
               No loop activity yet
             </h2>
@@ -109,26 +130,27 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
           </section>
         ) : (
           <div className="grid gap-6">
-            <Card className="rounded-[2rem] border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
-              <CardContent className="p-5 sm:p-6">
-                <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
+            <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
+              <CardContent className="p-8">
+                <div className="mb-7">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <h2 className="font-heading text-3xl font-bold text-foreground">
                       Your GP per Loop
                     </h2>
-                    <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                      Claims, streak bonuses and total Gyra Points for every
-                      loop.
-                    </p>
+                    <div className="flex w-fit shrink-0 items-end gap-3 sm:justify-end">
+                      <p className="text-4xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+                        {formatNumber(totals.totalPoints)}
+                      </p>
+                      <p className="flex flex-col gap-1 pb-0.5 text-left text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-muted-foreground">
+                        <span>Gyra</span>
+                        <span>Points</span>
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex w-fit items-baseline gap-3 sm:justify-end">
-                    <p className="font-mono text-4xl font-bold leading-none tracking-tight text-foreground">
-                      {formatNumber(data.globalStats?.totalPoints ?? 0)}
-                    </p>
-                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                      Total GP
-                    </p>
-                  </div>
+                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                    Claims, streak bonuses and total Gyra Points for every
+                    loop.
+                  </p>
                 </div>
 
                 <LoopActivityTable loops={data.loopStats} />
@@ -152,8 +174,8 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
   const unlockedLabel = `${unlockedCount} of ${scoringConfig.streakBonuses.length} bonuses unlocked`
 
   return (
-    <Card className="rounded-[2rem] border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
-      <CardContent className="p-5 sm:p-6">
+    <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
+      <CardContent className="p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="font-heading text-3xl font-bold text-foreground">
@@ -178,18 +200,12 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
               data.loopStats,
               milestone.streak
             )
-            const globalBonus = data.globalStats?.earnedStreakBonuses.find(
-              (bonus) => bonus.streak === milestone.streak
-            )
-
             return (
               <AchievementBonusCard
                 key={milestone.streak}
                 streak={milestone.streak}
                 rewardPoints={milestone.points}
-                creditedPoints={
-                  globalBonus?.points ?? earnedLoops.length * milestone.points
-                }
+                creditedPoints={earnedLoops.length * milestone.points}
                 bestOverallStreak={bestOverallStreak}
                 earnedLoops={earnedLoops}
               />
@@ -216,7 +232,6 @@ function AchievementBonusCard({
 }) {
   const earned = earnedLoops.length > 0
   const progress = Math.min(100, (bestOverallStreak / streak) * 100)
-  const StatusIcon = earned ? FaFire : FaLock
 
   return (
     <Card
@@ -243,7 +258,15 @@ function AchievementBonusCard({
               : "border-border bg-background/50 text-muted-foreground"
           )}
         >
-          <StatusIcon className="size-6" aria-hidden="true" />
+          {earned ? (
+            <StreakMilestoneIcon
+              streak={streak}
+              glowing
+              className="size-6"
+            />
+          ) : (
+            <FaLock className="size-6" aria-hidden="true" />
+          )}
         </div>
       </div>
 
@@ -334,7 +357,8 @@ function AchievementBonusCard({
 }
 
 function ProfileHeader({ data }: { data: ProfilePageData }) {
-  const totalPoints = data.globalStats?.totalPoints ?? 0
+  const totals = getLoopTotals(data.loopStats)
+  const totalPoints = totals.totalPoints
   const level = getLooperLevelProgress(totalPoints)
   const progressPercent = Math.round(level.progress)
   const progressMarkerPosition = Math.min(96, Math.max(4, level.progress))
@@ -343,8 +367,8 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-      <Card className="min-h-[220px] rounded-[2rem] border-border/70 bg-card p-4 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
-        <CardContent className="relative z-10 flex min-h-[188px] flex-col gap-3 p-0">
+      <Card className="min-h-[220px] rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
+        <CardContent className="relative z-10 flex min-h-[220px] flex-col gap-3 p-8">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -366,37 +390,34 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
             <div className="grid grid-cols-2 gap-2 sm:max-w-[220px] xl:min-w-[220px]">
               <ProfileHeaderStat
                 icon={FaBolt}
-                value={`${formatNumber(data.globalStats?.totalClaims ?? 0)}`}
+                value={`${formatNumber(totals.claims)}`}
                 label="total claims"
               />
               <ProfileHeaderStat
                 icon={FaFire}
-                value={`${formatNumber(data.globalStats?.longestStreak ?? 0)}`}
+                value={`${formatNumber(totals.longestStreak)}`}
                 label="best streak"
               />
             </div>
           </div>
 
           <div className="mt-auto space-y-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
               <div className="flex items-baseline gap-2">
-                <span className="font-heading text-4xl font-bold leading-none tracking-tight text-foreground sm:text-5xl">
+                <span className="text-4xl font-bold leading-none tracking-tight text-foreground tabular-nums sm:text-5xl">
                   {formatNumber(totalPoints)}
                 </span>
                 <GyraPointsLabel />
               </div>
-              <p className="text-xs font-semibold text-muted-foreground sm:text-right">
-                {level.copy}
-              </p>
             </div>
 
             <div className="space-y-2">
-              <div className="relative pt-4">
+              <div className="relative pt-5">
                 <span
-                  className="absolute top-0 -translate-x-1/2 p-px font-mono text-[11px] font-bold text-primary"
+                  className="absolute top-0 -translate-x-1/2 px-1 py-0.5 font-mono text-[11px] font-medium text-primary"
                   style={{ left: `${progressMarkerPosition}%` }}
                 >
-                  {progressPercent}%
+                  {progressPercent}% completed
                 </span>
                 <Progress
                   value={level.progress}
@@ -413,26 +434,24 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
       </Card>
 
       <div className="size-full max-w-[220px] justify-self-stretch max-lg:max-w-none">
-        <div className="relative h-full rounded-[1.75rem] border border-border/70 p-2 md:rounded-[1.85rem]">
-          <div className="relative flex h-full min-h-[204px] flex-col overflow-hidden rounded-[1.2rem] border border-white/[0.06] bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] text-card-foreground shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--secondary)/0.28)_0%,transparent_58%)]" />
-            <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-5 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                All time rank
-              </p>
-              <p className="mt-3 font-heading text-5xl font-bold leading-none tracking-[-0.04em] text-foreground">
-                {rankLabel}
-              </p>
-            </div>
-
-            <Link
-              href="/leaderboard"
-              className="relative flex min-h-12 items-center justify-center border-t border-border/60 bg-secondary/10 px-4 font-heading text-sm font-bold text-foreground transition-colors hover:bg-secondary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/70"
-            >
-              View leaderboard
-            </Link>
+        <Card className="relative flex h-full min-h-[220px] flex-col overflow-hidden rounded-3xl border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0.02)_100%)] text-card-foreground shadow-[0_18px_50px_-30px_rgba(0,0,0,0.35)] backdrop-blur-sm dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.015)_100%)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--secondary)/0.28)_0%,transparent_58%)]" />
+          <div className="relative flex flex-1 flex-col items-center justify-center p-8 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              All time rank
+            </p>
+            <p className="mt-3 text-5xl font-bold leading-none tracking-[-0.04em] text-foreground tabular-nums">
+              {rankLabel}
+            </p>
           </div>
-        </div>
+
+          <Link
+            href="/leaderboard"
+            className="relative flex min-h-12 items-center justify-center border-t border-border/60 bg-secondary/10 px-6 font-heading text-sm font-bold text-foreground transition-colors hover:bg-secondary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/70"
+          >
+            View leaderboard
+          </Link>
+        </Card>
       </div>
     </section>
   )
@@ -445,7 +464,7 @@ function GyraPointsLabel() {
         <TooltipTrigger asChild>
           <span
             tabIndex={0}
-            className="cursor-help text-base font-bold uppercase tracking-[0.06em] text-muted-foreground outline-none transition-colors hover:text-primary focus-visible:text-primary sm:text-lg"
+            className="cursor-help align-baseline text-base font-bold uppercase leading-none tracking-[0.06em] text-muted-foreground outline-none transition-colors hover:text-primary focus-visible:text-primary sm:text-lg"
           >
             GP
           </span>
@@ -479,14 +498,7 @@ function ProfileHeaderStat({
 }
 
 function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
-  const totals = loops.reduce(
-    (acc, loop) => ({
-      claims: acc.claims + loop.totalClaims,
-      streakPoints: acc.streakPoints + loop.streakBonusPoints,
-      totalPoints: acc.totalPoints + loop.totalPoints,
-    }),
-    { claims: 0, streakPoints: 0, totalPoints: 0 }
-  )
+  const totals = getLoopTotals(loops)
 
   return (
     <TooltipProvider>
@@ -533,16 +545,30 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
 }
 
 function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
+  const logoUrl = loop.metadata.logoUrl
+
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-center gap-4 border-b border-border/70 px-3 py-3.5 transition-colors hover:bg-muted/45">
       <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
         <div
           className={cn(
-            "flex size-[34px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-heading text-[13px] font-extrabold leading-none text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-1px_0_rgba(0,0,0,0.16)]",
-            getLoopAvatarClassName(loop)
+            "relative flex size-[34px] shrink-0 items-center justify-center overflow-hidden rounded-xl font-heading text-[13px] font-extrabold leading-none text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-1px_0_rgba(0,0,0,0.16)]",
+            logoUrl
+              ? "border border-border/70 bg-background/70"
+              : cn("bg-gradient-to-br", getLoopAvatarClassName(loop))
           )}
         >
-          {getLoopInitial(loop)}
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt=""
+              fill
+              sizes="34px"
+              className="object-contain p-1"
+            />
+          ) : (
+            getLoopInitial(loop)
+          )}
         </div>
 
         <div className="min-w-0">
@@ -560,7 +586,7 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
             ) : null}
           </div>
           <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-            by {loop.metadata.by}
+            Sponsored by {loop.metadata.sponsorName}
           </p>
         </div>
       </div>

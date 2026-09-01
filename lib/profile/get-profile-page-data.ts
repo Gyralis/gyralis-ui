@@ -20,10 +20,12 @@ export interface ProfileLoopMetadata {
   id: number
   title: string
   by: string
+  sponsorName: string
   address: string | null
   chainId: number
   chainName: string
   contractType: LoopCardData["contractType"] | "archived"
+  logoUrl?: string
   communityLogoUrl?: string
   eligibilityLogoUrl?: string
   sponsorLogoUrl?: string
@@ -89,10 +91,13 @@ function toLoopMetadata(stats: LoopStatsRecord): ProfileLoopMetadata {
       id: loop.id,
       title: loop.title,
       by: loop.by,
+      sponsorName: loop.sponsorName ?? loop.by,
       address: loop.address ?? null,
       chainId: loop.chainId,
       chainName: loop.chainName,
       contractType: loop.contractType,
+      logoUrl:
+        loop.communityLogoUrl ?? loop.eligibilityLogoUrl ?? loop.sponsorLogoUrl,
       communityLogoUrl: loop.communityLogoUrl,
       eligibilityLogoUrl: loop.eligibilityLogoUrl,
       sponsorLogoUrl: loop.sponsorLogoUrl,
@@ -105,6 +110,7 @@ function toLoopMetadata(stats: LoopStatsRecord): ProfileLoopMetadata {
     id: stats.loopId,
     title: `Archived loop #${stats.loopId}`,
     by: "Gyralis",
+    sponsorName: "Gyralis",
     address: null,
     chainId: stats.chainId,
     chainName: chainNameById[stats.chainId] ?? `Chain ${stats.chainId}`,
@@ -175,7 +181,7 @@ export async function getProfilePageData(
         left.loopId - right.loopId
       )
     }),
-    hasActivity: Boolean(globalStats || loopStats.length > 0),
+    hasActivity: loopStats.length > 0,
     globalRank,
   }
 }
