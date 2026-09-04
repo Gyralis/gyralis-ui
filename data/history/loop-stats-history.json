@@ -8,26 +8,6 @@
       "cacheFile": "data/loop-registration-cache.json",
       "cacheUpdatedAt": "2026-05-06T22:23:40.000Z",
       "loops": {
-        "blockscout": {
-          "loopKey": "blockscout",
-          "loopName": "Blockscout Merits",
-          "updatedAt": "2026-05-06T22:23:40.000Z",
-          "lastProcessedPeriod": "2",
-          "uniqueUserCount": 3,
-          "uniqueClaimUserCount": 1,
-          "totalRegistrationsCount": 3,
-          "totalClaimsCount": 1,
-          "totalDistributedAmountRaw": "199999999999999998",
-          "totalDistributedAmountFormatted": "0.199999999999999998",
-          "tokenSymbol": "HNY",
-          "claimRatePercent": "33.33",
-          "maxRegistrationsInPeriodCount": 3,
-          "maxRegistrationsInPeriodNumber": "2",
-          "maxRegistrationsInPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT",
-          "maxClaimsInPeriodCount": 1,
-          "maxClaimsInPeriodNumber": "2",
-          "maxClaimsInPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT"
-        },
         "1hive": {
           "loopKey": "1hive",
           "loopName": "1Hive Gardens",
@@ -37,16 +17,36 @@
           "uniqueClaimUserCount": 1,
           "totalRegistrationsCount": 1,
           "totalClaimsCount": 1,
-          "totalDistributedAmountRaw": "500000000000000000",
-          "totalDistributedAmountFormatted": "0.5",
-          "tokenSymbol": "HNY",
           "claimRatePercent": "100.00",
           "maxRegistrationsInPeriodCount": 1,
           "maxRegistrationsInPeriodNumber": "2",
           "maxRegistrationsInPeriodEndedAt": "Thu, 07 May 2026 22:23:35 GMT",
           "maxClaimsInPeriodCount": 1,
           "maxClaimsInPeriodNumber": "2",
-          "maxClaimsInPeriodEndedAt": "Thu, 07 May 2026 22:23:35 GMT"
+          "maxClaimsInPeriodEndedAt": "Thu, 07 May 2026 22:23:35 GMT",
+          "totalDistributedAmountRaw": "500000000000000000",
+          "totalDistributedAmountFormatted": "0.5",
+          "tokenSymbol": "HNY"
+        },
+        "blockscout": {
+          "loopKey": "blockscout",
+          "loopName": "Blockscout Merits",
+          "updatedAt": "2026-05-06T22:23:40.000Z",
+          "lastProcessedPeriod": "2",
+          "uniqueUserCount": 3,
+          "uniqueClaimUserCount": 1,
+          "totalRegistrationsCount": 3,
+          "totalClaimsCount": 1,
+          "claimRatePercent": "33.33",
+          "maxRegistrationsInPeriodCount": 3,
+          "maxRegistrationsInPeriodNumber": "2",
+          "maxRegistrationsInPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT",
+          "maxClaimsInPeriodCount": 1,
+          "maxClaimsInPeriodNumber": "2",
+          "maxClaimsInPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT",
+          "totalDistributedAmountRaw": "199999999999999998",
+          "totalDistributedAmountFormatted": "0.199999999999999998",
+          "tokenSymbol": "HNY"
         }
       },
       "global": {
@@ -59,6 +59,15 @@
         "uniqueClaimUserCount": 1,
         "totalRegistrationsCount": 4,
         "totalClaimsCount": 2,
+        "claimRatePercent": "50.00",
+        "maxRegistrationsInLoopPeriodCount": 3,
+        "maxRegistrationsInLoopPeriodLoopKey": "blockscout",
+        "maxRegistrationsInLoopPeriodNumber": "2",
+        "maxRegistrationsInLoopPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT",
+        "maxClaimsInLoopPeriodCount": 1,
+        "maxClaimsInLoopPeriodLoopKey": "1hive",
+        "maxClaimsInLoopPeriodNumber": "2",
+        "maxClaimsInLoopPeriodEndedAt": "Thu, 07 May 2026 22:23:35 GMT",
         "totalDistributedAmountRaw": "699999999999999998",
         "totalDistributedAmountFormatted": "0.699999999999999998",
         "tokenSymbol": "HNY",
@@ -74,16 +83,7 @@
             "totalUnclaimedAmountRaw": "133333333333333332",
             "totalUnclaimedAmountFormatted": "0.133333333333333332"
           }
-        ],
-        "claimRatePercent": "50.00",
-        "maxRegistrationsInLoopPeriodCount": 3,
-        "maxRegistrationsInLoopPeriodLoopKey": "blockscout",
-        "maxRegistrationsInLoopPeriodNumber": "2",
-        "maxRegistrationsInLoopPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT",
-        "maxClaimsInLoopPeriodCount": 1,
-        "maxClaimsInLoopPeriodLoopKey": "blockscout",
-        "maxClaimsInLoopPeriodNumber": "2",
-        "maxClaimsInLoopPeriodEndedAt": "Thu, 07 May 2026 22:23:40 GMT"
+        ]
       }
     },
     {
@@ -748,6 +748,122 @@
         "maxClaimsInLoopPeriodLoopKey": "blockscout",
         "maxClaimsInLoopPeriodNumber": "95",
         "maxClaimsInLoopPeriodEndedAt": "Sat, 08 Aug 2026 22:23:40 GMT"
+      }
+    },
+    {
+      "date": "2026-09-04",
+      "recordedAt": "2026-09-04T20:21:34.974Z",
+      "cacheFile": "data/loop-registration-cache.json",
+      "cacheUpdatedAt": "2026-09-04T20:21:34.974Z",
+      "loops": {
+        "blockscout": {
+          "loopKey": "blockscout",
+          "loopName": "Blockscout Merits",
+          "updatedAt": "2026-09-04T20:21:34.974Z",
+          "lastProcessedPeriod": "121",
+          "uniqueUserCount": 201,
+          "uniqueClaimUserCount": 149,
+          "totalRegistrationsCount": 6604,
+          "totalClaimsCount": 5758,
+          "claimRatePercent": "87.19",
+          "maxRegistrationsInPeriodCount": 80,
+          "maxRegistrationsInPeriodNumber": "95",
+          "maxRegistrationsInPeriodEndedAt": "Sat, 08 Aug 2026 22:23:40 GMT",
+          "maxClaimsInPeriodCount": 75,
+          "maxClaimsInPeriodNumber": "100",
+          "maxClaimsInPeriodEndedAt": "Thu, 13 Aug 2026 22:23:40 GMT",
+          "totalDistributedAmountRaw": "175394356672134869884",
+          "totalDistributedAmountFormatted": "175.394356672134869884",
+          "tokenSymbol": "HNY"
+        },
+        "1hive": {
+          "loopKey": "1hive",
+          "loopName": "1Hive Gardens",
+          "updatedAt": "2026-09-04T20:21:01.019Z",
+          "lastProcessedPeriod": "121",
+          "uniqueUserCount": 47,
+          "uniqueClaimUserCount": 44,
+          "totalRegistrationsCount": 2345,
+          "totalClaimsCount": 2099,
+          "claimRatePercent": "89.51",
+          "maxRegistrationsInPeriodCount": 30,
+          "maxRegistrationsInPeriodNumber": "97",
+          "maxRegistrationsInPeriodEndedAt": "Mon, 10 Aug 2026 22:23:35 GMT",
+          "maxClaimsInPeriodCount": 26,
+          "maxClaimsInPeriodNumber": "78",
+          "maxClaimsInPeriodEndedAt": "Wed, 22 Jul 2026 22:23:35 GMT",
+          "totalDistributedAmountRaw": "160691302573545952200",
+          "totalDistributedAmountFormatted": "160.6913025735459522",
+          "tokenSymbol": "HNY"
+        },
+        "test-superloops": {
+          "loopKey": "test-superloops",
+          "loopName": "TEST SUPERLOOPS",
+          "updatedAt": "2026-06-15T14:55:13.028Z",
+          "lastProcessedPeriod": "18825",
+          "uniqueUserCount": 2,
+          "uniqueClaimUserCount": 1,
+          "totalRegistrationsCount": 4,
+          "totalClaimsCount": 1,
+          "claimRatePercent": "25.00",
+          "maxRegistrationsInPeriodCount": 1,
+          "maxRegistrationsInPeriodNumber": "3452",
+          "maxRegistrationsInPeriodEndedAt": "Mon, 25 May 2026 17:33:29 GMT",
+          "maxClaimsInPeriodCount": 1,
+          "maxClaimsInPeriodNumber": "3469",
+          "maxClaimsInPeriodEndedAt": "Mon, 25 May 2026 18:07:29 GMT",
+          "totalDistributedAmountRaw": "0",
+          "totalDistributedAmountFormatted": "0",
+          "tokenSymbol": "MST"
+        }
+      },
+      "global": {
+        "updatedAt": "2026-09-04T20:21:34.974Z",
+        "loopsIncluded": [
+          "1hive",
+          "blockscout",
+          "test-superloops"
+        ],
+        "uniqueUserCount": 209,
+        "uniqueClaimUserCount": 157,
+        "totalRegistrationsCount": 8953,
+        "totalClaimsCount": 7858,
+        "claimRatePercent": "87.77",
+        "totalDistributedAmountRaw": null,
+        "totalDistributedAmountFormatted": null,
+        "tokenSymbol": null,
+        "tokenTotals": [
+          {
+            "tokenAddress": "0x71850b7E9Ee3f13Ab46d67167341E4bDc905Eef9",
+            "tokenSymbol": "HNY",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "336085659245680822084",
+            "totalDistributedAmountFormatted": "336.085659245680822084",
+            "totalClaimedAmountRaw": "294290906832738555398",
+            "totalClaimedAmountFormatted": "294.290906832738555398",
+            "totalUnclaimedAmountRaw": "41794752412942266686",
+            "totalUnclaimedAmountFormatted": "41.794752412942266686"
+          },
+          {
+            "tokenAddress": "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
+            "tokenSymbol": "MST",
+            "tokenDecimals": 18,
+            "totalDistributedAmountRaw": "0",
+            "totalDistributedAmountFormatted": "0",
+            "totalClaimedAmountRaw": "120000000000000000000",
+            "totalClaimedAmountFormatted": "120",
+            "totalUnclaimedAmountRaw": "-120000000000000000000",
+            "totalUnclaimedAmountFormatted": "-120"
+          }
+        ],
+        "maxRegistrationsInLoopPeriodCount": 80,
+        "maxRegistrationsInLoopPeriodLoopKey": "blockscout",
+        "maxRegistrationsInLoopPeriodNumber": "95",
+        "maxRegistrationsInLoopPeriodEndedAt": "Sat, 08 Aug 2026 22:23:40 GMT",
+        "maxClaimsInLoopPeriodCount": 75,
+        "maxClaimsInLoopPeriodLoopKey": "blockscout",
+        "maxClaimsInLoopPeriodNumber": "100",
+        "maxClaimsInLoopPeriodEndedAt": "Thu, 13 Aug 2026 22:23:40 GMT"
       }
     }
   ]
