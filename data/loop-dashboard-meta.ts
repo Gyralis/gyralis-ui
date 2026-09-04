@@ -47,7 +47,7 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
     logoSrc: "/markee-logo.png",
     brandColor: "#22C55E",
     chainName: "Base",
-    tokenSymbol: "MARKEEx",
+    tokenSymbol: "MARKEE",
     isVisibleInDashboard: true,
   },
 }

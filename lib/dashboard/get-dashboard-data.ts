@@ -606,7 +606,7 @@ function buildTokenSummariesFromSelectedLoops(
     const existing = totalsByToken.get(tokenAddress) ?? {
       tokenAddress,
       tokenSymbol:
-        rawLoop.token?.symbol ?? loopDashboardMeta[loopKey].tokenSymbol,
+        loopDashboardMeta[loopKey].tokenSymbol ?? rawLoop.token?.symbol,
       tokenDecimals:
         typeof rawLoop.token?.decimals === "number"
           ? rawLoop.token.decimals
