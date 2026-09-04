@@ -23,7 +23,7 @@ export const useSubmitPassport = () => {
       if (response.ok) {
         return data as AddressScoreResponse
       }
-      if (data.detail) throw data.detail
+      if (data.detail) throw new Error(String(data.detail))
       throw new Error(response.statusText)
     },
     onSuccess: (data) => {

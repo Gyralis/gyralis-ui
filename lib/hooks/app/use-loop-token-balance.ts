@@ -28,6 +28,7 @@ const cfaV1ForwarderAbi = [
 type LoopTokenBalanceData = {
   flowRateError?: boolean
   flowRatePerSecond?: bigint
+  payoutSymbol: string
   value?: bigint
   decimals: number
   symbol: string
@@ -38,6 +39,7 @@ type UseLoopTokenBalanceParams = {
   chainId: number
   contractType?: LoopContractType
   enabled?: boolean
+  payoutToken?: Address
   token?: Address
 }
 
@@ -46,6 +48,7 @@ export function useLoopTokenBalance({
   chainId,
   contractType = DEFAULT_LOOP_CONTRACT_TYPE,
   enabled = true,
+  payoutToken,
   token,
 }: UseLoopTokenBalanceParams) {
   const queryEnabled = enabled && Boolean(token)
@@ -90,6 +93,12 @@ export function useLoopTokenBalance({
         args: [token ?? zeroAddress, address ?? zeroAddress],
         chainId,
       },
+      {
+        address: payoutToken ?? token ?? zeroAddress,
+        abi: erc20Abi,
+        functionName: "symbol",
+        chainId,
+      },
     ],
     query: {
       enabled:
@@ -106,17 +115,15 @@ export function useLoopTokenBalance({
     if (isSuperLoop) {
       if (!superLoopData) return undefined
 
-      const [decimals, symbol, flowRateRaw] = superLoopData as readonly [
-        number,
-        string,
-        bigint
-      ]
+      const [decimals, symbol, flowRateRaw, payoutSymbol] =
+        superLoopData as unknown as readonly [number, string, bigint, string]
       const flowRatePerSecond = flowRateRaw
 
       return {
         flowRatePerSecond,
         flowRateError: false,
         decimals,
+        payoutSymbol: payoutSymbol ?? symbol,
         symbol,
       }
     }
@@ -128,6 +135,7 @@ export function useLoopTokenBalance({
       flowRatePerSecond: undefined,
       flowRateError: false,
       decimals: tokenBalance.data.decimals,
+      payoutSymbol: tokenBalance.data.symbol,
       symbol: tokenBalance.data.symbol,
     }
   }, [isSuperLoop, superLoopData, tokenBalance.data])

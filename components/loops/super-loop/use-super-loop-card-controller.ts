@@ -58,6 +58,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     contractType: "superLoop",
     enabled: Boolean(address && settings.data?.token),
+    payoutToken: loop.payoutToken,
     token: settings.data?.token,
   })
   const participation = useSuperLoopParticipation({
@@ -109,7 +110,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     isClaimable: statusReads.data.isClaimable === true,
     onConfirmed: refreshAfterAction,
     tokenDecimals: balance.data?.decimals,
-    tokenSymbol: balance.data?.symbol,
+    tokenSymbol: balance.data?.payoutSymbol,
   })
   const status = reconcileSuperLoopConfirmedStatus({
     confirmedAction: claim.confirmedAction,
@@ -149,7 +150,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       ? `${trimFormattedBalance(
           formatUnits(estimatedPeriodPayout, balance.data.decimals),
           7
-        )} ${balance.data.symbol}`
+        )} ${balance.data.payoutSymbol}`
       : undefined
   const claimableRewardValue =
     balance.data && claimableAmount > 0n
@@ -160,7 +161,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       : undefined
   const claimableRewardLabel =
     balance.data && claimableRewardValue
-      ? `${claimableRewardValue} ${balance.data.symbol}`
+      ? `${claimableRewardValue} ${balance.data.payoutSymbol}`
       : undefined
   const claimedRewardAmount =
     status === "claimed"
@@ -181,7 +182,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       ? `${trimFormattedBalance(
           formatUnits(displayedAmount, balance.data.decimals),
           4
-        )} ${balance.data.symbol}`
+        )} ${balance.data.payoutSymbol}`
       : undefined
   const actionStatus: LoopActionStatus = claim.isPending
     ? claim.pendingAction === "claim"
@@ -242,7 +243,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                 }),
             balanceDetailLabel: "Inflow",
             detail: superLoopRewardShowsToken(status)
-              ? balance.data.symbol
+              ? balance.data.payoutSymbol
               : undefined,
             isLoading: estimatedPeriodPayoutIsLoading,
             tooltip: rewardsTooltip,

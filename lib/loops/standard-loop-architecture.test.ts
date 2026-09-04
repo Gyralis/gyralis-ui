@@ -19,6 +19,10 @@ const CLAIM_HOOK_PATH = resolve(
   process.cwd(),
   "lib/hooks/loops/standard/use-standard-loop-claim.ts"
 )
+const CARD_CONTROLLER_PATH = resolve(
+  process.cwd(),
+  "components/loops/standard-loop/use-standard-loop-card-controller.ts"
+)
 
 function getSourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -51,6 +55,22 @@ describe("standard Loop architecture boundary", () => {
     )
     expect(participationHook).not.toContain("getLogsChunked")
     expect(participationHook).not.toContain("parseAbiItem")
+  })
+
+  it("uses the contract period payout for the card's Daily rewards value", () => {
+    const participationHook = readFileSync(PARTICIPATION_HOOK_PATH, "utf8")
+    const cardController = readFileSync(CARD_CONTROLLER_PATH, "utf8")
+
+    expect(participationHook).toContain(
+      "loopContractMethods.loop.getPeriodIndividualPayout"
+    )
+    expect(participationHook).toContain(
+      "totalPeriodPayout: periodIndividualPayout * registeredCount"
+    )
+    expect(cardController).toContain("participation.data.totalPeriodPayout")
+    expect(cardController).not.toContain(
+      "balance.data.value * settings.data.percentPerPeriod"
+    )
   })
 
   it("only enables detailed Looper logs while the modal is open", () => {

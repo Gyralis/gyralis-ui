@@ -332,7 +332,10 @@ export const IdentityHubDrawer = ({
     }
 
     if (scoreQuery.isError) {
-      const errorMessage = String(scoreQuery.error)
+      const errorMessage =
+        scoreQuery.error instanceof Error
+          ? scoreQuery.error.message
+          : String(scoreQuery.error)
       if (errorMessage === HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR) {
         return [
           {
