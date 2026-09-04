@@ -2,15 +2,17 @@ import "server-only"
 
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
+import {
+  defaultDashboardLoopKeys,
+  loopDashboardMeta,
+} from "@/data/loop-dashboard-meta"
 import { formatUnits } from "viem"
-
-import { defaultDashboardLoopKeys, loopDashboardMeta } from "@/data/loop-dashboard-meta"
 
 import type {
   DashboardCurrentPeriodOverview,
   DashboardDistributionByPeriodRow,
-  DashboardHistoryMetricRow,
   DashboardGrowthStat,
+  DashboardHistoryMetricRow,
   DashboardLoopKey,
   DashboardLoopSummary,
   DashboardLoopTableRow,
@@ -21,16 +23,19 @@ import type {
   DashboardPeriodTableRow,
   DashboardTokenSummary,
   GetDashboardDataOptions,
+  RawGlobalTokenTotal,
   RawHistoryLoopSnapshot,
   RawHistorySnapshotEntry,
-  RawLoopStatsHistory,
-  RawGlobalTokenTotal,
   RawLoopCacheEntry,
   RawLoopPeriodEntry,
   RawLoopRegistrationCache,
+  RawLoopStatsHistory,
 } from "./types"
 
-const DEFAULT_CACHE_FILE_PATH = resolve(process.cwd(), "data/loop-registration-cache.json")
+const DEFAULT_CACHE_FILE_PATH = resolve(
+  process.cwd(),
+  "data/loop-registration-cache.json"
+)
 const DEFAULT_HISTORY_FILE_PATH = resolve(
   process.cwd(),
   "data/history/loop-stats-history.json"
@@ -54,7 +59,9 @@ const historySnapshotLongFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 })
 
-function parseInteger(value: string | number | undefined | null): number | null {
+function parseInteger(
+  value: string | number | undefined | null
+): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value !== "string" || value.trim() === "") return null
 
@@ -66,7 +73,9 @@ function parseCount(value: string | number | undefined | null): number {
   return parseInteger(value) ?? 0
 }
 
-function parsePercent(value: string | number | undefined | null): number | null {
+function parsePercent(
+  value: string | number | undefined | null
+): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value !== "string" || value.trim() === "") return null
 
@@ -94,7 +103,9 @@ function formatBigIntPercent(
 
 function filterLoopKeys(loopKeys?: DashboardLoopKey[]): DashboardLoopKey[] {
   const requested = loopKeys?.length ? loopKeys : [...defaultDashboardLoopKeys]
-  return requested.filter((loopKey) => loopDashboardMeta[loopKey]?.isVisibleInDashboard)
+  return requested.filter(
+    (loopKey) => loopDashboardMeta[loopKey]?.isVisibleInDashboard
+  )
 }
 
 function formatPeriodEndedLabels(periodEndUnix: string | null) {
@@ -143,7 +154,9 @@ function toPeriodStats(
     ),
     claimEventCount: parseCount(periodEntry.claimEventCount),
     claimRatePercent: parsePercent(periodEntry.claimRatePercent),
-    totalRegisteredAmount: parseAmount(periodEntry.totalRegisteredAmountFormatted),
+    totalRegisteredAmount: parseAmount(
+      periodEntry.totalRegisteredAmountFormatted
+    ),
     totalClaimedAmount: parseAmount(periodEntry.claimedAmountFormatted),
     totalUnclaimedAmount: parseAmount(periodEntry.unclaimedAmountFormatted),
     newUserCount: parseCount(periodEntry.newUserCount),
@@ -154,11 +167,16 @@ function toPeriodStats(
   }
 }
 
-function buildLoopSummary(loopKey: DashboardLoopKey, rawLoop: RawLoopCacheEntry): DashboardLoopSummary {
+function buildLoopSummary(
+  loopKey: DashboardLoopKey,
+  rawLoop: RawLoopCacheEntry
+): DashboardLoopSummary {
   const meta = loopDashboardMeta[loopKey]
   const currentPeriod = parseInteger(rawLoop.currentPeriod)
   const lastProcessedPeriod = parseInteger(rawLoop.lastProcessedPeriod)
-  const uniqueUserCount = parseCount(rawLoop.uniqueUserCount ?? rawLoop.uniqueUsers?.length)
+  const uniqueUserCount = parseCount(
+    rawLoop.uniqueUserCount ?? rawLoop.uniqueUsers?.length
+  )
   const uniqueClaimUserCount = parseCount(
     rawLoop.uniqueClaimUserCount ?? rawLoop.uniqueClaimUsers?.length
   )
@@ -189,13 +207,22 @@ function buildLoopSummary(loopKey: DashboardLoopKey, rawLoop: RawLoopCacheEntry)
     lastProcessedPeriod,
     uniqueUserCount,
     uniqueClaimUserCount,
-    registeredButNeverClaimedCount: Math.max(uniqueUserCount - uniqueClaimUserCount, 0),
-    claimParticipationRatePercent: parsePercent(rawLoop.stats?.claimRatePercent),
+    registeredButNeverClaimedCount: Math.max(
+      uniqueUserCount - uniqueClaimUserCount,
+      0
+    ),
+    claimParticipationRatePercent: parsePercent(
+      rawLoop.stats?.claimRatePercent
+    ),
     totalRegistrationsCount: parseCount(rawLoop.stats?.totalRegistrationsCount),
     totalClaimsCount: parseCount(rawLoop.stats?.totalClaimsCount),
-    totalDistributedAmount: parseAmount(rawLoop.stats?.totalRegisteredAmountFormatted),
+    totalDistributedAmount: parseAmount(
+      rawLoop.stats?.totalRegisteredAmountFormatted
+    ),
     totalClaimedAmount: parseAmount(rawLoop.stats?.totalClaimedAmountFormatted),
-    totalUnclaimedAmount: parseAmount(rawLoop.stats?.totalUnclaimedAmountFormatted),
+    totalUnclaimedAmount: parseAmount(
+      rawLoop.stats?.totalUnclaimedAmountFormatted
+    ),
     claimedAmountRatePercent: formatBigIntPercent(
       rawLoop.stats?.totalClaimedAmountRaw,
       rawLoop.stats?.totalRegisteredAmountRaw
@@ -257,14 +284,22 @@ function buildOverview(
   uniqueClaimUsers: number,
   weekOverWeek: DashboardOverviewCards["weekOverWeek"]
 ): DashboardOverviewCards {
-  const currentPeriod = loopSummaries.reduce<number | null>((maxPeriod, loop) => {
-    if (loop.lastProcessedPeriod == null) return maxPeriod
-    return maxPeriod == null ? loop.lastProcessedPeriod : Math.max(maxPeriod, loop.lastProcessedPeriod)
-  }, null)
+  const currentPeriod = loopSummaries.reduce<number | null>(
+    (maxPeriod, loop) => {
+      if (loop.lastProcessedPeriod == null) return maxPeriod
+      return maxPeriod == null
+        ? loop.lastProcessedPeriod
+        : Math.max(maxPeriod, loop.lastProcessedPeriod)
+    },
+    null
+  )
 
   const currentPeriodStats = loopSummaries
     .map((loop) => loop.currentPeriodStats)
-    .filter((period): period is DashboardPeriodStats => period != null && period.period === currentPeriod)
+    .filter(
+      (period): period is DashboardPeriodStats =>
+        period != null && period.period === currentPeriod
+    )
 
   return {
     globalUniqueRegisteredUsers: uniqueRegisteredUsers,
@@ -281,10 +316,16 @@ function buildOverview(
       (total, loop) => total + loop.totalRegistrationsCount,
       0
     ),
-    totalClaims: loopSummaries.reduce((total, loop) => total + loop.totalClaimsCount, 0),
+    totalClaims: loopSummaries.reduce(
+      (total, loop) => total + loop.totalClaimsCount,
+      0
+    ),
     claimParticipationRatePercent: formatNumberPercent(
       loopSummaries.reduce((total, loop) => total + loop.totalClaimsCount, 0),
-      loopSummaries.reduce((total, loop) => total + loop.totalRegistrationsCount, 0)
+      loopSummaries.reduce(
+        (total, loop) => total + loop.totalRegistrationsCount,
+        0
+      )
     ),
     totalDistributedAmount: tokenSummary?.totalDistributedAmount ?? null,
     totalClaimedAmount: tokenSummary?.totalClaimedAmount ?? null,
@@ -299,8 +340,15 @@ function buildOverview(
   }
 }
 
-function formatNumberPercent(numerator: number, denominator: number): number | null {
-  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+function formatNumberPercent(
+  numerator: number,
+  denominator: number
+): number | null {
+  if (
+    !Number.isFinite(numerator) ||
+    !Number.isFinite(denominator) ||
+    denominator === 0
+  ) {
     return null
   }
 
@@ -315,22 +363,34 @@ function buildCurrentPeriodOverview(
 
   const periods = loopSummaries
     .map((loop) => loop.currentPeriodStats)
-    .filter((period): period is DashboardPeriodStats => period != null && period.period === currentPeriod)
+    .filter(
+      (period): period is DashboardPeriodStats =>
+        period != null && period.period === currentPeriod
+    )
 
   if (periods.length === 0) return null
 
-  const registrations = periods.reduce((total, period) => total + period.registeredUserCount, 0)
-  const claims = periods.reduce((total, period) => total + period.claimEventCount, 0)
+  const registrations = periods.reduce(
+    (total, period) => total + period.registeredUserCount,
+    0
+  )
+  const claims = periods.reduce(
+    (total, period) => total + period.claimEventCount,
+    0
+  )
   const distributedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalRegisteredAmount ?? "0"),
+    (total, period) =>
+      total + Number.parseFloat(period.totalRegisteredAmount ?? "0"),
     0
   )
   const claimedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalClaimedAmount ?? "0"),
+    (total, period) =>
+      total + Number.parseFloat(period.totalClaimedAmount ?? "0"),
     0
   )
   const unclaimedAmount = periods.reduce(
-    (total, period) => total + Number.parseFloat(period.totalUnclaimedAmount ?? "0"),
+    (total, period) =>
+      total + Number.parseFloat(period.totalUnclaimedAmount ?? "0"),
     0
   )
 
@@ -348,16 +408,24 @@ function buildCurrentPeriodOverview(
   }
 }
 
-function buildWindowPeriods(loopSummaries: DashboardLoopSummary[], periodsBack: number): number[] {
+function buildWindowPeriods(
+  loopSummaries: DashboardLoopSummary[],
+  periodsBack: number
+): number[] {
   const maxPeriod = loopSummaries.reduce<number | null>((max, loop) => {
     if (loop.lastProcessedPeriod == null) return max
-    return max == null ? loop.lastProcessedPeriod : Math.max(max, loop.lastProcessedPeriod)
+    return max == null
+      ? loop.lastProcessedPeriod
+      : Math.max(max, loop.lastProcessedPeriod)
   }, null)
 
   if (maxPeriod == null) return []
 
   const startPeriod = Math.max(maxPeriod - periodsBack + 1, 1)
-  return Array.from({ length: maxPeriod - startPeriod + 1 }, (_, index) => startPeriod + index)
+  return Array.from(
+    { length: maxPeriod - startPeriod + 1 },
+    (_, index) => startPeriod + index
+  )
 }
 
 function findReferencePeriod(
@@ -367,7 +435,8 @@ function findReferencePeriod(
   return (
     loopSummaries
       .flatMap((loop) => loop.periods)
-      .find((periodEntry) => periodEntry.period === period) ?? nullPeriod(period)
+      .find((periodEntry) => periodEntry.period === period) ??
+    nullPeriod(period)
   )
 }
 
@@ -387,7 +456,10 @@ function buildMetricRows(
       values: Object.fromEntries(
         loopSummaries.map((loop) => [
           loop.loopKey,
-          selector(loop.periods.find((loopPeriod) => loopPeriod.period === period) ?? nullPeriod(period)),
+          selector(
+            loop.periods.find((loopPeriod) => loopPeriod.period === period) ??
+              nullPeriod(period)
+          ),
         ])
       ) as Partial<Record<DashboardLoopKey, number | null>>,
     }
@@ -419,7 +491,9 @@ function buildDistributionRows(
 ): DashboardDistributionByPeriodRow[] {
   return periods.flatMap((period) =>
     loopSummaries.map((loop) => {
-      const loopPeriod = loop.periods.find((entry) => entry.period === period) ?? nullPeriod(period)
+      const loopPeriod =
+        loop.periods.find((entry) => entry.period === period) ??
+        nullPeriod(period)
 
       return {
         period,
@@ -436,7 +510,9 @@ function buildDistributionRows(
   )
 }
 
-function buildLoopTableRows(loopSummaries: DashboardLoopSummary[]): DashboardLoopTableRow[] {
+function buildLoopTableRows(
+  loopSummaries: DashboardLoopSummary[]
+): DashboardLoopTableRow[] {
   return loopSummaries.map((loop) => ({
     loopKey: loop.loopKey,
     loopName: loop.meta.title,
@@ -459,7 +535,9 @@ function buildPeriodTableRows(
 ): DashboardPeriodTableRow[] {
   return periods.flatMap((period) =>
     loopSummaries.map((loop) => {
-      const loopPeriod = loop.periods.find((entry) => entry.period === period) ?? nullPeriod(period)
+      const loopPeriod =
+        loop.periods.find((entry) => entry.period === period) ??
+        nullPeriod(period)
 
       return {
         period,
@@ -480,15 +558,23 @@ function buildPeriodTableRows(
   )
 }
 
-function toTokenSummary(rawTokenTotal: RawGlobalTokenTotal): DashboardTokenSummary {
+function toTokenSummary(
+  rawTokenTotal: RawGlobalTokenTotal
+): DashboardTokenSummary {
   return {
     tokenAddress: rawTokenTotal.tokenAddress ?? null,
     tokenSymbol: rawTokenTotal.tokenSymbol ?? null,
     tokenDecimals:
-      typeof rawTokenTotal.tokenDecimals === "number" ? rawTokenTotal.tokenDecimals : null,
-    totalDistributedAmount: parseAmount(rawTokenTotal.totalRegisteredAmountFormatted),
+      typeof rawTokenTotal.tokenDecimals === "number"
+        ? rawTokenTotal.tokenDecimals
+        : null,
+    totalDistributedAmount: parseAmount(
+      rawTokenTotal.totalRegisteredAmountFormatted
+    ),
     totalClaimedAmount: parseAmount(rawTokenTotal.totalClaimedAmountFormatted),
-    totalUnclaimedAmount: parseAmount(rawTokenTotal.totalUnclaimedAmountFormatted),
+    totalUnclaimedAmount: parseAmount(
+      rawTokenTotal.totalUnclaimedAmountFormatted
+    ),
     claimedAmountRatePercent: formatBigIntPercent(
       rawTokenTotal.totalClaimedAmountRaw,
       rawTokenTotal.totalRegisteredAmountRaw
@@ -519,17 +605,26 @@ function buildTokenSummariesFromSelectedLoops(
 
     const existing = totalsByToken.get(tokenAddress) ?? {
       tokenAddress,
-      tokenSymbol: rawLoop.token?.symbol ?? loopDashboardMeta[loopKey].tokenSymbol,
+      tokenSymbol:
+        rawLoop.token?.symbol ?? loopDashboardMeta[loopKey].tokenSymbol,
       tokenDecimals:
-        typeof rawLoop.token?.decimals === "number" ? rawLoop.token.decimals : null,
+        typeof rawLoop.token?.decimals === "number"
+          ? rawLoop.token.decimals
+          : null,
       totalRegisteredAmountRaw: 0n,
       totalClaimedAmountRaw: 0n,
       totalUnclaimedAmountRaw: 0n,
     }
 
-    existing.totalRegisteredAmountRaw += BigInt(rawLoop.stats?.totalRegisteredAmountRaw ?? "0")
-    existing.totalClaimedAmountRaw += BigInt(rawLoop.stats?.totalClaimedAmountRaw ?? "0")
-    existing.totalUnclaimedAmountRaw += BigInt(rawLoop.stats?.totalUnclaimedAmountRaw ?? "0")
+    existing.totalRegisteredAmountRaw += BigInt(
+      rawLoop.stats?.totalRegisteredAmountRaw ?? "0"
+    )
+    existing.totalClaimedAmountRaw += BigInt(
+      rawLoop.stats?.totalClaimedAmountRaw ?? "0"
+    )
+    existing.totalUnclaimedAmountRaw += BigInt(
+      rawLoop.stats?.totalUnclaimedAmountRaw ?? "0"
+    )
 
     totalsByToken.set(tokenAddress, existing)
   }
@@ -542,21 +637,34 @@ function buildTokenSummariesFromSelectedLoops(
       tokenSymbol: entry.tokenSymbol,
       tokenDecimals: entry.tokenDecimals ?? undefined,
       totalRegisteredAmountRaw: entry.totalRegisteredAmountRaw.toString(),
-      totalRegisteredAmountFormatted: formatUnits(entry.totalRegisteredAmountRaw, decimals),
+      totalRegisteredAmountFormatted: formatUnits(
+        entry.totalRegisteredAmountRaw,
+        decimals
+      ),
       totalClaimedAmountRaw: entry.totalClaimedAmountRaw.toString(),
-      totalClaimedAmountFormatted: formatUnits(entry.totalClaimedAmountRaw, decimals),
+      totalClaimedAmountFormatted: formatUnits(
+        entry.totalClaimedAmountRaw,
+        decimals
+      ),
       totalUnclaimedAmountRaw: entry.totalUnclaimedAmountRaw.toString(),
-      totalUnclaimedAmountFormatted: formatUnits(entry.totalUnclaimedAmountRaw, decimals),
+      totalUnclaimedAmountFormatted: formatUnits(
+        entry.totalUnclaimedAmountRaw,
+        decimals
+      ),
     })
   })
 }
 
-async function readLoopRegistrationCache(cacheFilePath: string): Promise<RawLoopRegistrationCache> {
+async function readLoopRegistrationCache(
+  cacheFilePath: string
+): Promise<RawLoopRegistrationCache> {
   const contents = await readFile(cacheFilePath, "utf8")
   return JSON.parse(contents) as RawLoopRegistrationCache
 }
 
-async function readLoopStatsHistory(historyFilePath: string): Promise<RawLoopStatsHistory | null> {
+async function readLoopStatsHistory(
+  historyFilePath: string
+): Promise<RawLoopStatsHistory | null> {
   try {
     const contents = await readFile(historyFilePath, "utf8")
     return JSON.parse(contents) as RawLoopStatsHistory
@@ -569,7 +677,10 @@ function getSortedHistorySnapshots(
   history: RawLoopStatsHistory | null
 ): RawHistorySnapshotEntry[] {
   return [...(history?.snapshots ?? [])]
-    .filter((snapshot) => typeof snapshot?.date === "string" && snapshot.date.length > 0)
+    .filter(
+      (snapshot) =>
+        typeof snapshot?.date === "string" && snapshot.date.length > 0
+    )
     .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
 }
 
@@ -603,13 +714,20 @@ function buildSnapshotMetricRows(
     snapshotShortLabel: formatHistoryDateLabel(snapshot.date),
     snapshotLongLabel: formatHistoryLongDateLabel(snapshot.date),
     values: Object.fromEntries(
-      selectedLoopKeys.map((loopKey) => [loopKey, selector(snapshot.loops?.[loopKey])])
+      selectedLoopKeys.map((loopKey) => [
+        loopKey,
+        selector(snapshot.loops?.[loopKey]),
+      ])
     ) as Partial<Record<DashboardLoopKey, number | null>>,
   }))
 }
 
-function computeGrowthPercent(current: number, previous: number): number | null {
-  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null
+function computeGrowthPercent(
+  current: number,
+  previous: number
+): number | null {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0)
+    return null
   return Number((((current - previous) / previous) * 100).toFixed(2))
 }
 
@@ -658,7 +776,8 @@ function buildOverviewGrowth(
   totalClaims: number
 ): DashboardOverviewCards["weekOverWeek"] {
   const snapshots = getSortedHistorySnapshots(history)
-  const previousSnapshot = snapshots.length > 1 ? snapshots[snapshots.length - 2] : null
+  const previousSnapshot =
+    snapshots.length > 1 ? snapshots[snapshots.length - 2] : null
 
   const previousDate = previousSnapshot?.date ?? null
 
@@ -670,7 +789,9 @@ function buildOverviewGrowth(
       totals.uniqueUsers += loopSnapshot.uniqueUserCount ?? 0
       totals.totalRegistrations += loopSnapshot.totalRegistrationsCount ?? 0
       totals.totalClaims += loopSnapshot.totalClaimsCount ?? 0
-      totals.totalDistributedRaw += BigInt(loopSnapshot.totalDistributedAmountRaw ?? "0")
+      totals.totalDistributedRaw += BigInt(
+        loopSnapshot.totalDistributedAmountRaw ?? "0"
+      )
       return totals
     },
     {
@@ -680,7 +801,9 @@ function buildOverviewGrowth(
       totalDistributedRaw: 0n,
     }
   )
-  const previousLoopsIncluded = new Set(previousSnapshot?.global?.loopsIncluded ?? [])
+  const previousLoopsIncluded = new Set(
+    previousSnapshot?.global?.loopsIncluded ?? []
+  )
   const selectedLoopsMatchPreviousGlobal =
     previousLoopsIncluded.size === selectedLoopKeys.length &&
     selectedLoopKeys.every((loopKey) => previousLoopsIncluded.has(loopKey))
@@ -716,7 +839,11 @@ function buildOverviewGrowth(
     totalClaims:
       previousSnapshot == null
         ? null
-        : buildNumberGrowthStat(totalClaims, previousTotals.totalClaims, previousDate),
+        : buildNumberGrowthStat(
+            totalClaims,
+            previousTotals.totalClaims,
+            previousDate
+          ),
   }
 }
 
@@ -743,15 +870,38 @@ export async function getDashboardPageData(
     })
     .filter((loop): loop is DashboardLoopSummary => loop != null)
 
-  const windowPeriods = buildWindowPeriods(loopSummaries, periodsBack)
-  const tokenSummaries = buildTokenSummariesFromSelectedLoops(cache, selectedLoopKeys)
+  // Standard Gnosis loops share one daily period sequence. SuperLoops use an
+  // independent cadence, so their activity is compared by snapshot date instead.
+  const periodComparableLoopSummaries = loopSummaries.filter(
+    (loop) => loop.meta.contractType === "loop"
+  )
+  const periodComparableCurrentPeriod = periodComparableLoopSummaries.reduce<
+    number | null
+  >((currentPeriod, loop) => {
+    if (loop.currentPeriod == null) return currentPeriod
+    return currentPeriod == null
+      ? loop.currentPeriod
+      : Math.max(currentPeriod, loop.currentPeriod)
+  }, null)
+  const windowPeriods = buildWindowPeriods(
+    periodComparableLoopSummaries,
+    periodsBack
+  )
+  const tokenSummaries = buildTokenSummariesFromSelectedLoops(
+    cache,
+    selectedLoopKeys
+  )
   const primaryTokenSummary = tokenSummaries[0]
 
   const uniqueUsers = new Set(
-    selectedLoopKeys.flatMap((loopKey) => cache.loops?.[loopKey]?.uniqueUsers ?? [])
+    selectedLoopKeys.flatMap(
+      (loopKey) => cache.loops?.[loopKey]?.uniqueUsers ?? []
+    )
   )
   const uniqueClaimUsers = new Set(
-    selectedLoopKeys.flatMap((loopKey) => cache.loops?.[loopKey]?.uniqueClaimUsers ?? [])
+    selectedLoopKeys.flatMap(
+      (loopKey) => cache.loops?.[loopKey]?.uniqueClaimUsers ?? []
+    )
   )
   const totalRegistrations = loopSummaries.reduce(
     (total, loop) => total + loop.totalRegistrationsCount,
@@ -785,33 +935,46 @@ export async function getDashboardPageData(
       availableLoopKeys: [...defaultDashboardLoopKeys],
       availablePeriodRange: {
         min: windowPeriods.length > 0 ? windowPeriods[0] : null,
-        max: windowPeriods.length > 0 ? windowPeriods[windowPeriods.length - 1] : null,
+        max:
+          windowPeriods.length > 0
+            ? windowPeriods[windowPeriods.length - 1]
+            : null,
       },
       periodsBack,
     },
     overview,
-    currentPeriodOverview: buildCurrentPeriodOverview(loopSummaries, overview.currentPeriod),
+    currentPeriodOverview: buildCurrentPeriodOverview(
+      periodComparableLoopSummaries,
+      periodComparableCurrentPeriod
+    ),
     loopSummaries,
     tokenSummaries,
     charts: {
       periods: windowPeriods,
       registrationsByPeriod: buildMetricRows(
-        loopSummaries,
+        periodComparableLoopSummaries,
         windowPeriods,
         (period) => period.registeredUserCount
       ),
-      claimsByPeriod: buildMetricRows(loopSummaries, windowPeriods, (period) => period.claimEventCount),
+      claimsByPeriod: buildMetricRows(
+        periodComparableLoopSummaries,
+        windowPeriods,
+        (period) => period.claimEventCount
+      ),
       claimRateByPeriod: buildMetricRows(
-        loopSummaries,
+        periodComparableLoopSummaries,
         windowPeriods,
         (period) => period.claimRatePercent
       ),
       cumulativeUniqueUsersByPeriod: buildMetricRows(
-        loopSummaries,
+        periodComparableLoopSummaries,
         windowPeriods,
         (period) => period.cumulativeUniqueUserCount
       ),
-      distributionByPeriod: buildDistributionRows(loopSummaries, windowPeriods),
+      distributionByPeriod: buildDistributionRows(
+        periodComparableLoopSummaries,
+        windowPeriods
+      ),
       uniqueUsersBySnapshot: buildSnapshotMetricRows(
         history,
         selectedLoopKeys,
@@ -860,7 +1023,10 @@ export async function getDashboardPageData(
     },
     tables: {
       loopSummary: buildLoopTableRows(loopSummaries),
-      periodSummary: buildPeriodTableRows(loopSummaries, windowPeriods),
+      periodSummary: buildPeriodTableRows(
+        periodComparableLoopSummaries,
+        windowPeriods
+      ),
     },
   }
 }

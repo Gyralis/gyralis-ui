@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import {
@@ -11,6 +10,8 @@ import {
   parseAbiItem,
 } from "viem"
 import { base, gnosis } from "viem/chains"
+
+import { superLoops } from "./superloop-registry.mjs"
 
 const loops = {
   "1hive": {
@@ -25,12 +26,7 @@ const loops = {
     chain: gnosis,
     contractType: "loop",
   },
-  "test-superloops": {
-    name: "TEST SUPERLOOPS",
-    address: "0x42664386739EFdD277Fa1eB05658b562c3b804c0",
-    chain: base,
-    contractType: "superLoop",
-  },
+  ...superLoops,
 }
 
 const loopAbi = parseAbi(["function getCurrentPeriod() view returns (uint256)"])
@@ -45,6 +41,9 @@ const superLoopDetailsAbi = parseAbi([
 ])
 const periodPayoutAbi = parseAbi([
   "function getPeriodIndividualPayout(uint256 periodNumber) view returns (uint256)",
+])
+const superLoopPeriodPayoutAbi = parseAbi([
+  "function getStreamingPeriodIndividualPayout(uint256 periodNumber) view returns (uint256)",
 ])
 const erc20MetadataAbi = parseAbi([
   "function symbol() view returns (string)",
@@ -109,7 +108,8 @@ function parseArgs(argv) {
     const arg = argv[i]
     const readValue = () => {
       const next = argv[i + 1]
-      if (!next || next.startsWith("--")) throw new Error(`Missing value for ${arg}`)
+      if (!next || next.startsWith("--"))
+        throw new Error(`Missing value for ${arg}`)
       i += 1
       return next
     }
@@ -129,7 +129,8 @@ function parseArgs(argv) {
 }
 
 function parsePeriod(value, flagName) {
-  if (!/^\d+$/.test(value)) throw new Error(`${flagName} must be a non-negative integer`)
+  if (!/^\d+$/.test(value))
+    throw new Error(`${flagName} must be a non-negative integer`)
   return BigInt(value)
 }
 
@@ -161,11 +162,13 @@ async function fetchCurrentPeriod(client, loop) {
 
 async function fetchLoopSchedule(client, loop) {
   if (loop.contractType === "superLoop") {
-    const [token, periodLength, , firstPeriodStart] = await client.readContract({
-      address: loop.address,
-      abi: superLoopDetailsAbi,
-      functionName: "getStreamingLoopDetails",
-    })
+    const [token, periodLength, , firstPeriodStart] = await client.readContract(
+      {
+        address: loop.address,
+        abi: superLoopDetailsAbi,
+        functionName: "getStreamingLoopDetails",
+      }
+    )
     return { token, periodLength, firstPeriodStart }
   }
 
@@ -175,65 +178,6 @@ async function fetchLoopSchedule(client, loop) {
     functionName: "getLoopDetails",
   })
   return { token, periodLength, firstPeriodStart }
-}
-
-async function fetchRegisterLogs(client, loopAddress) {
-  const [legacyLogs, upgradedLogs] = await Promise.all([
-    client.getLogs({
-      address: loopAddress,
-      event: legacyRegisterEvent,
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-    client.getLogs({
-      address: loopAddress,
-      event: upgradedRegisterEvent,
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-  ])
-
-  return [...legacyLogs, ...upgradedLogs]
-}
-
-async function fetchClaimLogs(client, loopAddress) {
-  const [legacyLogs, upgradedLogs] = await Promise.all([
-    client.getLogs({
-      address: loopAddress,
-      event: legacyClaimEvent,
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-    client.getLogs({
-      address: loopAddress,
-      event: upgradedClaimEvent,
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-  ])
-
-  return [...legacyLogs, ...upgradedLogs]
-}
-
-async function fetchRegisterLogsForPeriod(client, loopAddress, periodNumber) {
-  const [legacyLogs, upgradedLogs] = await Promise.all([
-    client.getLogs({
-      address: loopAddress,
-      event: legacyRegisterEvent,
-      args: { periodNumber },
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-    client.getLogs({
-      address: loopAddress,
-      event: upgradedRegisterEvent,
-      args: { periodNumber },
-      fromBlock: 0n,
-      toBlock: "latest",
-    }),
-  ])
-
-  return [...legacyLogs, ...upgradedLogs]
 }
 
 async function fetchTokenInfo(client, tokenAddress) {
@@ -253,7 +197,8 @@ async function fetchTokenInfo(client, tokenAddress) {
   return {
     address: tokenAddress,
     symbol: symbolResult.status === "fulfilled" ? symbolResult.value : null,
-    decimals: decimalsResult.status === "fulfilled" ? Number(decimalsResult.value) : 18,
+    decimals:
+      decimalsResult.status === "fulfilled" ? Number(decimalsResult.value) : 18,
   }
 }
 
@@ -275,6 +220,111 @@ async function findBlockNumberAtOrAfterTimestamp(client, targetTimestamp) {
   return low
 }
 
+async function withRateLimitRetry(action) {
+  let lastError
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      return await action()
+    } catch (error) {
+      lastError = error
+      const isRateLimited = /rate limit|429/i.test(String(error))
+      if (!isRateLimited || attempt === 3) throw error
+      await new Promise((resolve) => setTimeout(resolve, 750 * (attempt + 1)))
+    }
+  }
+
+  throw lastError
+}
+
+const LOG_BLOCK_RANGE = 10_000n
+
+async function fetchLogsInRanges(client, request, fromBlock) {
+  const latestBlock = await client.getBlock({ blockTag: "latest" })
+  const logs = []
+
+  for (
+    let start = fromBlock;
+    start <= latestBlock.number;
+    start += LOG_BLOCK_RANGE
+  ) {
+    const end =
+      start + LOG_BLOCK_RANGE - 1n < latestBlock.number
+        ? start + LOG_BLOCK_RANGE - 1n
+        : latestBlock.number
+    const rangeLogs = await client.getLogs({
+      ...request,
+      fromBlock: start,
+      toBlock: end,
+    })
+    logs.push(...rangeLogs)
+  }
+
+  return logs
+}
+
+async function fetchRegisterLogs(client, loop, schedule) {
+  const fromBlock = await findBlockNumberAtOrAfterTimestamp(
+    client,
+    schedule.firstPeriodStart
+  )
+  const events =
+    loop.contractType === "superLoop"
+      ? [upgradedRegisterEvent]
+      : [legacyRegisterEvent, upgradedRegisterEvent]
+  const logsByEvent = await Promise.all(
+    events.map((event) =>
+      fetchLogsInRanges(client, { address: loop.address, event }, fromBlock)
+    )
+  )
+
+  return logsByEvent.flat()
+}
+
+async function fetchClaimLogs(client, loop, schedule) {
+  const fromBlock = await findBlockNumberAtOrAfterTimestamp(
+    client,
+    schedule.firstPeriodStart
+  )
+  const events =
+    loop.contractType === "superLoop"
+      ? [upgradedClaimEvent]
+      : [legacyClaimEvent, upgradedClaimEvent]
+  const logsByEvent = await Promise.all(
+    events.map((event) =>
+      fetchLogsInRanges(client, { address: loop.address, event }, fromBlock)
+    )
+  )
+
+  return logsByEvent.flat()
+}
+
+async function fetchRegisterLogsForPeriod(
+  client,
+  loop,
+  schedule,
+  periodNumber
+) {
+  const periodStart =
+    schedule.firstPeriodStart + (periodNumber - 1n) * schedule.periodLength
+  const fromBlock = await findBlockNumberAtOrAfterTimestamp(client, periodStart)
+  const events =
+    loop.contractType === "superLoop"
+      ? [upgradedRegisterEvent]
+      : [legacyRegisterEvent, upgradedRegisterEvent]
+  const logsByEvent = await Promise.all(
+    events.map((event) =>
+      fetchLogsInRanges(
+        client,
+        { address: loop.address, event, args: { periodNumber } },
+        fromBlock
+      )
+    )
+  )
+
+  return logsByEvent.flat()
+}
+
 async function fetchLoopTokenBalanceSnapshot(
   client,
   tokenAddress,
@@ -285,14 +335,19 @@ async function fetchLoopTokenBalanceSnapshot(
 ) {
   const snapshotTimestamp =
     schedule.firstPeriodStart + BigInt(periodNumber) * schedule.periodLength
-  const blockNumber = await findBlockNumberAtOrAfterTimestamp(client, snapshotTimestamp)
-  const balance = await client.readContract({
-    address: tokenAddress,
-    abi: erc20MetadataAbi,
-    functionName: "balanceOf",
-    args: [loopAddress],
-    blockNumber,
-  })
+  const blockNumber = await findBlockNumberAtOrAfterTimestamp(
+    client,
+    snapshotTimestamp
+  )
+  const balance = await withRateLimitRetry(() =>
+    client.readContract({
+      address: tokenAddress,
+      abi: erc20MetadataAbi,
+      functionName: "balanceOf",
+      args: [loopAddress],
+      blockNumber,
+    })
+  )
 
   return {
     periodNumber: periodNumber.toString(),
@@ -315,9 +370,10 @@ async function fetchLoopTokenSnapshots(
   if (lastProcessedPeriod >= 2n) periodNumbers.push(2n)
   if (lastProcessedPeriod > 2n) periodNumbers.push(lastProcessedPeriod)
 
-  const snapshots = await Promise.all(
-    periodNumbers.map((periodNumber) =>
-      fetchLoopTokenBalanceSnapshot(
+  const snapshots = []
+  for (const periodNumber of periodNumbers) {
+    snapshots.push(
+      await fetchLoopTokenBalanceSnapshot(
         client,
         schedule.token,
         loop.address,
@@ -326,37 +382,44 @@ async function fetchLoopTokenSnapshots(
         schedule
       )
     )
-  )
+  }
 
   return {
     balanceAtPeriod1: snapshots[0],
     balanceAtPeriod2: lastProcessedPeriod >= 2n ? snapshots[1] : null,
     balanceAtLastProcessedPeriod:
-      periodNumbers.length === 1 ? snapshots[0] : snapshots[snapshots.length - 1],
+      periodNumbers.length === 1
+        ? snapshots[0]
+        : snapshots[snapshots.length - 1],
   }
 }
 
 async function fetchPayoutsByPeriod(client, loop, lastEndedPeriod) {
   const payoutsByPeriod = new Map()
-  if (loop.contractType !== "loop" || lastEndedPeriod < 1n) return payoutsByPeriod
+  if (lastEndedPeriod < 1n) return payoutsByPeriod
 
-  const periods = []
-  for (let period = 1n; period <= lastEndedPeriod; period += 1n) periods.push(period)
-
-  const payouts = await Promise.all(
-    periods.map((periodNumber) =>
+  for (
+    let periodNumber = 1n;
+    periodNumber <= lastEndedPeriod;
+    periodNumber += 1n
+  ) {
+    const payout = await withRateLimitRetry(() =>
       client.readContract({
         address: loop.address,
-        abi: periodPayoutAbi,
-        functionName: "getPeriodIndividualPayout",
+        abi:
+          loop.contractType === "superLoop"
+            ? superLoopPeriodPayoutAbi
+            : periodPayoutAbi,
+        functionName:
+          loop.contractType === "superLoop"
+            ? "getStreamingPeriodIndividualPayout"
+            : "getPeriodIndividualPayout",
         args: [periodNumber],
       })
     )
-  )
 
-  periods.forEach((periodNumber, index) => {
-    payoutsByPeriod.set(periodNumber.toString(), payouts[index])
-  })
+    payoutsByPeriod.set(periodNumber.toString(), payout)
+  }
 
   return payoutsByPeriod
 }
@@ -388,13 +451,11 @@ function buildClaimStatsByPeriod(logs) {
     if (!claimer || periodNumber == null || payout == null) continue
 
     const periodKey = periodNumber.toString()
-    const existing =
-      byPeriod.get(periodKey) ??
-      {
-        claimers: new Set(),
-        claimEventCount: 0,
-        claimedAmount: 0n,
-      }
+    const existing = byPeriod.get(periodKey) ?? {
+      claimers: new Set(),
+      claimEventCount: 0,
+      claimedAmount: 0n,
+    }
 
     existing.claimers.add(getAddress(claimer))
     existing.claimEventCount += 1
@@ -482,8 +543,12 @@ function buildSummary(
   let totalClaimedAmount = 0n
 
   for (let period = 1n; period <= lastEndedPeriod; period += 1n) {
-    const periodUsers = [...(storedPeriods[period.toString()]?.registeredUsers ?? [])].sort()
-    const newUsers = periodUsers.filter((address) => !allUniqueUsers.has(address))
+    const periodUsers = [
+      ...(storedPeriods[period.toString()]?.registeredUsers ?? []),
+    ].sort()
+    const newUsers = periodUsers.filter(
+      (address) => !allUniqueUsers.has(address)
+    )
     const periodWindow = getPeriodWindow(
       period,
       schedule.firstPeriodStart,
@@ -509,7 +574,8 @@ function buildSummary(
     totalRegistrationsCount += periodUsers.length
     totalClaimsCount += claimStats.claimEventCount
     totalClaimedAmount += claimStats.claimedAmount
-    if (totalRegisteredPeriodAmount != null) totalRegisteredAmount += totalRegisteredPeriodAmount
+    if (totalRegisteredPeriodAmount != null)
+      totalRegisteredAmount += totalRegisteredPeriodAmount
 
     periods.push({
       periodNumber: period.toString(),
@@ -521,9 +587,14 @@ function buildSummary(
       claimEventCount: claimStats.claimEventCount,
       payoutPerUserRaw: payoutPerUser?.toString() ?? null,
       payoutPerUserFormatted:
-        payoutPerUser == null ? null : formatTokenAmount(payoutPerUser, tokenInfo.decimals),
+        payoutPerUser == null
+          ? null
+          : formatTokenAmount(payoutPerUser, tokenInfo.decimals),
       claimedAmountRaw: claimStats.claimedAmount.toString(),
-      claimedAmountFormatted: formatTokenAmount(claimStats.claimedAmount, tokenInfo.decimals),
+      claimedAmountFormatted: formatTokenAmount(
+        claimStats.claimedAmount,
+        tokenInfo.decimals
+      ),
       totalRegisteredAmountRaw: totalRegisteredPeriodAmount?.toString() ?? null,
       totalRegisteredAmountFormatted:
         totalRegisteredPeriodAmount == null
@@ -531,8 +602,13 @@ function buildSummary(
           : formatTokenAmount(totalRegisteredPeriodAmount, tokenInfo.decimals),
       unclaimedAmountRaw: unclaimedAmount?.toString() ?? null,
       unclaimedAmountFormatted:
-        unclaimedAmount == null ? null : formatTokenAmount(unclaimedAmount, tokenInfo.decimals),
-      claimRatePercent: formatPercent(claimStats.claimEventCount, periodUsers.length),
+        unclaimedAmount == null
+          ? null
+          : formatTokenAmount(unclaimedAmount, tokenInfo.decimals),
+      claimRatePercent: formatPercent(
+        claimStats.claimEventCount,
+        periodUsers.length
+      ),
       newUsers,
       newUserCount: newUsers.length,
       cumulativeUniqueUserCount: allUniqueUsers.size,
@@ -561,15 +637,26 @@ function buildSummary(
       totalRegistrationsCount,
       totalClaimsCount,
       totalRegisteredAmountRaw: totalRegisteredAmount.toString(),
-      totalRegisteredAmountFormatted: formatTokenAmount(totalRegisteredAmount, tokenInfo.decimals),
+      totalRegisteredAmountFormatted: formatTokenAmount(
+        totalRegisteredAmount,
+        tokenInfo.decimals
+      ),
       totalClaimedAmountRaw: totalClaimedAmount.toString(),
-      totalClaimedAmountFormatted: formatTokenAmount(totalClaimedAmount, tokenInfo.decimals),
-      totalUnclaimedAmountRaw: (totalRegisteredAmount - totalClaimedAmount).toString(),
+      totalClaimedAmountFormatted: formatTokenAmount(
+        totalClaimedAmount,
+        tokenInfo.decimals
+      ),
+      totalUnclaimedAmountRaw: (
+        totalRegisteredAmount - totalClaimedAmount
+      ).toString(),
       totalUnclaimedAmountFormatted: formatTokenAmount(
         totalRegisteredAmount - totalClaimedAmount,
         tokenInfo.decimals
       ),
-      claimRatePercent: formatPercent(totalClaimsCount, totalRegistrationsCount),
+      claimRatePercent: formatPercent(
+        totalClaimsCount,
+        totalRegistrationsCount
+      ),
     },
     periods,
   }
@@ -590,6 +677,12 @@ function loadCache(cacheFile) {
     version: parsed.version ?? 1,
     loops: parsed.loops ?? {},
     global: parsed.global ?? null,
+  }
+}
+
+function removeInactiveLoopCacheEntries(cache) {
+  for (const loopKey of Object.keys(cache.loops)) {
+    if (!loops[loopKey]) delete cache.loops[loopKey]
   }
 }
 
@@ -616,8 +709,7 @@ function loadHistory(historyFile) {
   const parsed = JSON.parse(readFileSync(historyPath, "utf8"))
   return {
     version: parsed.version ?? 1,
-    generatedFromCacheFile:
-      parsed.generatedFromCacheFile ?? DEFAULT_CACHE_FILE,
+    generatedFromCacheFile: parsed.generatedFromCacheFile ?? DEFAULT_CACHE_FILE,
     snapshots: Array.isArray(parsed.snapshots) ? parsed.snapshots : [],
   }
 }
@@ -659,7 +751,8 @@ function computeLoopSnapshotMaxima(loopEntry, upToPeriodValue) {
 
   const maxRegistrationsPeriod = periods.reduce((best, periodEntry) => {
     const count = periodEntry?.registeredUserCount ?? 0
-    if (best == null || count > (best.registeredUserCount ?? 0)) return periodEntry
+    if (best == null || count > (best.registeredUserCount ?? 0))
+      return periodEntry
     return best
   }, null)
   const maxClaimsPeriod = periods.reduce((best, periodEntry) => {
@@ -669,8 +762,10 @@ function computeLoopSnapshotMaxima(loopEntry, upToPeriodValue) {
   }, null)
 
   return {
-    maxRegistrationsInPeriodCount: maxRegistrationsPeriod?.registeredUserCount ?? 0,
-    maxRegistrationsInPeriodNumber: maxRegistrationsPeriod?.periodNumber ?? null,
+    maxRegistrationsInPeriodCount:
+      maxRegistrationsPeriod?.registeredUserCount ?? 0,
+    maxRegistrationsInPeriodNumber:
+      maxRegistrationsPeriod?.periodNumber ?? null,
     maxRegistrationsInPeriodEndedAt:
       maxRegistrationsPeriod?.periodEndExclusive?.utc ?? null,
     maxClaimsInPeriodCount: maxClaimsPeriod?.claimEventCount ?? 0,
@@ -680,7 +775,10 @@ function computeLoopSnapshotMaxima(loopEntry, upToPeriodValue) {
 }
 
 function buildLoopHistorySnapshot(loopKey, loopEntry) {
-  const maxima = computeLoopSnapshotMaxima(loopEntry, loopEntry.lastProcessedPeriod)
+  const maxima = computeLoopSnapshotMaxima(
+    loopEntry,
+    loopEntry.lastProcessedPeriod
+  )
 
   return {
     loopKey,
@@ -795,7 +893,10 @@ function normalizeHistoryPeriodMaxima(history, cache) {
       return best
     }, null)
     const maxClaims = comparableLoopMaxima.reduce((best, entry) => {
-      if (best == null || entry.maxClaimsInPeriodCount > best.maxClaimsInPeriodCount) {
+      if (
+        best == null ||
+        entry.maxClaimsInPeriodCount > best.maxClaimsInPeriodCount
+      ) {
         return entry
       }
       return best
@@ -854,7 +955,9 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
 
   const recordedAt =
     loopEntries
-      .map(({ periodEntry }) => formatUnixSecondsAsIso(periodEntry.periodStart?.unix))
+      .map(({ periodEntry }) =>
+        formatUnixSecondsAsIso(periodEntry.periodStart?.unix)
+      )
       .filter(Boolean)
       .sort()
       .at(-1) ?? `${INITIAL_GNOSIS_HISTORY_SEED.date}T00:00:00.000Z`
@@ -869,12 +972,16 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
 
   const loopsSnapshot = Object.fromEntries(
     loopEntries.map(({ loopKey, loopEntry, periodEntry }) => {
-      for (const user of periodEntry.registeredUsers ?? []) uniqueUsers.add(user)
-      for (const user of periodEntry.claimUsers ?? []) uniqueClaimUsers.add(user)
+      for (const user of periodEntry.registeredUsers ?? [])
+        uniqueUsers.add(user)
+      for (const user of periodEntry.claimUsers ?? [])
+        uniqueClaimUsers.add(user)
 
       totalRegistrationsCount += periodEntry.registeredUserCount ?? 0
       totalClaimsCount += periodEntry.claimEventCount ?? 0
-      totalDistributedAmountRaw += BigInt(periodEntry.totalRegisteredAmountRaw ?? "0")
+      totalDistributedAmountRaw += BigInt(
+        periodEntry.totalRegisteredAmountRaw ?? "0"
+      )
       totalClaimedAmountRaw += BigInt(periodEntry.claimedAmountRaw ?? "0")
       totalUnclaimedAmountRaw += BigInt(periodEntry.unclaimedAmountRaw ?? "0")
 
@@ -886,7 +993,9 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
           updatedAt: recordedAt,
           lastProcessedPeriod: periodEntry.periodNumber ?? null,
           uniqueUserCount:
-            periodEntry.cumulativeUniqueUserCount ?? periodEntry.registeredUserCount ?? 0,
+            periodEntry.cumulativeUniqueUserCount ??
+            periodEntry.registeredUserCount ??
+            0,
           uniqueClaimUserCount: periodEntry.claimUserCount ?? 0,
           totalRegistrationsCount: periodEntry.registeredUserCount ?? 0,
           totalClaimsCount: periodEntry.claimEventCount ?? 0,
@@ -898,7 +1007,8 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
           maxClaimsInPeriodCount: periodEntry.claimEventCount ?? 0,
           maxClaimsInPeriodNumber: periodEntry.periodNumber ?? null,
           maxClaimsInPeriodEndedAt: periodEntry.periodEndExclusive?.utc ?? null,
-          totalDistributedAmountRaw: periodEntry.totalRegisteredAmountRaw ?? "0",
+          totalDistributedAmountRaw:
+            periodEntry.totalRegisteredAmountRaw ?? "0",
           totalDistributedAmountFormatted:
             periodEntry.totalRegisteredAmountFormatted ?? "0",
           tokenSymbol: loopEntry.token?.symbol ?? null,
@@ -921,78 +1031,82 @@ function upsertInitialGnosisHistorySeed(history, cache, cacheFile) {
       uniqueClaimUserCount: uniqueClaimUsers.size,
       totalRegistrationsCount,
       totalClaimsCount,
-      claimRatePercent: formatPercent(totalClaimsCount, totalRegistrationsCount),
+      claimRatePercent: formatPercent(
+        totalClaimsCount,
+        totalRegistrationsCount
+      ),
       maxRegistrationsInLoopPeriodCount: loopEntries.reduce(
         (best, { periodEntry }) =>
           Math.max(best, periodEntry.registeredUserCount ?? 0),
         0
       ),
       maxRegistrationsInLoopPeriodLoopKey:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.registeredUserCount ?? 0
-            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.loopKey ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.registeredUserCount ?? 0
+          if (
+            best == null ||
+            count > (best.periodEntry.registeredUserCount ?? 0)
+          ) {
+            return entry
+          }
+          return best
+        }, null)?.loopKey ?? null,
       maxRegistrationsInLoopPeriodNumber:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.registeredUserCount ?? 0
-            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.periodEntry.periodNumber ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.registeredUserCount ?? 0
+          if (
+            best == null ||
+            count > (best.periodEntry.registeredUserCount ?? 0)
+          ) {
+            return entry
+          }
+          return best
+        }, null)?.periodEntry.periodNumber ?? null,
       maxRegistrationsInLoopPeriodEndedAt:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.registeredUserCount ?? 0
-            if (best == null || count > (best.periodEntry.registeredUserCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.periodEntry.periodEndExclusive?.utc ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.registeredUserCount ?? 0
+          if (
+            best == null ||
+            count > (best.periodEntry.registeredUserCount ?? 0)
+          ) {
+            return entry
+          }
+          return best
+        }, null)?.periodEntry.periodEndExclusive?.utc ?? null,
       maxClaimsInLoopPeriodCount: loopEntries.reduce(
-        (best, { periodEntry }) => Math.max(best, periodEntry.claimEventCount ?? 0),
+        (best, { periodEntry }) =>
+          Math.max(best, periodEntry.claimEventCount ?? 0),
         0
       ),
       maxClaimsInLoopPeriodLoopKey:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.claimEventCount ?? 0
-            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.loopKey ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.claimEventCount ?? 0
+          if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+            return entry
+          }
+          return best
+        }, null)?.loopKey ?? null,
       maxClaimsInLoopPeriodNumber:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.claimEventCount ?? 0
-            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.periodEntry.periodNumber ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.claimEventCount ?? 0
+          if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+            return entry
+          }
+          return best
+        }, null)?.periodEntry.periodNumber ?? null,
       maxClaimsInLoopPeriodEndedAt:
-        loopEntries
-          .reduce((best, entry) => {
-            const count = entry.periodEntry.claimEventCount ?? 0
-            if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
-              return entry
-            }
-            return best
-          }, null)
-          ?.periodEntry.periodEndExclusive?.utc ?? null,
+        loopEntries.reduce((best, entry) => {
+          const count = entry.periodEntry.claimEventCount ?? 0
+          if (best == null || count > (best.periodEntry.claimEventCount ?? 0)) {
+            return entry
+          }
+          return best
+        }, null)?.periodEntry.periodEndExclusive?.utc ?? null,
       totalDistributedAmountRaw: totalDistributedAmountRaw.toString(),
-      totalDistributedAmountFormatted: formatUnits(totalDistributedAmountRaw, 18),
+      totalDistributedAmountFormatted: formatUnits(
+        totalDistributedAmountRaw,
+        18
+      ),
       tokenSymbol: primaryLoopEntry?.loopEntry.token?.symbol ?? null,
       tokenTotals:
         primaryLoopEntry == null
@@ -1080,7 +1194,9 @@ function buildCacheLoopEntry(
 }
 
 function buildCachedPeriods(storedPeriods, summaryPeriods) {
-  const summaryByPeriod = new Map(summaryPeriods.map((period) => [period.periodNumber, period]))
+  const summaryByPeriod = new Map(
+    summaryPeriods.map((period) => [period.periodNumber, period])
+  )
   const cachedPeriods = {}
 
   for (const [periodKey, periodData] of Object.entries(storedPeriods)) {
@@ -1091,7 +1207,9 @@ function buildCachedPeriods(storedPeriods, summaryPeriods) {
 }
 
 function rebuildGlobalCache(cache, updatedAt) {
-  const loopEntries = Object.entries(cache.loops ?? {}).filter(([, value]) => value != null)
+  const loopEntries = Object.entries(cache.loops ?? {}).filter(
+    ([loopKey, value]) => value != null && loops[loopKey]
+  )
   const globalUsers = new Set()
   const globalClaimUsers = new Set()
   let totalRegistrationsCount = 0
@@ -1100,27 +1218,28 @@ function rebuildGlobalCache(cache, updatedAt) {
 
   for (const [, loopEntry] of loopEntries) {
     for (const address of loopEntry.uniqueUsers ?? []) globalUsers.add(address)
-    for (const address of loopEntry.uniqueClaimUsers ?? []) globalClaimUsers.add(address)
+    for (const address of loopEntry.uniqueClaimUsers ?? [])
+      globalClaimUsers.add(address)
     totalRegistrationsCount += loopEntry.stats?.totalRegistrationsCount ?? 0
     totalClaimsCount += loopEntry.stats?.totalClaimsCount ?? 0
 
     const tokenAddress = loopEntry.token?.address
     if (tokenAddress) {
-      const existing =
-        tokenTotals.get(tokenAddress) ??
-        {
-          tokenAddress,
-          tokenSymbol: loopEntry.token?.symbol ?? null,
-          tokenDecimals: loopEntry.token?.decimals ?? 18,
-          totalRegisteredAmount: 0n,
-          totalClaimedAmount: 0n,
-          totalUnclaimedAmount: 0n,
-        }
+      const existing = tokenTotals.get(tokenAddress) ?? {
+        tokenAddress,
+        tokenSymbol: loopEntry.token?.symbol ?? null,
+        tokenDecimals: loopEntry.token?.decimals ?? 18,
+        totalRegisteredAmount: 0n,
+        totalClaimedAmount: 0n,
+        totalUnclaimedAmount: 0n,
+      }
 
       existing.totalRegisteredAmount += BigInt(
         loopEntry.stats?.totalRegisteredAmountRaw ?? "0"
       )
-      existing.totalClaimedAmount += BigInt(loopEntry.stats?.totalClaimedAmountRaw ?? "0")
+      existing.totalClaimedAmount += BigInt(
+        loopEntry.stats?.totalClaimedAmountRaw ?? "0"
+      )
       existing.totalUnclaimedAmount += BigInt(
         loopEntry.stats?.totalUnclaimedAmountRaw ?? "0"
       )
@@ -1137,7 +1256,10 @@ function rebuildGlobalCache(cache, updatedAt) {
     stats: {
       totalRegistrationsCount,
       totalClaimsCount,
-      claimRatePercent: formatPercent(totalClaimsCount, totalRegistrationsCount),
+      claimRatePercent: formatPercent(
+        totalClaimsCount,
+        totalRegistrationsCount
+      ),
     },
     tokenTotals: Array.from(tokenTotals.values())
       .map((entry) => ({
@@ -1186,7 +1308,8 @@ function printTable(results) {
 }
 
 async function inspectLoop(loop, args, cache, runTimestamp) {
-  const chainRpcEnvName = loop.chain.id === base.id ? "BASE_RPC_URL" : "GNOSIS_RPC_URL"
+  const chainRpcEnvName =
+    loop.chain.id === base.id ? "BASE_RPC_URL" : "GNOSIS_RPC_URL"
   const rpcUrl = args.rpcUrl ?? process.env[chainRpcEnvName]
   const client = createPublicClient({
     chain: loop.chain,
@@ -1199,7 +1322,9 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
   ])
   const tokenInfo = await fetchTokenInfo(client, schedule.token)
   const configuredUpperBound =
-    args.upToPeriod == null ? null : parsePeriod(args.upToPeriod, "--up-to-period")
+    args.upToPeriod == null
+      ? null
+      : parsePeriod(args.upToPeriod, "--up-to-period")
 
   // getCurrentPeriod returns the latest completed period. The app APIs add one
   // to this value when they need the next claim period.
@@ -1208,19 +1333,22 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
     configuredUpperBound == null
       ? discoveredLastPeriod
       : configuredUpperBound < discoveredLastPeriod
-        ? configuredUpperBound
-        : discoveredLastPeriod
+      ? configuredUpperBound
+      : discoveredLastPeriod
 
   const cachedLoop = args.refreshAll ? null : getCachedLoopEntry(cache, loop)
   let storedPeriods = { ...(cachedLoop?.periods ?? {}) }
   const cachedLastProcessedPeriod = cachedLoop
-    ? parsePeriod(cachedLoop.lastProcessedPeriod ?? "0", "cached lastProcessedPeriod")
+    ? parsePeriod(
+        cachedLoop.lastProcessedPeriod ?? "0",
+        "cached lastProcessedPeriod"
+      )
     : 0n
   let fetchedIncrementally = false
   let periodsFetchedThisRun = []
 
   if (args.refreshAll || !cachedLoop) {
-    const logs = await fetchRegisterLogs(client, loop.address)
+    const logs = await fetchRegisterLogs(client, loop, schedule)
     storedPeriods = pruneStoredPeriods(
       buildStoredPeriods(buildPeriodUserMap(logs), schedule),
       lastEndedPeriod
@@ -1240,7 +1368,12 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
     if (missingPeriods.length > 0) {
       fetchedIncrementally = true
       for (const period of missingPeriods) {
-        const logs = await fetchRegisterLogsForPeriod(client, loop.address, period)
+        const logs = await fetchRegisterLogsForPeriod(
+          client,
+          loop,
+          schedule,
+          period
+        )
         const periodUsers = Array.from(
           new Set(
             logs
@@ -1250,7 +1383,11 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
           )
         ).sort()
         storedPeriods[period.toString()] = {
-          ...getPeriodWindow(period, schedule.firstPeriodStart, schedule.periodLength),
+          ...getPeriodWindow(
+            period,
+            schedule.firstPeriodStart,
+            schedule.periodLength
+          ),
           registeredUsers: periodUsers,
         }
       }
@@ -1261,7 +1398,7 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
   storedPeriods = pruneStoredPeriods(storedPeriods, lastEndedPeriod)
 
   const [claimLogs, payoutsByPeriod, tokenSnapshots] = await Promise.all([
-    fetchClaimLogs(client, loop.address),
+    fetchClaimLogs(client, loop, schedule),
     fetchPayoutsByPeriod(client, loop, lastEndedPeriod),
     fetchLoopTokenSnapshots(client, loop, schedule, tokenInfo, lastEndedPeriod),
   ])
@@ -1280,7 +1417,9 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
   )
 
   const cacheHighWaterMark =
-    args.refreshAll || !cachedLoop || lastEndedPeriod > cachedLastProcessedPeriod
+    args.refreshAll ||
+    !cachedLoop ||
+    lastEndedPeriod > cachedLastProcessedPeriod
       ? lastEndedPeriod
       : cachedLastProcessedPeriod
   const cacheSummary = buildSummary(
@@ -1301,7 +1440,10 @@ async function inspectLoop(loop, args, cache, runTimestamp) {
       currentPeriod,
       cacheHighWaterMark,
       buildCachedPeriods(
-        pruneStoredPeriods(mergeStoredPeriods(cachedLoop?.periods, storedPeriods), cacheHighWaterMark),
+        pruneStoredPeriods(
+          mergeStoredPeriods(cachedLoop?.periods, storedPeriods),
+          cacheHighWaterMark
+        ),
         cacheSummary.periods
       ),
       cacheSummary,
@@ -1333,6 +1475,7 @@ async function main() {
 
   const loopKeys = getLoopKeys(args.loop)
   const cache = loadCache(args.cacheFile)
+  removeInactiveLoopCacheEntries(cache)
   const runTimestamp = new Date().toISOString()
   const results = []
 

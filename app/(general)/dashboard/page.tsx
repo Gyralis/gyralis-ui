@@ -360,6 +360,9 @@ export default async function DashboardPage() {
 
   const data = await getDashboardPageData({ periodsBack: 7 })
   const tokenSummary = data.tokenSummaries[0]
+  const loopTokenSymbols = Object.fromEntries(
+    data.loopSummaries.map((loop) => [loop.loopKey, loop.meta.tokenSymbol])
+  )
   const totalDistributedOverview = formatTokenAmountParts(
     data.overview.totalDistributedAmount,
     tokenSummary?.tokenSymbol,
@@ -452,7 +455,7 @@ export default async function DashboardPage() {
                 ]}
               />
               <OverviewStatGroup
-                title="Total Distributed"
+                title="HNY Distribution"
                 tone="secondary"
                 icon={FaCoins}
                 mainValue={totalDistributedOverview.value}
@@ -490,6 +493,40 @@ export default async function DashboardPage() {
                 claimRate={data.overview.claimParticipationRatePercent}
               />
             </div>
+
+            <Card className="tamagotchi-card overflow-hidden p-0">
+              <CardContent className="grid gap-3 p-5 sm:grid-cols-2">
+                {data.tokenSummaries.map((token) => (
+                  <div
+                    key={token.tokenAddress ?? token.tokenSymbol ?? "token"}
+                    className="rounded-2xl border border-border/60 bg-muted/20 p-4"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        {token.tokenSymbol ?? "Token"} Distribution
+                      </p>
+                      <span className="text-sm font-semibold text-card-foreground">
+                        {formatTokenAmount(
+                          token.totalDistributedAmount,
+                          token.tokenSymbol,
+                          2
+                        )}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {formatTokenAmount(
+                        token.totalClaimedAmount,
+                        token.tokenSymbol,
+                        2
+                      )}{" "}
+                      claimed
+                      {" · "}
+                      {formatPercent(token.claimedAmountRatePercent)} claim rate
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
           </section>
 
           <section id="loops" className="scroll-mt-24 space-y-5">
@@ -569,7 +606,6 @@ export default async function DashboardPage() {
                             />
                           </div>
                         </div>
-
                       </div>
                     </CardHeader>
 
@@ -652,7 +688,8 @@ export default async function DashboardPage() {
                               </p>
                               <p className="mt-1 text-lg font-semibold text-card-foreground">
                                 {formatNumber(
-                                  maxRegistrationsPeriod?.registeredUserCount ?? 0
+                                  maxRegistrationsPeriod?.registeredUserCount ??
+                                    0
                                 )}
                               </p>
                               <p className="mt-1 text-xs text-muted-foreground">
@@ -712,8 +749,8 @@ export default async function DashboardPage() {
                               <p className="mt-1 text-lg font-semibold text-card-foreground">
                                 {formatTokenAmount(
                                   loop.tokenSnapshots
-                                    ?.balanceAtLastProcessedPeriod
-                                    ?.formatted ?? null,
+                                    ?.balanceAtLastProcessedPeriod?.formatted ??
+                                    null,
                                   loop.meta.tokenSymbol,
                                   2
                                 )}
@@ -738,9 +775,9 @@ export default async function DashboardPage() {
               <FaInfoCircle className="mt-1 size-4 shrink-0 text-primary" />
               <p>
                 Charts use saved snapshot dates from the cached history so you
-                can compare cumulative growth across{" "}
-                {data.loopSummaries.length} Gnosis loops over time with shared
-                token accounting.
+                can compare cumulative growth across {data.loopSummaries.length}{" "}
+                loops over time. Participation is compared across every loop;
+                token distribution remains separated by token.
               </p>
             </div>
 
@@ -757,12 +794,14 @@ export default async function DashboardPage() {
                   softColor: chartColors.softColor,
                 }
               })}
-              tokenSymbol={tokenSummary?.tokenSymbol ?? null}
+              tokenSymbol={null}
               claimParticipationRatePercent={
                 data.overview.claimParticipationRatePercent
               }
               uniqueUsersBySnapshot={data.charts.uniqueUsersBySnapshot}
-              uniqueClaimUsersBySnapshot={data.charts.uniqueClaimUsersBySnapshot}
+              uniqueClaimUsersBySnapshot={
+                data.charts.uniqueClaimUsersBySnapshot
+              }
               registrationsBySnapshot={data.charts.registrationsBySnapshot}
               claimsBySnapshot={data.charts.claimsBySnapshot}
               claimRateBySnapshot={data.charts.claimRateBySnapshot}
@@ -828,19 +867,19 @@ export default async function DashboardPage() {
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.distributedAmount,
-                              tokenSummary?.tokenSymbol
+                              loopTokenSymbols[row.loopKey]
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.claimedAmount,
-                              tokenSummary?.tokenSymbol
+                              loopTokenSymbols[row.loopKey]
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.unclaimedAmount,
-                              tokenSummary?.tokenSymbol
+                              loopTokenSymbols[row.loopKey]
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">

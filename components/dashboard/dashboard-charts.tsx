@@ -8,19 +8,19 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   ReferenceLine,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
 import type {
   DashboardHistoryMetricRow,
   DashboardLoopKey,
 } from "@/lib/dashboard/types"
+import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 type DashboardChartLoop = {
   loopKey: DashboardLoopKey
@@ -45,7 +45,7 @@ type DashboardChartsProps = {
 type ChartDataRow = {
   label: string
   fullLabel: string
-  [key: string]: number | string
+  [key: string]: number | string | null
 }
 
 type TooltipEntry = {
@@ -103,7 +103,7 @@ function buildHistoryRows(
     label: row.snapshotShortLabel ?? row.snapshotDate,
     fullLabel: row.snapshotLongLabel ?? row.snapshotDate,
     ...Object.fromEntries(
-      loops.map((loop) => [loop.loopKey, Number(row.values[loop.loopKey] ?? 0)])
+      loops.map((loop) => [loop.loopKey, row.values[loop.loopKey] ?? null])
     ),
   }))
 }
@@ -192,11 +192,20 @@ export function DashboardCharts({
   distributedAmountBySnapshot,
 }: DashboardChartsProps) {
   const snapshotUniqueUsersData = buildHistoryRows(uniqueUsersBySnapshot, loops)
-  const snapshotUniqueClaimUsersData = buildHistoryRows(uniqueClaimUsersBySnapshot, loops)
-  const snapshotRegistrationsData = buildHistoryRows(registrationsBySnapshot, loops)
+  const snapshotUniqueClaimUsersData = buildHistoryRows(
+    uniqueClaimUsersBySnapshot,
+    loops
+  )
+  const snapshotRegistrationsData = buildHistoryRows(
+    registrationsBySnapshot,
+    loops
+  )
   const snapshotClaimsData = buildHistoryRows(claimsBySnapshot, loops)
   const snapshotClaimRateData = buildHistoryRows(claimRateBySnapshot, loops)
-  const snapshotDistributionData = buildHistoryRows(distributedAmountBySnapshot, loops)
+  const snapshotDistributionData = buildHistoryRows(
+    distributedAmountBySnapshot,
+    loops
+  )
 
   return (
     <div className="space-y-5">
@@ -209,7 +218,12 @@ export function DashboardCharts({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={snapshotUniqueUsersData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -223,7 +237,9 @@ export function DashboardCharts({
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Line
                     key={loop.loopKey}
@@ -249,7 +265,12 @@ export function DashboardCharts({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={snapshotUniqueClaimUsersData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -263,7 +284,9 @@ export function DashboardCharts({
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Line
                     key={loop.loopKey}
@@ -291,7 +314,12 @@ export function DashboardCharts({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={snapshotRegistrationsData} barGap={10}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -306,7 +334,9 @@ export function DashboardCharts({
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Bar
                     key={loop.loopKey}
@@ -330,7 +360,12 @@ export function DashboardCharts({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={snapshotClaimsData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -344,7 +379,9 @@ export function DashboardCharts({
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Line
                     key={loop.loopKey}
@@ -372,7 +409,12 @@ export function DashboardCharts({
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={snapshotClaimRateData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -387,7 +429,9 @@ export function DashboardCharts({
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Line
                     key={loop.loopKey}
@@ -407,7 +451,9 @@ export function DashboardCharts({
                     strokeDasharray="8 6"
                     strokeWidth={2}
                     label={{
-                      value: `Avg claim rate: ${formatPercent(claimParticipationRatePercent)}`,
+                      value: `Avg claim rate: ${formatPercent(
+                        claimParticipationRatePercent
+                      )}`,
                       position: "insideTopRight",
                       fill: "hsl(var(--muted-foreground))",
                       fontSize: 12,
@@ -421,13 +467,18 @@ export function DashboardCharts({
 
         <ChartCard
           title="Distributed Amount by Snapshot Date"
-          description="Snapshot-date HNY totals show the cumulative distribution story for each loop across the saved update history."
+          description="Each series uses its loop's token unit. Compare its trend over time, not token amounts across different assets."
         >
           <div className="h-[360px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={snapshotDistributionData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}
                   axisLine={false}
@@ -438,11 +489,15 @@ export function DashboardCharts({
                   content={
                     <CustomTooltip
                       tokenSymbol={tokenSymbol}
-                      valueFormatter={(value, symbol) => formatToken(value, symbol)}
+                      valueFormatter={(value, symbol) =>
+                        formatToken(value, symbol)
+                      }
                     />
                   }
                 />
-                <Legend wrapperStyle={{ color: "hsl(var(--muted-foreground))" }} />
+                <Legend
+                  wrapperStyle={{ color: "hsl(var(--muted-foreground))" }}
+                />
                 {loops.map((loop) => (
                   <Line
                     key={loop.loopKey}

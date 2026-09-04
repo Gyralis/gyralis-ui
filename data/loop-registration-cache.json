@@ -24911,105 +24911,102 @@
       },
       "updatedAt": "2026-09-04T20:21:01.019Z"
     },
-    "test-superloops": {
-      "loopName": "TEST SUPERLOOPS",
-      "loopAddress": "0x42664386739EFdD277Fa1eB05658b562c3b804c0",
+    "markee-gardens": {
+      "loopName": "Markee Gardens",
+      "loopAddress": "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
       "chainId": 8453,
       "contractType": "superLoop",
       "token": {
-        "address": "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
-        "symbol": "MST",
+        "address": "0x8b8c7b77767a30e698e32293D2b55B164D463BD1",
+        "symbol": "MARKEEx",
         "decimals": 18,
         "snapshots": {
           "balanceAtPeriod1": {
             "periodNumber": "1",
-            "blockNumber": "46263471",
+            "blockNumber": "49569022",
             "raw": "0",
             "formatted": "0"
           },
           "balanceAtPeriod2": {
             "periodNumber": "2",
-            "blockNumber": "46263531",
+            "blockNumber": "49590622",
             "raw": "0",
             "formatted": "0"
           },
           "balanceAtLastProcessedPeriod": {
-            "periodNumber": "18825",
-            "blockNumber": "47392911",
-            "raw": "0",
-            "formatted": "0"
+            "periodNumber": "61",
+            "blockNumber": "50865022",
+            "raw": "181363356164383357731",
+            "formatted": "181.363356164383357731"
           }
         }
       },
       "firstPeriodStart": {
-        "unix": "1779316169",
-        "utc": "Wed, 20 May 2026 22:29:29 GMT"
+        "unix": "1785884191",
+        "utc": "Tue, 04 Aug 2026 22:56:31 GMT"
       },
-      "periodLengthSeconds": "120",
-      "currentPeriod": "18825",
-      "lastProcessedPeriod": "18825",
+      "periodLengthSeconds": "43200",
+      "currentPeriod": "61",
+      "lastProcessedPeriod": "61",
       "uniqueUsers": [
-        "0x933f6eC3395b5521dCE3B020CC4D9f5126011eEb",
-        "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
+        "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+        "0x0E9B063789909565CEdA1Fba162474405A151E66",
+        "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+        "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+        "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+        "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+        "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+        "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+        "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+        "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+        "0xB2206f941A5206B55BFA33E665687523A8bcEd80",
+        "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+        "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+        "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+        "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+        "0xdBb811EC62338db94858Ec21ef1d56B658111922",
+        "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
       ],
-      "uniqueUserCount": 2,
+      "uniqueUserCount": 17,
       "uniqueClaimUsers": [
-        "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
+        "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+        "0x0E9B063789909565CEdA1Fba162474405A151E66",
+        "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+        "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+        "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+        "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+        "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+        "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+        "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+        "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+        "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+        "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+        "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+        "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+        "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
       ],
-      "uniqueClaimUserCount": 1,
+      "uniqueClaimUserCount": 15,
       "stats": {
-        "totalRegistrationsCount": 4,
-        "totalClaimsCount": 1,
-        "totalRegisteredAmountRaw": "0",
-        "totalRegisteredAmountFormatted": "0",
-        "totalClaimedAmountRaw": "120000000000000000000",
-        "totalClaimedAmountFormatted": "120",
-        "totalUnclaimedAmountRaw": "-120000000000000000000",
-        "totalUnclaimedAmountFormatted": "-120",
-        "claimRatePercent": "25.00"
+        "totalRegistrationsCount": 296,
+        "totalClaimsCount": 232,
+        "totalRegisteredAmountRaw": "834117465753423643084",
+        "totalRegisteredAmountFormatted": "834.117465753423643084",
+        "totalClaimedAmountRaw": "660870547945204672161",
+        "totalClaimedAmountFormatted": "660.870547945204672161",
+        "totalUnclaimedAmountRaw": "173246917808218970923",
+        "totalUnclaimedAmountFormatted": "173.246917808218970923",
+        "claimRatePercent": "78.38"
       },
       "periods": {
-        "3452": {
-          "periodNumber": "3452",
+        "5": {
+          "periodNumber": "5",
           "periodStart": {
-            "unix": "1779730289",
-            "utc": "Mon, 25 May 2026 17:31:29 GMT"
+            "unix": "1786056991",
+            "utc": "Thu, 06 Aug 2026 22:56:31 GMT"
           },
           "periodEndExclusive": {
-            "unix": "1779730409",
-            "utc": "Mon, 25 May 2026 17:33:29 GMT"
-          },
-          "registeredUsers": [
-            "0x933f6eC3395b5521dCE3B020CC4D9f5126011eEb"
-          ],
-          "registeredUserCount": 1,
-          "claimUsers": [],
-          "claimUserCount": 0,
-          "claimEventCount": 0,
-          "payoutPerUserRaw": null,
-          "payoutPerUserFormatted": null,
-          "claimedAmountRaw": "0",
-          "claimedAmountFormatted": "0",
-          "totalRegisteredAmountRaw": null,
-          "totalRegisteredAmountFormatted": null,
-          "unclaimedAmountRaw": null,
-          "unclaimedAmountFormatted": null,
-          "claimRatePercent": "0.00",
-          "newUsers": [
-            "0x933f6eC3395b5521dCE3B020CC4D9f5126011eEb"
-          ],
-          "newUserCount": 1,
-          "cumulativeUniqueUserCount": 1
-        },
-        "3469": {
-          "periodNumber": "3469",
-          "periodStart": {
-            "unix": "1779732329",
-            "utc": "Mon, 25 May 2026 18:05:29 GMT"
-          },
-          "periodEndExclusive": {
-            "unix": "1779732449",
-            "utc": "Mon, 25 May 2026 18:07:29 GMT"
+            "unix": "1786100191",
+            "utc": "Fri, 07 Aug 2026 10:56:31 GMT"
           },
           "registeredUsers": [
             "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
@@ -25020,90 +25017,2259 @@
           ],
           "claimUserCount": 1,
           "claimEventCount": 1,
-          "payoutPerUserRaw": null,
-          "payoutPerUserFormatted": null,
-          "claimedAmountRaw": "120000000000000000000",
-          "claimedAmountFormatted": "120",
-          "totalRegisteredAmountRaw": null,
-          "totalRegisteredAmountFormatted": null,
-          "unclaimedAmountRaw": null,
-          "unclaimedAmountFormatted": null,
+          "payoutPerUserRaw": "410958904109572800",
+          "payoutPerUserFormatted": "0.4109589041095728",
+          "claimedAmountRaw": "410958904109572800",
+          "claimedAmountFormatted": "0.4109589041095728",
+          "totalRegisteredAmountRaw": "410958904109572800",
+          "totalRegisteredAmountFormatted": "0.4109589041095728",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
           "claimRatePercent": "100.00",
           "newUsers": [
             "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
           ],
           "newUserCount": 1,
-          "cumulativeUniqueUserCount": 2
+          "cumulativeUniqueUserCount": 1
         },
-        "3470": {
-          "periodNumber": "3470",
+        "6": {
+          "periodNumber": "6",
           "periodStart": {
-            "unix": "1779732449",
-            "utc": "Mon, 25 May 2026 18:07:29 GMT"
+            "unix": "1786100191",
+            "utc": "Fri, 07 Aug 2026 10:56:31 GMT"
           },
           "periodEndExclusive": {
-            "unix": "1779732569",
-            "utc": "Mon, 25 May 2026 18:09:29 GMT"
+            "unix": "1786143391",
+            "utc": "Fri, 07 Aug 2026 22:56:31 GMT"
           },
           "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "51369863013696600",
+          "payoutPerUserFormatted": "0.0513698630136966",
+          "claimedAmountRaw": "359589041095876200",
+          "claimedAmountFormatted": "0.3595890410958762",
+          "totalRegisteredAmountRaw": "410958904109572800",
+          "totalRegisteredAmountFormatted": "0.4109589041095728",
+          "unclaimedAmountRaw": "51369863013696600",
+          "unclaimedAmountFormatted": "0.0513698630136966",
+          "claimRatePercent": "87.50",
+          "newUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "newUserCount": 8,
+          "cumulativeUniqueUserCount": 9
+        },
+        "7": {
+          "periodNumber": "7",
+          "periodStart": {
+            "unix": "1786143391",
+            "utc": "Fri, 07 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786186591",
+            "utc": "Sat, 08 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
             "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
           ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "205479452054786400",
+          "payoutPerUserFormatted": "0.2054794520547864",
+          "claimedAmountRaw": "205479452054786400",
+          "claimedAmountFormatted": "0.2054794520547864",
+          "totalRegisteredAmountRaw": "410958904109572800",
+          "totalRegisteredAmountFormatted": "0.4109589041095728",
+          "unclaimedAmountRaw": "205479452054786400",
+          "unclaimedAmountFormatted": "0.2054794520547864",
+          "claimRatePercent": "50.00",
+          "newUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 10
+        },
+        "8": {
+          "periodNumber": "8",
+          "periodStart": {
+            "unix": "1786186591",
+            "utc": "Sat, 08 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786229791",
+            "utc": "Sat, 08 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "58708414872796114",
+          "payoutPerUserFormatted": "0.058708414872796114",
+          "claimedAmountRaw": "410958904109572798",
+          "claimedAmountFormatted": "0.410958904109572798",
+          "totalRegisteredAmountRaw": "410958904109572798",
+          "totalRegisteredAmountFormatted": "0.410958904109572798",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 10
+        },
+        "9": {
+          "periodNumber": "9",
+          "periodStart": {
+            "unix": "1786229791",
+            "utc": "Sat, 08 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786272991",
+            "utc": "Sun, 09 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "205479452054786400",
+          "payoutPerUserFormatted": "0.2054794520547864",
+          "claimedAmountRaw": "410958904109572800",
+          "claimedAmountFormatted": "0.4109589041095728",
+          "totalRegisteredAmountRaw": "410958904109572800",
+          "totalRegisteredAmountFormatted": "0.4109589041095728",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 11
+        },
+        "10": {
+          "periodNumber": "10",
+          "periodStart": {
+            "unix": "1786272991",
+            "utc": "Sun, 09 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786316191",
+            "utc": "Sun, 09 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "51369863013696600",
+          "payoutPerUserFormatted": "0.0513698630136966",
+          "claimedAmountRaw": "359589041095876200",
+          "claimedAmountFormatted": "0.3595890410958762",
+          "totalRegisteredAmountRaw": "410958904109572800",
+          "totalRegisteredAmountFormatted": "0.4109589041095728",
+          "unclaimedAmountRaw": "51369863013696600",
+          "unclaimedAmountFormatted": "0.0513698630136966",
+          "claimRatePercent": "87.50",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 11
+        },
+        "11": {
+          "periodNumber": "11",
+          "periodStart": {
+            "unix": "1786316191",
+            "utc": "Sun, 09 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786359391",
+            "utc": "Mon, 10 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xB2206f941A5206B55BFA33E665687523A8bcEd80"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "2011757990867566364",
+          "payoutPerUserFormatted": "2.011757990867566364",
+          "claimedAmountRaw": "4023515981735132728",
+          "claimedAmountFormatted": "4.023515981735132728",
+          "totalRegisteredAmountRaw": "6035273972602699092",
+          "totalRegisteredAmountFormatted": "6.035273972602699092",
+          "unclaimedAmountRaw": "2011757990867566364",
+          "unclaimedAmountFormatted": "2.011757990867566364",
+          "claimRatePercent": "66.67",
+          "newUsers": [
+            "0xB2206f941A5206B55BFA33E665687523A8bcEd80"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 12
+        },
+        "12": {
+          "periodNumber": "12",
+          "periodStart": {
+            "unix": "1786359391",
+            "utc": "Mon, 10 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786402591",
+            "utc": "Mon, 10 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 10,
+          "claimUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd"
+          ],
+          "claimUserCount": 9,
+          "claimEventCount": 9,
+          "payoutPerUserRaw": "1684931506849313280",
+          "payoutPerUserFormatted": "1.68493150684931328",
+          "claimedAmountRaw": "15164383561643819520",
+          "claimedAmountFormatted": "15.16438356164381952",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "1684931506849313280",
+          "unclaimedAmountFormatted": "1.68493150684931328",
+          "claimRatePercent": "90.00",
+          "newUsers": [
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "newUserCount": 2,
+          "cumulativeUniqueUserCount": 14
+        },
+        "13": {
+          "periodNumber": "13",
+          "periodStart": {
+            "unix": "1786402591",
+            "utc": "Mon, 10 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786445791",
+            "utc": "Tue, 11 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "8424657534246566400",
+          "payoutPerUserFormatted": "8.4246575342465664",
+          "claimedAmountRaw": "8424657534246566400",
+          "claimedAmountFormatted": "8.4246575342465664",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "8424657534246566400",
+          "unclaimedAmountFormatted": "8.4246575342465664",
+          "claimRatePercent": "50.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 14
+        },
+        "14": {
+          "periodNumber": "14",
+          "periodStart": {
+            "unix": "1786445791",
+            "utc": "Tue, 11 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786488991",
+            "utc": "Tue, 11 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdBb811EC62338db94858Ec21ef1d56B658111922"
+          ],
+          "registeredUserCount": 10,
+          "claimUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd"
+          ],
+          "claimUserCount": 8,
+          "claimEventCount": 8,
+          "payoutPerUserRaw": "1684931506849313280",
+          "payoutPerUserFormatted": "1.68493150684931328",
+          "claimedAmountRaw": "13479452054794506240",
+          "claimedAmountFormatted": "13.47945205479450624",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "3369863013698626560",
+          "unclaimedAmountFormatted": "3.36986301369862656",
+          "claimRatePercent": "80.00",
+          "newUsers": [
+            "0xdBb811EC62338db94858Ec21ef1d56B658111922"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 15
+        },
+        "15": {
+          "periodNumber": "15",
+          "periodStart": {
+            "unix": "1786488991",
+            "utc": "Tue, 11 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786532191",
+            "utc": "Wed, 12 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
           "registeredUserCount": 1,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "16849315068493132800",
+          "payoutPerUserFormatted": "16.8493150684931328",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "16": {
+          "periodNumber": "16",
+          "periodStart": {
+            "unix": "1786532191",
+            "utc": "Wed, 12 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786575391",
+            "utc": "Wed, 12 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
+            "0xB2206f941A5206B55BFA33E665687523A8bcEd80",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 10,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "1684931506849313280",
+          "payoutPerUserFormatted": "1.68493150684931328",
+          "claimedAmountRaw": "11794520547945192960",
+          "claimedAmountFormatted": "11.79452054794519296",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "5054794520547939840",
+          "unclaimedAmountFormatted": "5.05479452054793984",
+          "claimRatePercent": "70.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "17": {
+          "periodNumber": "17",
+          "periodStart": {
+            "unix": "1786575391",
+            "utc": "Wed, 12 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786618591",
+            "utc": "Thu, 13 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "11232876712328755200",
+          "claimedAmountFormatted": "11.2328767123287552",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "5616438356164377600",
+          "unclaimedAmountFormatted": "5.6164383561643776",
+          "claimRatePercent": "66.67",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "18": {
+          "periodNumber": "18",
+          "periodStart": {
+            "unix": "1786618591",
+            "utc": "Thu, 13 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786661791",
+            "utc": "Thu, 13 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 8,
+          "claimEventCount": 8,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "19": {
+          "periodNumber": "19",
+          "periodStart": {
+            "unix": "1786661791",
+            "utc": "Thu, 13 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786704991",
+            "utc": "Fri, 14 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "8424657534246566400",
+          "payoutPerUserFormatted": "8.4246575342465664",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "20": {
+          "periodNumber": "20",
+          "periodStart": {
+            "unix": "1786704991",
+            "utc": "Fri, 14 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786748191",
+            "utc": "Fri, 14 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 9,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 8,
+          "claimEventCount": 8,
+          "payoutPerUserRaw": "1872146118721459200",
+          "payoutPerUserFormatted": "1.8721461187214592",
+          "claimedAmountRaw": "14977168949771673600",
+          "claimedAmountFormatted": "14.9771689497716736",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "1872146118721459200",
+          "unclaimedAmountFormatted": "1.8721461187214592",
+          "claimRatePercent": "88.89",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "21": {
+          "periodNumber": "21",
+          "periodStart": {
+            "unix": "1786748191",
+            "utc": "Fri, 14 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786791391",
+            "utc": "Sat, 15 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xB2206f941A5206B55BFA33E665687523A8bcEd80"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "5616438356164377600",
+          "claimedAmountFormatted": "5.6164383561643776",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "11232876712328755200",
+          "unclaimedAmountFormatted": "11.2328767123287552",
+          "claimRatePercent": "33.33",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "22": {
+          "periodNumber": "22",
+          "periodStart": {
+            "unix": "1786791391",
+            "utc": "Sat, 15 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786834591",
+            "utc": "Sat, 15 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "8424657534246566400",
+          "claimedAmountFormatted": "8.4246575342465664",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "8424657534246566400",
+          "unclaimedAmountFormatted": "8.4246575342465664",
+          "claimRatePercent": "50.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "23": {
+          "periodNumber": "23",
+          "periodStart": {
+            "unix": "1786834591",
+            "utc": "Sat, 15 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786877791",
+            "utc": "Sun, 16 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 1,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "16849315068493132800",
+          "payoutPerUserFormatted": "16.8493150684931328",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "24": {
+          "periodNumber": "24",
+          "periodStart": {
+            "unix": "1786877791",
+            "utc": "Sun, 16 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786920991",
+            "utc": "Sun, 16 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xB2206f941A5206B55BFA33E665687523A8bcEd80",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 6,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "2808219178082188800",
+          "payoutPerUserFormatted": "2.8082191780821888",
+          "claimedAmountRaw": "8424657534246566400",
+          "claimedAmountFormatted": "8.4246575342465664",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "8424657534246566400",
+          "unclaimedAmountFormatted": "8.4246575342465664",
+          "claimRatePercent": "50.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "25": {
+          "periodNumber": "25",
+          "periodStart": {
+            "unix": "1786920991",
+            "utc": "Sun, 16 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1786964191",
+            "utc": "Mon, 17 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "8424657534246566400",
+          "payoutPerUserFormatted": "8.4246575342465664",
+          "claimedAmountRaw": "8424657534246566400",
+          "claimedAmountFormatted": "8.4246575342465664",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "8424657534246566400",
+          "unclaimedAmountFormatted": "8.4246575342465664",
+          "claimRatePercent": "50.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "26": {
+          "periodNumber": "26",
+          "periodStart": {
+            "unix": "1786964191",
+            "utc": "Mon, 17 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787007391",
+            "utc": "Mon, 17 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "7221135029354199771",
+          "claimedAmountFormatted": "7.221135029354199771",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "9628180039138933028",
+          "unclaimedAmountFormatted": "9.628180039138933028",
+          "claimRatePercent": "42.86",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "27": {
+          "periodNumber": "27",
+          "periodStart": {
+            "unix": "1787007391",
+            "utc": "Mon, 17 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787050591",
+            "utc": "Tue, 18 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xdBb811EC62338db94858Ec21ef1d56B658111922"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "11232876712328755200",
+          "claimedAmountFormatted": "11.2328767123287552",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "5616438356164377600",
+          "unclaimedAmountFormatted": "5.6164383561643776",
+          "claimRatePercent": "66.67",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 15
+        },
+        "28": {
+          "periodNumber": "28",
+          "periodStart": {
+            "unix": "1787050591",
+            "utc": "Tue, 18 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787093791",
+            "utc": "Tue, 18 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "registeredUserCount": 6,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 5,
+          "claimEventCount": 5,
+          "payoutPerUserRaw": "2808219178082188800",
+          "payoutPerUserFormatted": "2.8082191780821888",
+          "claimedAmountRaw": "14041095890410944000",
+          "claimedAmountFormatted": "14.041095890410944",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "2808219178082188800",
+          "unclaimedAmountFormatted": "2.8082191780821888",
+          "claimRatePercent": "83.33",
+          "newUsers": [
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 16
+        },
+        "29": {
+          "periodNumber": "29",
+          "periodStart": {
+            "unix": "1787093791",
+            "utc": "Tue, 18 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787136991",
+            "utc": "Wed, 19 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "5616438356164377600",
+          "claimedAmountFormatted": "5.6164383561643776",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "11232876712328755200",
+          "unclaimedAmountFormatted": "11.2328767123287552",
+          "claimRatePercent": "33.33",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "30": {
+          "periodNumber": "30",
+          "periodStart": {
+            "unix": "1787136991",
+            "utc": "Wed, 19 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787180191",
+            "utc": "Wed, 19 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdBb811EC62338db94858Ec21ef1d56B658111922"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 6,
+          "claimEventCount": 6,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "14442270058708399542",
+          "claimedAmountFormatted": "14.442270058708399542",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "2407045009784733257",
+          "unclaimedAmountFormatted": "2.407045009784733257",
+          "claimRatePercent": "85.71",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "31": {
+          "periodNumber": "31",
+          "periodStart": {
+            "unix": "1787180191",
+            "utc": "Wed, 19 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787223391",
+            "utc": "Thu, 20 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 1,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "16849315068493132800",
+          "payoutPerUserFormatted": "16.8493150684931328",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "32": {
+          "periodNumber": "32",
+          "periodStart": {
+            "unix": "1787223391",
+            "utc": "Thu, 20 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787266591",
+            "utc": "Thu, 20 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 9,
+          "claimUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 8,
+          "claimEventCount": 8,
+          "payoutPerUserRaw": "1872146118721459200",
+          "payoutPerUserFormatted": "1.8721461187214592",
+          "claimedAmountRaw": "14977168949771673600",
+          "claimedAmountFormatted": "14.9771689497716736",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "1872146118721459200",
+          "unclaimedAmountFormatted": "1.8721461187214592",
+          "claimRatePercent": "88.89",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "33": {
+          "periodNumber": "33",
+          "periodStart": {
+            "unix": "1787266591",
+            "utc": "Thu, 20 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787309791",
+            "utc": "Fri, 21 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 1,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "16849315068493132800",
+          "payoutPerUserFormatted": "16.8493150684931328",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "34": {
+          "periodNumber": "34",
+          "periodStart": {
+            "unix": "1787309791",
+            "utc": "Fri, 21 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787352991",
+            "utc": "Fri, 21 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 9,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "1872146118721459200",
+          "payoutPerUserFormatted": "1.8721461187214592",
+          "claimedAmountRaw": "13105022831050214400",
+          "claimedAmountFormatted": "13.1050228310502144",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "3744292237442918400",
+          "unclaimedAmountFormatted": "3.7442922374429184",
+          "claimRatePercent": "77.78",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "35": {
+          "periodNumber": "35",
+          "periodStart": {
+            "unix": "1787352991",
+            "utc": "Fri, 21 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787396191",
+            "utc": "Sat, 22 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 1,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "16849315068493132800",
+          "payoutPerUserFormatted": "16.8493150684931328",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "36": {
+          "periodNumber": "36",
+          "periodStart": {
+            "unix": "1787396191",
+            "utc": "Sat, 22 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787439391",
+            "utc": "Sat, 22 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 6,
+          "claimEventCount": 6,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "12636986301369849600",
+          "claimedAmountFormatted": "12.6369863013698496",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "4212328767123283200",
+          "unclaimedAmountFormatted": "4.2123287671232832",
+          "claimRatePercent": "75.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "37": {
+          "periodNumber": "37",
+          "periodStart": {
+            "unix": "1787439391",
+            "utc": "Sat, 22 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787482591",
+            "utc": "Sun, 23 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 2,
+          "claimUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "8424657534246566400",
+          "payoutPerUserFormatted": "8.4246575342465664",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "38": {
+          "periodNumber": "38",
+          "periodStart": {
+            "unix": "1787482591",
+            "utc": "Sun, 23 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787525791",
+            "utc": "Sun, 23 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 6,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "2808219178082188800",
+          "payoutPerUserFormatted": "2.8082191780821888",
+          "claimedAmountRaw": "11232876712328755200",
+          "claimedAmountFormatted": "11.2328767123287552",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "5616438356164377600",
+          "unclaimedAmountFormatted": "5.6164383561643776",
+          "claimRatePercent": "66.67",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "39": {
+          "periodNumber": "39",
+          "periodStart": {
+            "unix": "1787525791",
+            "utc": "Sun, 23 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787568991",
+            "utc": "Mon, 24 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798"
+          ],
+          "claimUserCount": 1,
+          "claimEventCount": 1,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "5616438356164377600",
+          "claimedAmountFormatted": "5.6164383561643776",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "11232876712328755200",
+          "unclaimedAmountFormatted": "11.2328767123287552",
+          "claimRatePercent": "33.33",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "40": {
+          "periodNumber": "40",
+          "periodStart": {
+            "unix": "1787568991",
+            "utc": "Mon, 24 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787612191",
+            "utc": "Mon, 24 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 6,
+          "claimEventCount": 6,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "14442270058708399542",
+          "claimedAmountFormatted": "14.442270058708399542",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "2407045009784733257",
+          "unclaimedAmountFormatted": "2.407045009784733257",
+          "claimRatePercent": "85.71",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "41": {
+          "periodNumber": "41",
+          "periodStart": {
+            "unix": "1787612191",
+            "utc": "Mon, 24 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787655391",
+            "utc": "Tue, 25 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 2,
+          "claimEventCount": 2,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "11232876712328755200",
+          "claimedAmountFormatted": "11.2328767123287552",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "5616438356164377600",
+          "unclaimedAmountFormatted": "5.6164383561643776",
+          "claimRatePercent": "66.67",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "42": {
+          "periodNumber": "42",
+          "periodStart": {
+            "unix": "1787655391",
+            "utc": "Tue, 25 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787698591",
+            "utc": "Tue, 25 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "registeredUserCount": 9,
+          "claimUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "1872146118721459200",
+          "payoutPerUserFormatted": "1.8721461187214592",
+          "claimedAmountRaw": "13105022831050214400",
+          "claimedAmountFormatted": "13.1050228310502144",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "3744292237442918400",
+          "unclaimedAmountFormatted": "3.7442922374429184",
+          "claimRatePercent": "77.78",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 16
+        },
+        "43": {
+          "periodNumber": "43",
+          "periodStart": {
+            "unix": "1787698591",
+            "utc": "Tue, 25 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787741791",
+            "utc": "Wed, 26 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 4,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "4212328767123283200",
+          "payoutPerUserFormatted": "4.2123287671232832",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e"
+          ],
+          "newUserCount": 1,
+          "cumulativeUniqueUserCount": 17
+        },
+        "44": {
+          "periodNumber": "44",
+          "periodStart": {
+            "unix": "1787741791",
+            "utc": "Wed, 26 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787784991",
+            "utc": "Wed, 26 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x07AD02e0C1FA0b09fC945ff197E18e9C256838c6",
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 6,
+          "claimEventCount": 6,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "14442270058708399542",
+          "claimedAmountFormatted": "14.442270058708399542",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "2407045009784733257",
+          "unclaimedAmountFormatted": "2.407045009784733257",
+          "claimRatePercent": "85.71",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "45": {
+          "periodNumber": "45",
+          "periodStart": {
+            "unix": "1787784991",
+            "utc": "Wed, 26 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787828191",
+            "utc": "Thu, 27 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
+          ],
+          "registeredUserCount": 5,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "3369863013698626560",
+          "payoutPerUserFormatted": "3.36986301369862656",
+          "claimedAmountRaw": "13479452054794506240",
+          "claimedAmountFormatted": "13.47945205479450624",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "3369863013698626560",
+          "unclaimedAmountFormatted": "3.36986301369862656",
+          "claimRatePercent": "80.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "46": {
+          "periodNumber": "46",
+          "periodStart": {
+            "unix": "1787828191",
+            "utc": "Thu, 27 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787871391",
+            "utc": "Thu, 27 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "16849315068493132799",
+          "claimedAmountFormatted": "16.849315068493132799",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "47": {
+          "periodNumber": "47",
+          "periodStart": {
+            "unix": "1787871391",
+            "utc": "Thu, 27 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787914591",
+            "utc": "Fri, 28 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 4,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "4212328767123283200",
+          "payoutPerUserFormatted": "4.2123287671232832",
+          "claimedAmountRaw": "12636986301369849600",
+          "claimedAmountFormatted": "12.6369863013698496",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "4212328767123283200",
+          "unclaimedAmountFormatted": "4.2123287671232832",
+          "claimRatePercent": "75.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "48": {
+          "periodNumber": "48",
+          "periodStart": {
+            "unix": "1787914591",
+            "utc": "Fri, 28 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1787957791",
+            "utc": "Fri, 28 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 5,
+          "claimEventCount": 5,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "10530821917808208000",
+          "claimedAmountFormatted": "10.530821917808208",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "6318493150684924800",
+          "unclaimedAmountFormatted": "6.3184931506849248",
+          "claimRatePercent": "62.50",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "49": {
+          "periodNumber": "49",
+          "periodStart": {
+            "unix": "1787957791",
+            "utc": "Fri, 28 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788000991",
+            "utc": "Sat, 29 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "50": {
+          "periodNumber": "50",
+          "periodStart": {
+            "unix": "1788000991",
+            "utc": "Sat, 29 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788044191",
+            "utc": "Sat, 29 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 6,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 5,
+          "claimEventCount": 5,
+          "payoutPerUserRaw": "2808219178082188800",
+          "payoutPerUserFormatted": "2.8082191780821888",
+          "claimedAmountRaw": "14041095890410944000",
+          "claimedAmountFormatted": "14.041095890410944",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "2808219178082188800",
+          "unclaimedAmountFormatted": "2.8082191780821888",
+          "claimRatePercent": "83.33",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "51": {
+          "periodNumber": "51",
+          "periodStart": {
+            "unix": "1788044191",
+            "utc": "Sat, 29 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788087391",
+            "utc": "Sun, 30 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 4,
+          "claimUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "4212328767123283200",
+          "payoutPerUserFormatted": "4.2123287671232832",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "52": {
+          "periodNumber": "52",
+          "periodStart": {
+            "unix": "1788087391",
+            "utc": "Sun, 30 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788130591",
+            "utc": "Sun, 30 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 6,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 6,
+          "claimEventCount": 6,
+          "payoutPerUserRaw": "2808219178082188800",
+          "payoutPerUserFormatted": "2.8082191780821888",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "53": {
+          "periodNumber": "53",
+          "periodStart": {
+            "unix": "1788130591",
+            "utc": "Sun, 30 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788173791",
+            "utc": "Mon, 31 Aug 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 4,
+          "claimUsers": [
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "4212328767123283200",
+          "payoutPerUserFormatted": "4.2123287671232832",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "54": {
+          "periodNumber": "54",
+          "periodStart": {
+            "unix": "1788173791",
+            "utc": "Mon, 31 Aug 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788216991",
+            "utc": "Mon, 31 Aug 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "14743150684931491200",
+          "claimedAmountFormatted": "14.7431506849314912",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "2106164383561641600",
+          "unclaimedAmountFormatted": "2.1061643835616416",
+          "claimRatePercent": "87.50",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "55": {
+          "periodNumber": "55",
+          "periodStart": {
+            "unix": "1788216991",
+            "utc": "Mon, 31 Aug 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788260191",
+            "utc": "Tue, 01 Sep 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x6C965b656C450259a6D4d95A2E68Fb4319EecBc0",
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 5,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "3369863013698626560",
+          "payoutPerUserFormatted": "3.36986301369862656",
+          "claimedAmountRaw": "10109589041095879680",
+          "claimedAmountFormatted": "10.10958904109587968",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "6739726027397253120",
+          "unclaimedAmountFormatted": "6.73972602739725312",
+          "claimRatePercent": "60.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "56": {
+          "periodNumber": "56",
+          "periodStart": {
+            "unix": "1788260191",
+            "utc": "Tue, 01 Sep 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788303391",
+            "utc": "Tue, 01 Sep 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 7,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 7,
+          "claimEventCount": 7,
+          "payoutPerUserRaw": "2407045009784733257",
+          "payoutPerUserFormatted": "2.407045009784733257",
+          "claimedAmountRaw": "16849315068493132799",
+          "claimedAmountFormatted": "16.849315068493132799",
+          "totalRegisteredAmountRaw": "16849315068493132799",
+          "totalRegisteredAmountFormatted": "16.849315068493132799",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "57": {
+          "periodNumber": "57",
+          "periodStart": {
+            "unix": "1788303391",
+            "utc": "Tue, 01 Sep 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788346591",
+            "utc": "Wed, 02 Sep 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "58": {
+          "periodNumber": "58",
+          "periodStart": {
+            "unix": "1788346591",
+            "utc": "Wed, 02 Sep 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788389791",
+            "utc": "Wed, 02 Sep 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 9,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "claimUserCount": 8,
+          "claimEventCount": 8,
+          "payoutPerUserRaw": "1872146118721459200",
+          "payoutPerUserFormatted": "1.8721461187214592",
+          "claimedAmountRaw": "14977168949771673600",
+          "claimedAmountFormatted": "14.9771689497716736",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "1872146118721459200",
+          "unclaimedAmountFormatted": "1.8721461187214592",
+          "claimRatePercent": "88.89",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "59": {
+          "periodNumber": "59",
+          "periodStart": {
+            "unix": "1788389791",
+            "utc": "Wed, 02 Sep 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788432991",
+            "utc": "Thu, 03 Sep 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 3,
+          "claimUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "claimUserCount": 3,
+          "claimEventCount": 3,
+          "payoutPerUserRaw": "5616438356164377600",
+          "payoutPerUserFormatted": "5.6164383561643776",
+          "claimedAmountRaw": "16849315068493132800",
+          "claimedAmountFormatted": "16.8493150684931328",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
+          "claimRatePercent": "100.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "60": {
+          "periodNumber": "60",
+          "periodStart": {
+            "unix": "1788432991",
+            "utc": "Thu, 03 Sep 2026 10:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788476191",
+            "utc": "Thu, 03 Sep 2026 22:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x2B464Aa1c30024794CEEA6689856e2C5E671754F",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23",
+            "0xa25211B64D041F690C0c818183E32f28ba9647Dd",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d",
+            "0xdfbFF2E5535A24e1C11b4C994F5eaB08Acd573CA"
+          ],
+          "registeredUserCount": 8,
+          "claimUsers": [
+            "0x0E9B063789909565CEdA1Fba162474405A151E66",
+            "0x412B7153504217b405af821BDCdC5F21C71E3cBc",
+            "0x48E5D1322a93B95FeE46bb4EA47155aFd3a200ec",
+            "0xc6048e46b00eF5473F95F66627140418BbC29b3d"
+          ],
+          "claimUserCount": 4,
+          "claimEventCount": 4,
+          "payoutPerUserRaw": "2106164383561641600",
+          "payoutPerUserFormatted": "2.1061643835616416",
+          "claimedAmountRaw": "8424657534246566400",
+          "claimedAmountFormatted": "8.4246575342465664",
+          "totalRegisteredAmountRaw": "16849315068493132800",
+          "totalRegisteredAmountFormatted": "16.8493150684931328",
+          "unclaimedAmountRaw": "8424657534246566400",
+          "unclaimedAmountFormatted": "8.4246575342465664",
+          "claimRatePercent": "50.00",
+          "newUsers": [],
+          "newUserCount": 0,
+          "cumulativeUniqueUserCount": 17
+        },
+        "61": {
+          "periodNumber": "61",
+          "periodStart": {
+            "unix": "1788476191",
+            "utc": "Thu, 03 Sep 2026 22:56:31 GMT"
+          },
+          "periodEndExclusive": {
+            "unix": "1788519391",
+            "utc": "Fri, 04 Sep 2026 10:56:31 GMT"
+          },
+          "registeredUsers": [
+            "0x734702f244A12d493424C73Cc7b3102A91F8aE07",
+            "0x855216A770Fd7Be1e5715880d29796f189f0721e",
+            "0x9C952fc22AD42A56A7399fEB9879b0E696099798",
+            "0xD559E433718B1F2667Fde7c859fC982cF0bC491f"
+          ],
+          "registeredUserCount": 4,
           "claimUsers": [],
           "claimUserCount": 0,
           "claimEventCount": 0,
-          "payoutPerUserRaw": null,
-          "payoutPerUserFormatted": null,
+          "payoutPerUserRaw": "0",
+          "payoutPerUserFormatted": "0",
           "claimedAmountRaw": "0",
           "claimedAmountFormatted": "0",
-          "totalRegisteredAmountRaw": null,
-          "totalRegisteredAmountFormatted": null,
-          "unclaimedAmountRaw": null,
-          "unclaimedAmountFormatted": null,
+          "totalRegisteredAmountRaw": "0",
+          "totalRegisteredAmountFormatted": "0",
+          "unclaimedAmountRaw": "0",
+          "unclaimedAmountFormatted": "0",
           "claimRatePercent": "0.00",
           "newUsers": [],
           "newUserCount": 0,
-          "cumulativeUniqueUserCount": 2
-        },
-        "3473": {
-          "periodNumber": "3473",
-          "periodStart": {
-            "unix": "1779732809",
-            "utc": "Mon, 25 May 2026 18:13:29 GMT"
-          },
-          "periodEndExclusive": {
-            "unix": "1779732929",
-            "utc": "Mon, 25 May 2026 18:15:29 GMT"
-          },
-          "registeredUsers": [
-            "0xE9dC34B67006Db0910a9761CB031D4bDE67dCE23"
-          ],
-          "registeredUserCount": 1,
-          "claimUsers": [],
-          "claimUserCount": 0,
-          "claimEventCount": 0,
-          "payoutPerUserRaw": null,
-          "payoutPerUserFormatted": null,
-          "claimedAmountRaw": "0",
-          "claimedAmountFormatted": "0",
-          "totalRegisteredAmountRaw": null,
-          "totalRegisteredAmountFormatted": null,
-          "unclaimedAmountRaw": null,
-          "unclaimedAmountFormatted": null,
-          "claimRatePercent": "0.00",
-          "newUsers": [],
-          "newUserCount": 0,
-          "cumulativeUniqueUserCount": 2
+          "cumulativeUniqueUserCount": 17
         }
       },
-      "updatedAt": "2026-06-15T14:55:13.028Z"
+      "updatedAt": "2026-09-04T20:42:12.635Z"
     }
   },
   "global": {
     "loopsIncluded": [
       "1hive",
       "blockscout",
-      "test-superloops"
+      "markee-gardens"
     ],
     "uniqueUsers": [
       "0x000bE6EA15efe5e7dE25314Bf6E818Cd5a64CB20",
@@ -25407,6 +27573,7 @@
       "0x7E05382A7463bffD77fd09B44Ed261Dd72D74AA1",
       "0x7b3518965080c60426CeA27fdb3b783dc732821b",
       "0x7d477EA91aBc560c1E5f36821C140B96cADa766e",
+      "0x809C9f8dd8CA93A41c3adca4972Fa234C28F7714",
       "0x84A4d54F8483740ea3FA7148810E4cF3D13ab71A",
       "0x855216A770Fd7Be1e5715880d29796f189f0721e",
       "0x85551a893E2aa4ac44dBe38Adafa916a6F5f48EC",
@@ -25476,11 +27643,11 @@
       "0xf434787e7D5bB5dcaBF008299d4d485e2868f579",
       "0xfB4fB99e80E3AEb74750C90F4e253f0a9126588F"
     ],
-    "uniqueClaimUserCount": 157,
+    "uniqueClaimUserCount": 158,
     "stats": {
-      "totalRegistrationsCount": 8953,
-      "totalClaimsCount": 7858,
-      "claimRatePercent": "87.77"
+      "totalRegistrationsCount": 9245,
+      "totalClaimsCount": 8089,
+      "claimRatePercent": "87.50"
     },
     "tokenTotals": [
       {
@@ -25495,17 +27662,17 @@
         "totalUnclaimedAmountFormatted": "41.794752412942266686"
       },
       {
-        "tokenAddress": "0xfF2e2f5b5DD04600394091F0A586ef1DD98693Dd",
-        "tokenSymbol": "MST",
+        "tokenAddress": "0x8b8c7b77767a30e698e32293D2b55B164D463BD1",
+        "tokenSymbol": "MARKEEx",
         "tokenDecimals": 18,
-        "totalRegisteredAmountRaw": "0",
-        "totalRegisteredAmountFormatted": "0",
-        "totalClaimedAmountRaw": "120000000000000000000",
-        "totalClaimedAmountFormatted": "120",
-        "totalUnclaimedAmountRaw": "-120000000000000000000",
-        "totalUnclaimedAmountFormatted": "-120"
+        "totalRegisteredAmountRaw": "834117465753423643084",
+        "totalRegisteredAmountFormatted": "834.117465753423643084",
+        "totalClaimedAmountRaw": "660870547945204672161",
+        "totalClaimedAmountFormatted": "660.870547945204672161",
+        "totalUnclaimedAmountRaw": "173246917808218970923",
+        "totalUnclaimedAmountFormatted": "173.246917808218970923"
       }
     ],
-    "updatedAt": "2026-09-04T20:21:34.974Z"
+    "updatedAt": "2026-09-04T20:42:12.635Z"
   }
 }
