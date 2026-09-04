@@ -14,11 +14,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -279,7 +274,7 @@ function AchievementBonusCard({
         </div>
       </div>
 
-      <CardContent className="flex min-h-[132px] flex-col gap-3 p-4">
+      <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-base font-bold leading-tight text-foreground">
@@ -289,40 +284,9 @@ function AchievementBonusCard({
               +{rewardPoints} points per loop
             </p>
           </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="shrink-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                aria-label={`${earnedLoops.length} of ${loops.length} loops have earned the ${streak}-claim streak bonus`}
-              >
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "cursor-pointer rounded-lg px-2 py-1 text-[10px] font-bold",
-                    earned
-                      ? "border-primary/30 bg-primary/10 text-primary"
-                      : "border-border bg-muted text-muted-foreground"
-                  )}
-                >
-                  {earned
-                    ? `${earnedLoops.length}/${loops.length} loops`
-                    : "Locked"}
-                </Badge>
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              className="w-64 rounded-2xl border-border/70 bg-card p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
-            >
-              <AchievementLoopBonusList
-                loops={loops}
-                streak={streak}
-                rewardPoints={rewardPoints}
-              />
-            </PopoverContent>
-          </Popover>
+          <span className="shrink-0 pt-0.5 text-[11px] font-medium text-muted-foreground">
+            {earned ? `${earnedLoops.length}/${loops.length} loops` : "Locked"}
+          </span>
         </div>
 
         {!earned ? (
@@ -331,8 +295,14 @@ function AchievementBonusCard({
           </p>
         ) : null}
 
-        <div className="mt-auto space-y-2">
-          <div className="flex items-center justify-end">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <AchievementLoopLogosTooltip
+              loops={loops}
+              earnedLoops={earnedLoops}
+              streak={streak}
+              rewardPoints={rewardPoints}
+            />
             <span
               className={cn(
                 "font-mono text-xs font-bold",
@@ -349,10 +319,106 @@ function AchievementBonusCard({
               earned ? "[&>div]:bg-primary" : "[&>div]:bg-secondary"
             )}
           />
-
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function AchievementLoopLogosTooltip({
+  loops,
+  earnedLoops,
+  streak,
+  rewardPoints,
+}: {
+  loops: ProfileLoopStats[]
+  earnedLoops: ProfileLoopStats[]
+  streak: number
+  rewardPoints: number
+}) {
+  const visibleLoops = earnedLoops.slice(0, 4)
+  const hiddenLoopCount = Math.max(0, earnedLoops.length - visibleLoops.length)
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="flex min-h-7 min-w-7 items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            aria-label={`View loop streak status for the ${streak}-claim streak bonus`}
+          >
+            {visibleLoops.length > 0 ? (
+              <span className="flex items-center">
+                {visibleLoops.map((loop, index) => (
+                  <LoopLogoMark
+                    key={`${streak}-${loop.id}`}
+                    loop={loop}
+                    className={cn(index > 0 && "-ml-2")}
+                  />
+                ))}
+                {hiddenLoopCount > 0 ? (
+                  <span className="-ml-2 flex size-7 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px] font-bold text-muted-foreground tabular-nums">
+                    +{hiddenLoopCount}
+                  </span>
+                ) : null}
+              </span>
+            ) : (
+              <span className="flex size-7 items-center justify-center rounded-full border-2 border-card bg-muted">
+                <StreakMilestoneIcon
+                  streak={streak}
+                  disabled
+                  className="size-3.5"
+                />
+              </span>
+            )}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          className="w-64 rounded-2xl border-border/70 bg-card p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
+        >
+          <AchievementLoopBonusList
+            loops={loops}
+            streak={streak}
+            rewardPoints={rewardPoints}
+          />
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function LoopLogoMark({
+  loop,
+  className,
+}: {
+  loop: ProfileLoopStats
+  className?: string
+}) {
+  const logoUrl = loop.metadata.logoUrl
+
+  return (
+    <span
+      className={cn(
+        "relative flex size-7 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-gradient-to-br font-heading text-[10px] font-extrabold leading-none text-primary-foreground shadow-[0_1px_4px_hsl(var(--foreground)/0.18)]",
+        !logoUrl && getLoopAvatarClassName(loop),
+        className
+      )}
+      title={loop.metadata.title}
+    >
+      {logoUrl ? (
+        <Image
+          src={logoUrl}
+          alt=""
+          fill
+          sizes="28px"
+          className="bg-background object-contain p-1"
+        />
+      ) : (
+        getLoopInitial(loop)
+      )}
+    </span>
   )
 }
 
