@@ -168,7 +168,7 @@ export async function fetchAllClaimEventsForUserLoop(input: {
   const events: ClaimScoringEvent[] = []
   let afterEventId: string | undefined
 
-  while (true) {
+  for (;;) {
     const batch = await fetchClaimEventPage({
       query: buildClaimEventsQuery({
         afterEventId: afterEventId != null,

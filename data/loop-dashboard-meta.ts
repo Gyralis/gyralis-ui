@@ -3,7 +3,7 @@ import type { DashboardLoopKey, DashboardLoopMeta } from "@/lib/dashboard/types"
 export const defaultDashboardLoopKeys = [
   "1hive",
   "blockscout",
-  "base-superloop",
+  "markee-gardens",
 ] as const satisfies readonly DashboardLoopKey[]
 
 export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
@@ -36,32 +36,18 @@ export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
     tokenSymbol: "HNY",
     isVisibleInDashboard: true,
   },
-  "base-superloop": {
-    loopKey: "base-superloop",
+  "markee-gardens": {
+    loopKey: "markee-gardens",
     contractType: "superLoop",
-    title: "Markee SuperLoop",
+    title: "Markee Gardens",
     shortTitle: "Markee",
-    by: "Markee",
+    by: "Markee Cooperative",
     description:
-      "The production SuperLoop distributing MARKEE rewards on Base.",
+      "Streaming rewards for eligible members of the Markee Gardens community.",
     logoSrc: "/markee-logo.png",
-    brandColor: "#0052FF",
+    brandColor: "#22C55E",
     chainName: "Base",
     tokenSymbol: "MARKEE",
     isVisibleInDashboard: true,
-  },
-  "test-superloops": {
-    loopKey: "test-superloops",
-    contractType: "superLoop",
-    title: "TEST SUPERLOOPS",
-    shortTitle: "Superloops",
-    by: "Gyralis Team",
-    description:
-      "The first SuperLoop now receiving live SUP flow on Base for eligible loopers.",
-    logoSrc: "/blockscout-logo.png",
-    brandColor: "#F97316",
-    chainName: "Base",
-    tokenSymbol: "SUP",
-    isVisibleInDashboard: false,
   },
 }

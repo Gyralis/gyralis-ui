@@ -437,7 +437,7 @@ describe("receipt claim scoring sync", () => {
     const claimEvent = parseAbiItem(
       "event Claim(address indexed claimer,address indexed token,uint256 indexed periodNumber,uint256 payout)"
     )
-    const txHash = `0x${"3".repeat(64)}` as `0x${string}`
+    const txHash = `0x${"3".repeat(64)}`
     const token = "0xF6627cF19317C33B457f77452876e6e297c4942F"
     const topics = encodeEventTopics({
       abi: [claimEvent],
@@ -483,7 +483,7 @@ describe("receipt claim scoring sync", () => {
     const claimEvent = parseAbiItem(
       "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
     )
-    const txHash = `0x${"1".repeat(64)}` as `0x${string}`
+    const txHash = `0x${"1".repeat(64)}`
     const topics = encodeEventTopics({
       abi: [claimEvent],
       eventName: "Claim",
@@ -530,7 +530,7 @@ describe("receipt claim scoring sync", () => {
     const claimEvent = parseAbiItem(
       "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
     )
-    const txHash = `0x${"2".repeat(64)}` as `0x${string}`
+    const txHash = `0x${"2".repeat(64)}`
     const topics = encodeEventTopics({
       abi: [claimEvent],
       eventName: "Claim",

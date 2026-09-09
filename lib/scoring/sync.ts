@@ -139,7 +139,9 @@ export function advanceScoringSyncCursor(
 export async function runScoringSync(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
   if (mode === "full" && (input.loopId != null || input.chainId != null)) {
-    throw new Error("Full scoring recompute must run without chain or loop filters")
+    throw new Error(
+      "Full scoring recompute must run without chain or loop filters"
+    )
   }
 
   const configuredSources = getScoringSubgraphSources()
@@ -203,7 +205,7 @@ export async function runScoringSync(input: SyncInput = {}) {
     }) {
       let afterEventId = pageInput.afterEventId
 
-      while (true) {
+      for (;;) {
         const events = await fetchClaimEventsFromSubgraph({
           source,
           fromBlock: pageInput.fromBlock,

@@ -62,7 +62,7 @@ const liveLoopSources = {
     payoutTokenAddress: null,
     getEndpoint: () => env.GYRALIS_SUBGRAPH_URL,
   },
-  "base-superloop": {
+  "markee-gardens": {
     subgraphId: "0x213310e1dbd6991cd488ab247c81fad82cd88e7a",
     address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
     chain: base,
@@ -405,8 +405,7 @@ function sumAmounts(
 
 function sumDecimalAmounts(amounts: string[]): string {
   const decimals = amounts.reduce(
-    (maximum, amount) =>
-      Math.max(maximum, amount.split(".")[1]?.length ?? 0),
+    (maximum, amount) => Math.max(maximum, amount.split(".")[1]?.length ?? 0),
     0
   )
   const total = amounts.reduce((sum, amount) => {
