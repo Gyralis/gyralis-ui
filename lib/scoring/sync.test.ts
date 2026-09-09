@@ -102,12 +102,14 @@ describe("incremental scoring sync", () => {
   })
 
   it("processes one bounded page and checkpoints after projection writes", async () => {
+    const historicalEvent = claimEvent(5, "0x111-0")
     const lastBlockEvent = claimEvent(10, "0xbbb-0")
     const newBlockEvent = claimEvent(11, "0xccc-0")
     mocks.fetchClaimEventsFromSubgraph
       .mockResolvedValueOnce([lastBlockEvent])
       .mockResolvedValueOnce([newBlockEvent])
     mocks.fetchAllClaimEventsForUserLoop.mockResolvedValue([
+      historicalEvent,
       lastBlockEvent,
       newBlockEvent,
     ])
@@ -138,6 +140,10 @@ describe("incremental scoring sync", () => {
       lastBlockNumber: 11,
       lastEventId: "0xccc-0",
     })
+    expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([
+      lastBlockEvent,
+      newBlockEvent,
+    ])
     expect(
       mocks.updateScoringSyncState.mock.invocationCallOrder[0]
     ).toBeGreaterThan(mocks.upsertUserLoopStats.mock.invocationCallOrder[0])

@@ -36,6 +36,7 @@ import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
 type SyncMode = "incremental" | "full"
 const PROJECTION_WRITE_CONCURRENCY = 20
+const INCREMENTAL_MAX_BATCH_SIZE = 100
 
 interface SyncInput {
   mode?: SyncMode
@@ -149,7 +150,10 @@ export async function runScoringSync(input: SyncInput = {}) {
 
   const syncState = mode === "incremental" ? await getScoringSyncState() : null
   const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
-  const batchSize = env.SCORING_SYNC_BATCH_SIZE
+  const batchSize =
+    mode === "incremental"
+      ? Math.min(env.SCORING_SYNC_BATCH_SIZE, INCREMENTAL_MAX_BATCH_SIZE)
+      : env.SCORING_SYNC_BATCH_SIZE
   const affectedLoops = new Map<string, AffectedLoopKey>()
   const fullModeClaimEventsByLoop = new Map<
     string,
@@ -206,7 +210,11 @@ export async function runScoringSync(input: SyncInput = {}) {
   }
 
   async function updateProjections(
-    pageAffectedLoops: Map<string, AffectedLoopKey>
+    pageAffectedLoops: Map<string, AffectedLoopKey>,
+    newClaimEventsByLoop: Map<
+      string,
+      Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+    >
   ) {
     const affectedUsers = new Set<string>()
 
@@ -232,7 +240,7 @@ export async function runScoringSync(input: SyncInput = {}) {
         await Promise.all([
           upsertUserLoopStats(loopStats),
           upsertLoopLeaderboardEntry(loopStats),
-          markProcessedClaimEvents(claimEvents),
+          markProcessedClaimEvents(newClaimEventsByLoop.get(loopKey) ?? []),
         ])
         affectedUsers.add(key.userAddress)
       }
@@ -258,6 +266,10 @@ export async function runScoringSync(input: SyncInput = {}) {
 
   if (mode === "incremental") {
     const pageAffectedLoops = new Map<string, AffectedLoopKey>()
+    const pageClaimEventsByLoop = new Map<
+      string,
+      Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+    >()
     const events = syncState?.lastEventId
       ? await fetchClaimEventsFromSubgraph({
           blockNumber: lastSyncedBlock,
@@ -284,11 +296,18 @@ export async function runScoringSync(input: SyncInput = {}) {
         loopId: event.loopId,
         chainId: event.chainId,
       }
-      pageAffectedLoops.set(keyForAffectedLoop(key), key)
+      const loopKey = keyForAffectedLoop(key)
+      pageAffectedLoops.set(loopKey, key)
+      const loopEvents = pageClaimEventsByLoop.get(loopKey) ?? []
+      loopEvents.push(event)
+      pageClaimEventsByLoop.set(loopKey, loopEvents)
       cursor = advanceScoringSyncCursor(cursor, event)
     }
 
-    const affectedUsers = await updateProjections(pageAffectedLoops)
+    const affectedUsers = await updateProjections(
+      pageAffectedLoops,
+      pageClaimEventsByLoop
+    )
 
     if (input.loopId == null) {
       await updateScoringSyncState({
@@ -311,7 +330,10 @@ export async function runScoringSync(input: SyncInput = {}) {
     fromBlock: 0,
   })
 
-  const affectedUsers = await updateProjections(affectedLoops)
+  const affectedUsers = await updateProjections(
+    affectedLoops,
+    fullModeClaimEventsByLoop
+  )
 
   if (input.loopId == null) {
     await updateScoringSyncState({
