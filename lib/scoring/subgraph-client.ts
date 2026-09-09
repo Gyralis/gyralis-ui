@@ -76,8 +76,11 @@ export function getScoringSubgraphSource(
   return source
 }
 
+export type ClaimEventsOrderBy = "id" | "blockNumber"
+
 export function buildClaimEventsQuery(
-  filters: ClaimEventsQueryFilters
+  filters: ClaimEventsQueryFilters,
+  orderBy: ClaimEventsOrderBy = "id"
 ): string {
   const variables = ["$first: Int!"]
   const where = []
@@ -109,7 +112,7 @@ export function buildClaimEventsQuery(
   query ClaimEvents(${variables.join(", ")}) {
     claimEvents(
       first: $first
-      orderBy: id
+      orderBy: ${orderBy}
       orderDirection: asc
       ${whereClause}
     ) {
@@ -133,18 +136,22 @@ export async function fetchClaimEventsFromSubgraph(input: {
   afterEventId?: string
   first: number
   loopId?: number
+  orderBy?: ClaimEventsOrderBy
 }): Promise<ClaimScoringEvent[]> {
   if (input.fromBlock != null && input.blockNumber != null) {
     throw new Error("Use either fromBlock or blockNumber, not both")
   }
 
   return fetchClaimEventPage({
-    query: buildClaimEventsQuery({
-      fromBlock: input.fromBlock != null,
-      blockNumber: input.blockNumber != null,
-      afterEventId: input.afterEventId != null,
-      loopId: input.loopId != null,
-    }),
+    query: buildClaimEventsQuery(
+      {
+        fromBlock: input.fromBlock != null,
+        blockNumber: input.blockNumber != null,
+        afterEventId: input.afterEventId != null,
+        loopId: input.loopId != null,
+      },
+      input.orderBy
+    ),
     variables: {
       first: input.first,
       fromBlock: input.fromBlock,
