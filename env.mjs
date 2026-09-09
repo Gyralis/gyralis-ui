@@ -5,6 +5,8 @@ export const DEFAULT_NEXTAUTH_SECRET =
   "complex_password_at_least_32_characters_long"
 export const DEFAULT_GYRALIS_SUBGRAPH_URL =
   "https://api.studio.thegraph.com/query/33583/gyralis-gnosis/version/latest"
+export const DEFAULT_GYRALIS_BASE_SUBGRAPH_URL =
+  "https://api.studio.thegraph.com/query/33583/gyralis-base/version/latest"
 
 export const env = createEnv({
   server: {
@@ -15,6 +17,11 @@ export const env = createEnv({
       .string()
       .url()
       .default(DEFAULT_GYRALIS_SUBGRAPH_URL),
+    GYRALIS_BASE_SUBGRAPH_URL: z
+      .string()
+      .url()
+      .default(DEFAULT_GYRALIS_BASE_SUBGRAPH_URL),
+    BASE_RPC_URL: z.string().url().optional(),
     GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),
     SCORING_SYNC_BATCH_SIZE: z.coerce.number().int().positive().default(500),
     CRON_SECRET: z.string().min(32).optional(),
@@ -52,6 +59,8 @@ export const env = createEnv({
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     GYRALIS_SUBGRAPH_URL: process.env.GYRALIS_SUBGRAPH_URL,
+    GYRALIS_BASE_SUBGRAPH_URL: process.env.GYRALIS_BASE_SUBGRAPH_URL,
+    BASE_RPC_URL: process.env.BASE_RPC_URL,
     GYRALIS_SUBGRAPH_CHAIN_ID: process.env.GYRALIS_SUBGRAPH_CHAIN_ID,
     SCORING_SYNC_BATCH_SIZE: process.env.SCORING_SYNC_BATCH_SIZE,
     CRON_SECRET: process.env.CRON_SECRET,

@@ -31,6 +31,8 @@ import { computeLoopStatsFromClaims } from "./rules"
 import {
   fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph,
+  getScoringSubgraphSource,
+  getScoringSubgraphSources,
 } from "./subgraph-client"
 import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
@@ -135,21 +137,21 @@ export function advanceScoringSyncCursor(
 
 export async function runScoringSync(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
-  if (mode === "full" && input.loopId != null) {
-    throw new Error("Full scoring recompute must run without a loop filter")
-  }
-  if (input.chainId && input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
+  if (mode === "full" && (input.loopId != null || input.chainId != null)) {
     throw new Error(
-      "Requested chainId does not match GYRALIS_SUBGRAPH_CHAIN_ID"
+      "Full scoring recompute must run without chain or loop filters"
     )
   }
+
+  const configuredSources = getScoringSubgraphSources()
+  const sources = input.chainId
+    ? [getScoringSubgraphSource(input.chainId)]
+    : configuredSources
 
   if (mode === "full") {
     await clearScoringProjections()
   }
 
-  const syncState = mode === "incremental" ? await getScoringSyncState() : null
-  const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
   const batchSize =
     mode === "incremental"
       ? Math.min(env.SCORING_SYNC_BATCH_SIZE, INCREMENTAL_MAX_BATCH_SIZE)
@@ -159,55 +161,15 @@ export async function runScoringSync(input: SyncInput = {}) {
     string,
     Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
   >()
+  const allAffectedUsers = new Set<string>()
+  const sourceCursors = new Map<number, ScoringSyncCursor>()
+  const sourceResults: Array<{
+    chainId: number
+    processedEvents: number
+    lastBlockNumber: number
+    hasMore: boolean
+  }> = []
   let processedEvents = 0
-  let cursor: ScoringSyncCursor = {
-    lastBlockNumber: mode === "incremental" ? lastSyncedBlock : 0,
-    lastEventId: syncState?.lastEventId ?? undefined,
-  }
-
-  function trackEvents(
-    events: Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
-  ) {
-    for (const event of events) {
-      const key = {
-        userAddress: event.userAddress,
-        loopId: event.loopId,
-        chainId: event.chainId,
-      }
-      const loopKey = keyForAffectedLoop(key)
-      affectedLoops.set(loopKey, key)
-      if (mode === "full") {
-        const eventsForLoop = fullModeClaimEventsByLoop.get(loopKey) ?? []
-        eventsForLoop.push(event)
-        fullModeClaimEventsByLoop.set(loopKey, eventsForLoop)
-      }
-      cursor = advanceScoringSyncCursor(cursor, event)
-      processedEvents += 1
-    }
-  }
-
-  async function fetchCursorPages(pageInput: {
-    fromBlock?: number
-    blockNumber?: number
-    afterEventId?: string
-  }) {
-    let afterEventId = pageInput.afterEventId
-
-    for (;;) {
-      const events = await fetchClaimEventsFromSubgraph({
-        fromBlock: pageInput.fromBlock,
-        blockNumber: pageInput.blockNumber,
-        afterEventId,
-        first: batchSize,
-        loopId: input.loopId,
-      })
-
-      if (events.length === 0) break
-      trackEvents(events)
-      if (events.length < batchSize) break
-      afterEventId = events[events.length - 1]?.id
-    }
-  }
 
   async function updateProjections(
     pageAffectedLoops: Map<string, AffectedLoopKey>,
@@ -228,6 +190,7 @@ export async function runScoringSync(input: SyncInput = {}) {
           mode === "full"
             ? fullModeClaimEventsByLoop.get(loopKey) ?? []
             : await fetchAllClaimEventsForUserLoop({
+                source: getScoringSubgraphSource(key.chainId),
                 userAddress: key.userAddress,
                 loopId: key.loopId,
                 batchSize,
@@ -265,70 +228,136 @@ export async function runScoringSync(input: SyncInput = {}) {
   }
 
   if (mode === "incremental") {
-    const pageAffectedLoops = new Map<string, AffectedLoopKey>()
-    const pageClaimEventsByLoop = new Map<
-      string,
-      Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
-    >()
-    const events = syncState?.lastEventId
-      ? await fetchClaimEventsFromSubgraph({
-          blockNumber: lastSyncedBlock,
-          afterEventId: syncState.lastEventId,
-          first: batchSize,
-          loopId: input.loopId,
-          orderBy: "id",
-        })
-      : []
-
-    if (events.length < batchSize) {
-      const newBlockEvents = await fetchClaimEventsFromSubgraph({
-        fromBlock: lastSyncedBlock + 1,
-        first: batchSize - events.length,
-        loopId: input.loopId,
-        orderBy: "blockNumber",
-      })
-      events.push(...newBlockEvents)
-    }
-
-    for (const event of events) {
-      const key = {
-        userAddress: event.userAddress,
-        loopId: event.loopId,
-        chainId: event.chainId,
+    for (const source of sources) {
+      const syncState = await getScoringSyncState(source.chainId)
+      const lastSyncedBlock = syncState?.lastBlockNumber ?? 0
+      let cursor: ScoringSyncCursor = {
+        lastBlockNumber: lastSyncedBlock,
+        lastEventId: syncState?.lastEventId ?? undefined,
       }
-      const loopKey = keyForAffectedLoop(key)
-      pageAffectedLoops.set(loopKey, key)
-      const loopEvents = pageClaimEventsByLoop.get(loopKey) ?? []
-      loopEvents.push(event)
-      pageClaimEventsByLoop.set(loopKey, loopEvents)
-      cursor = advanceScoringSyncCursor(cursor, event)
-    }
+      const pageAffectedLoops = new Map<string, AffectedLoopKey>()
+      const pageClaimEventsByLoop = new Map<
+        string,
+        Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
+      >()
+      const events = syncState?.lastEventId
+        ? await fetchClaimEventsFromSubgraph({
+            source,
+            blockNumber: lastSyncedBlock,
+            afterEventId: syncState.lastEventId,
+            first: batchSize,
+            loopId: input.loopId,
+            orderBy: "id",
+          })
+        : []
 
-    const affectedUsers = await updateProjections(
-      pageAffectedLoops,
-      pageClaimEventsByLoop
-    )
+      if (events.length < batchSize) {
+        const newBlockEvents = await fetchClaimEventsFromSubgraph({
+          source,
+          fromBlock: lastSyncedBlock + 1,
+          first: batchSize - events.length,
+          loopId: input.loopId,
+          orderBy: "blockNumber",
+        })
+        events.push(...newBlockEvents)
+      }
 
-    if (input.loopId == null) {
-      await updateScoringSyncState({
+      for (const event of events) {
+        const key = {
+          userAddress: event.userAddress,
+          loopId: event.loopId,
+          chainId: event.chainId,
+        }
+        const loopKey = keyForAffectedLoop(key)
+        pageAffectedLoops.set(loopKey, key)
+        affectedLoops.set(loopKey, key)
+        const loopEvents = pageClaimEventsByLoop.get(loopKey) ?? []
+        loopEvents.push(event)
+        pageClaimEventsByLoop.set(loopKey, loopEvents)
+        cursor = advanceScoringSyncCursor(cursor, event)
+      }
+
+      const affectedUsers = await updateProjections(
+        pageAffectedLoops,
+        pageClaimEventsByLoop
+      )
+      affectedUsers.forEach((userAddress) => allAffectedUsers.add(userAddress))
+
+      if (input.loopId == null) {
+        await updateScoringSyncState({
+          chainId: source.chainId,
+          lastBlockNumber: cursor.lastBlockNumber,
+          lastEventId: cursor.lastEventId,
+        })
+      }
+
+      processedEvents += events.length
+      sourceCursors.set(source.chainId, cursor)
+      sourceResults.push({
+        chainId: source.chainId,
+        processedEvents: events.length,
         lastBlockNumber: cursor.lastBlockNumber,
-        lastEventId: cursor.lastEventId,
+        hasMore: events.length === batchSize,
       })
     }
 
     return {
       mode,
-      processedEvents: events.length,
-      affectedLoops: pageAffectedLoops.size,
-      affectedUsers: affectedUsers.size,
-      lastBlockNumber: cursor.lastBlockNumber,
-      hasMore: events.length === batchSize,
+      processedEvents,
+      affectedLoops: affectedLoops.size,
+      affectedUsers: allAffectedUsers.size,
+      lastBlockNumber: Math.max(
+        0,
+        ...sourceResults.map((result) => result.lastBlockNumber)
+      ),
+      hasMore: sourceResults.some((result) => result.hasMore),
+      chains: sourceResults,
     }
   }
 
-  await fetchCursorPages({
-    fromBlock: 0,
-  })
+  for (const source of sources) {
+    let cursor: ScoringSyncCursor = { lastBlockNumber: 0 }
+    let afterEventId: string | undefined
+    let sourceProcessedEvents = 0
+
+    for (;;) {
+      const events = await fetchClaimEventsFromSubgraph({
+        source,
+        fromBlock: 0,
+        afterEventId,
+        first: batchSize,
+        loopId: input.loopId,
+        orderBy: "id",
+      })
+
+      if (events.length === 0) break
+      for (const event of events) {
+        const key = {
+          userAddress: event.userAddress,
+          loopId: event.loopId,
+          chainId: event.chainId,
+        }
+        const loopKey = keyForAffectedLoop(key)
+        affectedLoops.set(loopKey, key)
+        const loopEvents = fullModeClaimEventsByLoop.get(loopKey) ?? []
+        loopEvents.push(event)
+        fullModeClaimEventsByLoop.set(loopKey, loopEvents)
+        cursor = advanceScoringSyncCursor(cursor, event)
+        processedEvents += 1
+        sourceProcessedEvents += 1
+      }
+      if (events.length < batchSize) break
+      afterEventId = events[events.length - 1]?.id
+    }
+
+    sourceCursors.set(source.chainId, cursor)
+    sourceResults.push({
+      chainId: source.chainId,
+      processedEvents: sourceProcessedEvents,
+      lastBlockNumber: cursor.lastBlockNumber,
+      hasMore: false,
+    })
+  }
 
   const affectedUsers = await updateProjections(
     affectedLoops,
@@ -336,10 +365,15 @@ export async function runScoringSync(input: SyncInput = {}) {
   )
 
   if (input.loopId == null) {
-    await updateScoringSyncState({
-      lastBlockNumber: cursor.lastBlockNumber,
-      lastEventId: cursor.lastEventId,
-    })
+    for (const source of sources) {
+      const cursor = sourceCursors.get(source.chainId)
+      if (!cursor) continue
+      await updateScoringSyncState({
+        chainId: source.chainId,
+        lastBlockNumber: cursor.lastBlockNumber,
+        lastEventId: cursor.lastEventId,
+      })
+    }
   }
 
   return {
@@ -347,7 +381,11 @@ export async function runScoringSync(input: SyncInput = {}) {
     processedEvents,
     affectedLoops: affectedLoops.size,
     affectedUsers: affectedUsers.size,
-    lastBlockNumber: cursor.lastBlockNumber,
+    lastBlockNumber: Math.max(
+      0,
+      ...sourceResults.map((result) => result.lastBlockNumber)
+    ),
     hasMore: false,
+    chains: sourceResults,
   }
 }

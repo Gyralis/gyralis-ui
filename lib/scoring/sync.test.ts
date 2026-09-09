@@ -16,6 +16,11 @@ const mocks = vi.hoisted(() => ({
   upsertGlobalLeaderboardEntry: vi.fn(),
 }))
 
+const gnosisSource = {
+  chainId: 100,
+  url: "https://example.com/gnosis",
+}
+
 vi.mock("@/env.mjs", () => ({
   env: {
     GYRALIS_SUBGRAPH_CHAIN_ID: 100,
@@ -58,6 +63,8 @@ vi.mock("@/lib/db/clients/user-profile.client", () => ({
 vi.mock("./subgraph-client", () => ({
   fetchAllClaimEventsForUserLoop: mocks.fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph: mocks.fetchClaimEventsFromSubgraph,
+  getScoringSubgraphSource: () => gnosisSource,
+  getScoringSubgraphSources: () => [gnosisSource],
 }))
 
 const userAddress = "0x0000000000000000000000000000000000000001"
@@ -117,6 +124,7 @@ describe("incremental scoring sync", () => {
     const result = await runScoringSync()
 
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(1, {
+      source: gnosisSource,
       blockNumber: 10,
       afterEventId: "0xaaa-0",
       first: 2,
@@ -124,6 +132,7 @@ describe("incremental scoring sync", () => {
       orderBy: "id",
     })
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
+      source: gnosisSource,
       fromBlock: 11,
       first: 1,
       loopId: undefined,
@@ -137,6 +146,7 @@ describe("incremental scoring sync", () => {
       hasMore: true,
     })
     expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
+      chainId: 100,
       lastBlockNumber: 11,
       lastEventId: "0xccc-0",
     })
