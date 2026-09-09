@@ -160,6 +160,6 @@ export const LoopCardsData: LoopCardData[] = [
     statusLabel: "Preparing",
     sponsorName: "TBA",
     sponsorLogoUrl: "/gyralis-logo.svg",
-    sponsorUrl: "/",
+    sponsorUrl: "https://www.gyralis.xyz/",
   },
 ]

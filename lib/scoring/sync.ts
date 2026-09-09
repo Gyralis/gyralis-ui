@@ -35,6 +35,7 @@ import {
 import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
 type SyncMode = "incremental" | "full"
+const PROJECTION_WRITE_CONCURRENCY = 20
 
 interface SyncInput {
   mode?: SyncMode
@@ -55,6 +56,16 @@ interface ScoringSyncCursor {
 
 function keyForAffectedLoop(key: AffectedLoopKey): string {
   return [key.chainId, key.loopId, key.userAddress.toLowerCase()].join("|")
+}
+
+async function mapWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  callback: (item: T) => Promise<void>
+) {
+  for (let index = 0; index < items.length; index += concurrency) {
+    await Promise.all(items.slice(index, index + concurrency).map(callback))
+  }
 }
 
 function parseEarnedBonuses(value: unknown): EarnedStreakBonus[] {
@@ -178,7 +189,7 @@ export async function runScoringSync(input: SyncInput = {}) {
   }) {
     let afterEventId = pageInput.afterEventId
 
-    while (true) {
+    for (;;) {
       const events = await fetchClaimEventsFromSubgraph({
         fromBlock: pageInput.fromBlock,
         blockNumber: pageInput.blockNumber,
@@ -194,48 +205,113 @@ export async function runScoringSync(input: SyncInput = {}) {
     }
   }
 
-  if (mode === "incremental" && syncState?.lastEventId) {
-    await fetchCursorPages({
-      blockNumber: lastSyncedBlock,
-      afterEventId: syncState.lastEventId,
-    })
+  async function updateProjections(
+    pageAffectedLoops: Map<string, AffectedLoopKey>
+  ) {
+    const affectedUsers = new Set<string>()
+
+    await mapWithConcurrency(
+      [...pageAffectedLoops.values()],
+      PROJECTION_WRITE_CONCURRENCY,
+      async (key) => {
+        await ensureUserProfile(key.userAddress)
+        const loopKey = keyForAffectedLoop(key)
+        const claimEvents =
+          mode === "full"
+            ? fullModeClaimEventsByLoop.get(loopKey) ?? []
+            : await fetchAllClaimEventsForUserLoop({
+                userAddress: key.userAddress,
+                loopId: key.loopId,
+                batchSize,
+              })
+        const loopStats = computeLoopStatsFromClaims(
+          claimEvents,
+          scoringConfig,
+          key
+        )
+        await Promise.all([
+          upsertUserLoopStats(loopStats),
+          upsertLoopLeaderboardEntry(loopStats),
+          markProcessedClaimEvents(claimEvents),
+        ])
+        affectedUsers.add(key.userAddress)
+      }
+    )
+
+    await mapWithConcurrency(
+      [...affectedUsers],
+      PROJECTION_WRITE_CONCURRENCY,
+      async (userAddress) => {
+        const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
+          mapDbLoopStats
+        )
+        const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
+        await Promise.all([
+          upsertUserGlobalStats(globalStats),
+          upsertGlobalLeaderboardEntry(globalStats),
+        ])
+      }
+    )
+
+    return affectedUsers
+  }
+
+  if (mode === "incremental") {
+    const pageAffectedLoops = new Map<string, AffectedLoopKey>()
+    const events = syncState?.lastEventId
+      ? await fetchClaimEventsFromSubgraph({
+          blockNumber: lastSyncedBlock,
+          afterEventId: syncState.lastEventId,
+          first: batchSize,
+          loopId: input.loopId,
+          orderBy: "id",
+        })
+      : []
+
+    if (events.length < batchSize) {
+      const newBlockEvents = await fetchClaimEventsFromSubgraph({
+        fromBlock: lastSyncedBlock + 1,
+        first: batchSize - events.length,
+        loopId: input.loopId,
+        orderBy: "blockNumber",
+      })
+      events.push(...newBlockEvents)
+    }
+
+    for (const event of events) {
+      const key = {
+        userAddress: event.userAddress,
+        loopId: event.loopId,
+        chainId: event.chainId,
+      }
+      pageAffectedLoops.set(keyForAffectedLoop(key), key)
+      cursor = advanceScoringSyncCursor(cursor, event)
+    }
+
+    const affectedUsers = await updateProjections(pageAffectedLoops)
+
+    if (input.loopId == null) {
+      await updateScoringSyncState({
+        lastBlockNumber: cursor.lastBlockNumber,
+        lastEventId: cursor.lastEventId,
+      })
+    }
+
+    return {
+      mode,
+      processedEvents: events.length,
+      affectedLoops: pageAffectedLoops.size,
+      affectedUsers: affectedUsers.size,
+      lastBlockNumber: cursor.lastBlockNumber,
+      hasMore: events.length === batchSize,
+    }
   }
 
   await fetchCursorPages({
-    fromBlock: mode === "incremental" ? lastSyncedBlock + 1 : 0,
+    fromBlock: 0,
   })
 
-  const affectedUsers = new Set<string>()
-  for (const key of affectedLoops.values()) {
-    await ensureUserProfile(key.userAddress)
-    const loopKey = keyForAffectedLoop(key)
-    const claimEvents =
-      mode === "full"
-        ? fullModeClaimEventsByLoop.get(loopKey) ?? []
-        : await fetchAllClaimEventsForUserLoop({
-            userAddress: key.userAddress,
-            loopId: key.loopId,
-            batchSize,
-          })
-    const loopStats = computeLoopStatsFromClaims(
-      claimEvents,
-      scoringConfig,
-      key
-    )
-    await upsertUserLoopStats(loopStats)
-    await upsertLoopLeaderboardEntry(loopStats)
-    await markProcessedClaimEvents(claimEvents)
-    affectedUsers.add(key.userAddress)
-  }
-
-  for (const userAddress of affectedUsers) {
-    const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
-      mapDbLoopStats
-    )
-    const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
-    await upsertUserGlobalStats(globalStats)
-    await upsertGlobalLeaderboardEntry(globalStats)
-  }
+  const affectedUsers = await updateProjections(affectedLoops)
 
   if (input.loopId == null) {
     await updateScoringSyncState({
@@ -250,5 +326,6 @@ export async function runScoringSync(input: SyncInput = {}) {
     affectedLoops: affectedLoops.size,
     affectedUsers: affectedUsers.size,
     lastBlockNumber: cursor.lastBlockNumber,
+    hasMore: false,
   }
 }
