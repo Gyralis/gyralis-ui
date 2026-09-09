@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 const LOOP_KEYS = new Set<DashboardLoopKey>([
   "1hive",
   "blockscout",
-  "test-superloops",
+  "markee-gardens",
 ])
 
 function parseLoopKey(value: string): DashboardLoopKey | null {

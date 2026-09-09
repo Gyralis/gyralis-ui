@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { env } from "@/env.mjs"
 import { Chain, createWalletClient, getContract, http, parseAbi } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import * as chains from "viem/chains"
@@ -13,18 +12,15 @@ import {
   findAllowlistedLoop,
 } from "@/lib/loops/eligibility"
 import { generateEligibilitySignature } from "@/lib/loops/eligibility-signature"
+import { requestPassportScore } from "@/integrations/gitcoin-passport/api/passport-score"
 
 const TRUSTED_BACKEND_SIGNER_PK = process.env.TRUSTED_BACKEND_SIGNER_PK ?? ""
-const GITCOIN_PASSPORT_API_KEY = env.GITCOIN_PASSPORT_API_KEY ?? ""
-const SCORER_ID = env.GITCOIN_PASSPORT_SCORER_ID ?? ""
 
 /** Blockscout “Merits/Points” API */
 const BLOCKSCOUT_POINTS_BASE =
   process.env.BLOCKSCOUT_POINTS_BASE ?? "https://points.k8s-dev.blockscout.com"
 const BLOCKSCOUT_OFFER_ID = process.env.BLOCKSCOUT_OFFER_ID ?? "gyralis-offer"
 const THRESHOLD_SCORE = Number(process.env.THRESHOLD_SCORE ?? 0)
-const HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR =
-  "Unable to get score for provided scorer."
 const ELIGIBILITY_ERROR_CODES = {
   invalidRequest: "INVALID_REQUEST",
   loopNotEnabled: "LOOP_NOT_ENABLED",
@@ -45,7 +41,8 @@ class PassportScoreNotSyncedError extends Error {
 }
 
 interface PassportScoreResponse {
-  score: number
+  score?: number | string
+  detail?: string
 }
 
 interface BlockscoutRedemption {
@@ -72,34 +69,33 @@ function getViemChain(chainId: string | number): Chain {
 
 async function fetchPassportScore(
   userAddress: string,
-  minScore: number
+  minScore: number,
+  requestId: string
 ): Promise<number> {
-  if (!GITCOIN_PASSPORT_API_KEY)
-    throw new Error("Gitcoin Passport API key missing")
-  if (!SCORER_ID) throw new Error("Gitcoin Passport scorer id missing")
+  const response = await requestPassportScore(
+    userAddress,
+    `${requestId}:passport-score`
+  )
+  const data = (await response.json()) as PassportScoreResponse
 
-  const endpoint = `https://api.scorer.gitcoin.co/registry/score/${SCORER_ID}/${userAddress}`
-  const response = await fetch(endpoint, {
-    headers: { "X-API-KEY": GITCOIN_PASSPORT_API_KEY },
-  })
   if (!response.ok) {
-    const body = await response.text()
-    if (
-      response.status === 404 ||
-      body.includes(HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR)
-    ) {
+    if (response.status === 404) {
       throw new PassportScoreNotSyncedError(minScore)
     }
 
     throw new Error(
-      `Failed to fetch passport score (${response.status}): ${body.slice(
-        0,
-        240
-      )}`
+      `Failed to fetch passport score (${response.status}): ${
+        data.detail ?? response.statusText
+      }`
     )
   }
-  const data = (await response.json()) as PassportScoreResponse
-  return data.score
+
+  const score = Number(data.score)
+  if (!Number.isFinite(score)) {
+    throw new Error("Human Passport returned an invalid score")
+  }
+
+  return score
 }
 
 async function fetchNextPeriod(
@@ -228,7 +224,8 @@ export async function POST(req: Request) {
     const passportThreshold = THRESHOLD_SCORE
     const passportScore = await fetchPassportScore(
       userAddress,
-      passportThreshold
+      passportThreshold,
+      requestId
     )
     console.log(`[${requestId}] Passport score fetched`, {
       score: passportScore,
