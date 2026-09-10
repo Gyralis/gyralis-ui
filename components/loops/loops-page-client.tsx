@@ -86,7 +86,7 @@ export function LoopsPageClient() {
 
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-8 sm:pt-10"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-12"
         >
           <div className="mx-auto hidden max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
             {/* Table view is temporarily disabled while its data path is refactored.

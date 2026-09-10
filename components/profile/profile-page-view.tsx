@@ -83,7 +83,6 @@ function getLoopTotals(loops: ProfileLoopStats[]) {
 function getLooperLevelProgress(totalPoints: number) {
   if (totalPoints >= 250) {
     return {
-      badgeLabel: "LooperX",
       fromLabel: "True Looper",
       toLabel: "LooperX · 250 GP",
       progress: 100,
@@ -92,7 +91,6 @@ function getLooperLevelProgress(totalPoints: number) {
 
   if (totalPoints >= 50) {
     return {
-      badgeLabel: "True Looper",
       fromLabel: "True Looper",
       toLabel: "LooperX · 250 GP",
       progress: ((totalPoints - 50) / 200) * 100,
@@ -100,7 +98,6 @@ function getLooperLevelProgress(totalPoints: number) {
   }
 
   return {
-    badgeLabel: "Next: True Looper",
     fromLabel: "0 GP",
     toLabel: "True Looper",
     progress: (totalPoints / 50) * 100,
@@ -487,17 +484,9 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
         <CardContent className="relative z-10 flex min-h-[220px] flex-col gap-3 p-8">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Looper Profile
-                </h1>
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-primary"
-                >
-                  {level.badgeLabel}
-                </Badge>
-              </div>
+              <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Looper Profile
+              </h1>
               <p className="mt-1.5 break-all font-mono text-[11px] text-muted-foreground">
                 {data.address}
               </p>
