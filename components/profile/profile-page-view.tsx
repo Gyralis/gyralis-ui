@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { FaBolt, FaCheck, FaLock } from "react-icons/fa"
@@ -10,9 +11,11 @@ import {
   ProfilePageData,
 } from "@/lib/profile/get-profile-page-data"
 import { cn } from "@/lib/utils"
+import { getNextStreakMilestone } from "@/lib/profile/profile-opportunities"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -21,6 +24,9 @@ import {
 } from "@/components/ui/tooltip"
 import { StreakMilestoneIcon } from "@/components/loops/streak-milestone-icon"
 import { ProfileWalletAddressSync } from "@/components/profile/profile-wallet-address-sync"
+import { AchievementNextBonus } from "@/components/profile/achievement-next-bonus"
+import { ProfileExploreLoops } from "@/components/profile/profile-explore-loops"
+import { StreakPointsInfo } from "@/components/profile/streak-points-info"
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value)
@@ -119,8 +125,8 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
               No loop activity yet
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-              This wallet has a profile record, but no scored claims yet. Once
-              it claims in a loop, streaks and points will appear here.
+              No scored claims for this wallet yet. Start claiming in a loop
+              to earn points and unlock streak bonuses.
             </p>
             <Link
               href="/loops"
@@ -157,10 +163,10 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
                 <LoopActivityTable loops={data.loopStats} />
               </CardContent>
             </Card>
-
-            <AchievementsSection data={data} />
           </div>
         )}
+        <AchievementsSection data={data} />
+        <ProfileExploreLoops loops={data.loopStats} />
       </div>
     </div>
   )
@@ -179,9 +185,12 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
       <CardContent className="p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="font-heading text-3xl font-bold text-foreground">
-              Your achievements
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-heading text-3xl font-bold text-foreground">
+                Your achievements
+              </h2>
+              <StreakPointsInfo />
+            </div>
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
               Explore completed streak bonuses and points earned across loops.
             </p>
@@ -236,11 +245,14 @@ function AchievementBonusCard({
 }) {
   const earned = earnedLoops.length > 0
   const progress = Math.min(100, (bestOverallStreak / streak) * 100)
+  const nextBonusLoops = loops.filter(
+    (loop) => getNextStreakMilestone(loop)?.streak === streak
+  )
 
   return (
     <Card
       className={cn(
-        "overflow-hidden rounded-3xl border bg-card/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_34px_-28px_hsl(var(--foreground)/0.32)] transition-all duration-200 hover:border-border hover:bg-card",
+        "flex flex-col overflow-hidden rounded-3xl border bg-card/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_34px_-28px_hsl(var(--foreground)/0.32)] transition-all duration-200 hover:border-border hover:bg-card",
         earned
           ? "border-border/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_12px_34px_-28px_hsl(var(--foreground)/0.32)]"
           : "border-border/70 opacity-75"
@@ -248,7 +260,7 @@ function AchievementBonusCard({
     >
       <div
         className={cn(
-          "flex h-[92px] items-center justify-center",
+          "flex h-[92px] shrink-0 items-center justify-center",
           earned
             ? "bg-[linear-gradient(135deg,hsl(var(--primary)/0.14)_0%,hsl(var(--secondary)/0.10)_48%,hsl(var(--muted)/0.42)_100%)]"
             : "bg-[linear-gradient(135deg,hsl(var(--muted)/0.58)_0%,hsl(var(--muted)/0.28)_100%)]"
@@ -271,7 +283,7 @@ function AchievementBonusCard({
         </div>
       </div>
 
-      <CardContent className="flex flex-col gap-3 p-4">
+      <CardContent className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-base font-bold leading-tight text-foreground">
@@ -292,7 +304,13 @@ function AchievementBonusCard({
           </p>
         ) : null}
 
-        <div className="space-y-2">
+        {nextBonusLoops.length > 0 ? (
+          <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
+            <AchievementNextBonus loops={nextBonusLoops} />
+          </Suspense>
+        ) : null}
+
+        <div className="mt-auto space-y-2">
           <div className="flex items-center justify-between gap-3">
             <AchievementLoopLogosTooltip
               loops={loops}
@@ -428,6 +446,14 @@ function AchievementLoopBonusList({
   streak: number
   rewardPoints: number
 }) {
+  if (loops.length === 0) {
+    return (
+      <p className="text-xs leading-5 text-muted-foreground">
+        Claim in a loop to start earning streak bonuses.
+      </p>
+    )
+  }
+
   return (
     <div className="space-y-1.5">
       {loops.map((loop) => {
@@ -485,11 +511,8 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Looper Profile
+                Looper <span className="text-primary">Profile</span>
               </h1>
-              <p className="mt-1.5 break-all font-mono text-[11px] text-muted-foreground">
-                {data.address}
-              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:max-w-[220px] xl:min-w-[220px]">
@@ -609,10 +632,10 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
     <TooltipProvider>
       <div className="overflow-x-auto">
         <div className="w-full min-w-[720px]">
-          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-center gap-4 border-b border-border/70 px-3 pb-3 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-end gap-4 border-b border-border/70 px-3 py-2 text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-muted-foreground">
             <span>Loop</span>
-            <span className="text-right">Claims</span>
             <span className="text-right">Current streak</span>
+            <span className="text-right">Claims</span>
             <span className="text-right">Streak points</span>
             <span className="text-right">Total</span>
           </div>
@@ -629,10 +652,13 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
                 All loops
               </p>
             </div>
-            <TableValue value={formatNumber(totals.claims)} align="right" />
             <span className="text-right text-sm font-semibold text-muted-foreground">
               —
             </span>
+            <TableValue
+              value={`+${formatNumber(totals.claims)}`}
+              align="right"
+            />
             <StreakBonusValue
               value={totals.streakPoints}
               align="right"
@@ -696,8 +722,8 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
         </div>
       </div>
 
-      <TableValue value={formatNumber(loop.totalClaims)} align="right" />
       <StreakValue value={loop.currentStreak} />
+      <TableValue value={`+${formatNumber(loop.totalClaims)}`} align="right" />
       <StreakBonusCell loop={loop} />
       <TableValue
         value={formatNumber(loop.totalPoints)}
@@ -714,15 +740,13 @@ function StreakValue({ value }: { value: number }) {
   return (
     <div
       className={cn(
-        "inline-flex items-center justify-end gap-2 text-right text-sm font-normal tabular-nums",
-        hasStreak
-          ? "text-foreground"
-          : "text-muted-foreground"
+        "flex w-full items-baseline justify-end gap-1.5 text-right text-sm font-normal leading-5 tabular-nums",
+        hasStreak ? "text-primary" : "text-muted-foreground"
       )}
     >
       <FaFire
         className={cn(
-          "size-[13px]",
+          "size-[13px] self-center",
           hasStreak &&
             "text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.45)]"
         )}
@@ -741,13 +765,16 @@ function StreakBonusCell({ loop }: { loop: ProfileLoopStats }) {
       <TooltipTrigger asChild>
         <button
           type="button"
-          className="group flex w-full flex-col items-end gap-1.5 rounded-xl text-right outline-none transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="group grid w-full grid-rows-[1fr_auto_1fr] justify-items-end gap-y-1 self-stretch rounded-xl text-right outline-none transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           aria-label={`Streak points ${formatNumber(loop.streakBonusPoints)}. ${earnedCount} of ${scoringConfig.streakBonuses.length} streaks earned.`}
         >
-          <StreakBonusValue value={loop.streakBonusPoints} align="right" />
-          <div className="flex items-center justify-end gap-2">
+          {/* Equal outer tracks center the number, with the details below it. */}
+          <div className="row-start-2">
+            <StreakBonusValue value={loop.streakBonusPoints} align="right" />
+          </div>
+          <div className="row-start-3 flex items-center justify-end gap-2 self-start">
             <MilestoneDots loop={loop} />
-            <span className="text-[10px] font-semibold text-muted-foreground">
+            <span className="text-[10px] font-semibold leading-3 text-muted-foreground">
               {earnedCount} of {scoringConfig.streakBonuses.length} streaks
             </span>
           </div>

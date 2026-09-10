@@ -11,10 +11,16 @@ const links: Array<{
   href: string
   label: string
   section: ParticipationSection
+  disabled?: boolean
 }> = [
   { href: "/loops", label: "Loops", section: "loops" },
-  { href: "/leaderboard", label: "Leaderboard", section: "leaderboard" },
-  { href: "/profile", label: "Profile", section: "profile" },
+  {
+    href: "/leaderboard",
+    label: "Leaderboard",
+    section: "leaderboard",
+    disabled: true,
+  },
+  { href: "/profile", label: "Profile", section: "profile", disabled: true },
 ]
 
 export function ParticipationSectionNav({
@@ -38,24 +44,39 @@ export function ParticipationSectionNav({
       >
         {links.map((link, index) => {
           const isActive = isSectionActive(link.section)
+          const itemClassName = cn(
+            "inline-flex items-center rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest transition-colors sm:px-5 sm:text-xs sm:tracking-[0.12em]",
+            link.disabled
+              ? "cursor-not-allowed text-muted-foreground/50"
+              : isActive
+              ? "bg-primary/[0.14] text-primary shadow-[0_0_0_1px_rgba(28,231,131,0.32),0_0_24px_-6px_rgba(28,231,131,0.95),0_0_38px_-16px_rgba(28,231,131,0.85)] ring-1 ring-primary/30"
+              : "text-muted-foreground hover:bg-muted/70 hover:text-primary"
+          )
 
           return (
             <div key={link.section} className="contents">
               {index > 0 ? (
                 <div className="h-5 w-px bg-border" aria-hidden="true" />
               ) : null}
-              <Link
-                href={link.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "inline-flex items-center rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest transition-colors sm:px-5 sm:text-xs sm:tracking-[0.12em]",
-                  isActive
-                    ? "bg-primary/[0.14] text-primary shadow-[0_0_0_1px_rgba(28,231,131,0.32),0_0_24px_-6px_rgba(28,231,131,0.95),0_0_38px_-16px_rgba(28,231,131,0.85)] ring-1 ring-primary/30"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-primary"
-                )}
-              >
-                {link.label}
-              </Link>
+              {link.disabled ? (
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  aria-current={isActive ? "page" : undefined}
+                  className={itemClassName}
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <Link
+                  href={link.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={itemClassName}
+                >
+                  {link.label}
+                </Link>
+              )}
             </div>
           )
         })}
