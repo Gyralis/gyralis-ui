@@ -1206,11 +1206,6 @@ export default function HomePage() {
                     already claiming, returning, and building streaks across the
                     ecosystem.
                   </p>
-                  <p>
-                    Unlock special access to the{" "}
-                    <span className="text-white">True Loopers Loop</span> —
-                    coming soon.
-                  </p>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-3">
