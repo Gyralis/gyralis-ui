@@ -1,5 +1,6 @@
 import "server-only"
 
+import { unstable_cache } from "next/cache"
 import {
   defaultDashboardLoopKeys,
   loopDashboardMeta,
@@ -474,7 +475,7 @@ function buildCurrentPeriodOverview(
   }
 }
 
-export async function getDashboardPageData(
+async function loadDashboardPageData(
   options: GetDashboardDataOptions = {}
 ): Promise<DashboardPageData> {
   const selectedLoopKeys = (
@@ -681,4 +682,17 @@ export async function getDashboardPageData(
       ),
     },
   }
+}
+
+const getCachedDashboardPageData = unstable_cache(
+  loadDashboardPageData,
+  ["dashboard-page-data-v1"],
+  { revalidate: REVALIDATE_SECONDS }
+)
+
+export function getDashboardPageData(options: GetDashboardDataOptions = {}) {
+  return getCachedDashboardPageData({
+    loopKeys: options.loopKeys ?? [...defaultDashboardLoopKeys],
+    periodsBack: options.periodsBack ?? DEFAULT_PERIODS_BACK,
+  })
 }

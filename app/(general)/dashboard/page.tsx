@@ -1,8 +1,9 @@
 import Image from "next/image"
+import Link from "next/link"
 import type { IconType } from "react-icons"
 import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 
-import { getDashboardPageData } from "@/lib/dashboard"
+import { getDashboardPageData, type DashboardPageData } from "@/lib/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
@@ -301,7 +302,33 @@ function LoopRateStatCard({ label, value }: LoopRateStatCardProps) {
 }
 
 export default async function DashboardPage() {
-  const data = await getDashboardPageData({ periodsBack: 7 })
+  let data: DashboardPageData
+  try {
+    data = await getDashboardPageData({ periodsBack: 7 })
+  } catch (error) {
+    console.error("[dashboard] Unable to load statistics", error)
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-16">
+        <Card>
+          <CardHeader>
+            <CardTitle>Dashboard temporarily unavailable</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground">
+              We couldn’t load the statistics right now. Please try again later.
+              You can still visit Loops.
+            </p>
+            <Link
+              href="/loops"
+              className="inline-flex rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Back to Loops
+            </Link>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
   const tokenSummary = data.tokenSummaries[0]
   const indexedBlockLabel = data.indexedBlocks
     .map(
