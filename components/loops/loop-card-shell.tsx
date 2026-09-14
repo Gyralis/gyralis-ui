@@ -50,6 +50,7 @@ import {
 interface LoopCardShellProps {
   action: ReactNode
   distribution: SectionState<LoopDistributionViewData>
+  eligibilityLinkDisabled?: boolean
   isSuper: boolean
   loop: LoopCardData
   loopers: SectionState<LoopersViewData>
@@ -73,6 +74,7 @@ const CHAIN_ICON_SRC: Record<string, string> = {
 export function LoopCardShell({
   action,
   distribution,
+  eligibilityLinkDisabled = false,
   isSuper,
   loop,
   loopers,
@@ -226,7 +228,7 @@ export function LoopCardShell({
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Eligibility
               </p>
-              {loop.eligibilityUrl ? (
+              {loop.eligibilityUrl && !eligibilityLinkDisabled ? (
                 <Link
                   href={loop.eligibilityUrl}
                   target="_blank"
@@ -241,7 +243,14 @@ export function LoopCardShell({
                   </span>
                 </Link>
               ) : (
-                <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-foreground">
+                <p
+                  aria-disabled={eligibilityLinkDisabled || undefined}
+                  className={`mt-0.5 line-clamp-2 text-sm font-semibold leading-5 ${
+                    eligibilityLinkDisabled
+                      ? "text-muted-foreground"
+                      : "text-foreground"
+                  }`}
+                >
                   {eligibilityLabel}
                 </p>
               )}

@@ -14,6 +14,7 @@ export type LoopActionStatus =
   | "claiming"
   | "claimed"
   | "error"
+  | "unavailable"
 
 export interface LoopActionTooltip {
   title: string

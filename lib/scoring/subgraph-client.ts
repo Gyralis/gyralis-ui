@@ -29,8 +29,11 @@ interface ClaimEventsQueryFilters {
   userAddress?: boolean
 }
 
+export type ClaimEventsOrderBy = "id" | "blockNumber"
+
 export function buildClaimEventsQuery(
-  filters: ClaimEventsQueryFilters
+  filters: ClaimEventsQueryFilters,
+  orderBy: ClaimEventsOrderBy = "id"
 ): string {
   const variables = ["$first: Int!"]
   const where = []
@@ -66,7 +69,7 @@ export function buildClaimEventsQuery(
   query ClaimEvents(${variables.join(", ")}) {
     claimEvents(
       first: $first
-      orderBy: id
+      orderBy: ${orderBy}
       orderDirection: asc
       ${whereClause}
     ) {
@@ -90,19 +93,23 @@ export async function fetchClaimEventsFromSubgraph(input: {
   first: number
   loopId?: number
   excludedLoopIds?: readonly number[]
+  orderBy?: ClaimEventsOrderBy
 }): Promise<ClaimScoringEvent[]> {
   if (input.fromBlock != null && input.blockNumber != null) {
     throw new Error("Use either fromBlock or blockNumber, not both")
   }
 
   return fetchClaimEventPage({
-    query: buildClaimEventsQuery({
-      fromBlock: input.fromBlock != null,
-      blockNumber: input.blockNumber != null,
-      afterEventId: input.afterEventId != null,
-      loopId: input.loopId != null,
-      excludedLoopIds: Boolean(input.excludedLoopIds?.length),
-    }),
+    query: buildClaimEventsQuery(
+      {
+        fromBlock: input.fromBlock != null,
+        blockNumber: input.blockNumber != null,
+        afterEventId: input.afterEventId != null,
+        loopId: input.loopId != null,
+        excludedLoopIds: Boolean(input.excludedLoopIds?.length),
+      },
+      input.orderBy
+    ),
     variables: {
       first: input.first,
       fromBlock: input.fromBlock,

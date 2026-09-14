@@ -1,6 +1,6 @@
 "use client"
 
-import { LuCheck, LuWallet, LuWaves } from "react-icons/lu"
+import { LuCheck, LuInfo, LuWallet, LuWaves } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +42,15 @@ export function LoopClaimAction({
     : "min-h-12 w-full px-5 py-3 text-sm"
 
   if (model.presentation === "neutral") {
+    const StatusIcon =
+      model.status === "entered"
+        ? LuCheck
+        : model.status === "unavailable"
+        ? LuInfo
+        : LuWaves
+    const statusIconClassName =
+      model.status === "unavailable" ? "text-muted-foreground" : "text-primary"
+
     return (
       <div className={compact ? "inline-flex" : "w-full"}>
         <Tooltip>
@@ -51,17 +60,16 @@ export function LoopClaimAction({
               tabIndex={0}
               className={`${statusClassName} inline-flex cursor-help items-center justify-center gap-2 rounded-full bg-muted/45 font-semibold tracking-[0.01em] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
             >
-              {model.status === "entered" ? (
-                <LuCheck
-                  className="size-4 shrink-0 text-primary"
-                  aria-hidden="true"
-                />
-              ) : (
-                <LuWaves
-                  className="size-4 shrink-0 text-primary motion-safe:animate-pulse"
-                  aria-hidden="true"
-                />
-              )}
+              <StatusIcon
+                className={[
+                  "size-4 shrink-0",
+                  statusIconClassName,
+                  model.status === "active" ? "motion-safe:animate-pulse" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-hidden="true"
+              />
               <span>{model.label}</span>
             </div>
           </TooltipTrigger>

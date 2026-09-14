@@ -22,11 +22,11 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
     expect(
       findAllowlistedLoop(
         "gardens",
-        "0x3a5972524cc121d6d8a9a7e79d6f49dbfe71857b",
+        "0x213310e1dbd6991cd488ab247c81fad82cd88e7a",
         8453
       )
     ).toMatchObject({
-      address: "0x3a5972524cc121D6d8A9a7e79d6F49dbfe71857b",
+      address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
       chainId: 8453,
       contractType: "superLoop",
       gardensCommunity: "markee",

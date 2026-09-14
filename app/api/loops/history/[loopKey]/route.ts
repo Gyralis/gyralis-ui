@@ -1,36 +1,9 @@
-import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
 import { NextResponse } from "next/server"
 
+import { getDashboardPageData } from "@/lib/dashboard"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
 export const dynamic = "force-dynamic"
-
-type LoopHistorySnapshot = {
-  loopKey?: string
-  loopName?: string
-  uniqueUserCount?: number
-  totalClaimsCount?: number
-  totalRegistrationsCount?: number
-  claimRatePercent?: string | number | null
-  totalDistributedAmountFormatted?: string | null
-  tokenSymbol?: string | null
-}
-
-type HistorySnapshotEntry = {
-  date?: string
-  recordedAt?: string
-  loops?: Partial<Record<DashboardLoopKey, LoopHistorySnapshot>>
-}
-
-type LoopStatsHistory = {
-  snapshots?: HistorySnapshotEntry[]
-}
-
-const HISTORY_FILE_PATH = resolve(
-  process.cwd(),
-  "data/history/loop-stats-history.json"
-)
 
 const LOOP_KEYS = new Set<DashboardLoopKey>([
   "1hive",
@@ -56,14 +29,11 @@ export async function GET(
     )
   }
 
-  const raw = await readFile(HISTORY_FILE_PATH, "utf8")
-  const history = JSON.parse(raw) as LoopStatsHistory
-  const latestSnapshot = history.snapshots?.at(-1)
-  const loopSnapshot = latestSnapshot?.loops?.[loopKey]
-
-  if (!latestSnapshot || !loopSnapshot) {
+  const dashboard = await getDashboardPageData({ loopKeys: [loopKey] })
+  const loop = dashboard.loopSummaries[0]
+  if (!loop) {
     return NextResponse.json(
-      { success: false, error: "Loop history not found" },
+      { success: false, error: "Loop not found" },
       { status: 404 }
     )
   }
@@ -71,20 +41,16 @@ export async function GET(
   return NextResponse.json({
     success: true,
     loopKey,
-    snapshotDate: latestSnapshot.date ?? null,
-    recordedAt: latestSnapshot.recordedAt ?? null,
+    snapshotDate: loop.updatedAt,
+    recordedAt: loop.updatedAt,
     stats: {
-      loopName: loopSnapshot.loopName ?? null,
-      uniqueUsers: loopSnapshot.uniqueUserCount ?? 0,
-      claims: loopSnapshot.totalClaimsCount ?? 0,
-      registrations: loopSnapshot.totalRegistrationsCount ?? 0,
-      claimRatePercent:
-        loopSnapshot.claimRatePercent == null
-          ? null
-          : Number(loopSnapshot.claimRatePercent),
-      distributedAmount:
-        loopSnapshot.totalDistributedAmountFormatted ?? null,
-      tokenSymbol: loopSnapshot.tokenSymbol ?? null,
+      loopName: loop.meta.title,
+      uniqueUsers: loop.uniqueUserCount,
+      claims: loop.totalClaimsCount,
+      registrations: loop.totalRegistrationsCount,
+      claimRatePercent: loop.claimParticipationRatePercent,
+      distributedAmount: loop.totalDistributedAmount,
+      tokenSymbol: loop.meta.tokenSymbol,
     },
   })
 }
