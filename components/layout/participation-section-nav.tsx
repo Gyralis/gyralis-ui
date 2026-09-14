@@ -18,9 +18,8 @@ const links: Array<{
     href: "/leaderboard",
     label: "Leaderboard",
     section: "leaderboard",
-    disabled: true,
   },
-  { href: "/profile", label: "Profile", section: "profile", disabled: true },
+  { href: "/profile", label: "Profile", section: "profile" },
 ]
 
 export function ParticipationSectionNav({
