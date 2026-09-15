@@ -596,7 +596,7 @@ function SponsorModal({
           ) : hardcodeZeroStats ? null : (
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <LuInfo className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>Latest history snapshot</span>
+              <span>Updated:</span>
               <span>{formatSnapshotDate(data?.snapshotDate)}</span>
             </div>
           )}
@@ -648,13 +648,14 @@ function formatClaimRateStat(
 
 function formatSnapshotDate(snapshotDate: string | null | undefined) {
   if (!snapshotDate) return "No snapshot date"
-  const parsed = new Date(`${snapshotDate}T00:00:00Z`)
+  const parsed = new Date(snapshotDate)
   if (Number.isNaN(parsed.getTime())) return snapshotDate
 
-  return parsed.toLocaleDateString("en-US", {
+  const month = parsed.toLocaleDateString("en-US", {
     month: "long",
-    day: "numeric",
-    year: "numeric",
     timeZone: "UTC",
   })
+  const hours = String(parsed.getUTCHours()).padStart(2, "0")
+  const minutes = String(parsed.getUTCMinutes()).padStart(2, "0")
+  return `${parsed.getUTCDate()} of ${month} ${parsed.getUTCFullYear()} at ${hours}:${minutes} UTC`
 }
