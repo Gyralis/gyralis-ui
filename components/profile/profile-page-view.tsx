@@ -31,6 +31,7 @@ import { ProfileWalletAddressSync } from "@/components/profile/profile-wallet-ad
 import { AchievementNextBonus } from "@/components/profile/achievement-next-bonus"
 import { ProfileExploreLoops } from "@/components/profile/profile-explore-loops"
 import { StreakPointsInfo } from "@/components/profile/streak-points-info"
+import { ProfileDetails } from "@/components/profile/profile-details"
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value)
@@ -348,22 +349,17 @@ function AchievementBonusCard({
   )
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{card}</TooltipTrigger>
-        <TooltipContent
-          side="bottom"
-          sideOffset={8}
-          className="w-64 rounded-2xl border-border/70 bg-card !p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
-        >
+    <ProfileDetails
+      trigger={card}
+      label={`Loop status for the ${streak}-claim streak bonus`}
+      className="w-64 max-w-[calc(100vw-2rem)] rounded-2xl border-border/70 bg-card !p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
+    >
           <AchievementLoopBonusList
             loops={loopStatuses}
             streak={streak}
             rewardPoints={rewardPoints}
           />
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    </ProfileDetails>
   )
 }
 
@@ -495,7 +491,9 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
   const progressMarkerPosition = Math.min(96, Math.max(4, level.progress))
   const rankLabel =
     data.globalRank == null ? "—" : `#${formatNumber(data.globalRank)}`
-  const lastUpdated = data.globalStats?.updatedAt
+  const lastUpdated = data.lastStatsUpdatedAt
+    ? new Date(data.lastStatsUpdatedAt)
+    : null
 
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
@@ -552,7 +550,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
             <div className="space-y-2">
               <div className="relative pt-5">
                 <span
-                  className="absolute top-0 -translate-x-1/2 px-1 py-0.5 font-mono text-[11px] font-medium text-primary"
+                  className="absolute top-0 -translate-x-1/2 px-1 py-0.5 text-[11px] font-medium text-primary tabular-nums"
                   style={{ left: `${progressMarkerPosition}%` }}
                 >
                   {progressPercent}% completed
@@ -582,7 +580,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               {rankLabel}
             </p>
             <p className="mt-3 text-[10px] leading-3 text-muted-foreground">
-              Last updated{" "}
+              Updated:{" "}
               {lastUpdated ? (
                 <time
                   dateTime={lastUpdated.toISOString()}
@@ -724,8 +722,11 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
   const logoUrl = loop.metadata.logoUrl
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <ProfileDetails
+      label={`${loop.metadata.title} streak details`}
+      align="end"
+      className="w-[208px] max-w-[calc(100vw-2rem)] rounded-lg border-border bg-card !p-0 text-left text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_24px_70px_-34px_hsl(var(--foreground)/0.35)]"
+      trigger={
         <div
           tabIndex={0}
           role="group"
@@ -788,16 +789,10 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
             align="right"
           />
         </div>
-      </TooltipTrigger>
-      <TooltipContent
-        side="bottom"
-        align="end"
-        sideOffset={8}
-        className="w-[208px] rounded-lg border-border bg-card p-0 text-left text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_24px_70px_-34px_hsl(var(--foreground)/0.35)]"
-      >
+      }
+    >
         <StreakBonusDetailCard loop={loop} />
-      </TooltipContent>
-    </Tooltip>
+    </ProfileDetails>
   )
 }
 
@@ -844,13 +839,7 @@ function StreakBonusValue({
 
   return (
     <p
-      className={cn(
-        "font-bold tabular-nums",
-        "text-sm",
-        hasBonus ? "text-foreground" : "text-muted-foreground",
-        align === "center" && "text-center",
-        align === "right" && "text-right"
-      )}
+      className={`text-sm font-bold tabular-nums ${hasBonus ? "text-foreground" : "text-muted-foreground"} ${align === "center" ? "text-center" : "text-right"}`}
     >
       +{formatNumber(value)}
       <span className="ml-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -951,12 +940,7 @@ function TableValue({
 }) {
   return (
     <p
-      className={cn(
-        "leading-5 tabular-nums text-foreground",
-        total ? "text-base font-extrabold" : "text-sm font-bold",
-        align === "center" && "text-center",
-        align === "right" && "text-right"
-      )}
+      className={`leading-5 tabular-nums text-foreground ${total ? "text-base font-extrabold" : "text-sm font-bold"} ${align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left"}`}
     >
       {value}
       {suffix ? (

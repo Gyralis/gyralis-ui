@@ -25,6 +25,7 @@ import {
   markProcessedClaimEvents,
 } from "@/lib/db/clients/processed-claim-events.client"
 import { ensureUserProfile } from "@/lib/db/clients/user-profile.client"
+import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
@@ -202,6 +203,7 @@ async function recomputeUserLoopAndGlobalStats(input: {
   )
   await upsertUserGlobalStats(globalStats)
   await upsertGlobalLeaderboardEntry(globalStats)
+  invalidateProfilePageData(input.userAddress)
 
   return { loopStats, globalStats }
 }

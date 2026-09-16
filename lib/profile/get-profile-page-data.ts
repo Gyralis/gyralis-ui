@@ -1,20 +1,26 @@
 import "server-only"
 
+import { unstable_cache } from "next/cache"
+import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 import { isAddress } from "viem"
 
-import { LoopCardData, LoopCardsData } from "@/data/loops-data"
-import { getUserGlobalStats } from "@/lib/db/clients/global-stats.client"
 import { getGlobalLeaderboardRank } from "@/lib/db/clients/leaderboard.client"
 import { getUserLoopStatsForUser } from "@/lib/db/clients/loop-stats.client"
-import { getUserProfile } from "@/lib/db/clients/user-profile.client"
 import { normalizeDbAddress } from "@/lib/db/ids"
 import { ignoredScoringLoopIds } from "@/lib/scoring/loop-filters"
 import { parseEarnedStreakBonuses } from "@/lib/scoring/responses"
 import { EarnedStreakBonus } from "@/lib/scoring/types"
 
-type ProfileRecord = Awaited<ReturnType<typeof getUserProfile>>
-type GlobalStatsRecord = Awaited<ReturnType<typeof getUserGlobalStats>>
-type LoopStatsRecord = Awaited<ReturnType<typeof getUserLoopStatsForUser>>[number]
+import {
+  PROFILE_CACHE_SECONDS,
+  PROFILE_RANK_CACHE_TAG,
+  PROFILE_STATS_CACHE_TAG,
+  profileStatsCacheTag,
+} from "./profile-cache"
+
+type LoopStatsRecord = Awaited<
+  ReturnType<typeof getUserLoopStatsForUser>
+>[number]
 
 export interface ProfileLoopMetadata {
   id: number
@@ -51,14 +57,7 @@ export interface ProfileLoopStats {
 
 export interface ProfilePageData {
   address: string
-  profile: ProfileRecord
-  globalStats: GlobalStatsRecord extends infer T
-    ? T extends null
-      ? null
-      : Omit<T, "earnedStreakBonuses"> & {
-          earnedStreakBonuses: EarnedStreakBonus[]
-        }
-    : never
+  lastStatsUpdatedAt: string | null
   loopStats: ProfileLoopStats[]
   hasActivity: boolean
   globalRank: number | null
@@ -148,32 +147,20 @@ export function formatProfileAddress(address: string) {
   return truncateAddress(address)
 }
 
-export async function getProfilePageData(
-  rawAddress: string
-): Promise<ProfilePageData | null> {
-  if (!isAddress(rawAddress)) return null
-
-  const address = normalizeDbAddress(rawAddress)
-  const [profile, globalStats, loopStats, globalRank] = await Promise.all([
-    getUserProfile(address),
-    getUserGlobalStats(address),
-    getUserLoopStatsForUser(address, {
-      excludedLoopIds: ignoredScoringLoopIds,
-    }),
-    getGlobalLeaderboardRank(address),
-  ])
+async function fetchProfileStats(address: string) {
+  const loopStats = await getUserLoopStatsForUser(address, {
+    excludedLoopIds: ignoredScoringLoopIds,
+  })
+  const latestUpdate = loopStats.reduce<Date | null>(
+    (latest, loop) =>
+      !latest || loop.updatedAt > latest ? loop.updatedAt : latest,
+    null
+  )
 
   return {
     address,
-    profile,
-    globalStats: globalStats
-      ? {
-          ...globalStats,
-          earnedStreakBonuses: parseEarnedStreakBonuses(
-            globalStats.earnedStreakBonuses
-          ),
-        }
-      : null,
+    // ISO strings keep cache hits and misses identical after JSON serialization.
+    lastStatsUpdatedAt: latestUpdate?.toISOString() ?? null,
     loopStats: loopStats.map(mapLoopStats).sort((left, right) => {
       return (
         right.totalPoints - left.totalPoints ||
@@ -182,6 +169,32 @@ export async function getProfilePageData(
       )
     }),
     hasActivity: loopStats.length > 0,
-    globalRank,
   }
+}
+
+const getCachedGlobalRank = unstable_cache(
+  getGlobalLeaderboardRank,
+  ["profile-global-rank-v1"],
+  { revalidate: PROFILE_CACHE_SECONDS, tags: [PROFILE_RANK_CACHE_TAG] }
+)
+
+export async function getProfilePageData(
+  rawAddress: string
+): Promise<ProfilePageData | null> {
+  if (!isAddress(rawAddress)) return null
+
+  const address = normalizeDbAddress(rawAddress)
+  const [stats, globalRank] = await Promise.all([
+    unstable_cache(
+      () => fetchProfileStats(address),
+      ["profile-stats-v1", address],
+      {
+        revalidate: PROFILE_CACHE_SECONDS,
+        tags: [PROFILE_STATS_CACHE_TAG, profileStatsCacheTag(address)],
+      }
+    )(),
+    getCachedGlobalRank(address),
+  ])
+
+  return { ...stats, globalRank }
 }

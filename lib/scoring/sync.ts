@@ -24,6 +24,7 @@ import {
   updateScoringSyncState,
 } from "@/lib/db/clients/sync-state.client"
 import { ensureUserProfile } from "@/lib/db/clients/user-profile.client"
+import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
@@ -76,6 +77,7 @@ async function clearScoringProjections() {
   await clearUserLoopStats()
   await clearProcessedClaimEvents()
   await resetScoringSyncState()
+  invalidateProfilePageData()
 }
 
 export function advanceScoringSyncCursor(
@@ -240,6 +242,7 @@ export async function runScoringSync(input: SyncInput = {}) {
           upsertUserGlobalStats(globalStats),
           upsertGlobalLeaderboardEntry(globalStats),
         ])
+        invalidateProfilePageData(userAddress)
       }
     )
 
@@ -321,6 +324,8 @@ export async function runScoringSync(input: SyncInput = {}) {
     affectedLoops,
     fullModeClaimEventsByLoop
   )
+  // Also evict empty/partial snapshots read while the full rebuild was running.
+  invalidateProfilePageData()
 
   if (input.loopId == null) {
     await updateScoringSyncState({
