@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { FaBolt, FaCheck, FaLock } from "react-icons/fa"
+import { FaBolt, FaCheck, FaInfoCircle, FaLock } from "react-icons/fa"
 import { FaFire } from "react-icons/fa6"
 import type { IconType } from "react-icons"
 
@@ -310,7 +310,7 @@ function AchievementBonusCard({
           </span>
         </div>
 
-        {nextBonusLoops.length > 0 ? (
+        {earned && nextBonusLoops.length > 0 ? (
           <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
             <AchievementNextBonus loops={nextBonusLoops} />
           </Suspense>
@@ -354,7 +354,7 @@ function AchievementBonusCard({
         <TooltipContent
           side="bottom"
           sideOffset={8}
-          className="w-64 rounded-2xl border-border/70 bg-card p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
+          className="w-64 rounded-2xl border-border/70 bg-card !p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
         >
           <AchievementLoopBonusList
             loops={loopStatuses}
@@ -453,7 +453,7 @@ function AchievementLoopBonusList({
         return (
           <div
             key={`${streak}-${loop.key}`}
-            className="flex items-center justify-between gap-3 rounded-xl bg-muted/35 px-2.5 py-2"
+            className="flex items-center justify-between gap-3 rounded-2xl bg-muted/35 px-2.5 py-2"
           >
             <div className="flex min-w-0 items-center gap-2">
               <StreakMilestoneIcon
@@ -478,7 +478,7 @@ function AchievementLoopBonusList({
                 earned ? "text-primary" : "text-muted-foreground"
               )}
             >
-              {earned ? `+${rewardPoints} GP` : "not yet"}
+              +{rewardPoints} GP
             </span>
           </div>
         )
@@ -596,6 +596,22 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               ) : (
                 "—"
               )}
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Profile update schedule"
+                      className="ml-1 inline-flex size-4 items-center justify-center rounded-full align-middle text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <FaInfoCircle className="size-3" aria-hidden="true" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Profile stats are updated once per day.
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </p>
           </div>
 
@@ -791,7 +807,7 @@ function StreakValue({ value }: { value: number }) {
   return (
     <div
       className={cn(
-        "flex w-full items-baseline justify-end gap-1.5 text-right text-sm font-normal leading-5 tabular-nums",
+        "flex w-full items-baseline justify-end gap-1.5 text-right text-sm font-bold leading-5 tabular-nums",
         hasStreak ? "text-primary" : "text-muted-foreground"
       )}
     >
@@ -829,7 +845,7 @@ function StreakBonusValue({
   return (
     <p
       className={cn(
-        "font-normal tabular-nums",
+        "font-bold tabular-nums",
         "text-sm",
         hasBonus ? "text-foreground" : "text-muted-foreground",
         align === "center" && "text-center",
@@ -937,7 +953,7 @@ function TableValue({
     <p
       className={cn(
         "leading-5 tabular-nums text-foreground",
-        total ? "text-base font-extrabold" : "text-sm font-normal",
+        total ? "text-base font-extrabold" : "text-sm font-bold",
         align === "center" && "text-center",
         align === "right" && "text-right"
       )}

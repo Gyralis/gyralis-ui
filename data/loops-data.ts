@@ -129,7 +129,7 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityProvider: "gardens",
     gardensCommunity: "markee",
     passportMinScore: 0,
-    enabled: true,
+    enabled: false,
     achievementActive: false,
     rewardsSummary: "1000 markee tokens",
     sponsorName: "Markee Cooperative",
