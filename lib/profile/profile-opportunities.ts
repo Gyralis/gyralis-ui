@@ -1,11 +1,73 @@
 import { LoopCardsData, type LoopCardData } from "@/data/loops-data"
 import { isAddress } from "viem"
 
+import type { ProfileLoopStats } from "@/lib/profile/get-profile-page-data"
 import { scoringConfig } from "@/lib/scoring/config"
 import { isIncludedScoringLoopId } from "@/lib/scoring/loop-filters"
-import type { ProfileLoopStats } from "@/lib/profile/get-profile-page-data"
 
 type ClaimSummary = Pick<ProfileLoopStats, "chainId" | "loopId" | "totalClaims">
+
+export interface AchievementLoopStatus {
+  key: string
+  title: string
+  logoUrl?: string
+  active: boolean
+  earned: boolean
+}
+
+export function getAchievementLoopStatuses(
+  stats: readonly ProfileLoopStats[],
+  streak: number,
+  catalog: readonly LoopCardData[] = LoopCardsData
+): AchievementLoopStatus[] {
+  const statsByLoop = new Map(
+    stats.map((loop) => [`${loop.chainId}-${loop.loopId}`, loop])
+  )
+  const activeLoops = catalog.filter(
+    (loop) =>
+      loop.enabled &&
+      loop.achievementActive !== false &&
+      loop.address != null &&
+      isAddress(loop.address) &&
+      isIncludedScoringLoopId(loop.id)
+  )
+  const statuses: AchievementLoopStatus[] = activeLoops.map((loop) => {
+    const key = `${loop.chainId}-${loop.id}`
+    return {
+      key,
+      title: loop.title,
+      logoUrl:
+        loop.communityLogoUrl ?? loop.eligibilityLogoUrl ?? loop.sponsorLogoUrl,
+      active: true,
+      earned:
+        statsByLoop
+          .get(key)
+          ?.earnedStreakBonuses.some((bonus) => bonus.streak === streak) ??
+        false,
+    }
+  })
+  const activeKeys = new Set(statuses.map((loop) => loop.key))
+
+  // Keep inactive earned bonuses in the tooltip history, not the active logos.
+  for (const loop of stats) {
+    const key = `${loop.chainId}-${loop.loopId}`
+    if (
+      !activeKeys.has(key) &&
+      isIncludedScoringLoopId(loop.loopId) &&
+      loop.earnedStreakBonuses.some((bonus) => bonus.streak === streak)
+    ) {
+      statuses.push({
+        key,
+        title: loop.metadata.title,
+        logoUrl: loop.metadata.logoUrl,
+        active: false,
+        earned: true,
+      })
+    }
+  }
+
+  return statuses
+}
 
 export function getUnclaimedLoops(
   stats: readonly ClaimSummary[],

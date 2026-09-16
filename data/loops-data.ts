@@ -33,6 +33,8 @@ export interface LoopCardData {
   gardensCommunity?: GardensCommunityKey
   passportMinScore: number
   enabled: boolean
+  // Override inclusion in the active achievement roster without hiding the loop.
+  achievementActive?: boolean
   claimAmount?: string // New: Amount user can claim
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
@@ -128,6 +130,7 @@ export const LoopCardsData: LoopCardData[] = [
     gardensCommunity: "markee",
     passportMinScore: 0,
     enabled: true,
+    achievementActive: false,
     rewardsSummary: "1000 markee tokens",
     sponsorName: "Markee Cooperative",
     sponsorLogoUrl: "/markee-logo.png",

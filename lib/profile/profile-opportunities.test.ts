@@ -1,14 +1,15 @@
 import { LoopCardsData, type LoopCardData } from "@/data/loops-data"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { scoringConfig } from "@/lib/scoring/config"
 import type { ProfileLoopStats } from "@/lib/profile/get-profile-page-data"
 import { getVerifiedStreakBonus } from "@/lib/profile/get-verified-streak-bonus"
 import {
+  getAchievementLoopStatuses,
   getNextStreakBonus,
   getNextStreakMilestone,
   getUnclaimedLoops,
 } from "@/lib/profile/profile-opportunities"
+import { scoringConfig } from "@/lib/scoring/config"
 
 const { readContract } = vi.hoisted(() => ({ readContract: vi.fn() }))
 
@@ -61,6 +62,92 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+describe("achievement loop logos", () => {
+  it("includes both active loops even when the user has no scoring records", () => {
+    const loops = getAchievementLoopStatuses([], 3)
+    expect(loops.map((loop) => loop.title)).toEqual([
+      "1Hive Gardens",
+      "Blockscout Merits",
+    ])
+    expect(loops.every((loop) => loop.active && !loop.earned)).toBe(true)
+  })
+
+  it("counts one earned loop out of two active loops, including the unvisited loop", () => {
+    const active = getAchievementLoopStatuses([makeLoop()], 3).filter(
+      (loop) => loop.active
+    )
+    expect(active).toHaveLength(2)
+    expect(active.filter((loop) => loop.earned)).toHaveLength(1)
+  })
+
+  it("keeps historical rewards out of the active completion count", () => {
+    const loops = getAchievementLoopStatuses(
+      [
+        makeLoop(),
+        makeLoop({ id: "inactive-markee", loopId: 5, chainId: 8453 }),
+      ],
+      3
+    )
+    expect(loops.filter((loop) => loop.earned)).toHaveLength(2)
+    expect(loops.filter((loop) => loop.active)).toHaveLength(2)
+    expect(loops.filter((loop) => loop.active && loop.earned)).toHaveLength(1)
+  })
+
+  it("counts eight available bonuses across two active loops", () => {
+    const activeBonuses = scoringConfig.streakBonuses.flatMap((milestone) =>
+      getAchievementLoopStatuses([makeLoop()], milestone.streak).filter(
+        (loop) => loop.active
+      )
+    )
+    expect(activeBonuses).toHaveLength(8)
+    expect(activeBonuses.filter((loop) => loop.earned)).toHaveLength(1)
+  })
+
+  it("matches earned bonuses by chain, loop and milestone, not current streak", () => {
+    const catalog = [catalogLoop, { ...catalogLoop, chainId: 8453 }]
+    const stats = [makeLoop({ currentStreak: 0 })]
+    expect(
+      getAchievementLoopStatuses(stats, 3, catalog).map((loop) => loop.earned)
+    ).toEqual([true, false])
+    expect(
+      getAchievementLoopStatuses(stats, 7, catalog).map((loop) => loop.earned)
+    ).toEqual([false, false])
+  })
+
+  it("keeps inactive earned bonuses in history without treating them as active", () => {
+    const loops = getAchievementLoopStatuses([makeLoop()], 3, [
+      { ...catalogLoop, achievementActive: false },
+    ])
+    expect(loops).toMatchObject([{ key: "100-3", active: false, earned: true }])
+    expect(
+      getAchievementLoopStatuses([makeLoop()], 7, [
+        { ...catalogLoop, achievementActive: false },
+      ])
+    ).toEqual([])
+  })
+
+  it("excludes disabled, ignored and unconfigured loops from the active roster", () => {
+    expect(
+      getAchievementLoopStatuses([], 3, [
+        { ...catalogLoop, enabled: false },
+        { ...catalogLoop, achievementActive: false },
+        { ...catalogLoop, id: 1 },
+        { ...catalogLoop, id: 2 },
+        { ...catalogLoop, address: undefined },
+        { ...catalogLoop, address: "0xinvalid" },
+      ])
+    ).toEqual([])
+  })
+
+  it("does not cap the active roster at four logos", () => {
+    const catalog = Array.from({ length: 6 }, (_, index) => ({
+      ...catalogLoop,
+      id: index + 3,
+    }))
+    expect(getAchievementLoopStatuses([], 30, catalog)).toHaveLength(6)
+  })
+})
+
 describe("profile loop discovery", () => {
   it("offers active loops for a wallet with no claims", () => {
     expect(getUnclaimedLoops([], [catalogLoop])).toEqual([catalogLoop])
@@ -71,19 +158,22 @@ describe("profile loop discovery", () => {
 
   it("matches claims by both chain and loop ID", () => {
     const otherChain = { ...catalogLoop, chainId: 8453 }
-    expect(
-      getUnclaimedLoops([makeLoop()], [catalogLoop, otherChain])
-    ).toEqual([otherChain])
+    expect(getUnclaimedLoops([makeLoop()], [catalogLoop, otherChain])).toEqual([
+      otherChain,
+    ])
   })
 
   it("excludes disabled, ignored and unconfigured loops", () => {
     expect(
-      getUnclaimedLoops([], [
-        { ...catalogLoop, enabled: false },
-        { ...catalogLoop, id: 1 },
-        { ...catalogLoop, id: 2 },
-        { ...catalogLoop, address: undefined },
-      ])
+      getUnclaimedLoops(
+        [],
+        [
+          { ...catalogLoop, enabled: false },
+          { ...catalogLoop, id: 1 },
+          { ...catalogLoop, id: 2 },
+          { ...catalogLoop, address: undefined },
+        ]
+      )
     ).toEqual([])
   })
 
@@ -124,9 +214,11 @@ describe("next streak bonuses", () => {
   })
 
   it("handles one claim remaining without rounding", () => {
-    expect(
-      getNextStreakBonus(makeLoop({ currentStreak: 6 }), 11n)
-    ).toEqual({ streak: 7, points: 5, remainingClaims: 1 })
+    expect(getNextStreakBonus(makeLoop({ currentStreak: 6 }), 11n)).toEqual({
+      streak: 7,
+      points: 5,
+      remainingClaims: 1,
+    })
   })
 
   it.each([
@@ -153,23 +245,26 @@ describe("live streak verification", () => {
   it.each([
     ["loop", "getCurrentPeriod"],
     ["superLoop", "getStreamingCurrentPeriod"],
-  ] as const)("checks the correct period method for %s", async (type, method) => {
-    readContract.mockResolvedValue(11n)
-    const loop = makeLoop()
-    loop.metadata.contractType = type
+  ] as const)(
+    "checks the correct period method for %s",
+    async (type, method) => {
+      readContract.mockResolvedValue(11n)
+      const loop = makeLoop()
+      loop.metadata.contractType = type
 
-    await expect(getVerifiedStreakBonus(loop)).resolves.toEqual({
-      streak: 7,
-      points: 5,
-      remainingClaims: 2,
-    })
-    expect(readContract).toHaveBeenCalledWith(
-      expect.objectContaining({
-        address: loop.metadata.address,
-        functionName: method,
+      await expect(getVerifiedStreakBonus(loop)).resolves.toEqual({
+        streak: 7,
+        points: 5,
+        remainingClaims: 2,
       })
-    )
-  })
+      expect(readContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          address: loop.metadata.address,
+          functionName: method,
+        })
+      )
+    }
+  )
 
   it("does not fetch when there is no next milestone", async () => {
     await expect(

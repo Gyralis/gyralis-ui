@@ -11,7 +11,11 @@ import {
   ProfilePageData,
 } from "@/lib/profile/get-profile-page-data"
 import { cn } from "@/lib/utils"
-import { getNextStreakMilestone } from "@/lib/profile/profile-opportunities"
+import {
+  getAchievementLoopStatuses,
+  getNextStreakMilestone,
+  type AchievementLoopStatus,
+} from "@/lib/profile/profile-opportunities"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -58,13 +62,6 @@ function getEarnedLoopsForMilestone(
 
 function hasEarnedStreakBonus(loop: ProfileLoopStats, streak: number) {
   return loop.earnedStreakBonuses.some((bonus) => bonus.streak === streak)
-}
-
-function getBestOverallStreak(loops: ProfileLoopStats[]) {
-  return loops.reduce(
-    (best, loop) => Math.max(best, loop.longestStreak),
-    0
-  )
 }
 
 function getLoopTotals(loops: ProfileLoopStats[]) {
@@ -155,8 +152,7 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
                     </div>
                   </div>
                   <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                    Claims, streak bonuses and total Gyra Points for every
-                    loop.
+                    Claim points, streak bonuses, and total GP per loop.
                   </p>
                 </div>
 
@@ -173,12 +169,18 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
 }
 
 function AchievementsSection({ data }: { data: ProfilePageData }) {
-  const bestOverallStreak = getBestOverallStreak(data.loopStats)
-  const unlockedCount = scoringConfig.streakBonuses.filter(
-    (milestone) =>
-      getEarnedLoopsForMilestone(data.loopStats, milestone.streak).length > 0
-  ).length
-  const unlockedLabel = `${unlockedCount} of ${scoringConfig.streakBonuses.length} bonuses unlocked`
+  const milestones = scoringConfig.streakBonuses.map((milestone) => ({
+    ...milestone,
+    loopStatuses: getAchievementLoopStatuses(data.loopStats, milestone.streak),
+  }))
+  const activeBonuses = milestones.flatMap((milestone) =>
+    milestone.loopStatuses.filter((loop) => loop.active)
+  )
+  const earnedCount = activeBonuses.filter((loop) => loop.earned).length
+  const earnedLabel =
+    activeBonuses.length > 0
+      ? `${earnedCount} of ${activeBonuses.length} bonuses earned`
+      : "No loops available"
 
   return (
     <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
@@ -200,12 +202,12 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
             variant="outline"
             className="w-fit rounded-full border-primary/25 bg-primary/10 px-3 py-1 text-xs font-bold text-primary"
           >
-            {unlockedLabel}
+            {earnedLabel}
           </Badge>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {scoringConfig.streakBonuses.map((milestone) => {
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+          {milestones.map((milestone) => {
             const earnedLoops = getEarnedLoopsForMilestone(
               data.loopStats,
               milestone.streak
@@ -216,9 +218,8 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
                 streak={milestone.streak}
                 rewardPoints={milestone.points}
                 creditedPoints={earnedLoops.length * milestone.points}
-                bestOverallStreak={bestOverallStreak}
                 loops={data.loopStats}
-                earnedLoops={earnedLoops}
+                loopStatuses={milestone.loopStatuses}
               />
             )
           })}
@@ -232,27 +233,36 @@ function AchievementBonusCard({
   streak,
   rewardPoints,
   creditedPoints,
-  bestOverallStreak,
   loops,
-  earnedLoops,
+  loopStatuses,
 }: {
   streak: number
   rewardPoints: number
   creditedPoints: number
-  bestOverallStreak: number
   loops: ProfileLoopStats[]
-  earnedLoops: ProfileLoopStats[]
+  loopStatuses: AchievementLoopStatus[]
 }) {
-  const earned = earnedLoops.length > 0
-  const progress = Math.min(100, (bestOverallStreak / streak) * 100)
+  const earned = loopStatuses.some((loop) => loop.earned)
+  const activeLoops = loopStatuses.filter((loop) => loop.active)
+  const earnedActiveCount = activeLoops.filter((loop) => loop.earned).length
+  const progress = activeLoops.length > 0
+    ? (earnedActiveCount / activeLoops.length) * 100
+    : 0
   const nextBonusLoops = loops.filter(
-    (loop) => getNextStreakMilestone(loop)?.streak === streak
+    (loop) =>
+      activeLoops.some(
+        (active) => active.key === `${loop.chainId}-${loop.loopId}`
+      ) &&
+      getNextStreakMilestone(loop)?.streak === streak
   )
 
-  return (
+  const card = (
     <Card
+      tabIndex={0}
+      role="group"
+      aria-label={`View loop streak status for the ${streak}-claim streak bonus`}
       className={cn(
-        "flex flex-col overflow-hidden rounded-3xl border bg-card/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_34px_-28px_hsl(var(--foreground)/0.32)] transition-all duration-200 hover:border-border hover:bg-card",
+        "flex cursor-pointer flex-col overflow-hidden rounded-3xl border bg-card/50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_12px_34px_-28px_hsl(var(--foreground)/0.32)] outline-none transition-all duration-200 hover:border-border hover:bg-card focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary",
         earned
           ? "border-border/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_12px_34px_-28px_hsl(var(--foreground)/0.32)]"
           : "border-border/70 opacity-75"
@@ -283,26 +293,22 @@ function AchievementBonusCard({
         </div>
       </div>
 
-      <CardContent className="flex flex-1 flex-col gap-3 p-4">
+      <CardContent className="flex flex-1 flex-col gap-5 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-heading text-base font-bold leading-tight text-foreground">
               {streak}-claim streak
             </h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              +{rewardPoints} points per loop
+              +{rewardPoints} GP per loop
             </p>
           </div>
           <span className="shrink-0 pt-0.5 text-[11px] font-medium text-muted-foreground">
-            {earned ? `${earnedLoops.length}/${loops.length} loops` : "Locked"}
+            {activeLoops.length > 0
+              ? `${earnedActiveCount}/${activeLoops.length} loops`
+              : "No loops available"}
           </span>
         </div>
-
-        {!earned ? (
-          <p className="text-xs leading-5 text-muted-foreground">
-            Reach a {streak}-claim streak in any loop to unlock this bonus.
-          </p>
-        ) : null}
 
         {nextBonusLoops.length > 0 ? (
           <Suspense fallback={<Skeleton className="h-10 w-full rounded-lg" />}>
@@ -310,21 +316,23 @@ function AchievementBonusCard({
           </Suspense>
         ) : null}
 
-        <div className="mt-auto space-y-2">
+        <div className="mt-auto space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <AchievementLoopLogosTooltip
-              loops={loops}
-              earnedLoops={earnedLoops}
+            <AchievementLoopLogos
+              loopStatuses={loopStatuses}
               streak={streak}
-              rewardPoints={rewardPoints}
             />
             <span
               className={cn(
-                "font-mono text-xs font-bold",
+                "whitespace-nowrap text-sm font-semibold tabular-nums",
                 earned ? "text-primary" : "text-muted-foreground"
               )}
+              title="All-time bonus earnings, including inactive loops"
             >
-              {earned ? `+${formatNumber(creditedPoints)}` : "locked"}
+              +{formatNumber(creditedPoints)}{" "}
+              <span className="text-xs font-normal">
+                GP
+              </span>
             </span>
           </div>
           <Progress
@@ -338,63 +346,18 @@ function AchievementBonusCard({
       </CardContent>
     </Card>
   )
-}
-
-function AchievementLoopLogosTooltip({
-  loops,
-  earnedLoops,
-  streak,
-  rewardPoints,
-}: {
-  loops: ProfileLoopStats[]
-  earnedLoops: ProfileLoopStats[]
-  streak: number
-  rewardPoints: number
-}) {
-  const visibleLoops = earnedLoops.slice(0, 4)
-  const hiddenLoopCount = Math.max(0, earnedLoops.length - visibleLoops.length)
 
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className="flex min-h-7 min-w-7 items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-            aria-label={`View loop streak status for the ${streak}-claim streak bonus`}
-          >
-            {visibleLoops.length > 0 ? (
-              <span className="flex items-center">
-                {visibleLoops.map((loop, index) => (
-                  <LoopLogoMark
-                    key={`${streak}-${loop.id}`}
-                    loop={loop}
-                    className={cn(index > 0 && "-ml-2")}
-                  />
-                ))}
-                {hiddenLoopCount > 0 ? (
-                  <span className="-ml-2 flex size-7 items-center justify-center rounded-full border-2 border-card bg-muted text-[10px] font-bold text-muted-foreground tabular-nums">
-                    +{hiddenLoopCount}
-                  </span>
-                ) : null}
-              </span>
-            ) : (
-              <span className="flex size-7 items-center justify-center rounded-full border-2 border-card bg-muted">
-                <StreakMilestoneIcon
-                  streak={streak}
-                  disabled
-                  className="size-3.5"
-                />
-              </span>
-            )}
-          </button>
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{card}</TooltipTrigger>
         <TooltipContent
           side="bottom"
+          sideOffset={8}
           className="w-64 rounded-2xl border-border/70 bg-card p-3 text-card-foreground shadow-[0_18px_50px_-28px_hsl(var(--foreground)/0.45)]"
         >
           <AchievementLoopBonusList
-            loops={loops}
+            loops={loopStatuses}
             streak={streak}
             rewardPoints={rewardPoints}
           />
@@ -404,35 +367,63 @@ function AchievementLoopLogosTooltip({
   )
 }
 
-function LoopLogoMark({
-  loop,
-  className,
+function AchievementLoopLogos({
+  loopStatuses,
+  streak,
 }: {
-  loop: ProfileLoopStats
-  className?: string
+  loopStatuses: AchievementLoopStatus[]
+  streak: number
 }) {
-  const logoUrl = loop.metadata.logoUrl
+  const activeLoops = loopStatuses.filter((loop) => loop.active)
+
+  return (
+    <span className="flex min-h-7 min-w-0 flex-wrap items-center gap-1">
+      {activeLoops.length > 0 ? (
+        activeLoops.map((loop) => (
+          <LoopLogoMark key={`${streak}-${loop.key}`} loop={loop} />
+        ))
+      ) : (
+        <span className="flex size-7 items-center justify-center rounded-full border-2 border-card bg-muted">
+          <StreakMilestoneIcon streak={streak} disabled className="size-3.5" />
+        </span>
+      )}
+    </span>
+  )
+}
+
+function LoopLogoMark({ loop }: { loop: AchievementLoopStatus }) {
+  const { logoUrl, earned } = loop
 
   return (
     <span
-      className={cn(
-        "relative flex size-7 items-center justify-center overflow-hidden rounded-full border-2 border-card bg-gradient-to-br font-heading text-[10px] font-extrabold leading-none text-primary-foreground shadow-[0_1px_4px_hsl(var(--foreground)/0.18)]",
-        !logoUrl && getLoopAvatarClassName(loop),
-        className
-      )}
-      title={loop.metadata.title}
+      className="relative flex size-6 shrink-0 font-heading text-[9px] font-extrabold leading-none"
+      title={`${loop.title}: ${earned ? "Earned" : "Not yet earned"}`}
     >
-      {logoUrl ? (
-        <Image
-          src={logoUrl}
-          alt=""
-          fill
-          sizes="28px"
-          className="bg-background object-contain p-1"
-        />
-      ) : (
-        getLoopInitial(loop)
-      )}
+      <span
+        className={cn(
+          "relative flex size-full items-center justify-center overflow-hidden rounded-full",
+          earned
+            ? "bg-background/70 text-foreground"
+            : "bg-muted text-muted-foreground"
+        )}
+      >
+        {logoUrl ? (
+          <Image
+            src={logoUrl}
+            alt=""
+            fill
+            sizes="24px"
+            className={cn("object-contain p-1", !earned && "opacity-40 grayscale")}
+          />
+        ) : (
+          loop.title.trim().charAt(0).toUpperCase() || "#"
+        )}
+      </span>
+      {earned ? (
+        <span className="absolute -bottom-0.5 -right-0.5 flex size-3 items-center justify-center rounded-full bg-card text-primary ring-1 ring-border">
+          <FaCheck className="size-[7px]" aria-hidden="true" />
+        </span>
+      ) : null}
     </span>
   )
 }
@@ -442,14 +433,14 @@ function AchievementLoopBonusList({
   streak,
   rewardPoints,
 }: {
-  loops: ProfileLoopStats[]
+  loops: AchievementLoopStatus[]
   streak: number
   rewardPoints: number
 }) {
   if (loops.length === 0) {
     return (
       <p className="text-xs leading-5 text-muted-foreground">
-        Claim in a loop to start earning streak bonuses.
+        No loops or earned bonuses to show yet.
       </p>
     )
   }
@@ -457,11 +448,11 @@ function AchievementLoopBonusList({
   return (
     <div className="space-y-1.5">
       {loops.map((loop) => {
-        const earned = hasEarnedStreakBonus(loop, streak)
+        const earned = loop.earned
 
         return (
           <div
-            key={`${streak}-${loop.id}`}
+            key={`${streak}-${loop.key}`}
             className="flex items-center justify-between gap-3 rounded-xl bg-muted/35 px-2.5 py-2"
           >
             <div className="flex min-w-0 items-center gap-2">
@@ -477,7 +468,8 @@ function AchievementLoopBonusList({
                   earned ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                {loop.metadata.title}
+                {loop.title}
+                {!loop.active ? " · Inactive" : ""}
               </span>
             </div>
             <span
@@ -503,6 +495,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
   const progressMarkerPosition = Math.min(96, Math.max(4, level.progress))
   const rankLabel =
     data.globalRank == null ? "—" : `#${formatNumber(data.globalRank)}`
+  const lastUpdated = data.globalStats?.updatedAt
 
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
@@ -513,6 +506,23 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Looper <span className="text-primary">Profile</span>
               </h1>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {totalPoints === 0 ? (
+                  "Welcome, Looper! Make your first claim to start earning GP."
+                ) : totalPoints >= 250 ? (
+                  "You’ve reached LooperX. Keep the claims coming."
+                ) : (
+                  <>
+                    You’re{" "}
+                    {formatNumber((totalPoints < 50 ? 50 : 250) - totalPoints)}{" "}
+                    GP away from{" "}
+                    <span className="text-foreground">
+                      {totalPoints < 50 ? "True Looper" : "LooperX"}
+                    </span>
+                    .
+                  </>
+                )}
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:max-w-[220px] xl:min-w-[220px]">
@@ -549,7 +559,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
                 </span>
                 <Progress
                   value={level.progress}
-                  className="h-2.5 bg-background/80 ring-1 ring-border/70 [&>div]:bg-primary"
+                  className="h-2.5 bg-muted ring-1 ring-border/70 [&>div]:bg-primary"
                 />
               </div>
               <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-muted-foreground">
@@ -570,6 +580,22 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
             </p>
             <p className="mt-3 text-5xl font-bold leading-none tracking-[-0.04em] text-foreground tabular-nums">
               {rankLabel}
+            </p>
+            <p className="mt-3 text-[10px] leading-3 text-muted-foreground">
+              Last updated{" "}
+              {lastUpdated ? (
+                <time
+                  dateTime={lastUpdated.toISOString()}
+                  title={lastUpdated.toUTCString()}
+                >
+                  {new Intl.DateTimeFormat("en-US", {
+                    dateStyle: "medium",
+                    timeZone: "UTC",
+                  }).format(lastUpdated)}
+                </time>
+              ) : (
+                "—"
+              )}
             </p>
           </div>
 
@@ -631,8 +657,8 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
   return (
     <TooltipProvider>
       <div className="overflow-x-auto">
-        <div className="w-full min-w-[720px]">
-          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-end gap-4 border-b border-border/70 px-3 py-2 text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-muted-foreground">
+        <div className="w-full min-w-[770px]">
+          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_220px_96px] items-end gap-4 border-b border-border/70 px-3 py-2 text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-muted-foreground">
             <span>Loop</span>
             <span className="text-right">Current streak</span>
             <span className="text-right">Claims</span>
@@ -646,9 +672,9 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
             ))}
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-center gap-4 px-3 py-3.5">
+          <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_220px_96px] items-center gap-4 px-3 py-3.5">
             <div>
-              <p className="font-heading text-sm font-bold text-muted-foreground">
+              <p className="text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-muted-foreground">
                 All loops
               </p>
             </div>
@@ -656,15 +682,18 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
               —
             </span>
             <TableValue
-              value={`+${formatNumber(totals.claims)}`}
+              value={formatNumber(totals.claims)}
+              suffix="GP"
               align="right"
             />
-            <StreakBonusValue
-              value={totals.streakPoints}
+            <TableValue
+              value={formatNumber(totals.streakPoints)}
+              suffix="GP"
               align="right"
             />
             <TableValue
               value={formatNumber(totals.totalPoints)}
+              suffix="GP"
               total
               align="right"
             />
@@ -679,58 +708,80 @@ function LoopActivityRow({ loop }: { loop: ProfileLoopStats }) {
   const logoUrl = loop.metadata.logoUrl
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_170px_96px] items-center gap-4 border-b border-border/70 px-3 py-3.5 transition-colors hover:bg-muted/45">
-      <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
+    <Tooltip>
+      <TooltipTrigger asChild>
         <div
-          className={cn(
-            "relative flex size-[34px] shrink-0 items-center justify-center overflow-hidden rounded-xl font-heading text-[13px] font-extrabold leading-none text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-1px_0_rgba(0,0,0,0.16)]",
-            logoUrl
-              ? "border border-border/70 bg-background/70"
-              : cn("bg-gradient-to-br", getLoopAvatarClassName(loop))
-          )}
+          tabIndex={0}
+          role="group"
+          aria-label={`${loop.metadata.title} streak details`}
+          className="grid cursor-pointer grid-cols-[minmax(0,1fr)_90px_90px_220px_96px] items-center gap-4 border-b border-border/70 px-3 py-3.5 outline-none transition-colors hover:bg-muted/45 focus-visible:bg-muted/45 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
         >
-          {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt=""
-              fill
-              sizes="34px"
-              className="object-contain p-1"
-            />
-          ) : (
-            getLoopInitial(loop)
-          )}
-        </div>
+          <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
+            <div
+              className={cn(
+                "relative flex size-[34px] shrink-0 items-center justify-center overflow-hidden rounded-xl font-heading text-[13px] font-extrabold leading-none text-primary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-1px_0_rgba(0,0,0,0.16)]",
+                logoUrl
+                  ? "border border-border/70 bg-background/70"
+                  : cn("bg-gradient-to-br", getLoopAvatarClassName(loop))
+              )}
+            >
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt=""
+                  fill
+                  sizes="34px"
+                  className="object-contain p-1"
+                />
+              ) : (
+                getLoopInitial(loop)
+              )}
+            </div>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-sm font-bold text-foreground">
-              {loop.metadata.title}
-            </h3>
-            {loop.metadata.archived ? (
-              <Badge
-                variant="outline"
-                className="rounded-full border-border bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
-              >
-                Archived
-              </Badge>
-            ) : null}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="truncate text-sm font-bold text-foreground">
+                  {loop.metadata.title}
+                </h3>
+                {loop.metadata.archived ? (
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-border bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground"
+                  >
+                    Archived
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                Sponsored by {loop.metadata.sponsorName}
+              </p>
+            </div>
           </div>
-          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-            Sponsored by {loop.metadata.sponsorName}
-          </p>
-        </div>
-      </div>
 
-      <StreakValue value={loop.currentStreak} />
-      <TableValue value={`+${formatNumber(loop.totalClaims)}`} align="right" />
-      <StreakBonusCell loop={loop} />
-      <TableValue
-        value={formatNumber(loop.totalPoints)}
-        total
-        align="right"
-      />
-    </div>
+          <StreakValue value={loop.currentStreak} />
+          <TableValue
+            value={`+${formatNumber(loop.totalClaims)}`}
+            suffix="GP"
+            align="right"
+          />
+          <StreakBonusCell loop={loop} />
+          <TableValue
+            value={formatNumber(loop.totalPoints)}
+            suffix="GP"
+            total
+            align="right"
+          />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="end"
+        sideOffset={8}
+        className="w-[208px] rounded-lg border-border bg-card p-0 text-left text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_24px_70px_-34px_hsl(var(--foreground)/0.35)]"
+      >
+        <StreakBonusDetailCard loop={loop} />
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -752,43 +803,17 @@ function StreakValue({ value }: { value: number }) {
         )}
         aria-hidden="true"
       />
-      <span>{hasStreak ? formatNumber(value) : "—"}</span>
+      <span>{formatNumber(value)}</span>
     </div>
   )
 }
 
 function StreakBonusCell({ loop }: { loop: ProfileLoopStats }) {
-  const earnedCount = loop.earnedStreakBonuses.length
-
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          className="group grid w-full grid-rows-[1fr_auto_1fr] justify-items-end gap-y-1 self-stretch rounded-xl text-right outline-none transition focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-          aria-label={`Streak points ${formatNumber(loop.streakBonusPoints)}. ${earnedCount} of ${scoringConfig.streakBonuses.length} streaks earned.`}
-        >
-          {/* Equal outer tracks center the number, with the details below it. */}
-          <div className="row-start-2">
-            <StreakBonusValue value={loop.streakBonusPoints} align="right" />
-          </div>
-          <div className="row-start-3 flex items-center justify-end gap-2 self-start">
-            <MilestoneDots loop={loop} />
-            <span className="text-[10px] font-semibold leading-3 text-muted-foreground">
-              {earnedCount} of {scoringConfig.streakBonuses.length} streaks
-            </span>
-          </div>
-        </button>
-      </TooltipTrigger>
-      <TooltipContent
-        side="bottom"
-        align="end"
-        sideOffset={8}
-        className="w-[208px] rounded-lg border-border bg-card p-0 text-left text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_24px_70px_-34px_hsl(var(--foreground)/0.35)]"
-      >
-        <StreakBonusDetailCard loop={loop} />
-      </TooltipContent>
-    </Tooltip>
+    <div className="flex w-full items-center justify-end gap-3 whitespace-nowrap text-right">
+      <MilestoneIcons loop={loop} />
+      <StreakBonusValue value={loop.streakBonusPoints} align="right" />
+    </div>
   )
 }
 
@@ -811,27 +836,26 @@ function StreakBonusValue({
         align === "right" && "text-right"
       )}
     >
-      {hasBonus ? `+${formatNumber(value)}` : "–"}
+      +{formatNumber(value)}
+      <span className="ml-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        GP
+      </span>
     </p>
   )
 }
 
-function MilestoneDots({ loop }: { loop: ProfileLoopStats }) {
+function MilestoneIcons({ loop }: { loop: ProfileLoopStats }) {
   return (
     <div className="flex items-center gap-1.5">
       {scoringConfig.streakBonuses.map((milestone) => {
-        const earned = loop.earnedStreakBonuses.some(
-          (bonus) => bonus.streak === milestone.streak
-        )
+        const earned = hasEarnedStreakBonus(loop, milestone.streak)
 
         return (
-          <span
+          <StreakMilestoneIcon
             key={milestone.streak}
-            className={cn(
-              "size-[7px] rounded-full border",
-              earned ? "border-primary bg-primary" : "border-border bg-muted"
-            )}
-            aria-hidden="true"
+            streak={milestone.streak}
+            disabled={!earned}
+            className="size-3.5 shrink-0"
           />
         )
       })}
