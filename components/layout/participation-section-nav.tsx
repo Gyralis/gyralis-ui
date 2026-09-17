@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
+import styles from "./participation-section-nav.module.css"
 
 type ParticipationSection = "loops" | "leaderboard" | "profile"
 
@@ -73,7 +74,9 @@ export function ParticipationSectionNav({
                   aria-current={isActive ? "page" : undefined}
                   className={itemClassName}
                 >
-                  {link.label}
+                  <span className={link.section === "profile" && !isActive ? styles.profileLabel : undefined}>
+                    {link.label}
+                  </span>
                 </Link>
               )}
             </div>
