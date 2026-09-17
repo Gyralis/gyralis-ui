@@ -24,15 +24,17 @@ import {
   updateScoringSyncState,
 } from "@/lib/db/clients/sync-state.client"
 import { ensureUserProfile } from "@/lib/db/clients/user-profile.client"
+import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
+import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
+import { ignoredScoringLoopIds, isIgnoredScoringLoopId } from "./loop-filters"
 import { computeLoopStatsFromClaims } from "./rules"
 import {
   fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph,
 } from "./subgraph-client"
-import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
 type SyncMode = "incremental" | "full"
 const PROJECTION_WRITE_CONCURRENCY = 20
@@ -69,44 +71,13 @@ async function mapWithConcurrency<T>(
   }
 }
 
-function parseEarnedBonuses(value: unknown): EarnedStreakBonus[] {
-  return Array.isArray(value)
-    ? value
-        .filter(
-          (item): item is EarnedStreakBonus =>
-            item != null &&
-            typeof item === "object" &&
-            typeof (item as EarnedStreakBonus).streak === "number" &&
-            typeof (item as EarnedStreakBonus).points === "number"
-        )
-        .map((item) => ({ streak: item.streak, points: item.points }))
-    : []
-}
-
-function mapDbLoopStats(
-  stats: Awaited<ReturnType<typeof getUserLoopStatsForUser>>[number]
-): UserLoopScoringStats {
-  return {
-    userAddress: stats.userAddress,
-    loopId: stats.loopId,
-    chainId: stats.chainId,
-    totalClaims: stats.totalClaims,
-    claimPoints: stats.claimPoints,
-    streakBonusPoints: stats.streakBonusPoints,
-    totalPoints: stats.totalPoints,
-    currentStreak: stats.currentStreak,
-    longestStreak: stats.longestStreak,
-    lastClaimedPeriod: stats.lastClaimedPeriod,
-    earnedStreakBonuses: parseEarnedBonuses(stats.earnedStreakBonuses),
-  }
-}
-
 async function clearScoringProjections() {
   await clearLeaderboardEntries()
   await clearUserGlobalStats()
   await clearUserLoopStats()
   await clearProcessedClaimEvents()
   await resetScoringSyncState()
+  invalidateProfilePageData()
 }
 
 export function advanceScoringSyncCursor(
@@ -169,6 +140,10 @@ export async function runScoringSync(input: SyncInput = {}) {
     events: Awaited<ReturnType<typeof fetchClaimEventsFromSubgraph>>
   ) {
     for (const event of events) {
+      cursor = advanceScoringSyncCursor(cursor, event)
+
+      if (isIgnoredScoringLoopId(event.loopId)) continue
+
       const key = {
         userAddress: event.userAddress,
         loopId: event.loopId,
@@ -181,7 +156,6 @@ export async function runScoringSync(input: SyncInput = {}) {
         eventsForLoop.push(event)
         fullModeClaimEventsByLoop.set(loopKey, eventsForLoop)
       }
-      cursor = advanceScoringSyncCursor(cursor, event)
       processedEvents += 1
     }
   }
@@ -192,19 +166,27 @@ export async function runScoringSync(input: SyncInput = {}) {
     afterEventId?: string
   }) {
     let afterEventId = pageInput.afterEventId
+    let shouldFetchNextPage = true
 
-    for (;;) {
+    while (shouldFetchNextPage) {
       const events = await fetchClaimEventsFromSubgraph({
         fromBlock: pageInput.fromBlock,
         blockNumber: pageInput.blockNumber,
         afterEventId,
         first: batchSize,
         loopId: input.loopId,
+        excludedLoopIds: ignoredScoringLoopIds,
       })
 
-      if (events.length === 0) break
+      if (events.length === 0) {
+        shouldFetchNextPage = false
+        continue
+      }
       trackEvents(events)
-      if (events.length < batchSize) break
+      if (events.length < batchSize) {
+        shouldFetchNextPage = false
+        continue
+      }
       afterEventId = events[events.length - 1]?.id
     }
   }
@@ -250,14 +232,17 @@ export async function runScoringSync(input: SyncInput = {}) {
       [...affectedUsers],
       PROJECTION_WRITE_CONCURRENCY,
       async (userAddress) => {
-        const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
-          mapDbLoopStats
-        )
+        const loopStats = (
+          await getUserLoopStatsForUser(userAddress, {
+            excludedLoopIds: ignoredScoringLoopIds,
+          })
+        ).map(mapDbUserLoopStatsToScoringStats)
         const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
         await Promise.all([
           upsertUserGlobalStats(globalStats),
           upsertGlobalLeaderboardEntry(globalStats),
         ])
+        invalidateProfilePageData(userAddress)
       }
     )
 
@@ -276,6 +261,7 @@ export async function runScoringSync(input: SyncInput = {}) {
           afterEventId: syncState.lastEventId,
           first: batchSize,
           loopId: input.loopId,
+          excludedLoopIds: ignoredScoringLoopIds,
           orderBy: "id",
         })
       : []
@@ -285,12 +271,17 @@ export async function runScoringSync(input: SyncInput = {}) {
         fromBlock: lastSyncedBlock + 1,
         first: batchSize - events.length,
         loopId: input.loopId,
+        excludedLoopIds: ignoredScoringLoopIds,
         orderBy: "blockNumber",
       })
       events.push(...newBlockEvents)
     }
 
     for (const event of events) {
+      cursor = advanceScoringSyncCursor(cursor, event)
+      if (isIgnoredScoringLoopId(event.loopId)) continue
+      processedEvents += 1
+
       const key = {
         userAddress: event.userAddress,
         loopId: event.loopId,
@@ -301,7 +292,6 @@ export async function runScoringSync(input: SyncInput = {}) {
       const loopEvents = pageClaimEventsByLoop.get(loopKey) ?? []
       loopEvents.push(event)
       pageClaimEventsByLoop.set(loopKey, loopEvents)
-      cursor = advanceScoringSyncCursor(cursor, event)
     }
 
     const affectedUsers = await updateProjections(
@@ -318,7 +308,7 @@ export async function runScoringSync(input: SyncInput = {}) {
 
     return {
       mode,
-      processedEvents: events.length,
+      processedEvents,
       affectedLoops: pageAffectedLoops.size,
       affectedUsers: affectedUsers.size,
       lastBlockNumber: cursor.lastBlockNumber,
@@ -334,6 +324,8 @@ export async function runScoringSync(input: SyncInput = {}) {
     affectedLoops,
     fullModeClaimEventsByLoop
   )
+  // Also evict empty/partial snapshots read while the full rebuild was running.
+  invalidateProfilePageData()
 
   if (input.loopId == null) {
     await updateScoringSyncState({

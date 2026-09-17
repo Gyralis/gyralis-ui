@@ -121,12 +121,14 @@ describe("incremental scoring sync", () => {
       afterEventId: "0xaaa-0",
       first: 2,
       loopId: undefined,
+      excludedLoopIds: [1, 2],
       orderBy: "id",
     })
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
       fromBlock: 11,
       first: 1,
       loopId: undefined,
+      excludedLoopIds: [1, 2],
       orderBy: "blockNumber",
     })
     expect(result).toMatchObject({
@@ -153,6 +155,46 @@ describe("incremental scoring sync", () => {
       mocks.upsertGlobalLeaderboardEntry.mock.invocationCallOrder[0]
     )
   })
+
+  it.each(["incremental", "full"] as const)(
+    "%s sync excludes legacy loops while advancing the cursor",
+    async (mode) => {
+      const activeEvent = claimEvent(11, "0xbbb-0")
+      const ignoredEvent = { ...claimEvent(12, "0xccc-0"), loopId: 1 }
+      if (mode === "incremental") {
+        mocks.fetchClaimEventsFromSubgraph
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([activeEvent, ignoredEvent])
+      } else {
+        mocks.fetchClaimEventsFromSubgraph
+          .mockResolvedValueOnce([activeEvent, ignoredEvent])
+          .mockResolvedValueOnce([])
+      }
+      mocks.fetchAllClaimEventsForUserLoop.mockResolvedValue([activeEvent])
+
+      const result = await runScoringSync({ mode })
+
+      expect(result).toMatchObject({
+        processedEvents: 1,
+        affectedLoops: 1,
+        affectedUsers: 1,
+        lastBlockNumber: 12,
+        hasMore: mode === "incremental",
+      })
+      expect(mocks.upsertUserLoopStats).toHaveBeenCalledTimes(1)
+      expect(mocks.upsertUserLoopStats).toHaveBeenCalledWith(
+        expect.objectContaining({ loopId: 3 })
+      )
+      expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([activeEvent])
+      expect(mocks.getUserLoopStatsForUser).toHaveBeenCalledWith(userAddress, {
+        excludedLoopIds: [1, 2],
+      })
+      expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
+        lastBlockNumber: 12,
+        lastEventId: "0xccc-0",
+      })
+    }
+  )
 
   it("does not checkpoint when projection writes fail", async () => {
     const event = claimEvent(11, "0xbbb-0")

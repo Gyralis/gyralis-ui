@@ -78,7 +78,7 @@ export const WalletConnect = ({
                 <button
                   type="button"
                   onClick={openAccountModal}
-                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-accent/60 dark:hover:bg-white/[0.08]"
                   title={account.address}
                 >
                   <FaWallet className="size-4 text-primary" />

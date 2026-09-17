@@ -25,13 +25,18 @@ import {
   markProcessedClaimEvents,
 } from "@/lib/db/clients/processed-claim-events.client"
 import { ensureUserProfile } from "@/lib/db/clients/user-profile.client"
+import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
-import { parseEarnedStreakBonuses } from "./responses"
+import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
+import {
+  ignoredScoringLoopIds,
+  isIgnoredScoringLoopId,
+} from "./loop-filters"
 import { computeLoopStatsFromClaims, normalizeAddress } from "./rules"
 import { fetchAllClaimEventsForUserLoop } from "./subgraph-client"
-import { ClaimScoringEvent, UserLoopScoringStats } from "./types"
+import { ClaimScoringEvent } from "./types"
 
 const canonicalClaimEvent = parseAbiItem(
   "event Claim(address indexed claimer,uint256 periodNumber,uint256 payout)"
@@ -171,24 +176,6 @@ function mergeReceiptEvents(
   return [...byId.values()]
 }
 
-function mapDbLoopStats(
-  stats: Awaited<ReturnType<typeof getUserLoopStatsForUser>>[number]
-): UserLoopScoringStats {
-  return {
-    userAddress: stats.userAddress,
-    loopId: stats.loopId,
-    chainId: stats.chainId,
-    totalClaims: stats.totalClaims,
-    claimPoints: stats.claimPoints,
-    streakBonusPoints: stats.streakBonusPoints,
-    totalPoints: stats.totalPoints,
-    currentStreak: stats.currentStreak,
-    longestStreak: stats.longestStreak,
-    lastClaimedPeriod: stats.lastClaimedPeriod,
-    earnedStreakBonuses: parseEarnedStreakBonuses(stats.earnedStreakBonuses),
-  }
-}
-
 async function recomputeUserLoopAndGlobalStats(input: {
   userAddress: string
   loopId: number
@@ -205,20 +192,27 @@ async function recomputeUserLoopAndGlobalStats(input: {
   await upsertUserLoopStats(loopStats)
   await upsertLoopLeaderboardEntry(loopStats)
 
-  const allLoopStats = (await getUserLoopStatsForUser(input.userAddress)).map(
-    mapDbLoopStats
-  )
+  const allLoopStats = (
+    await getUserLoopStatsForUser(input.userAddress, {
+      excludedLoopIds: ignoredScoringLoopIds,
+    })
+  ).map(mapDbUserLoopStatsToScoringStats)
   const globalStats = computeGlobalStatsFromLoops(
     input.userAddress,
     allLoopStats
   )
   await upsertUserGlobalStats(globalStats)
   await upsertGlobalLeaderboardEntry(globalStats)
+  invalidateProfilePageData(input.userAddress)
 
   return { loopStats, globalStats }
 }
 
 export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
+  if (isIgnoredScoringLoopId(input.loopId)) {
+    return { claimed: false, alreadySynced: false, ignoredLoop: true }
+  }
+
   if (input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
     throw new Error(
       "Requested chainId does not match GYRALIS_SUBGRAPH_CHAIN_ID"

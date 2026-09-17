@@ -1,5 +1,4 @@
 import Image from "next/image"
-import Link from "next/link"
 import type { IconType } from "react-icons"
 import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 
@@ -8,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
 import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card"
+import { BackToLoopsLink } from "@/components/layout/back-to-loops-link"
 import { LoopTypeBadge } from "@/components/loops/loop-type-badge"
 
 type OverviewStatGroupProps = {
@@ -318,12 +318,7 @@ export default async function DashboardPage() {
               We couldn’t load the statistics right now. Please try again later.
               You can still visit Loops.
             </p>
-            <Link
-              href="/loops"
-              className="inline-flex rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              Back to Loops
-            </Link>
+            <BackToLoopsLink />
           </CardContent>
         </Card>
       </main>
@@ -374,7 +369,8 @@ export default async function DashboardPage() {
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
-          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+          <BackToLoopsLink className="absolute left-5 top-5 z-20 border-white/15 bg-black/35 text-slate-200 hover:border-primary/45 hover:bg-primary/15 hover:text-primary sm:left-6 sm:top-6" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 px-6 pb-6 pt-20 sm:min-h-[380px] sm:px-8 sm:pb-8 xl:px-10 xl:pb-10">
             <div className="space-y-3">
               <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
                 Gyralis{" "}

@@ -629,7 +629,9 @@ function AnimatedStatValue({
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion()
-  const [activeFaq, setActiveFaq] = useState(faqItems[0]?.question ?? "")
+  const [activeFaq, setActiveFaq] = useState<string>(
+    faqItems[0]?.question ?? ""
+  )
   const [heroSummary, setHeroSummary] = useState<HeroHistorySummary>({
     totalClaims: 2858,
     totalRegistrations: 3349,

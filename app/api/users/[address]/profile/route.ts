@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { isAddress } from "viem"
 
 import { databaseUnavailableResponse } from "@/lib/api/database-error"
 import { getUserGlobalStats } from "@/lib/db/clients/global-stats.client"
@@ -11,6 +12,13 @@ export async function GET(
   _req: Request,
   { params }: { params: { address: string } }
 ) {
+  if (!isAddress(params.address)) {
+    return NextResponse.json(
+      { success: false, error: "Invalid user address" },
+      { status: 400 }
+    )
+  }
+
   const userAddress = normalizeDbAddress(params.address)
 
   try {

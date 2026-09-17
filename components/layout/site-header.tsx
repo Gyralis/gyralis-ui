@@ -10,6 +10,7 @@ import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer
 import { MainNav, MainNavMenu } from "@/components/layout/main-nav"
 //import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { MobileNav } from "./mobile-nav"
@@ -76,13 +77,15 @@ export function SiteHeader() {
         scrolled && "bg-background/50 "
       )}
     >
-      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-3 sm:px-2 lg:p-4">
-        <MainNav />
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center text-base font-medium md:flex">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center gap-2 px-4 py-3 sm:px-2 md:grid md:grid-cols-[minmax(0,1fr)_auto] lg:p-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+        <div className="col-start-1 row-start-1 hidden items-center justify-self-start md:flex">
+          <MainNav />
+        </div>
+        <nav className="col-span-2 col-start-1 row-start-2 hidden items-center justify-center justify-self-center text-base font-medium md:flex xl:col-span-1 xl:col-start-2 xl:row-start-1">
           <MainNavMenu />
         </nav>
         <MobileNav />
-        <div className="hidden items-center justify-end space-x-2 md:flex">
+        <div className="col-start-2 row-start-1 hidden items-center justify-end justify-self-end gap-2 md:flex xl:col-start-3">
           {isLandingPage ? (
             <Link
               href="/loops"
@@ -92,6 +95,8 @@ export function SiteHeader() {
             </Link>
           ) : (
             <>
+              <div className="hidden items-center 2xl:flex"><ProfileUserPill /></div>
+              <div className="flex items-center 2xl:hidden"><ProfileUserPill compact /></div>
               <IdentityHubDrawer />
               <WalletConnect />
               <ModeToggle />
