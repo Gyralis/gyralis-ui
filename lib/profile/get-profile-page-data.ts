@@ -178,23 +178,28 @@ const getCachedGlobalRank = unstable_cache(
   { revalidate: PROFILE_CACHE_SECONDS, tags: [PROFILE_RANK_CACHE_TAG] }
 )
 
+export async function getProfileStatsData(rawAddress: string) {
+  if (!isAddress(rawAddress)) return null
+  const address = normalizeDbAddress(rawAddress)
+  return unstable_cache(
+    () => fetchProfileStats(address),
+    ["profile-stats-v1", address],
+    {
+      revalidate: PROFILE_CACHE_SECONDS,
+      tags: [PROFILE_STATS_CACHE_TAG, profileStatsCacheTag(address)],
+    }
+  )()
+}
+
 export async function getProfilePageData(
   rawAddress: string
 ): Promise<ProfilePageData | null> {
   if (!isAddress(rawAddress)) return null
-
   const address = normalizeDbAddress(rawAddress)
   const [stats, globalRank] = await Promise.all([
-    unstable_cache(
-      () => fetchProfileStats(address),
-      ["profile-stats-v1", address],
-      {
-        revalidate: PROFILE_CACHE_SECONDS,
-        tags: [PROFILE_STATS_CACHE_TAG, profileStatsCacheTag(address)],
-      }
-    )(),
+    getProfileStatsData(address),
     getCachedGlobalRank(address),
   ])
-
+  if (!stats) return null
   return { ...stats, globalRank }
 }

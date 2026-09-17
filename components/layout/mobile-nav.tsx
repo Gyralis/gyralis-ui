@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
@@ -33,12 +34,13 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <div className="flex w-full items-center justify-between md:hidden">
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 md:hidden">
         <Link href="/" className="flex items-center space-x-2">
           <NavLogoMark />
           <span className="sr-only">Gyralis</span>
         </Link>
-        <div className="flex items-center gap-x-4">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          {!isLandingPage ? <ProfileUserPill compact /> : null}
           {!isLandingPage ? <IdentityHubDrawer compact /> : null}
           {!isLandingPage ? <WalletConnect className="shrink-0" /> : null}
           <SheetTrigger asChild>
@@ -62,6 +64,7 @@ export function MobileNav() {
 
         <ScrollArea className="my-4 mr-4 h-[calc(100vh-8rem)] pb-10">
           <div className="flex flex-col space-y-2">
+            {!isLandingPage ? <ProfileUserPill onNavigate={() => setOpen(false)} /> : null}
             {navLinks.map((link) => (
               <MobileLink
                 key={link.href}

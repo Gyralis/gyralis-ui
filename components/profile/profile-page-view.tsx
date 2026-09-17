@@ -32,6 +32,8 @@ import { AchievementNextBonus } from "@/components/profile/achievement-next-bonu
 import { ProfileExploreLoops } from "@/components/profile/profile-explore-loops"
 import { StreakPointsInfo } from "@/components/profile/streak-points-info"
 import { ProfileDetails } from "@/components/profile/profile-details"
+import { ProfileLevelsInfo } from "@/components/profile/profile-levels-info"
+import { getProfileLevel } from "@/lib/profile/profile-level"
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value)
@@ -85,27 +87,7 @@ function getLoopTotals(loops: ProfileLoopStats[]) {
 }
 
 function getLooperLevelProgress(totalPoints: number) {
-  if (totalPoints >= 250) {
-    return {
-      fromLabel: "True Looper",
-      toLabel: "LooperX · 250 GP",
-      progress: 100,
-    }
-  }
-
-  if (totalPoints >= 50) {
-    return {
-      fromLabel: "True Looper",
-      toLabel: "LooperX · 250 GP",
-      progress: ((totalPoints - 50) / 200) * 100,
-    }
-  }
-
-  return {
-    fromLabel: "0 GP",
-    toLabel: "True Looper",
-    progress: (totalPoints / 50) * 100,
-  }
+  return getProfileLevel(totalPoints)
 }
 
 export function ProfilePageView({ data }: { data: ProfilePageData }) {
@@ -501,9 +483,12 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
         <CardContent className="relative z-10 flex min-h-[220px] flex-col gap-3 p-8">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Looper <span className="text-primary">Profile</span>
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Looper <span className="text-primary">Profile</span>
+                </h1>
+                <ProfileLevelsInfo />
+              </div>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {totalPoints === 0 ? (
                   "Welcome, Looper! Make your first claim to start earning GP."
@@ -894,10 +879,7 @@ function StreakBonusDetailCard({ loop }: { loop: ProfileLoopStats }) {
                 {milestone.streak}-claim streak
               </span>
               <span
-                className={cn(
-                  "text-[11px] font-semibold",
-                  earned ? "text-primary" : "text-muted-foreground"
-                )}
+                className={`text-sm font-semibold ${earned ? "text-primary" : "text-muted-foreground"}`}
               >
                 {earned ? `+${milestone.points} GP` : "locked"}
               </span>
@@ -911,12 +893,7 @@ function StreakBonusDetailCard({ loop }: { loop: ProfileLoopStats }) {
           Streak points
         </span>
         <span
-          className={cn(
-            "text-xs font-bold",
-            loop.streakBonusPoints > 0
-              ? "text-primary"
-              : "text-muted-foreground"
-          )}
+          className={`text-sm font-bold ${loop.streakBonusPoints > 0 ? "text-primary" : "text-muted-foreground"}`}
         >
           {loop.streakBonusPoints > 0
             ? `+${formatNumber(loop.streakBonusPoints)}`

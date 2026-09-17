@@ -14,7 +14,7 @@ export function StreakPointsInfo() {
         <button
           type="button"
           aria-label="How streak points work"
-          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <FaInfoCircle className="size-4" aria-hidden="true" />
         </button>
