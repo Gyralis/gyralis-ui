@@ -34,19 +34,19 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <div className="flex w-full flex-wrap items-center justify-between gap-2 md:hidden">
-        <Link href="/" className="flex items-center space-x-2">
+      <div className="flex min-w-0 w-full items-center justify-between gap-2 md:hidden">
+        <Link href="/" className="flex shrink-0 items-center space-x-2">
           <NavLogoMark />
           <span className="sr-only">Gyralis</span>
         </Link>
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
+        <div className="flex min-w-0 items-center justify-end gap-1.5">
           {!isLandingPage ? <ProfileUserPill compact /> : null}
           {!isLandingPage ? <IdentityHubDrawer compact /> : null}
-          {!isLandingPage ? <WalletConnect className="shrink-0" /> : null}
+          {!isLandingPage ? <WalletConnect compact className="shrink-0" /> : null}
           <SheetTrigger asChild>
             <Button
               requireWallet={false}
-              className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+              className="size-10 shrink-0 !p-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
             >
               <LuMenu className="size-5" />
               <span className="sr-only">Toggle Menu</span>
@@ -64,7 +64,6 @@ export function MobileNav() {
 
         <ScrollArea className="my-4 mr-4 h-[calc(100vh-8rem)] pb-10">
           <div className="flex flex-col space-y-2">
-            {!isLandingPage ? <ProfileUserPill onNavigate={() => setOpen(false)} /> : null}
             {navLinks.map((link) => (
               <MobileLink
                 key={link.href}

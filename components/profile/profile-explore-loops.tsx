@@ -17,7 +17,7 @@ export function ProfileExploreLoops({ loops }: { loops: ProfileLoopStats[] }) {
         <h2 className="font-heading text-3xl font-bold text-foreground">
           Explore more loops
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-xs text-muted-foreground sm:text-sm">
           No recorded claims from this wallet in these loops yet. Explore
           their requirements and start earning more GP.
         </p>
