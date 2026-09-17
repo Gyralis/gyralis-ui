@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { FaBolt, FaCheck, FaInfoCircle, FaLock } from "react-icons/fa"
+import { FaBolt, FaCheck, FaInfoCircle, FaTimes } from "react-icons/fa"
 import { FaFire } from "react-icons/fa6"
 import type { IconType } from "react-icons"
 
@@ -97,7 +97,7 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
   return (
     <div className="px-4 py-8 sm:py-12">
       <ProfileWalletAddressSync />
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex min-w-0 w-full max-w-6xl flex-col gap-6">
         <ProfileHeader data={data} />
 
         {!data.hasActivity ? (
@@ -105,7 +105,7 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
             <h2 className="font-heading text-2xl font-bold">
               No loop activity yet
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+            <p className="mx-auto mt-3 max-w-xl text-xs text-muted-foreground sm:text-sm">
               No scored claims for this wallet yet. Start claiming in a loop
               to earn points and unlock streak bonuses.
             </p>
@@ -117,25 +117,26 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
             </Link>
           </section>
         ) : (
-          <div className="grid gap-6">
-            <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
-              <CardContent className="p-8">
-                <div className="mb-7">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <h2 className="font-heading text-3xl font-bold text-foreground">
+          <div className="grid min-w-0 grid-cols-1 gap-6">
+            <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)] min-w-0 max-w-full">
+              <CardContent className="p-5 sm:p-8">
+                <div className="mb-5 sm:mb-7">
+                  <div className="flex items-baseline justify-between gap-3 sm:items-end sm:gap-4">
+                    <h2 className="min-w-0 font-heading text-xl font-bold leading-tight text-foreground sm:text-3xl">
                       Your GP per Loop
                     </h2>
-                    <div className="flex w-fit shrink-0 items-end gap-3 sm:justify-end">
-                      <p className="text-4xl font-bold leading-none tracking-tight text-foreground tabular-nums">
+                    <div className="flex w-fit shrink-0 items-baseline gap-1.5 sm:items-end sm:gap-3 sm:justify-end">
+                      <p className="text-2xl font-bold leading-none tracking-tight text-foreground tabular-nums sm:text-4xl">
                         {formatNumber(totals.totalPoints)}
                       </p>
-                      <p className="flex flex-col gap-1 pb-0.5 text-left text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-muted-foreground">
+                      <span className="text-xs font-medium text-muted-foreground sm:hidden">GP</span>
+                      <p className="hidden flex-col gap-1 pb-0.5 text-left text-[10px] font-bold uppercase leading-none tracking-[0.16em] text-muted-foreground sm:flex">
                         <span>Gyra</span>
                         <span>Points</span>
                       </p>
                     </div>
                   </div>
-                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                  <p className="mt-2 max-w-2xl text-[10px] leading-relaxed text-muted-foreground sm:text-sm">
                     Claim points, streak bonuses, and total GP per loop.
                   </p>
                 </div>
@@ -169,26 +170,24 @@ function AchievementsSection({ data }: { data: ProfilePageData }) {
   return (
     <Card className="rounded-3xl border-border/70 bg-card text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)]">
       <CardContent className="p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-heading text-3xl font-bold text-foreground">
-                Your achievements
-              </h2>
-              <StreakPointsInfo />
-            </div>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              Explore completed streak bonuses and points earned across loops.
-            </p>
-          </div>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-0.5 sm:grid-cols-[auto_auto_minmax(0,1fr)] sm:items-center sm:gap-x-2">
+          <h2 className="col-start-1 row-start-1 min-w-0 font-heading text-lg font-bold text-foreground sm:text-3xl">
+            Your achievements
+          </h2>
+          <span className="col-start-2 row-start-1 inline-flex">
+            <StreakPointsInfo />
+          </span>
 
           <Badge
             variant="outline"
-            className="w-fit rounded-full border-primary/25 bg-primary/10 px-3 py-1 text-xs font-bold text-primary"
+            className="w-fit col-start-1 row-start-2 rounded-full border-primary/25 bg-primary/10 px-2 py-1 !text-[10px] font-bold text-primary sm:col-start-3 sm:row-start-1 sm:justify-self-end sm:px-3 sm:!text-xs"
           >
             {earnedLabel}
           </Badge>
         </div>
+        <p className="mt-2 max-w-2xl text-xs text-muted-foreground sm:text-sm">
+          Explore completed streak bonuses and points earned across loops.
+        </p>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {milestones.map((milestone) => {
@@ -487,7 +486,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
                 </h1>
                 <ProfileLevelsInfo />
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 {totalPoints === 0 ? (
                   "Welcome, Looper! Make your first claim to start earning GP."
                 ) : totalPoints >= 250 ? (
@@ -506,7 +505,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:max-w-[220px] xl:min-w-[220px]">
+            <div className="grid grid-cols-2 gap-4 sm:max-w-[220px] xl:min-w-[220px]">
               <ProfileHeaderStat
                 icon={FaBolt}
                 value={`${formatNumber(totals.claims)}`}
@@ -536,7 +535,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
                   className="absolute top-0 -translate-x-1/2 px-1 py-0.5 text-[11px] font-medium text-primary tabular-nums"
                   style={{ left: `${progressMarkerPosition}%` }}
                 >
-                  {progressPercent}% completed
+                  {progressPercent}%<span className="hidden sm:inline"> completed</span>
                 </span>
                 <Progress
                   value={level.progress}
@@ -641,7 +640,12 @@ function LoopActivityTable({ loops }: { loops: ProfileLoopStats[] }) {
 
   return (
     <TooltipProvider>
-      <div className="overflow-x-auto">
+      <div
+        role="region"
+        aria-label="Points per loop — scroll horizontally for all columns"
+        tabIndex={0}
+        className="min-w-0 w-full max-w-full overflow-x-auto overscroll-x-contain rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
         <div className="w-full min-w-[770px]">
           <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_220px_96px] items-end gap-4 border-b border-border/70 px-3 py-2 text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-muted-foreground">
             <span>Loop</span>
@@ -847,7 +851,7 @@ function StreakBonusDetailCard({ loop }: { loop: ProfileLoopStats }) {
           const earned = loop.earnedStreakBonuses.some(
             (bonus) => bonus.streak === milestone.streak
           )
-          const StatusIcon = earned ? FaCheck : FaLock
+          const StatusIcon = earned ? FaCheck : FaTimes
 
           return (
             <div
@@ -867,7 +871,7 @@ function StreakBonusDetailCard({ loop }: { loop: ProfileLoopStats }) {
               <span
                 className={`text-sm font-semibold ${earned ? "text-primary" : "text-muted-foreground"}`}
               >
-                {earned ? `+${milestone.points} GP` : "locked"}
+                {`+${milestone.points} GP`}
               </span>
             </div>
           )

@@ -5,8 +5,9 @@ import { useAccount, useEnsName } from "wagmi"
 
 export const WalletConnect = ({
   className,
+  compact = false,
   ...props
-}: HtmlHTMLAttributes<HTMLDivElement>) => {
+}: HtmlHTMLAttributes<HTMLDivElement> & { compact?: boolean }) => {
   const { address } = useAccount()
   const { data: ensName } = useEnsName({
     address,
@@ -51,11 +52,12 @@ export const WalletConnect = ({
                   <button
                     type="button"
                     onClick={openConnectModal}
+                    aria-label="Connect wallet"
                     className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
                   >
                     <FaWallet className="size-4" />
                     <span className="hidden sm:inline">Connect wallet</span>
-                    <span className="sm:hidden">Wallet</span>
+                    <span className={compact ? "hidden" : "sm:hidden"}>Wallet</span>
                   </button>
                 )
               }
@@ -78,11 +80,12 @@ export const WalletConnect = ({
                 <button
                   type="button"
                   onClick={openAccountModal}
+                  aria-label={`Open wallet ${walletLabel}`}
                   className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-background px-4 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-accent/60 dark:hover:bg-white/[0.08]"
                   title={account.address}
                 >
                   <FaWallet className="size-4 text-primary" />
-                  <span>{walletLabel}</span>
+                  <span className={compact ? "hidden sm:inline" : undefined}>{walletLabel}</span>
                 </button>
               )
             })()}
