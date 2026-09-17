@@ -33,6 +33,7 @@ import { ProfileExploreLoops } from "@/components/profile/profile-explore-loops"
 import { StreakPointsInfo } from "@/components/profile/streak-points-info"
 import { ProfileDetails } from "@/components/profile/profile-details"
 import { ProfileLevelsInfo } from "@/components/profile/profile-levels-info"
+import { ProfileUpdatedTime } from "@/components/profile/profile-updated-time"
 import { getProfileLevel } from "@/lib/profile/profile-level"
 
 function formatNumber(value: number) {
@@ -473,9 +474,6 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
   const progressMarkerPosition = Math.min(96, Math.max(4, level.progress))
   const rankLabel =
     data.globalRank == null ? "—" : `#${formatNumber(data.globalRank)}`
-  const lastUpdated = data.lastStatsUpdatedAt
-    ? new Date(data.lastStatsUpdatedAt)
-    : null
 
   return (
     <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
@@ -566,19 +564,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
             </p>
             <p className="mt-3 text-[10px] leading-3 text-muted-foreground">
               Updated:{" "}
-              {lastUpdated ? (
-                <time
-                  dateTime={lastUpdated.toISOString()}
-                  title={lastUpdated.toUTCString()}
-                >
-                  {new Intl.DateTimeFormat("en-US", {
-                    dateStyle: "medium",
-                    timeZone: "UTC",
-                  }).format(lastUpdated)}
-                </time>
-              ) : (
-                "—"
-              )}
+              <ProfileUpdatedTime updatedAt={data.lastStatsUpdatedAt} />
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
                   <TooltipTrigger asChild>

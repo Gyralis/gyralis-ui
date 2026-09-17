@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Close as PopoverClose } from "@radix-ui/react-popover"
 import { useQuery } from "@tanstack/react-query"
 import { FaRegUserCircle } from "react-icons/fa"
@@ -63,7 +64,7 @@ export function ProfileUserPill({
         aria-busy="true"
         className={pillClass}
       >
-        <Skeleton className="size-8 shrink-0 rounded-full" />
+        <Skeleton className="size-6 shrink-0 rounded-full" />
         <div aria-hidden="true" className={`${textClass} space-y-1`}>
           <Skeleton className="h-4 w-36" />
           <Skeleton className="h-3 w-44" />
@@ -110,16 +111,16 @@ export function ProfileUserPill({
       icon={
         <span
           aria-hidden="true"
-          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10"
+          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10"
         >
-          <PieChart width={32} height={32} accessibilityLayer={false}>
+          <PieChart width={24} height={24} accessibilityLayer={false}>
             <Pie
               data={[{ value }, { value: 100 - value }]}
               dataKey="value"
               cx="50%"
               cy="50%"
-              innerRadius={10}
-              outerRadius={13}
+              innerRadius={7}
+              outerRadius={10}
               startAngle={90}
               endAngle={-270}
               stroke="none"
@@ -154,6 +155,8 @@ function ProfilePillTarget({
   description: string
   icon: ReactNode
 }) {
+  const pathname = usePathname()
+  const isProfilePage = pathname === "/profile" || pathname.startsWith("/profile/")
   const className = `${pillClass} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary`
   const text = (
     <span className="min-w-0">
@@ -180,7 +183,7 @@ function ProfilePillTarget({
         }
       >
         {text}
-        <PopoverClose asChild>
+        {!isProfilePage && <PopoverClose asChild>
           <Link
             href={`/profile/${wallet}`}
             prefetch={false}
@@ -189,8 +192,17 @@ function ProfilePillTarget({
           >
             Open profile
           </Link>
-        </PopoverClose>
+        </PopoverClose>}
       </ProfileDetails>
+    )
+  }
+
+  if (isProfilePage) {
+    return (
+      <div className={pillClass}>
+        {icon}
+        <span className="whitespace-nowrap">{text}</span>
+      </div>
     )
   }
 

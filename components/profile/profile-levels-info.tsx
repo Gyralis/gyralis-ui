@@ -1,4 +1,4 @@
-import { FaInfoCircle } from "react-icons/fa"
+import { FaExternalLinkAlt, FaInfoCircle } from "react-icons/fa"
 
 import { ProfileDetails } from "@/components/profile/profile-details"
 
@@ -41,6 +41,19 @@ export function ProfileLevelsInfo() {
       </dl>
       <p className="border-t border-border/70 pt-3 text-xs leading-5 text-muted-foreground">
         True Looper loop access is separate: it requires 50 claims, not 50 GP.
+      </p>
+      <p className="mt-3 border-t border-border/70 pt-3 text-xs leading-5 text-muted-foreground">
+        All feedback is welcome.{" "}
+        <a
+          href="https://discord.gg/9shxYYHsaT"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          Join our Discord
+          <FaExternalLinkAlt className="size-2.5" aria-hidden="true" />
+          <span className="sr-only"> (opens in a new tab)</span>
+        </a>
       </p>
     </ProfileDetails>
   )
