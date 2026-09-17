@@ -5,7 +5,7 @@ import { z } from "zod"
 import { runScoringSync } from "@/lib/scoring/sync"
 
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
+export const maxDuration = 300
 
 const syncRequestSchema = z.object({
   mode: z.enum(["incremental", "full"]).optional(),

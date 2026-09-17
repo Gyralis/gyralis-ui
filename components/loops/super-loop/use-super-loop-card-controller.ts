@@ -58,6 +58,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     contractType: "superLoop",
     enabled: Boolean(address && settings.data?.token),
+    payoutToken: loop.payoutToken,
     token: settings.data?.token,
   })
   const participation = useSuperLoopParticipation({
@@ -109,13 +110,18 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     isClaimable: statusReads.data.isClaimable === true,
     onConfirmed: refreshAfterAction,
     tokenDecimals: balance.data?.decimals,
-    tokenSymbol: balance.data?.symbol,
+    tokenSymbol: balance.data?.payoutSymbol,
   })
   const status = reconcileSuperLoopConfirmedStatus({
     confirmedAction: claim.confirmedAction,
     currentPeriod: statusReads.data.currentPeriod,
     status: derivedStatus,
   })
+  const fundingUnavailable =
+    balance.data?.flowRateError === false &&
+    statusReads.data.owed != null &&
+    (balance.data.flowRatePerSecond ?? 0n) <= 0n &&
+    claimableAmount <= 0n
   const accumulatingUsers = participation.data?.registeredCount
   const calculatedPeriodPayout = calculateSuperLoopEstimatedPeriodPayout({
     accumulatingUsers,
@@ -149,7 +155,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       ? `${trimFormattedBalance(
           formatUnits(estimatedPeriodPayout, balance.data.decimals),
           7
-        )} ${balance.data.symbol}`
+        )} ${balance.data.payoutSymbol}`
       : undefined
   const claimableRewardValue =
     balance.data && claimableAmount > 0n
@@ -160,7 +166,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       : undefined
   const claimableRewardLabel =
     balance.data && claimableRewardValue
-      ? `${claimableRewardValue} ${balance.data.symbol}`
+      ? `${claimableRewardValue} ${balance.data.payoutSymbol}`
       : undefined
   const claimedRewardAmount =
     status === "claimed"
@@ -181,35 +187,48 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       ? `${trimFormattedBalance(
           formatUnits(displayedAmount, balance.data.decimals),
           4
-        )} ${balance.data.symbol}`
+        )} ${balance.data.payoutSymbol}`
       : undefined
-  const actionStatus: LoopActionStatus = claim.isPending
+  const actionStatus: LoopActionStatus = fundingUnavailable
+    ? "unavailable"
+    : claim.isPending
     ? claim.pendingAction === "claim"
       ? "claiming"
       : "entering"
     : status
   const action: LoopActionViewModel = {
     status: actionStatus,
-    label: getSuperLoopActionLabel({
-      amountLabel,
-      isConfirming: claim.isConfirming,
-      pendingAction: claim.pendingAction,
-      status,
-      submissionStage: claim.submissionStage,
-    }),
+    label: fundingUnavailable
+      ? "No rewards available"
+      : getSuperLoopActionLabel({
+          amountLabel,
+          isConfirming: claim.isConfirming,
+          pendingAction: claim.pendingAction,
+          status,
+          submissionStage: claim.submissionStage,
+        }),
     amountLabel,
     disabled:
-      !claim.wrongNetwork &&
-      (claim.isPending ||
-        !validAddress ||
-        ["checking", "entered", "active", "claimed"].includes(status)),
+      fundingUnavailable ||
+      (!claim.wrongNetwork &&
+        (claim.isPending ||
+          !validAddress ||
+          ["checking", "entered", "active", "claimed"].includes(status))),
     isPending: claim.isPending,
-    presentation: getSuperLoopActionPresentation({
-      isPending: claim.isPending,
-      status,
-      wrongNetwork: claim.wrongNetwork,
-    }),
-    tooltip: getSuperLoopActionTooltip(status),
+    presentation: fundingUnavailable
+      ? "neutral"
+      : getSuperLoopActionPresentation({
+          isPending: claim.isPending,
+          status,
+          wrongNetwork: claim.wrongNetwork,
+        }),
+    tooltip: fundingUnavailable
+      ? {
+          title: "Rewards paused",
+          description:
+            "This SuperLoop has no incoming funding and no rewards available to claim.",
+        }
+      : getSuperLoopActionTooltip(status),
     execute: status === "error" ? refetchStatus : claim.execute,
   }
 
@@ -242,15 +261,18 @@ export function useSuperLoopCardController(loop: LoopCardData) {
                 }),
             balanceDetailLabel: "Inflow",
             detail: superLoopRewardShowsToken(status)
-              ? balance.data.symbol
+              ? balance.data.payoutSymbol
               : undefined,
             isLoading: estimatedPeriodPayoutIsLoading,
-            tooltip: rewardsTooltip,
+            labelDetail: fundingUnavailable ? "Paused" : undefined,
+            tooltip: fundingUnavailable
+              ? "This SuperLoop is paused because its inflow is currently 0."
+              : rewardsTooltip,
             value: getSuperLoopRewardValue({
               claimableRewardValue,
               status,
             }),
-            valueMuted: status === "claimed",
+            valueMuted: status === "claimed" || fundingUnavailable,
           }
         : undefined
     const error = !settings.data ? settings.error ?? configError : balance.error
@@ -282,6 +304,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     settings.error,
     settings.isFetching,
     status,
+    fundingUnavailable,
     statusReads.data.currentPeriod,
   ])
 

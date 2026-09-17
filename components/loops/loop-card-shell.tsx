@@ -50,6 +50,7 @@ import {
 interface LoopCardShellProps {
   action: ReactNode
   distribution: SectionState<LoopDistributionViewData>
+  eligibilityLinkDisabled?: boolean
   isSuper: boolean
   loop: LoopCardData
   loopers: SectionState<LoopersViewData>
@@ -73,6 +74,7 @@ const CHAIN_ICON_SRC: Record<string, string> = {
 export function LoopCardShell({
   action,
   distribution,
+  eligibilityLinkDisabled = false,
   isSuper,
   loop,
   loopers,
@@ -226,7 +228,7 @@ export function LoopCardShell({
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Eligibility
               </p>
-              {loop.eligibilityUrl ? (
+              {loop.eligibilityUrl && !eligibilityLinkDisabled ? (
                 <Link
                   href={loop.eligibilityUrl}
                   target="_blank"
@@ -241,7 +243,14 @@ export function LoopCardShell({
                   </span>
                 </Link>
               ) : (
-                <p className="mt-0.5 line-clamp-2 text-sm font-semibold leading-5 text-foreground">
+                <p
+                  aria-disabled={eligibilityLinkDisabled || undefined}
+                  className={`mt-0.5 line-clamp-2 text-sm font-semibold leading-5 ${
+                    eligibilityLinkDisabled
+                      ? "text-muted-foreground"
+                      : "text-foreground"
+                  }`}
+                >
                   {eligibilityLabel}
                 </p>
               )}
@@ -587,7 +596,7 @@ function SponsorModal({
           ) : hardcodeZeroStats ? null : (
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <LuInfo className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>Latest history snapshot</span>
+              <span>Updated:</span>
               <span>{formatSnapshotDate(data?.snapshotDate)}</span>
             </div>
           )}
@@ -639,13 +648,14 @@ function formatClaimRateStat(
 
 function formatSnapshotDate(snapshotDate: string | null | undefined) {
   if (!snapshotDate) return "No snapshot date"
-  const parsed = new Date(`${snapshotDate}T00:00:00Z`)
+  const parsed = new Date(snapshotDate)
   if (Number.isNaN(parsed.getTime())) return snapshotDate
 
-  return parsed.toLocaleDateString("en-US", {
+  const month = parsed.toLocaleDateString("en-US", {
     month: "long",
-    day: "numeric",
-    year: "numeric",
     timeZone: "UTC",
   })
+  const hours = String(parsed.getUTCHours()).padStart(2, "0")
+  const minutes = String(parsed.getUTCMinutes()).padStart(2, "0")
+  return `${parsed.getUTCDate()} of ${month} ${parsed.getUTCFullYear()} at ${hours}:${minutes} UTC`
 }

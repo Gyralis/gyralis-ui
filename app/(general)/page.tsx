@@ -629,7 +629,9 @@ function AnimatedStatValue({
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion()
-  const [activeFaq, setActiveFaq] = useState(faqItems[0]?.question ?? "")
+  const [activeFaq, setActiveFaq] = useState<string>(
+    faqItems[0]?.question ?? ""
+  )
   const [heroSummary, setHeroSummary] = useState<HeroHistorySummary>({
     totalClaims: 2858,
     totalRegistrations: 3349,
@@ -1205,11 +1207,6 @@ export default function HomePage() {
                     </span>{" "}
                     already claiming, returning, and building streaks across the
                     ecosystem.
-                  </p>
-                  <p>
-                    Unlock special access to the{" "}
-                    <span className="text-white">True Loopers Loop</span> —
-                    coming soon.
                   </p>
                 </div>
 

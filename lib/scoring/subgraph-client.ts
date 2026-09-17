@@ -25,11 +25,15 @@ interface ClaimEventsQueryFilters {
   blockNumber?: boolean
   afterEventId?: boolean
   loopId?: boolean
+  excludedLoopIds?: boolean
   userAddress?: boolean
 }
 
+export type ClaimEventsOrderBy = "id" | "blockNumber"
+
 export function buildClaimEventsQuery(
-  filters: ClaimEventsQueryFilters
+  filters: ClaimEventsQueryFilters,
+  orderBy: ClaimEventsOrderBy = "id"
 ): string {
   const variables = ["$first: Int!"]
   const where = []
@@ -50,6 +54,10 @@ export function buildClaimEventsQuery(
     variables.push("$loopId: ID!")
     where.push("loop: $loopId")
   }
+  if (filters.excludedLoopIds) {
+    variables.push("$excludedLoopIds: [ID!]")
+    where.push("loop_not_in: $excludedLoopIds")
+  }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
     where.push("account: $userAddress")
@@ -61,7 +69,7 @@ export function buildClaimEventsQuery(
   query ClaimEvents(${variables.join(", ")}) {
     claimEvents(
       first: $first
-      orderBy: id
+      orderBy: ${orderBy}
       orderDirection: asc
       ${whereClause}
     ) {
@@ -84,24 +92,31 @@ export async function fetchClaimEventsFromSubgraph(input: {
   afterEventId?: string
   first: number
   loopId?: number
+  excludedLoopIds?: readonly number[]
+  orderBy?: ClaimEventsOrderBy
 }): Promise<ClaimScoringEvent[]> {
   if (input.fromBlock != null && input.blockNumber != null) {
     throw new Error("Use either fromBlock or blockNumber, not both")
   }
 
   return fetchClaimEventPage({
-    query: buildClaimEventsQuery({
-      fromBlock: input.fromBlock != null,
-      blockNumber: input.blockNumber != null,
-      afterEventId: input.afterEventId != null,
-      loopId: input.loopId != null,
-    }),
+    query: buildClaimEventsQuery(
+      {
+        fromBlock: input.fromBlock != null,
+        blockNumber: input.blockNumber != null,
+        afterEventId: input.afterEventId != null,
+        loopId: input.loopId != null,
+        excludedLoopIds: Boolean(input.excludedLoopIds?.length),
+      },
+      input.orderBy
+    ),
     variables: {
       first: input.first,
       fromBlock: input.fromBlock,
       blockNumber: input.blockNumber,
       afterEventId: input.afterEventId,
       loopId: input.loopId?.toString(),
+      excludedLoopIds: input.excludedLoopIds?.map(String),
     },
   })
 }
@@ -113,8 +128,9 @@ export async function fetchAllClaimEventsForUserLoop(input: {
 }): Promise<ClaimScoringEvent[]> {
   const events: ClaimScoringEvent[] = []
   let afterEventId: string | undefined
+  let shouldFetchNextPage = true
 
-  while (true) {
+  while (shouldFetchNextPage) {
     const batch = await fetchClaimEventPage({
       query: buildClaimEventsQuery({
         afterEventId: afterEventId != null,
@@ -129,7 +145,10 @@ export async function fetchAllClaimEventsForUserLoop(input: {
       },
     })
     events.push(...batch)
-    if (batch.length < input.batchSize) break
+    if (batch.length < input.batchSize) {
+      shouldFetchNextPage = false
+      continue
+    }
     afterEventId = batch[batch.length - 1]?.id
   }
 

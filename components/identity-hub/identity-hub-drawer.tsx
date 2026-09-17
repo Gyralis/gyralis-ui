@@ -332,7 +332,10 @@ export const IdentityHubDrawer = ({
     }
 
     if (scoreQuery.isError) {
-      const errorMessage = String(scoreQuery.error)
+      const errorMessage =
+        scoreQuery.error instanceof Error
+          ? scoreQuery.error.message
+          : String(scoreQuery.error)
       if (errorMessage === HAS_NOT_SUBMITTED_PASSPORT_YET_ERROR) {
         return [
           {
@@ -421,6 +424,7 @@ export const IdentityHubDrawer = ({
     >
       <SheetTrigger asChild>
         <button
+          aria-label="Open GyraHub"
           className={cn(
             "inline-flex shrink-0 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold shadow-sm backdrop-blur transition-colors",
             hasTriggerScore
@@ -438,7 +442,7 @@ export const IdentityHubDrawer = ({
               triggerNeedsAttention ? "text-amber-600" : "text-primary"
             )}
           />
-          {!hasTriggerScore && <span>GyraHub</span>}
+          {!hasTriggerScore && <span className={compact ? "hidden sm:inline" : undefined}>GyraHub</span>}
           {address && scoreQuery.isLoading && (
             <HiArrowPath className="size-4 animate-spin text-muted-foreground" />
           )}
@@ -448,9 +452,9 @@ export const IdentityHubDrawer = ({
             </span>
           )}
           {triggerNeedsAttention && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+            <span className={`${compact ? "hidden sm:inline-flex" : "inline-flex"} items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200`}>
               <HiExclamationTriangle className="size-3.5" />
-              Check
+              <span className={compact ? "hidden sm:inline" : undefined}>Check</span>
             </span>
           )}
         </button>

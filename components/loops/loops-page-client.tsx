@@ -1,59 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 // import { motion } from "framer-motion"
 import { LuX } from "react-icons/lu"
 
 // import { LuLayoutGrid, LuList } from "react-icons/lu"
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import LoopCard from "@/components/loops/loop-card"
 import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
+
 // import { LoopsTable } from "@/components/loops/loops-table"
-import {
-  EcosystemMetricData,
-  ParticipationProfile,
-  ParticipationProfileData,
-} from "@/components/loops/participation-profile"
-
-// type ViewMode = "grid" | "list"
-
-type LoopsPageClientProps = {
-  ecosystemMetrics: [
-    EcosystemMetricData,
-    EcosystemMetricData,
-    EcosystemMetricData,
-    EcosystemMetricData
-  ]
-  statsLastUpdatedLabel: string
-}
-
-const participationPreview: ParticipationProfileData = {
-  rank: 4,
-  percentile: "Top 5%",
-  identityLabel: "True Looper",
-  streak: 14,
-  tierLabel: "Core Looper",
-  claims: 42,
-  points: 58,
-  earnings: 100,
-  earningsSymbol: "HNY",
-  activeLoops: 2,
-}
 
 const UPGRADE_NOTICE_STORAGE_KEY = "gyralis-loops-upgrade-notice-dismissed"
 
-export function LoopsPageClient({
-  ecosystemMetrics,
-  statsLastUpdatedLabel,
-}: LoopsPageClientProps) {
+export function LoopsPageClient() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
   // const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [showUpgradeNotice, setShowUpgradeNotice] = useState(false)
@@ -86,77 +47,15 @@ export function LoopsPageClient({
   return (
     <div className="min-h-screen">
       <div className="relative">
-        <div className="flex justify-center px-4 pt-8">
-          <TooltipProvider>
-            <nav
-              aria-label="Loops participation"
-              className="inline-flex items-center gap-1 rounded-full border border-border bg-card p-1.5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_16px_42px_-28px_rgba(15,23,42,0.24)] backdrop-blur-2xl"
-            >
-              <Link
-                href="/loops"
-                aria-current="page"
-                className="rounded-full bg-primary/[0.14] px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-primary shadow-[0_0_0_1px_rgba(28,231,131,0.32),0_0_24px_-6px_rgba(28,231,131,0.95),0_0_38px_-16px_rgba(28,231,131,0.85)] ring-1 ring-primary/30 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-              >
-                Loops
-              </Link>
-              <div className="h-5 w-px bg-border" aria-hidden="true" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <Link
-                      href="/leaderboard"
-                      aria-disabled="true"
-                      tabIndex={-1}
-                      className="inline-flex cursor-not-allowed items-center rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/55 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-                      onClick={(event) => event.preventDefault()}
-                    >
-                      Leaderboard
-                    </Link>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>Soon</TooltipContent>
-              </Tooltip>
-              <div className="h-5 w-px bg-border" aria-hidden="true" />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
-                    <a
-                      href="#participation-profile"
-                      aria-disabled="true"
-                      tabIndex={-1}
-                      className="inline-flex cursor-not-allowed items-center rounded-full px-3 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/55 sm:px-5 sm:text-xs sm:tracking-[0.12em]"
-                      onClick={(event) => event.preventDefault()}
-                    >
-                      Profile
-                    </a>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>Sooner</TooltipContent>
-              </Tooltip>
-            </nav>
-          </TooltipProvider>
-        </div>
-
-        <LoopsUpgradeNotice
-          visible={showUpgradeNotice}
-          onDismiss={dismissUpgradeNotice}
-        />
-
-        <header className="mx-auto max-w-screen-xl px-4 py-8 sm:py-10">
-          <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 sm:gap-10">
-            <ParticipationProfile
-              profile={participationPreview}
-              ecosystemMetrics={ecosystemMetrics}
-              statsLastUpdatedLabel={statsLastUpdatedLabel}
-              preview
-            />
-          </div>
-        </header>
-
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-8 sm:pt-10"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-12"
         >
+          <LoopsUpgradeNotice
+            visible={showUpgradeNotice}
+            onDismiss={dismissUpgradeNotice}
+          />
+
           <div className="mx-auto hidden max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
             {/* Table view is temporarily disabled while its data path is refactored.
             <div className="flex items-center gap-3">
@@ -362,7 +261,7 @@ function LoopsUpgradeNotice({
   if (!visible) return null
 
   return (
-    <div className="mx-auto max-w-screen-xl px-4 pt-5">
+    <div className="mx-auto mb-6 max-w-screen-xl">
       <div className="mx-auto max-w-5xl rounded-2xl border border-primary/20 bg-primary/[0.06] px-4 py-3 text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_38px_-30px_rgba(28,231,131,0.65)] sm:px-5">
         <div className="min-w-0">
           <div className="flex items-center justify-between gap-4">

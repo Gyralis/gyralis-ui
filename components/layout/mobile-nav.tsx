@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { IdentityHubDrawer } from "../identity-hub/identity-hub-drawer"
@@ -33,18 +34,19 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <div className="flex w-full items-center justify-between md:hidden">
-        <Link href="/" className="flex items-center space-x-2">
+      <div className="flex min-w-0 w-full items-center justify-between gap-2 md:hidden">
+        <Link href="/" className="flex shrink-0 items-center space-x-2">
           <NavLogoMark />
           <span className="sr-only">Gyralis</span>
         </Link>
-        <div className="flex items-center gap-x-4">
+        <div className="flex min-w-0 items-center justify-end gap-1.5">
+          {!isLandingPage ? <ProfileUserPill compact /> : null}
           {!isLandingPage ? <IdentityHubDrawer compact /> : null}
-          {!isLandingPage ? <WalletConnect className="shrink-0" /> : null}
+          {!isLandingPage ? <WalletConnect compact className="shrink-0" /> : null}
           <SheetTrigger asChild>
             <Button
               requireWallet={false}
-              className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+              className="size-10 shrink-0 !p-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
             >
               <LuMenu className="size-5" />
               <span className="sr-only">Toggle Menu</span>

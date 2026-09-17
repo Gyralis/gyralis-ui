@@ -396,18 +396,30 @@ describe("scoring sync cursors", () => {
     ).toEqual({ lastBlockNumber: 20, lastEventId: "0x100-1" })
   })
 
-  it("builds stable id cursor queries instead of skip pagination", () => {
-    const query = buildClaimEventsQuery({
-      fromBlock: true,
-      afterEventId: true,
-      loopId: true,
-    })
+  it("orders new-block cursor pages by block number", () => {
+    const query = buildClaimEventsQuery(
+      {
+        fromBlock: true,
+        loopId: true,
+      },
+      "blockNumber"
+    )
 
-    expect(query).toContain("orderBy: id")
-    expect(query).toContain("id_gt: $afterEventId")
+    expect(query).toContain("orderBy: blockNumber")
     expect(query).toContain("blockNumber_gte: $fromBlock")
     expect(query).toContain("loop: $loopId")
     expect(query).not.toContain("skip")
+  })
+
+  it("uses an id cursor when finishing the last synced block", () => {
+    const query = buildClaimEventsQuery({
+      blockNumber: true,
+      afterEventId: true,
+    })
+
+    expect(query).toContain("orderBy: id")
+    expect(query).toContain("blockNumber: $blockNumber")
+    expect(query).toContain("id_gt: $afterEventId")
   })
 })
 
@@ -416,7 +428,7 @@ describe("receipt claim scoring sync", () => {
     const claimEvent = parseAbiItem(
       "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
     )
-    const txHash = `0x${"1".repeat(64)}` as `0x${string}`
+    const txHash: `0x${string}` = `0x${"1".repeat(64)}`
     const topics = encodeEventTopics({
       abi: [claimEvent],
       eventName: "Claim",
@@ -463,7 +475,7 @@ describe("receipt claim scoring sync", () => {
     const claimEvent = parseAbiItem(
       "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"
     )
-    const txHash = `0x${"2".repeat(64)}` as `0x${string}`
+    const txHash: `0x${string}` = `0x${"2".repeat(64)}`
     const topics = encodeEventTopics({
       abi: [claimEvent],
       eventName: "Claim",

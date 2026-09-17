@@ -160,6 +160,34 @@ export async function getGlobalLeaderboard(input: {
   })
 }
 
+export async function getGlobalLeaderboardRank(userAddress: string) {
+  const entry = await prisma.leaderboardEntry.findUnique({
+    where: { id: globalLeaderboardEntryId(userAddress) },
+  })
+
+  if (!entry || entry.scope !== "global") return null
+
+  const entriesAhead = await prisma.leaderboardEntry.count({
+    where: {
+      scope: "global",
+      OR: [
+        { totalPoints: { gt: entry.totalPoints } },
+        {
+          totalPoints: entry.totalPoints,
+          totalClaims: { gt: entry.totalClaims },
+        },
+        {
+          totalPoints: entry.totalPoints,
+          totalClaims: entry.totalClaims,
+          userAddress: { lt: entry.userAddress },
+        },
+      ],
+    },
+  })
+
+  return entriesAhead + 1
+}
+
 export async function getLoopLeaderboard(
   input: LeaderboardReadInput & {
     chainId: number

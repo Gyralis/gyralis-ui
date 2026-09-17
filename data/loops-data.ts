@@ -13,6 +13,7 @@ export interface LoopCardData {
   address?: Address
   description: string
   token: Address
+  payoutToken?: Address
   communityLogoUrl?: string
   eligibilityLogoUrl?: string
 
@@ -32,6 +33,8 @@ export interface LoopCardData {
   gardensCommunity?: GardensCommunityKey
   passportMinScore: number
   enabled: boolean
+  // Override inclusion in the active achievement roster without hiding the loop.
+  achievementActive?: boolean
   claimAmount?: string // New: Amount user can claim
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
@@ -43,37 +46,6 @@ export interface LoopCardData {
 }
 
 export const LoopCardsData: LoopCardData[] = [
-  {
-    id: 5,
-    title: "Markee",
-    by: "Markee cooperative",
-    address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
-    description:
-      "The first SuperLoop on Base, streaming rewards you can claim daily.",
-    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
-    communityLogoUrl: "/markee-logo.png",
-    eligibilityLogoUrl: "/gardens-logo.png",
-    shieldScore: "Passport Score 15+",
-    eligibility: "Join Markee community in Gardens required",
-    eligibilityUrl:
-      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
-    chainBadgeColor: "bg-custom-green",
-    shieldAccount: "0xtt...453",
-    shieldValue: "26",
-    super: true,
-    contractType: "superLoop",
-    chainId: 8453,
-    chainName: "Base",
-    historyLoopKey: "test-superloops",
-    eligibilityProvider: "gardens",
-    gardensCommunity: "markee",
-    passportMinScore: 0,
-    enabled: true,
-    rewardsSummary: "1000 markee tokens",
-    sponsorName: "Markee Cooperative",
-    sponsorLogoUrl: "/markee-logo.png",
-    sponsorUrl: "https://www.markee.xyz/",
-  },
   {
     id: 3,
     title: "1Hive Gardens",
@@ -131,7 +103,39 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorLogoUrl: "/1Hive-logo.png",
     sponsorUrl: "https://1hive.org",
   },
-
+  {
+    id: 5,
+    title: "Markee",
+    by: "Markee cooperative",
+    address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
+    description:
+      "The first SuperLoop on Base, streaming rewards you can claim daily.",
+    token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
+    communityLogoUrl: "/markee-logo.png",
+    eligibilityLogoUrl: "/gardens-logo.png",
+    shieldScore: "Passport Score 15+",
+    eligibility: "Join Markee community in Gardens required",
+    eligibilityUrl:
+      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
+    chainBadgeColor: "bg-custom-green",
+    shieldAccount: "0xtt...453",
+    shieldValue: "26",
+    super: true,
+    contractType: "superLoop",
+    chainId: 8453,
+    chainName: "Base",
+    historyLoopKey: "markee-gardens",
+    eligibilityProvider: "gardens",
+    gardensCommunity: "markee",
+    passportMinScore: 0,
+    enabled: false,
+    achievementActive: false,
+    rewardsSummary: "1000 markee tokens",
+    sponsorName: "Markee Cooperative",
+    sponsorLogoUrl: "/markee-logo.png",
+    sponsorUrl: "https://www.markee.xyz/",
+  },
   {
     id: 6,
     title: "True Loopers",
@@ -139,6 +143,7 @@ export const LoopCardsData: LoopCardData[] = [
     address: "0x5034003B12c05dE5D85bC58AD17360c77d13ae36",
     description: "Engage Daily. Earn Fairly with Gyralis superLoops.",
     token: "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+    payoutToken: "0xF6627cF19317C33B457f77452876e6e297c4942F",
     eligibilityLogoUrl: "/gyralis-logo.svg",
     shieldScore: "Passport Score 15+",
     eligibility: "+50 Claims in Gyralis",
@@ -149,7 +154,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "superLoop",
     chainId: 8453,
     chainName: "Base",
-    historyLoopKey: "test-superloops",
+    historyLoopKey: "markee-gardens",
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
     enabled: false,
@@ -157,6 +162,6 @@ export const LoopCardsData: LoopCardData[] = [
     statusLabel: "Preparing",
     sponsorName: "TBA",
     sponsorLogoUrl: "/gyralis-logo.svg",
-    sponsorUrl: "/",
+    sponsorUrl: "https://www.gyralis.xyz/",
   },
 ]
