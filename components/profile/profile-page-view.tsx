@@ -34,6 +34,8 @@ import { StreakPointsInfo } from "@/components/profile/streak-points-info"
 import { ProfileDetails } from "@/components/profile/profile-details"
 import { ProfileLevelsInfo } from "@/components/profile/profile-levels-info"
 import { ProfileUpdatedTime } from "@/components/profile/profile-updated-time"
+import { ProfileLevelProgress } from "@/components/profile/profile-level-progress"
+import { ProfileClaimRate, ProfileClaimRateSkeleton } from "@/components/profile/profile-claim-rate"
 import { getProfileLevel } from "@/lib/profile/profile-level"
 
 function formatNumber(value: number) {
@@ -505,17 +507,22 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 sm:max-w-[220px] xl:min-w-[220px]">
-              <ProfileHeaderStat
-                icon={FaBolt}
-                value={`${formatNumber(totals.claims)}`}
-                label="total claims"
-              />
+            <div className="grid grid-cols-2 gap-4 xl:min-w-[380px] xl:grid-cols-3">
               <ProfileHeaderStat
                 icon={FaFire}
                 value={`${formatNumber(totals.longestStreak)}`}
                 label="best streak"
               />
+              <ProfileHeaderStat
+                icon={FaBolt}
+                value={`${formatNumber(totals.claims)}`}
+                label="total claims"
+              />
+              <div className="col-span-2 xl:col-span-1 xl:col-start-3 xl:row-start-1">
+                <Suspense fallback={<ProfileClaimRateSkeleton />}>
+                  <ProfileClaimRate address={data.address} />
+                </Suspense>
+              </div>
             </div>
           </div>
 
@@ -537,9 +544,9 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
                 >
                   {progressPercent}%<span className="hidden sm:inline"> completed</span>
                 </span>
-                <Progress
+                <ProfileLevelProgress
                   value={level.progress}
-                  className="h-2.5 bg-muted ring-1 ring-border/70 [&>div]:bg-primary"
+                  label={`Level progress: ${level.toLabel}`}
                 />
               </div>
               <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-muted-foreground">
@@ -625,10 +632,10 @@ function ProfileHeaderStat({
   return (
     <div className="flex min-h-16 flex-col items-center justify-center rounded-2xl border border-border/70 bg-background/60 px-2.5 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
       <Icon className="mb-1.5 size-4 text-primary" aria-hidden="true" />
-      <p className="text-base font-bold leading-none text-foreground">
+      <p className="text-sm font-bold leading-none text-foreground">
         {value}
       </p>
-      <p className="mt-1 text-[11px] font-medium text-muted-foreground">
+      <p className="mt-1 text-[10px] font-medium text-muted-foreground">
         {label}
       </p>
     </div>
