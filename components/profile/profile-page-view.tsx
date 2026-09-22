@@ -471,6 +471,7 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
   const totals = getLoopTotals(data.loopStats)
   const totalPoints = totals.totalPoints
   const level = getLooperLevelProgress(totalPoints)
+  const isLooperX = totalPoints >= 250
   const progressPercent = Math.round(level.progress)
   const progressMarkerPosition = Math.min(96, Math.max(4, level.progress))
   const rankLabel =
@@ -488,11 +489,17 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
                 </h1>
                 <ProfileLevelsInfo />
               </div>
+              <p
+                className="mt-1 text-xs text-muted-foreground"
+                title={data.address}
+              >
+                {data.address.slice(0, 6)}…{data.address.slice(-4)}
+              </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 {totalPoints === 0 ? (
                   "Welcome, Looper! Make your first claim to start earning GP."
-                ) : totalPoints >= 250 ? (
-                  "You’ve reached LooperX. Keep the claims coming."
+                ) : isLooperX ? (
+                  "You’ve reached the highest beta level. Every claim still earns GP."
                 ) : (
                   <>
                     You’re{" "}
@@ -538,21 +545,34 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
 
             <div className="space-y-2">
               <div className="relative pt-5">
-                <span
-                  className="absolute top-0 -translate-x-1/2 px-1 py-0.5 text-[11px] font-medium text-primary tabular-nums"
-                  style={{ left: `${progressMarkerPosition}%` }}
-                >
-                  {progressPercent}%<span className="hidden sm:inline"> completed</span>
-                </span>
+                {!isLooperX && (
+                  <span
+                    className="absolute top-0 -translate-x-1/2 px-1 py-0.5 text-[11px] font-medium text-primary tabular-nums"
+                    style={{ left: `${progressMarkerPosition}%` }}
+                  >
+                    {progressPercent}%<span className="hidden sm:inline"> completed</span>
+                  </span>
+                )}
                 <ProfileLevelProgress
                   value={level.progress}
-                  label={`Level progress: ${level.toLabel}`}
+                  label={
+                    isLooperX
+                      ? "LooperX achieved: highest beta level completed"
+                      : `Level progress: ${level.toLabel}`
+                  }
                 />
               </div>
-              <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-muted-foreground">
-                <span>{level.fromLabel}</span>
-                <span>{level.toLabel}</span>
-              </div>
+              {isLooperX ? (
+                <div className="flex items-center justify-end gap-1.5 text-[11px] font-medium text-primary">
+                  <FaCheck className="size-3" aria-hidden="true" />
+                  <span>LooperX</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-muted-foreground">
+                  <span>{level.fromLabel}</span>
+                  <span>{level.toLabel}</span>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { runScoringSync } from "./sync"
 
 const mocks = vi.hoisted(() => ({
+  revalidateTag: vi.fn(),
   fetchAllClaimEventsForUserLoop: vi.fn(),
   fetchClaimEventsFromSubgraph: vi.fn(),
   getScoringSyncState: vi.fn(),
@@ -15,6 +16,8 @@ const mocks = vi.hoisted(() => ({
   upsertUserGlobalStats: vi.fn(),
   upsertGlobalLeaderboardEntry: vi.fn(),
 }))
+
+vi.mock("next/cache", () => ({ revalidateTag: mocks.revalidateTag }))
 
 vi.mock("@/env.mjs", () => ({
   env: {
@@ -115,6 +118,15 @@ describe("incremental scoring sync", () => {
     ])
 
     const result = await runScoringSync()
+
+    expect(mocks.revalidateTag).toHaveBeenCalledWith("leaderboard")
+    expect(
+      mocks.revalidateTag.mock.invocationCallOrder[
+        mocks.revalidateTag.mock.invocationCallOrder.length - 1
+      ]
+    ).toBeGreaterThan(
+      mocks.upsertGlobalLeaderboardEntry.mock.invocationCallOrder[0]
+    )
 
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(1, {
       blockNumber: 10,

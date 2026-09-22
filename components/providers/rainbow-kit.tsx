@@ -2,7 +2,7 @@
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-import { type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { env } from "@/env.mjs"
 import {
   darkTheme,
@@ -25,9 +25,8 @@ const wagmiConfig = getDefaultConfig({
   ssr: true,
 })
 
-const queryClient = new QueryClient()
-
 export function RainbowKit({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient())
   const { resolvedTheme } = useTheme()
   return (
     <>
