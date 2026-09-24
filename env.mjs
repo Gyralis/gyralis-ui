@@ -45,7 +45,10 @@ export const env = createEnv({
     NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
     NEXT_PUBLIC_WC_PROJECT_ID: z
       .string()
-      .min(1)
+      .regex(
+        /^[a-fA-F0-9]{32}$/,
+        "WalletConnect project ID must be 32 hexadecimal characters"
+      )
       .default("00000000000000000000000000000000"),
   },
   runtimeEnv: {
