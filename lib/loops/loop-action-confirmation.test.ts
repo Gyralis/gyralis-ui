@@ -11,7 +11,7 @@ const mock = vi.hoisted(() => ({
     isSuccess: true,
     isError: false,
     isLoading: false,
-    data: { status: "success" },
+    data: { status: "success", blockNumber: 12345n },
   },
   refetch: vi.fn().mockResolvedValue(undefined),
 }))
@@ -90,6 +90,7 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
           action,
           chainId: 100,
           transactionHash,
+          blockNumber: 12345n,
         })
       }
       expect(onConfirmed).toHaveBeenCalledTimes(1)
@@ -97,6 +98,7 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
         action,
         chainId: 100,
         transactionHash,
+        blockNumber: 12345n,
       })
     }
   )

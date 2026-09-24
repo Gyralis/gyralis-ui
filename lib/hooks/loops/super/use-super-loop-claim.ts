@@ -109,6 +109,7 @@ export function useSuperLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setLastClaimedAmount(undefined)
@@ -122,7 +123,13 @@ export function useSuperLoopClaim({
   }, [address, chainId, connectedAccount])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const completedAction = pendingAction
     const completedTransactionUrl = transactionUrl
@@ -146,6 +153,7 @@ export function useSuperLoopClaim({
         action: completedAction,
         chainId,
         transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
       })
     }
 
@@ -175,6 +183,7 @@ export function useSuperLoopClaim({
       action: completedAction,
       chainId,
       transactionHash: txHash,
+      blockNumber: receiptBlockNumber,
     })
   }, [
     chainId,
@@ -185,6 +194,7 @@ export function useSuperLoopClaim({
     pendingAction,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,

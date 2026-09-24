@@ -5,4 +5,5 @@ export interface LoopActionConfirmation {
   action: "enter" | "claim"
   chainId: number
   transactionHash: Hash
+  blockNumber: bigint
 }

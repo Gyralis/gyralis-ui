@@ -1,7 +1,12 @@
 import { QueryClient, QueryObserver } from "@tanstack/react-query"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { refreshTotalClaimsAfterClaim } from "./use-refresh-total-claims-after-claim"
+import { getClaimProgress } from "@/lib/loops/claim-progress"
+
+import {
+  refreshTotalClaimsAfterClaim,
+  syncTotalClaims,
+} from "./use-refresh-total-claims-after-claim"
 import { totalClaimsQueryOptions } from "./use-total-claims"
 
 const snapshot = {
@@ -20,6 +25,7 @@ afterEach(() => {
   clients.forEach((queryClient) => queryClient.clear())
   clients.length = 0
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
 describe("total claims query", () => {
@@ -79,6 +85,7 @@ describe("refresh total claims after confirmation", () => {
     action: "claim" as const,
     chainId: 100,
     transactionHash: "0x123" as const,
+    blockNumber: 12345n,
   }
 
   it("fetches without a mounted UI and replaces the existing snapshot", async () => {
@@ -123,9 +130,79 @@ describe("refresh total claims after confirmation", () => {
     vi.spyOn(queryClient, "fetchQuery").mockRejectedValue(
       new Error("Unavailable")
     )
-    await expect(
-      refreshTotalClaimsAfterClaim(queryClient, confirmation)
-    ).resolves.toBeUndefined()
+    vi.useFakeTimers()
+    const refresh = refreshTotalClaimsAfterClaim(queryClient, confirmation)
+    await vi.runAllTimersAsync()
+    await expect(refresh).resolves.toBeUndefined()
+    expect(queryClient.getQueryData(totalClaimsQueryOptions.queryKey)).toEqual(
+      snapshot
+    )
+  })
+
+  it("keeps +1 through indexing lag and stops retrying once its block is indexed", async () => {
+    vi.useFakeTimers()
+    const queryClient = client()
+    queryClient.setQueryData(totalClaimsQueryOptions.queryKey, snapshot)
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json(snapshot))
+      .mockResolvedValueOnce(
+        Response.json({ ...snapshot, totalClaims: 6525, indexedBlock: 12346 })
+      )
+    vi.stubGlobal("fetch", fetchMock)
+    const refresh = refreshTotalClaimsAfterClaim(queryClient, {
+      ...confirmation,
+      blockNumber: 12346n,
+    })
+    expect(getClaimProgress(queryClient).getSnapshot().pending).toHaveLength(1)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(getClaimProgress(queryClient).getSnapshot().pending).toHaveLength(1)
+    await vi.advanceTimersByTimeAsync(2000)
+    await refresh
+    expect(getClaimProgress(queryClient).getSnapshot().pending).toHaveLength(0)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(
+      queryClient.getQueryData(totalClaimsQueryOptions.queryKey)
+    ).toMatchObject({ totalClaims: 6525 })
+  })
+
+  it("bounds retries, keeps the increment pending, then allows manual recovery", async () => {
+    vi.useFakeTimers()
+    const queryClient = client()
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(Response.json(snapshot)))
+    vi.stubGlobal("fetch", fetchMock)
+    const refresh = refreshTotalClaimsAfterClaim(queryClient, {
+      ...confirmation,
+      blockNumber: 12346n,
+    })
+    await vi.advanceTimersByTimeAsync(30000)
+    await refresh
+    expect(fetchMock).toHaveBeenCalledTimes(5)
+    expect(getClaimProgress(queryClient).getSnapshot()).toMatchObject({
+      syncing: false,
+    })
+    expect(getClaimProgress(queryClient).getSnapshot().pending).toHaveLength(1)
+    fetchMock.mockResolvedValueOnce(
+      Response.json({ ...snapshot, indexedBlock: 12346, totalClaims: 6522 })
+    )
+    await syncTotalClaims(queryClient)
+    expect(getClaimProgress(queryClient).getSnapshot().pending).toHaveLength(0)
+  })
+
+  it("does not replace the cache with a response from an older indexed block", async () => {
+    const queryClient = client()
+    queryClient.setQueryData(totalClaimsQueryOptions.queryKey, snapshot)
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ ...snapshot, totalClaims: 6500, indexedBlock: 12300 })
+        )
+    )
+    await queryClient.fetchQuery(totalClaimsQueryOptions)
     expect(queryClient.getQueryData(totalClaimsQueryOptions.queryKey)).toEqual(
       snapshot
     )

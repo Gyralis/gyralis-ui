@@ -5,10 +5,11 @@ import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 // import { motion } from "framer-motion"
 import { LuX } from "react-icons/lu"
 
-// import { LuLayoutGrid, LuList } from "react-icons/lu"
-
 import LoopCard from "@/components/loops/loop-card"
 import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
+// import { LuLayoutGrid, LuList } from "react-icons/lu"
+
+import { RoadTo10k } from "@/components/loops/road-to-10k"
 
 // import { LoopsTable } from "@/components/loops/loops-table"
 
@@ -55,6 +56,8 @@ export function LoopsPageClient() {
             visible={showUpgradeNotice}
             onDismiss={dismissUpgradeNotice}
           />
+
+          <RoadTo10k />
 
           <div className="mx-auto hidden max-w-[560px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between xl:max-w-[calc(1120px+1.5rem)]">
             {/* Table view is temporarily disabled while its data path is refactored.

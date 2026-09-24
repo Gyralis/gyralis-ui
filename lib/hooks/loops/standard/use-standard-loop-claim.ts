@@ -186,6 +186,7 @@ export function useStandardLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -196,7 +197,13 @@ export function useStandardLoopClaim({
   }, [address, chainId, connectedAccount, currentPeriod])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const confirmedAction = pendingAction
     const claimedAmount = claimableAmount
@@ -221,6 +228,7 @@ export function useStandardLoopClaim({
         action: confirmedAction,
         chainId,
         transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
       })
     }
 
@@ -248,6 +256,7 @@ export function useStandardLoopClaim({
         action: confirmedAction,
         chainId,
         transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
       })
     })
   }, [
@@ -259,6 +268,7 @@ export function useStandardLoopClaim({
     refreshAccountState,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,
