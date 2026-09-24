@@ -18,6 +18,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import type {
   SuperLoopConfirmedAction,
   SuperLoopSubmissionStage,
@@ -47,7 +48,7 @@ interface UseSuperLoopClaimParams {
   eligibilityProvider: LoopEligibilityProvider
   hasClaimed: boolean
   isClaimable: boolean
-  onConfirmed?: () => void | Promise<void>
+  onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -158,8 +159,13 @@ export function useSuperLoopClaim({
         : undefined,
     })
 
-    void onConfirmed?.()
+    void onConfirmed?.({
+      action: completedAction,
+      chainId,
+      transactionHash: txHash,
+    })
   }, [
+    chainId,
     claimableAmount,
     currentPeriod,
     onConfirmed,

@@ -19,6 +19,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   deriveStandardLoopClaimStatus,
   type StandardLoopSubmissionStage,
@@ -47,7 +48,7 @@ interface UseStandardLoopClaimParams {
   chainId: number
   currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
-  onConfirmed?: () => void | Promise<void>
+  onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -231,9 +232,14 @@ export function useStandardLoopClaim({
     })
 
     void refreshAccountState().finally(() => {
-      void onConfirmed?.()
+      void onConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+      })
     })
   }, [
+    chainId,
     claimableAmount,
     onConfirmed,
     pendingAction,

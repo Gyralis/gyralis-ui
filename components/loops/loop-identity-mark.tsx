@@ -38,9 +38,9 @@ export function LoopIdentityMark({ loop }: LoopIdentityMarkProps) {
           <Image
             src={loop.eligibilityLogoUrl!}
             alt=""
-            width={16}
-            height={16}
-            className="size-4 object-contain"
+            width={12}
+            height={12}
+            className="size-3 shrink-0 object-contain"
           />
         </span>
       ) : null}

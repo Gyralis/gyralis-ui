@@ -731,7 +731,9 @@ export default function HomePage() {
                   alt=""
                   width={640}
                   height={640}
-                  className="size-[min(58vw,640px)] animate-[spin_120s_linear_infinite] opacity-[0.13] motion-reduce:animate-none"
+                  priority
+                  sizes="(max-width: 1103px) 58vw, 640px"
+                  className="h-auto w-[min(58vw,640px)] animate-[spin_120s_linear_infinite] opacity-[0.13] motion-reduce:animate-none"
                 />
               </motion.div>
               <div className="relative mx-auto max-w-5xl">
