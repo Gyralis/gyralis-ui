@@ -49,6 +49,9 @@ interface UseSuperLoopClaimParams {
   hasClaimed: boolean
   isClaimable: boolean
   onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -79,6 +82,7 @@ export function useSuperLoopClaim({
   hasClaimed,
   isClaimable,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseSuperLoopClaimParams) {
@@ -137,6 +141,14 @@ export function useSuperLoopClaim({
       return
     }
 
+    if (completedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: completedAction,
+        chainId,
+        transactionHash: txHash,
+      })
+    }
+
     setConfirmedAction({ action: completedAction, period: currentPeriod })
     if (completedAction === "claim") setLastClaimedAmount(claimableAmount)
 
@@ -169,6 +181,7 @@ export function useSuperLoopClaim({
     claimableAmount,
     currentPeriod,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     receipt.isSuccess,
     receiptStatus,

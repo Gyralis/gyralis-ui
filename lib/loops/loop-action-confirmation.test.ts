@@ -38,9 +38,12 @@ vi.mock("@/components/ui/use-toast", () => ({
   useToast: () => ({ toast: vi.fn() }),
 }))
 
+const onClaimConfirmed = vi.fn()
+
 const transactionHash = `0x${"a".repeat(64)}`
 
 beforeEach(() => {
+  onClaimConfirmed.mockClear()
   mock.effects = []
   mock.receipt.isSuccess = true
   mock.receipt.data.status = "success"
@@ -59,6 +62,7 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
       eligibilityProvider: "gardens" as const,
       currentPeriod: 5n,
       onConfirmed,
+      onClaimConfirmed,
     }
     if (kind === "standard") runStandardClaimHook(params)
     else
@@ -80,6 +84,14 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
     "preserves the confirmed %s action and transaction identity",
     async (action) => {
       const onConfirmed = await confirm(action)
+      expect(onClaimConfirmed).toHaveBeenCalledTimes(action === "claim" ? 1 : 0)
+      if (action === "claim") {
+        expect(onClaimConfirmed).toHaveBeenCalledWith({
+          action,
+          chainId: 100,
+          transactionHash,
+        })
+      }
       expect(onConfirmed).toHaveBeenCalledTimes(1)
       expect(onConfirmed).toHaveBeenCalledWith({
         action,
@@ -92,10 +104,12 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
   it("does not notify for a reverted transaction", async () => {
     mock.receipt.data.status = "reverted"
     expect(await confirm("claim")).not.toHaveBeenCalled()
+    expect(onClaimConfirmed).not.toHaveBeenCalled()
   })
 
   it("does not notify before receipt confirmation", async () => {
     mock.receipt.isSuccess = false
     expect(await confirm("claim")).not.toHaveBeenCalled()
+    expect(onClaimConfirmed).not.toHaveBeenCalled()
   })
 })

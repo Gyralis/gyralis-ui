@@ -49,6 +49,9 @@ interface UseStandardLoopClaimParams {
   currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
   onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -76,6 +79,7 @@ export function useStandardLoopClaim({
   currentPeriod,
   eligibilityProvider,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseStandardLoopClaimParams) {
@@ -212,6 +216,14 @@ export function useStandardLoopClaim({
       return
     }
 
+    if (confirmedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+      })
+    }
+
     setHasEnteredNextPeriod(true)
     if (confirmedAction === "claim") setLastClaimedAmount(claimedAmount)
 
@@ -242,6 +254,7 @@ export function useStandardLoopClaim({
     chainId,
     claimableAmount,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     refreshAccountState,
     receipt.isSuccess,

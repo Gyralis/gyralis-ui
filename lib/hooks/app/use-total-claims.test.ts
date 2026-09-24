@@ -1,6 +1,7 @@
 import { QueryClient, QueryObserver } from "@tanstack/react-query"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { refreshTotalClaimsAfterClaim } from "./use-refresh-total-claims-after-claim"
 import { totalClaimsQueryOptions } from "./use-total-claims"
 
 const snapshot = {
@@ -70,5 +71,63 @@ describe("total claims query", () => {
     const unsubscribeAgain = observer.subscribe(() => {})
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2))
     unsubscribeAgain()
+  })
+})
+
+describe("refresh total claims after confirmation", () => {
+  const confirmation = {
+    action: "claim" as const,
+    chainId: 100,
+    transactionHash: "0x123" as const,
+  }
+
+  it("fetches without a mounted UI and replaces the existing snapshot", async () => {
+    const next = { ...snapshot, totalClaims: 6522 }
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(next)))
+    const queryClient = client()
+    queryClient.setQueryData(totalClaimsQueryOptions.queryKey, snapshot)
+    await refreshTotalClaimsAfterClaim(queryClient, confirmation)
+    expect(queryClient.getQueryData(totalClaimsQueryOptions.queryKey)).toEqual(
+      next
+    )
+  })
+
+  it("does not invent an increment while the subgraph is catching up", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(snapshot)))
+    const queryClient = client()
+    queryClient.setQueryData(totalClaimsQueryOptions.queryKey, snapshot)
+    await refreshTotalClaimsAfterClaim(queryClient, confirmation)
+    expect(queryClient.getQueryData(totalClaimsQueryOptions.queryKey)).toEqual(
+      snapshot
+    )
+  })
+
+  it("ignores entries and claims on other chains", async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
+    const queryClient = client()
+    await refreshTotalClaimsAfterClaim(queryClient, {
+      ...confirmation,
+      action: "enter",
+    })
+    await refreshTotalClaimsAfterClaim(queryClient, {
+      ...confirmation,
+      chainId: 8453,
+    })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("does not reject the success callback if refreshing fails", async () => {
+    const queryClient = client()
+    queryClient.setQueryData(totalClaimsQueryOptions.queryKey, snapshot)
+    vi.spyOn(queryClient, "fetchQuery").mockRejectedValue(
+      new Error("Unavailable")
+    )
+    await expect(
+      refreshTotalClaimsAfterClaim(queryClient, confirmation)
+    ).resolves.toBeUndefined()
+    expect(queryClient.getQueryData(totalClaimsQueryOptions.queryKey)).toEqual(
+      snapshot
+    )
   })
 })
