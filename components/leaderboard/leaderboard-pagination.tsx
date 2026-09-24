@@ -24,7 +24,7 @@ export function LeaderboardPagination({
   const pages = leaderboardPageNumbers(page, totalPages)
   const mobilePages = mobileLeaderboardPageNumbers(page, totalPages)
   const buttonClass =
-    "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-background text-sm font-semibold tabular-nums text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 sm:size-10 sm:text-base"
+    "inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-background text-sm font-semibold tabular-nums text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
   return (
     <nav
@@ -40,7 +40,7 @@ export function LeaderboardPagination({
             disabled={disabled}
             onClick={() => onPageChange(1)}
           >
-            <FiChevronsLeft className="size-4 sm:size-5" aria-hidden="true" />
+            <FiChevronsLeft className="size-4" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -49,7 +49,7 @@ export function LeaderboardPagination({
             disabled={disabled}
             onClick={() => onPageChange(Math.min(totalPages, page - 1))}
           >
-            <FiChevronLeft className="size-4 sm:size-5" aria-hidden="true" />
+            <FiChevronLeft className="size-4" aria-hidden="true" />
           </button>
         </>
       )}
@@ -61,7 +61,7 @@ export function LeaderboardPagination({
           aria-current={number === page ? "page" : undefined}
           className={`${buttonClass} ${
             mobilePages.includes(number) ? "" : "!hidden sm:!inline-flex"
-          } ${number === page ? "!bg-primary !text-primary-foreground" : ""}`}
+          } ${number === page ? "!bg-secondary !text-secondary-foreground" : ""}`}
           disabled={disabled}
           onClick={() => {
             if (number !== page) onPageChange(number)
@@ -79,7 +79,7 @@ export function LeaderboardPagination({
             disabled={disabled}
             onClick={() => onPageChange(page + 1)}
           >
-            <FiChevronRight className="size-4 sm:size-5" aria-hidden="true" />
+            <FiChevronRight className="size-4" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -88,7 +88,7 @@ export function LeaderboardPagination({
             disabled={disabled}
             onClick={() => onPageChange(totalPages)}
           >
-            <FiChevronsRight className="size-4 sm:size-5" aria-hidden="true" />
+            <FiChevronsRight className="size-4" aria-hidden="true" />
           </button>
         </>
       )}

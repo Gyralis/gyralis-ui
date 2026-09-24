@@ -113,7 +113,7 @@ export function ProfileClaimRateGauge({
             {rateLabel}
           </span>
           <div className="text-[10px] font-medium text-muted-foreground">
-            <span>claim rate</span>
+            <span>Claim rate</span>
           </div>
         </button>
       }

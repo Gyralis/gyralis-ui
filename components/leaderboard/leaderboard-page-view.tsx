@@ -33,13 +33,21 @@ const number = new Intl.NumberFormat("en-US")
 const grid =
   "grid grid-cols-[64px_minmax(180px,1fr)_140px_130px_130px] items-center gap-4"
 
-export function LeaderboardRowsSkeleton() {
+export function LeaderboardRowsSkeleton({
+  searching = false,
+}: {
+  searching?: boolean
+}) {
   return (
     <div
       role="status"
-      aria-label="Loading leaderboard"
+      aria-live="polite"
+      aria-busy="true"
       className="space-y-4 py-6"
     >
+      <p className="text-sm text-muted-foreground">
+        {searching ? "Searching Looper ..." : "Loading leaderboard…"}
+      </p>
       {Array.from({ length: 5 }, (_, index) => (
         <Skeleton key={index} className="h-12 w-full rounded-md" />
       ))}
@@ -149,25 +157,26 @@ export function LeaderboardPageView({
   })
   const stats = [
     {
-      label: "All-time GP awarded",
+      label: "All-Time GP Awarded",
       value: summary.data?.totalPoints,
       icon: FaBolt,
       suffix: "GP",
     },
-    { label: "Total claims", value: summary.data?.totalClaims, icon: FaBolt },
+    { label: "Total Claims", value: summary.data?.totalClaims, icon: FaBolt },
     {
-      label: "Total loopers",
+      label: "Total Loopers",
       value: summary.data?.totalLoopers,
       icon: FaUsers,
     },
     {
-      label: "Longest streak",
+      label: "Longest Streak",
       value: summary.data?.longestStreak,
       icon: FaFire,
     },
   ]
   const total = rows.data?.totalMatching ?? 0
   const pendingSearch = normalizeLeaderboardSearch(draft) !== search
+  const loadingRows = pendingSearch || rows.isPending || rows.isFetching
 
   return (
     <main className="min-w-0 px-4 py-8 sm:py-12">
@@ -235,10 +244,7 @@ export function LeaderboardPageView({
         <Card className="min-w-0 max-w-full rounded-3xl p-5 sm:p-8">
           <div className="flex w-full items-center gap-3 sm:gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              <FaSearch
-                aria-hidden="true"
-                className="shrink-0 text-primary"
-              />
+              <FaSearch aria-hidden="true" className="shrink-0 text-primary" />
               <Input
                 id="leaderboard-search"
                 aria-label="Search by wallet address"
@@ -269,7 +275,9 @@ export function LeaderboardPageView({
               <span aria-hidden="true" className="mr-2">
                 /
               </span>
-              {rows.data ? (
+              {loadingRows ? (
+                <span aria-label="Loading result count">…</span>
+              ) : rows.data ? (
                 <>
                   <span className="font-semibold tabular-nums text-foreground">
                     {number.format(total)}
@@ -279,15 +287,12 @@ export function LeaderboardPageView({
               ) : (
                 "— loopers"
               )}
-              {(rows.isFetching || pendingSearch) && (
-                <span className="sr-only"> Updating leaderboard</span>
-              )}
-              {rows.isError && (
+              {rows.isError && !loadingRows && (
                 <span className="sr-only"> Leaderboard unavailable</span>
               )}
             </div>
           </div>
-          {rows.isError && (
+          {rows.isError && !loadingRows && (
             <Retry
               message="Leaderboard could not be refreshed."
               retry={() => {
@@ -295,8 +300,10 @@ export function LeaderboardPageView({
               }}
             />
           )}
-          {rows.isPending ? (
-            <LeaderboardRowsSkeleton />
+          {loadingRows ? (
+            <LeaderboardRowsSkeleton
+              searching={Boolean(normalizeLeaderboardSearch(draft))}
+            />
           ) : (
             rows.data && (
               <>
@@ -373,7 +380,11 @@ export function LeaderboardPageView({
                                 : ""
                             }`}
                           />
-                          <span>{number.format(entry.longestStreak)}</span>
+                          <span>
+                            {entry.longestStreak > 49
+                              ? "+50"
+                              : number.format(entry.longestStreak)}
+                          </span>
                         </div>
                         <div
                           role="cell"
@@ -402,19 +413,21 @@ export function LeaderboardPageView({
                     {total > 0
                       ? "No loopers on this page. Return to an earlier page."
                       : search
-                      ? "No matching addresses. Try another address fragment."
+                      ? "Looper not found. Try another address"
                       : "No scored claims yet. The first loopers will appear here."}
                   </p>
                 )}
-                <LeaderboardPagination
-                  page={page}
-                  totalPages={Math.max(
-                    1,
-                    Math.ceil(total / LEADERBOARD_PAGE_SIZE)
-                  )}
-                  disabled={pendingSearch || rows.isFetching}
-                  onPageChange={navigate}
-                />
+                {!search && (
+                  <LeaderboardPagination
+                    page={page}
+                    totalPages={Math.max(
+                      1,
+                      Math.ceil(total / LEADERBOARD_PAGE_SIZE)
+                    )}
+                    disabled={pendingSearch || rows.isFetching}
+                    onPageChange={navigate}
+                  />
+                )}
               </>
             )
           )}

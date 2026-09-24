@@ -518,12 +518,12 @@ function ProfileHeader({ data }: { data: ProfilePageData }) {
               <ProfileHeaderStat
                 icon={FaFire}
                 value={`${formatNumber(totals.longestStreak)}`}
-                label="best streak"
+                label="Best streak"
               />
               <ProfileHeaderStat
                 icon={FaBolt}
                 value={`${formatNumber(totals.claims)}`}
-                label="total claims"
+                label="Total claims"
               />
               <div className="col-span-2 xl:col-span-1 xl:col-start-3 xl:row-start-1">
                 <Suspense fallback={<ProfileClaimRateSkeleton />}>
