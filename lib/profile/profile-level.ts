@@ -40,7 +40,7 @@ export function getProfilePillProgress({
       progress: Math.max(0, (totalClaims / 50) * 100),
       description: `${remainingClaims} ${
         remainingClaims === 1 ? "claim" : "claims"
-      } to access True Looper loop`,
+      } left to join the True Loopers!`,
     }
   }
   return {

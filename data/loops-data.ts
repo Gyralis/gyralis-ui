@@ -39,6 +39,7 @@ export interface LoopCardData {
   balanceNumeri?: number // New: Numeric balance for calculations
   currency?: string // New: Currency symbol
   rewardsSummary?: string
+  unlockAtCommunityClaims?: number
   statusLabel?: string
   sponsorName?: string
   sponsorLogoUrl?: string
@@ -131,6 +132,7 @@ export const LoopCardsData: LoopCardData[] = [
     passportMinScore: 0,
     enabled: false,
     achievementActive: false,
+    statusLabel: "Paused",
     rewardsSummary: "1000 markee tokens",
     sponsorName: "Markee Cooperative",
     sponsorLogoUrl: "/markee-logo.png",
@@ -158,9 +160,10 @@ export const LoopCardsData: LoopCardData[] = [
     eligibilityProvider: "blockscout",
     passportMinScore: 0,
     enabled: false,
-    rewardsSummary: "Up to $50 USDC",
+    rewardsSummary: "$50 USDC shared pool",
+    unlockAtCommunityClaims: 10_000,
     statusLabel: "Preparing",
-    sponsorName: "TBA",
+    sponsorName: "Gyralis",
     sponsorLogoUrl: "/gyralis-logo.svg",
     sponsorUrl: "https://www.gyralis.xyz/",
   },
