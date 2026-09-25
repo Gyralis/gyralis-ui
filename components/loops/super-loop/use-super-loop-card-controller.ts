@@ -7,6 +7,7 @@ import { useAccount } from "wagmi"
 
 import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
+import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
 import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
 import { useSuperLoopParticipation } from "@/lib/hooks/loops/super/use-super-loop-participation"
 import { useSuperLoopSettings } from "@/lib/hooks/loops/super/use-super-loop-settings"
@@ -38,6 +39,7 @@ import type {
 import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
 
 export function useSuperLoopCardController(loop: LoopCardData) {
+  const refreshTotalClaimsAfterClaim = useRefreshTotalClaimsAfterClaim()
   const { address: account } = useAccount()
   const address = loop.address
   const validAddress = Boolean(address && isAddress(address))
@@ -108,6 +110,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     eligibilityProvider: loop.eligibilityProvider,
     hasClaimed: Boolean(claimerStatus?.hasClaimed),
     isClaimable: statusReads.data.isClaimable === true,
+    onClaimConfirmed: refreshTotalClaimsAfterClaim,
     onConfirmed: refreshAfterAction,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.payoutSymbol,

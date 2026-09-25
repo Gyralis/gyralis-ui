@@ -49,6 +49,9 @@ interface UseSuperLoopClaimParams {
   hasClaimed: boolean
   isClaimable: boolean
   onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -79,6 +82,7 @@ export function useSuperLoopClaim({
   hasClaimed,
   isClaimable,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseSuperLoopClaimParams) {
@@ -105,6 +109,7 @@ export function useSuperLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setLastClaimedAmount(undefined)
@@ -118,7 +123,13 @@ export function useSuperLoopClaim({
   }, [address, chainId, connectedAccount])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const completedAction = pendingAction
     const completedTransactionUrl = transactionUrl
@@ -135,6 +146,15 @@ export function useSuperLoopClaim({
           : undefined,
       })
       return
+    }
+
+    if (completedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: completedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     }
 
     setConfirmedAction({ action: completedAction, period: currentPeriod })
@@ -163,15 +183,18 @@ export function useSuperLoopClaim({
       action: completedAction,
       chainId,
       transactionHash: txHash,
+      blockNumber: receiptBlockNumber,
     })
   }, [
     chainId,
     claimableAmount,
     currentPeriod,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,

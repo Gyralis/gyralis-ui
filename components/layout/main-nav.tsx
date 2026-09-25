@@ -15,11 +15,13 @@ import { LightDarkImage } from "@/components/shared/light-dark-image"
 
 import { LinkComponent } from "../shared/link-component"
 
-export function NavLogoMark() {
+export function NavLogoMark({
+  className = "text-black dark:text-white",
+}: { className?: string } = {}) {
   return (
     <svg
       aria-hidden="true"
-      className="block size-8 text-black dark:text-white"
+      className={`block size-8 ${className}`}
       viewBox="0 0 292 260"
       fill="none"
     >

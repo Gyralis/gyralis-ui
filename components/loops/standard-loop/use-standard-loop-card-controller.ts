@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
 import { formatUnits, isAddress } from "viem"
 
+import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
 import { useStandardLoopBalance } from "@/lib/hooks/loops/standard/use-standard-loop-balance"
 import { useStandardLoopClaim } from "@/lib/hooks/loops/standard/use-standard-loop-claim"
 import { useStandardLoopParticipation } from "@/lib/hooks/loops/standard/use-standard-loop-participation"
@@ -45,6 +46,7 @@ function formatTokenAmount(
 }
 
 export function useStandardLoopCardController(loop: LoopCardData) {
+  const refreshTotalClaimsAfterClaim = useRefreshTotalClaimsAfterClaim()
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const address = loop.address
   const configError =
@@ -99,6 +101,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     currentPeriod: settings.data?.currentPeriod,
     eligibilityProvider: loop.eligibilityProvider,
+    onClaimConfirmed: refreshTotalClaimsAfterClaim,
     onConfirmed: refreshCardData,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.symbol,

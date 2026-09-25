@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
+
 import styles from "./participation-section-nav.module.css"
 
 type ParticipationSection = "loops" | "leaderboard" | "profile"
@@ -25,10 +26,16 @@ const links: Array<{
 
 export function ParticipationSectionNav({
   className,
+  hideOnLoopsPage = false,
 }: {
   className?: string
+  hideOnLoopsPage?: boolean
 }) {
   const pathname = usePathname()
+
+  if (hideOnLoopsPage && (pathname === "/loops" || pathname === "/loops/")) {
+    return null
+  }
 
   function isSectionActive(section: ParticipationSection) {
     if (section === "loops") return pathname.startsWith("/loops")
@@ -74,7 +81,15 @@ export function ParticipationSectionNav({
                   aria-current={isActive ? "page" : undefined}
                   className={itemClassName}
                 >
-                  <span className={link.section === "profile" && !isActive ? styles.profileLabel : undefined}>
+                  <span
+                    className={
+                      (link.section === "profile" ||
+                        link.section === "leaderboard") &&
+                      !isActive
+                        ? styles.animatedLabel
+                        : undefined
+                    }
+                  >
                     {link.label}
                   </span>
                 </Link>

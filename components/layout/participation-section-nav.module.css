@@ -1,5 +1,5 @@
 @supports (background-clip: text) or (-webkit-background-clip: text) {
-  .profileLabel {
+  .animatedLabel {
     background-image: linear-gradient(
       110deg,
       currentColor 40%,
@@ -11,17 +11,17 @@
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: profile-shimmer 3s ease-in-out infinite;
+    animation: label-shimmer 3s ease-in-out infinite;
   }
 }
 
-@keyframes profile-shimmer {
+@keyframes label-shimmer {
   0%, 55% { background-position: 100% 0; }
   90%, 100% { background-position: 0% 0; }
 }
 
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
-  .profileLabel {
+  .animatedLabel {
     animation: none;
     background: none;
     -webkit-text-fill-color: currentColor;

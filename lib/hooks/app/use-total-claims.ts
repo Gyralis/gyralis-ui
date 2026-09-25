@@ -24,6 +24,13 @@ export const totalClaimsQueryOptions = queryOptions({
   refetchOnReconnect: false,
   refetchInterval: false,
   retry: 2,
+  structuralSharing: (previous: unknown, incoming: unknown) => {
+    const next = totalClaimsSnapshotSchema.parse(incoming)
+    const old = totalClaimsSnapshotSchema.safeParse(previous)
+    return old.success && old.data.indexedBlock > next.indexedBlock
+      ? old.data
+      : next
+  },
 })
 
 /**
