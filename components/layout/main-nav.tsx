@@ -15,11 +15,13 @@ import { LightDarkImage } from "@/components/shared/light-dark-image"
 
 import { LinkComponent } from "../shared/link-component"
 
-export function NavLogoMark() {
+export function NavLogoMark({
+  className = "text-black dark:text-white",
+}: { className?: string } = {}) {
   return (
     <svg
       aria-hidden="true"
-      className="block size-8 text-black dark:text-white"
+      className={`block size-8 ${className}`}
       viewBox="0 0 292 260"
       fill="none"
     >
@@ -75,7 +77,7 @@ export function MainNavMenu() {
                 <LinkComponent
                   href={href}
                   isExternal={external}
-                  className={`inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-lg font-medium transition-colors focus:outline-none ${
+                  className={`inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-base font-medium tracking-[0.28px] transition-colors focus:outline-none ${
                     isActive
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground"

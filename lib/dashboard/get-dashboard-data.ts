@@ -9,6 +9,8 @@ import { env } from "@/env.mjs"
 import { createPublicClient, formatUnits, http, parseAbi } from "viem"
 import { gnosis } from "viem/chains"
 
+import { gnosisLoopSources as liveLoopSources } from "@/lib/loops/gnosis-loop-sources"
+
 import type {
   DashboardCurrentPeriodOverview,
   DashboardDistributionByPeriodRow,
@@ -33,17 +35,6 @@ const erc20Abi = parseAbi([
   "function symbol() view returns (string)",
   "function decimals() view returns (uint8)",
 ])
-
-const liveLoopSources = {
-  "1hive": {
-    subgraphId: "3",
-    address: "0x8995641fb3E452bC1359E79A738a6DE556015696",
-  },
-  blockscout: {
-    subgraphId: "4",
-    address: "0xaB25dBaFD11b1eb606B2455Eecec67e6746E409b",
-  },
-} as const
 
 interface SubgraphPeriod {
   periodNumber: string

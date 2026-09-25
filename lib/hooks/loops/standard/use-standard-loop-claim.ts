@@ -19,6 +19,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   deriveStandardLoopClaimStatus,
   type StandardLoopSubmissionStage,
@@ -47,7 +48,10 @@ interface UseStandardLoopClaimParams {
   chainId: number
   currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
-  onConfirmed?: () => void | Promise<void>
+  onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -75,6 +79,7 @@ export function useStandardLoopClaim({
   currentPeriod,
   eligibilityProvider,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseStandardLoopClaimParams) {
@@ -181,6 +186,7 @@ export function useStandardLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -191,7 +197,13 @@ export function useStandardLoopClaim({
   }, [address, chainId, connectedAccount, currentPeriod])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const confirmedAction = pendingAction
     const claimedAmount = claimableAmount
@@ -209,6 +221,15 @@ export function useStandardLoopClaim({
           : undefined,
       })
       return
+    }
+
+    if (confirmedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     }
 
     setHasEnteredNextPeriod(true)
@@ -231,15 +252,23 @@ export function useStandardLoopClaim({
     })
 
     void refreshAccountState().finally(() => {
-      void onConfirmed?.()
+      void onConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     })
   }, [
+    chainId,
     claimableAmount,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     refreshAccountState,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,

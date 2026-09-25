@@ -8,7 +8,13 @@ import { LuMenu } from "react-icons/lu"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
@@ -55,6 +61,10 @@ export function MobileNav() {
         </div>
       </div>
       <SheetContent className="pr-0">
+        <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+        <SheetDescription className="sr-only">
+          Navigate Gyralis and access appearance settings.
+        </SheetDescription>
         <div className="flex items-center gap-x-4">
           <MobileLink href="/" onOpenChange={setOpen}>
             <NavLogoMark />

@@ -22,10 +22,14 @@ export function ProfilePageSkeleton() {
                 <Skeleton className="h-4 w-48 max-w-full" />
                 <Skeleton className="h-12 w-40" />
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:w-[220px]">
+              <div className="grid grid-cols-2 gap-4 xl:min-w-[380px] xl:grid-cols-3">
                 {[0, 1].map((index) => (
                   <Skeleton key={index} className="h-20 rounded-2xl" />
                 ))}
+                <div className="col-span-2 flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border border-border/70 p-2 xl:col-span-1 xl:col-start-3 xl:row-start-1">
+                  <Skeleton className="h-9 w-[72px] rounded-t-full" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
               </div>
             </div>
             <Skeleton className="mt-5 h-3 w-24" />

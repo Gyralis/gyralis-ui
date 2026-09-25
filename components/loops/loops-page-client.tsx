@@ -5,10 +5,12 @@ import { LoopCardData, LoopCardsData } from "@/data/loops-data"
 // import { motion } from "framer-motion"
 import { LuX } from "react-icons/lu"
 
-// import { LuLayoutGrid, LuList } from "react-icons/lu"
-
+import { ParticipationSectionNav } from "@/components/layout/participation-section-nav"
 import LoopCard from "@/components/loops/loop-card"
 import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
+// import { LuLayoutGrid, LuList } from "react-icons/lu"
+
+import { RoadTo10k } from "@/components/loops/road-to-10k"
 
 // import { LoopsTable } from "@/components/loops/loops-table"
 
@@ -46,11 +48,14 @@ export function LoopsPageClient() {
 
   return (
     <div className="min-h-screen">
+      <RoadTo10k />
       <div className="relative">
         <div
           id="loops-grid"
-          className="mx-auto max-w-screen-2xl overflow-visible px-4 py-12"
+          className="mx-auto max-w-screen-2xl overflow-visible px-4 pb-12"
         >
+          <ParticipationSectionNav className="mb-[42px]" />
+
           <LoopsUpgradeNotice
             visible={showUpgradeNotice}
             onDismiss={dismissUpgradeNotice}

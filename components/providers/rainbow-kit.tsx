@@ -2,7 +2,7 @@
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-import { type ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { env } from "@/env.mjs"
 import {
   darkTheme,
@@ -12,22 +12,30 @@ import {
 } from "@rainbow-me/rainbowkit"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useTheme } from "next-themes"
-import { WagmiProvider } from "wagmi"
+import { createConfig, WagmiProvider } from "wagmi"
 
 import { chains, transports } from "@/config/networks"
 import { siteConfig } from "@/config/site"
 
-const wagmiConfig = getDefaultConfig({
-  appName: siteConfig.title,
-  projectId: env.NEXT_PUBLIC_WC_PROJECT_ID,
+const sharedConfig = {
   chains,
   transports,
   ssr: true,
-})
+} as const
 
-const queryClient = new QueryClient()
+// Wagmi initializes connectors even with ssr enabled. WalletConnect's setup
+// accesses IndexedDB, so only create wallet connectors in the browser.
+const wagmiConfig =
+  typeof window === "undefined"
+    ? createConfig(sharedConfig)
+    : getDefaultConfig({
+        ...sharedConfig,
+        appName: siteConfig.title,
+        projectId: env.NEXT_PUBLIC_WC_PROJECT_ID,
+      })
 
 export function RainbowKit({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient())
   const { resolvedTheme } = useTheme()
   return (
     <>

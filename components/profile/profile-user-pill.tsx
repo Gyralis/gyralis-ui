@@ -54,7 +54,7 @@ export function ProfileUserPill({
 
   const textClass = compact ? "hidden" : "min-w-0 whitespace-nowrap"
   const pillClass =
-    "inline-flex h-10 w-fit shrink-0 items-center justify-center gap-2 rounded-md bg-background/70 px-3 text-left text-sm font-semibold text-foreground shadow-sm backdrop-blur transition-colors hover:bg-accent/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.08]"
+    `inline-flex h-10 w-fit shrink-0 items-center justify-center gap-2.5 rounded-md bg-background/70 ${compact ? "px-3" : "px-4"} text-left text-sm font-semibold text-foreground shadow-sm backdrop-blur transition-colors hover:bg-accent/60 dark:bg-white/[0.05] dark:hover:bg-white/[0.08]`
 
   if (!walletReady || (isConnected && query.isPending)) {
     return (
@@ -64,7 +64,7 @@ export function ProfileUserPill({
         aria-busy="true"
         className={pillClass}
       >
-        <Skeleton className="size-6 shrink-0 rounded-full" />
+        <Skeleton className="size-7 shrink-0 rounded-full" />
         <div aria-hidden="true" className={`${textClass} space-y-1`}>
           <Skeleton className="h-4 w-36" />
           <Skeleton className="h-3 w-44" />
@@ -111,7 +111,7 @@ export function ProfileUserPill({
       icon={
         <span
           aria-hidden="true"
-          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10"
+          className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 p-0.5 shadow-[0_0_8px_hsl(var(--primary)/0.12)]"
         >
           <PieChart width={24} height={24} accessibilityLayer={false}>
             <Pie

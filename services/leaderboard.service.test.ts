@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { ApiRequestError } from "./api.service"
-import { getGlobalLeaderboard, getLoopLeaderboard } from "./leaderboard.service"
+import {
+  getGlobalLeaderboard,
+  getGlobalLeaderboardSummary,
+  getLoopLeaderboard,
+} from "./leaderboard.service"
 
 function mockFetch(payload: unknown, ok = true, status = ok ? 200 : 500) {
   const fetchMock = vi.fn().mockResolvedValue({
@@ -50,6 +54,33 @@ describe("leaderboard service", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/leaderboards/loops/100/42?sortBy=longestStreak&userAddress=0x123",
       undefined
+    )
+  })
+
+  it("passes cancellation signals and requests canonical ranks", async () => {
+    const fetchMock = mockFetch({
+      success: true,
+      entries: [],
+      totalMatching: 0,
+    })
+    const signal = new AbortController().signal
+    await getGlobalLeaderboard(
+      {
+        limit: 25,
+        includeGlobalRank: true,
+        userAddress: "0xabc",
+        minTotalClaims: 1,
+      },
+      { signal }
+    )
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/leaderboards/global?limit=25&userAddress=0xabc&minTotalClaims=1&includeGlobalRank=true",
+      { signal }
+    )
+    await getGlobalLeaderboardSummary({ signal })
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/leaderboards/global/summary",
+      { signal }
     )
   })
 

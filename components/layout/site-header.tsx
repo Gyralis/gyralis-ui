@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import useScroll from "@/lib/hooks/use-scroll"
 import { cn } from "@/lib/utils"
 import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer"
 import { MainNav, MainNavMenu } from "@/components/layout/main-nav"
@@ -16,36 +15,35 @@ import { WalletConnect } from "../blockchain/wallet-connect"
 import { MobileNav } from "./mobile-nav"
 
 export function SiteHeader() {
-  const scrolled = useScroll(0)
   const pathname = usePathname()
   const isLandingPage = pathname === "/"
   const [isVisible, setIsVisible] = useState(true)
   const [hasEntered, setHasEntered] = useState(false)
+  const [hasGlassBackground, setHasGlassBackground] = useState(false)
 
   useEffect(() => {
-    if (!isLandingPage) {
-      setIsVisible(true)
-      setHasEntered(true)
-      return
-    }
-
     setIsVisible(true)
-    setHasEntered(false)
+    setHasEntered(!isLandingPage)
+    setHasGlassBackground(window.scrollY > 12)
 
-    const enterFrame = window.requestAnimationFrame(() => {
-      setHasEntered(true)
-    })
+    const enterFrame = isLandingPage
+      ? window.requestAnimationFrame(() => {
+          setHasEntered(true)
+        })
+      : null
 
     let lastY = window.scrollY
 
     const onScrollDirection = () => {
-      const currentY = window.scrollY
+      const currentY = Math.max(window.scrollY, 0)
 
       if (currentY <= 12) {
         setIsVisible(true)
+        setHasGlassBackground(false)
       } else if (currentY < lastY) {
         setIsVisible(true)
-      } else if (currentY > lastY && currentY > 80) {
+        setHasGlassBackground(true)
+      } else if (currentY > lastY && currentY > 24) {
         setIsVisible(false)
       }
 
@@ -55,7 +53,9 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScrollDirection, { passive: true })
 
     return () => {
-      window.cancelAnimationFrame(enterFrame)
+      if (enterFrame !== null) {
+        window.cancelAnimationFrame(enterFrame)
+      }
       window.removeEventListener("scroll", onScrollDirection)
     }
   }, [isLandingPage])
@@ -63,25 +63,21 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        "z-50 w-full border-b backdrop-blur transition-all duration-300",
-        isLandingPage
-          ? "sticky top-0"
-          : "",
-        isLandingPage
-          ? hasEntered
-            ? isVisible
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-full opacity-0"
-            : "-translate-y-4 opacity-0"
-          : "",
-        scrolled && "bg-background/50 "
+        "sticky top-0 z-50 w-full border-b border-border/60 transition-[transform,opacity,background-color,box-shadow,backdrop-filter] duration-300 motion-reduce:transition-none",
+        hasEntered
+          ? isVisible
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-full opacity-0"
+          : "-translate-y-4 opacity-0",
+        hasGlassBackground &&
+          "bg-background/75 shadow-[0_12px_32px_-24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
       )}
     >
-      <div className="mx-auto flex w-full max-w-[1600px] items-center gap-2 px-4 py-3 sm:px-2 md:grid md:grid-cols-[minmax(0,1fr)_auto] lg:p-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="mx-auto flex h-20 w-full max-w-[1600px] items-center gap-2 px-4 sm:px-2 md:h-auto md:grid md:grid-cols-[minmax(0,1fr)_auto] md:py-3 lg:p-4 xl:h-20 xl:grid-cols-[auto_auto_minmax(0,1fr)] xl:gap-x-12 xl:py-0">
         <div className="col-start-1 row-start-1 hidden items-center justify-self-start md:flex">
           <MainNav />
         </div>
-        <nav className="col-span-2 col-start-1 row-start-2 hidden items-center justify-center justify-self-center text-base font-medium md:flex xl:col-span-1 xl:col-start-2 xl:row-start-1">
+        <nav className="col-span-2 col-start-1 row-start-2 hidden items-center justify-center justify-self-center text-base font-medium md:flex xl:col-span-1 xl:col-start-2 xl:row-start-1 xl:justify-self-start">
           <MainNavMenu />
         </nav>
         <MobileNav />

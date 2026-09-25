@@ -1,5 +1,7 @@
 import {
+  GlobalLeaderboardRequestParams,
   GlobalLeaderboardResponse,
+  GlobalLeaderboardSummary,
   LeaderboardRequestParams,
   LoopLeaderboardResponse,
 } from "@/lib/scoring/types"
@@ -46,9 +48,23 @@ function withQuery(endpoint: string, params?: LeaderboardRequestParams) {
   return query ? `${endpoint}?${query}` : endpoint
 }
 
-export function getGlobalLeaderboard(params?: LeaderboardRequestParams) {
+export function getGlobalLeaderboard(
+  params: GlobalLeaderboardRequestParams = {},
+  init?: RequestInit
+) {
+  const query = new URLSearchParams(buildLeaderboardQuery(params))
+  if (params.includeGlobalRank) query.set("includeGlobalRank", "true")
+  const suffix = query.toString()
   return fetchApi<GlobalLeaderboardResponse>(
-    withQuery("/api/leaderboards/global", params)
+    `/api/leaderboards/global${suffix ? `?${suffix}` : ""}`,
+    init
+  )
+}
+
+export function getGlobalLeaderboardSummary(init?: RequestInit) {
+  return fetchApi<GlobalLeaderboardSummary>(
+    "/api/leaderboards/global/summary",
+    init
   )
 }
 
