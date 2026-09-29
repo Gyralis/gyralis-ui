@@ -1,22 +1,12 @@
 import { HtmlHTMLAttributes } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { FaWallet } from "react-icons/fa"
-import { useAccount, useEnsName } from "wagmi"
 
 export const WalletConnect = ({
   className,
   compact = false,
   ...props
 }: HtmlHTMLAttributes<HTMLDivElement> & { compact?: boolean }) => {
-  const { address } = useAccount()
-  const { data: ensName } = useEnsName({
-    address,
-    chainId: 1,
-    query: {
-      enabled: Boolean(address),
-    },
-  })
-
   return (
     <ConnectButton.Custom>
       {({
@@ -57,7 +47,9 @@ export const WalletConnect = ({
                   >
                     <FaWallet className="size-4" />
                     <span className="hidden sm:inline">Connect wallet</span>
-                    <span className={compact ? "hidden" : "sm:hidden"}>Wallet</span>
+                    <span className={compact ? "hidden" : "sm:hidden"}>
+                      Wallet
+                    </span>
                   </button>
                 )
               }
@@ -74,7 +66,7 @@ export const WalletConnect = ({
                 )
               }
 
-              const walletLabel = account.ensName ?? ensName ?? account.displayName
+              const walletLabel = account.ensName ?? account.displayName
 
               return (
                 <button
@@ -85,7 +77,9 @@ export const WalletConnect = ({
                   title={account.address}
                 >
                   <FaWallet className="size-4 text-primary" />
-                  <span className={compact ? "hidden sm:inline" : undefined}>{walletLabel}</span>
+                  <span className={compact ? "hidden sm:inline" : undefined}>
+                    {walletLabel}
+                  </span>
                 </button>
               )
             })()}
