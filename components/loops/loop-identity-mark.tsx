@@ -6,6 +6,22 @@ interface LoopIdentityMarkProps {
 }
 
 export function LoopIdentityMark({ loop }: LoopIdentityMarkProps) {
+  if (loop.unlockAtCommunityClaims === 10_000) {
+    return (
+      <div
+        aria-label="10K claims milestone"
+        className="flex size-14 shrink-0 flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_24px_-18px_rgba(15,23,42,0.7)]"
+      >
+        <span className="font-baloo text-xl font-bold leading-none tracking-tight text-primary">
+          10K
+        </span>
+        <span className="mt-0.5 text-[7px] font-bold uppercase leading-none tracking-[0.16em] text-white/80">
+          Claims
+        </span>
+      </div>
+    )
+  }
+
   const showsGardensCommunity = Boolean(
     loop.eligibilityProvider === "gardens" &&
       loop.communityLogoUrl &&

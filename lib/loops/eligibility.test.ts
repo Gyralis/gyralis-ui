@@ -18,19 +18,14 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
     })
   })
 
-  it("maps the enabled Markee SuperLoop to the Markee Gardens community", () => {
+  it("does not allow the paused Markee SuperLoop", () => {
     expect(
       findAllowlistedLoop(
         "gardens",
         "0x213310e1dbd6991cd488ab247c81fad82cd88e7a",
         8453
       )
-    ).toMatchObject({
-      address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
-      chainId: 8453,
-      contractType: "superLoop",
-      gardensCommunity: "markee",
-    })
+    ).toBeUndefined()
   })
 
   it("does not allow a Gardens loop on the wrong chain", () => {
@@ -54,6 +49,20 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
       address: "0xaB25dBaFD11b1eb606B2455Eecec67e6746E409b",
       chainId: 100,
       contractType: "loop",
+    })
+  })
+
+  it("maps the enabled True Loopers SuperLoop to its eligibility provider", () => {
+    expect(
+      findAllowlistedLoop(
+        "blockscout",
+        "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
+        8453
+      )
+    ).toMatchObject({
+      address: "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0",
+      chainId: 8453,
+      contractType: "superLoop",
     })
   })
 
