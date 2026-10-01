@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { LuCheck, LuChevronDown, LuFlag, LuInfo, LuLock } from "react-icons/lu"
+import { LuCheck, LuChevronDown, LuInfo, LuUnlock } from "react-icons/lu"
 
 import { useRoadTo10k } from "@/lib/hooks/app/use-road-to-10k"
 import { ProfileDetails } from "@/components/profile/profile-details"
@@ -158,7 +158,7 @@ export function RoadTo10k() {
       <div className="relative mx-auto max-w-screen-xl p-4 sm:p-7 lg:p-8">
         <div className="relative mb-5 flex flex-col items-start gap-3 lg:flex-row lg:items-center lg:gap-4">
           <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/25 bg-black/50 px-4 py-2 text-xs font-semibold text-white backdrop-blur-xl">
-            <LuFlag className="size-3.5 text-emerald-400" aria-hidden="true" />
+            <LuCheck className="size-3.5 text-emerald-400" aria-hidden="true" />
             10K Claim Milestone
           </span>
           <div className="flex min-w-0 items-center gap-2">
@@ -166,7 +166,7 @@ export function RoadTo10k() {
               id="road-to-10k-title"
               className="font-baloo text-lg font-semibold leading-snug text-white sm:text-xl"
             >
-              Unlock True Looper SuperLoop — Every claim counts!
+              True Looper SuperLoop is ready!
             </h2>
             <ProfileDetails
               label="About True Looper rewards and eligibility"
@@ -186,13 +186,14 @@ export function RoadTo10k() {
                 True Looper rewards
               </h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                At 10,000 claims community reward milestone. A shared $50 USDC
-                reward pool unlocks for eligible Loopers.
+                At the 10,000-claim community milestone, a shared $50 USDC
+                reward pool unlocks for eligible Loopers. For now, milestone
+                progress counts Gnosis claims only.
               </p>
               <p className="mt-4 border-t border-border pt-4 text-sm leading-6">
                 <span className="font-semibold">Who qualifies?</span> Every
-                Looper with 50+ claims in Gyralis. Eligibility is based on
-                claims, not Gyra Points.
+                Looper with 50+ Gnosis claims in Gyralis. Eligibility is based
+                on Gnosis claims only for now, not Gyra Points.
               </p>
             </ProfileDetails>
           </div>
@@ -231,10 +232,7 @@ export function RoadTo10k() {
                 )}
               </div>
               <div className="text-right">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Goal
-                </p>
-                <p className="mt-1 font-baloo text-2xl font-semibold sm:text-3xl">
+                <p className="font-baloo text-2xl font-semibold sm:text-3xl">
                   10K{" "}
                   <span className="text-xs font-medium uppercase text-foreground">
                     claims
@@ -352,41 +350,42 @@ export function RoadTo10k() {
 
           <aside
             aria-label="Milestone reward and claim status"
-            className={`${glass} flex flex-col justify-center p-[30px] text-center text-foreground`}
+            className={`${glass} flex flex-col p-[30px] text-foreground`}
           >
-            <p className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              <LuLock className="size-4 shrink-0" aria-hidden="true" />
-              TRUE LOOPER REWARDS
-            </p>
-            <p className="mt-2 font-baloo text-5xl font-bold leading-none text-secondary">
-              $50 <span className="text-lg font-semibold">USDC</span>
-            </p>
-            <div className="mt-7 grid grid-cols-2 divide-x-[0.5px] divide-foreground/20 border-t-[0.5px] border-foreground/20 pt-5">
-              <div className="pr-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Claims to go
-                </p>
-                <p className="mt-2 font-baloo text-2xl font-bold tabular-nums">
-                  {total == null ? "—" : format(Math.max(0, GOAL - total))}
-                </p>
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                True Looper Rewards
+              </p>
+              <div
+                className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary shadow-[0_0_22px_hsl(var(--primary)/0.16)]"
+                aria-label="Milestone unlocked"
+              >
+                <LuUnlock className="size-5" aria-hidden="true" />
               </div>
-              <div className="pl-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Last checked
-                </p>
-                <p
-                  className="mt-2 text-sm font-medium tabular-nums"
-                  title={
-                    model.data
-                      ? `Subgraph checked ${new Date(
-                          model.data.checkedAt
-                        ).toLocaleString()}`
-                      : undefined
-                  }
-                >
-                  {updated}
-                </p>
-              </div>
+            </div>
+
+            <div className="flex flex-1 items-center py-8">
+              <p className="font-baloo text-5xl font-bold leading-none text-primary [text-shadow:0_0_18px_hsl(var(--primary)/0.72)]">
+                $50 <span className="text-lg font-semibold">USDC</span>
+              </p>
+            </div>
+
+            <div className="flex items-baseline justify-between gap-3 border-t-[0.5px] border-foreground/20 pt-4">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Updated
+              </p>
+              <p
+                className="text-right text-sm font-medium tabular-nums"
+                title={
+                  model.data
+                    ? `Subgraph checked ${new Date(
+                        model.data.checkedAt
+                      ).toLocaleString()}`
+                    : undefined
+                }
+              >
+                {updated}
+              </p>
             </div>
             {(model.syncing || delayed || model.isError) && (
               <p role="status" className="mt-3 text-xs text-muted-foreground">
