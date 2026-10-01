@@ -1,3 +1,5 @@
+import type { TrueLooperClaims } from "@/lib/loops/true-looper-claims"
+
 export function getProfileLevel(totalPoints: number) {
   if (totalPoints >= 250) {
     return {
@@ -26,18 +28,23 @@ export interface ProfileSummary {
   address: string
   totalPoints: number
   totalClaims: number
+  trueLooperClaims: TrueLooperClaims & { statsUpdatedAt: string | null }
 }
 
 export function getProfilePillProgress({
-  totalClaims,
   totalPoints,
+  trueLooperClaims,
 }: ProfileSummary) {
   const level = getProfileLevel(totalPoints)
-  const remainingClaims = Math.max(0, 50 - totalClaims)
+  const remainingClaims = trueLooperClaims.claimsRemaining
   if (remainingClaims > 0) {
     return {
       level: level.level,
-      progress: Math.max(0, (totalClaims / 50) * 100),
+      progress: Math.max(
+        0,
+        (trueLooperClaims.qualifyingClaims / trueLooperClaims.requiredClaims) *
+          100
+      ),
       description: `${remainingClaims} ${
         remainingClaims === 1 ? "claim" : "claims"
       } left to join the True Loopers!`,

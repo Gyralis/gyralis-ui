@@ -10,12 +10,13 @@ import {
   lightTheme,
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { useTheme } from "next-themes"
 import { createConfig, WagmiProvider } from "wagmi"
 
 import { chains, transports } from "@/config/networks"
 import { siteConfig } from "@/config/site"
+import { createWalletQueryClient } from "@/lib/wallet-query-client"
 
 const sharedConfig = {
   chains,
@@ -35,7 +36,7 @@ const wagmiConfig =
       })
 
 export function RainbowKit({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(createWalletQueryClient)
   const { resolvedTheme } = useTheme()
   return (
     <>
