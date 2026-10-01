@@ -33,10 +33,12 @@ import { useToast } from "@/components/ui/use-toast"
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
+  gyralis: "/api/gyralis",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+const CLAIMS_REQUIRED_CODE = "CLAIMS_REQUIRED"
 
 export type SuperLoopPendingAction = "enter" | "claim"
 
@@ -70,6 +72,8 @@ function getProviderEligibilityMessage(provider: LoopEligibilityProvider) {
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
     case "gardens":
       return "Join the Gardens community required by this loop to enter."
+    case "gyralis":
+      return "Complete 50 claims in Gyralis to enter this SuperLoop."
   }
 }
 
@@ -262,6 +266,7 @@ export function useSuperLoopClaim({
         }),
       })
       const payload = (await response.json()) as {
+        claimsRemaining?: number
         code?: string
         error?: string
         signature?: `0x${string}`
@@ -273,6 +278,21 @@ export function useSuperLoopClaim({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
+            type: "warning",
+          })
+          return
+        }
+
+        if (payload.code === CLAIMS_REQUIRED_CODE) {
+          const remaining = payload.claimsRemaining
+          toast({
+            title: "More claims required",
+            description:
+              typeof remaining === "number"
+                ? `${remaining} more ${
+                    remaining === 1 ? "claim is" : "claims are"
+                  } required to enter this SuperLoop.`
+                : "Complete 50 claims in Gyralis to enter this SuperLoop.",
             type: "warning",
           })
           return

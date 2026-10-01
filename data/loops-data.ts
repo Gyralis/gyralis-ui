@@ -3,7 +3,7 @@ import { Address } from "viem"
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "gardens" | "blockscout"
+export type LoopEligibilityProvider = "gardens" | "blockscout" | "gyralis"
 export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
@@ -157,9 +157,10 @@ export const LoopCardsData: LoopCardData[] = [
     chainId: 8453,
     chainName: "Base",
     historyLoopKey: "markee-gardens",
-    eligibilityProvider: "blockscout",
+    eligibilityProvider: "gyralis",
     passportMinScore: 0,
     enabled: true,
+    achievementActive: false,
     rewardsSummary: "$50 USDC shared pool",
     unlockAtCommunityClaims: 10_000,
     sponsorName: "Gyralis",

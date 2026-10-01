@@ -5,10 +5,12 @@ import type { LoopCardData } from "@/data/loops-data"
 import { formatUnits, isAddress } from "viem"
 
 import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
+import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
 import { useStandardLoopBalance } from "@/lib/hooks/loops/standard/use-standard-loop-balance"
 import { useStandardLoopClaim } from "@/lib/hooks/loops/standard/use-standard-loop-claim"
 import { useStandardLoopParticipation } from "@/lib/hooks/loops/standard/use-standard-loop-participation"
 import { useStandardLoopSettings } from "@/lib/hooks/loops/standard/use-standard-loop-settings"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   getStandardLoopActionLabel,
   getStandardLoopActionPresentation,
@@ -69,6 +71,20 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     currentPeriod: settings.data?.currentPeriod,
     enabled: Boolean(address && settings.data),
   })
+  const syncProfileAfterClaim = useSyncProfileAfterClaim({
+    contractAddress: address,
+    loopId: loop.id,
+    periodNumber: settings.data?.currentPeriod,
+  })
+  const handleClaimConfirmed = useCallback(
+    async (confirmation: LoopActionConfirmation) => {
+      await Promise.allSettled([
+        refreshTotalClaimsAfterClaim(confirmation),
+        syncProfileAfterClaim(confirmation),
+      ])
+    },
+    [refreshTotalClaimsAfterClaim, syncProfileAfterClaim]
+  )
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch
   const refetchSettings = settings.refetch
@@ -101,7 +117,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     currentPeriod: settings.data?.currentPeriod,
     eligibilityProvider: loop.eligibilityProvider,
-    onClaimConfirmed: refreshTotalClaimsAfterClaim,
+    onClaimConfirmed: handleClaimConfirmed,
     onConfirmed: refreshCardData,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.symbol,

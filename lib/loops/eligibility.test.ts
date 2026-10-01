@@ -55,7 +55,7 @@ describe("findAllowlistedLoop Gardens community mapping", () => {
   it("maps the enabled True Loopers SuperLoop to its eligibility provider", () => {
     expect(
       findAllowlistedLoop(
-        "blockscout",
+        "gyralis",
         "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
         8453
       )

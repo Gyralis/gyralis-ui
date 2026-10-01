@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { isAddress } from "viem"
 
+import { summarizeTrueLooperClaims } from "@/lib/loops/true-looper-claims"
 import { getProfileStatsData } from "@/lib/profile/get-profile-page-data"
 import type { ProfileSummary } from "@/lib/profile/profile-level"
 
@@ -21,14 +22,21 @@ export async function GET(
         { error: "Invalid user address" },
         { status: 400 }
       )
-    const summary = stats.loopStats.reduce<ProfileSummary>(
+    const totals = stats.loopStats.reduce(
       (total, loop) => ({
-        address: stats.address,
         totalPoints: total.totalPoints + loop.totalPoints,
         totalClaims: total.totalClaims + loop.totalClaims,
       }),
-      { address: stats.address, totalPoints: 0, totalClaims: 0 }
+      { totalPoints: 0, totalClaims: 0 }
     )
+    const summary: ProfileSummary = {
+      address: stats.address,
+      ...totals,
+      trueLooperClaims: {
+        ...summarizeTrueLooperClaims(stats.loopStats),
+        statsUpdatedAt: stats.lastStatsUpdatedAt,
+      },
+    }
     return NextResponse.json(summary, {
       headers: { "Cache-Control": "private, no-store" },
     })
