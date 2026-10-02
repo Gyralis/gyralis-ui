@@ -1,4 +1,4 @@
-const REQUIRED_VERCEL_ENV_VARS = ["GYRALIS_SUBGRAPH_URL"]
+const REQUIRED_VERCEL_ENV_VARS = ["GYRALIS_SUBGRAPH_CHAIN_ID"]
 
 if (process.env.VERCEL !== "1") {
   console.log("Skipping Vercel environment check outside Vercel.")
