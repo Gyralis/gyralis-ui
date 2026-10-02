@@ -1,4 +1,4 @@
-const REQUIRED_VERCEL_ENV_VARS = ["DATABASE_URL", "NEXTAUTH_SECRET"]
+const REQUIRED_VERCEL_ENV_VARS = ["DATABASE_URL"]
 
 if (process.env.VERCEL !== "1") {
   console.log("Skipping Vercel environment check outside Vercel.")
