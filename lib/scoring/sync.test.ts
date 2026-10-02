@@ -3,8 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { runScoringSync } from "./sync"
 
 const mocks = vi.hoisted(() => ({
+  revalidateTag: vi.fn(),
   fetchAllClaimEventsForUserLoop: vi.fn(),
   fetchClaimEventsFromSubgraph: vi.fn(),
+  getScoringSubgraphSource: vi.fn(),
+  getScoringSubgraphSources: vi.fn(),
   getScoringSyncState: vi.fn(),
   updateScoringSyncState: vi.fn(),
   ensureUserProfile: vi.fn(),
@@ -20,6 +23,12 @@ const gnosisSource = {
   chainId: 100,
   url: "https://example.com/gnosis",
 }
+const baseSource = {
+  chainId: 8453,
+  url: "https://example.com/base",
+}
+
+vi.mock("next/cache", () => ({ revalidateTag: mocks.revalidateTag }))
 
 vi.mock("@/env.mjs", () => ({
   env: {
@@ -63,8 +72,8 @@ vi.mock("@/lib/db/clients/user-profile.client", () => ({
 vi.mock("./subgraph-client", () => ({
   fetchAllClaimEventsForUserLoop: mocks.fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph: mocks.fetchClaimEventsFromSubgraph,
-  getScoringSubgraphSource: () => gnosisSource,
-  getScoringSubgraphSources: () => [gnosisSource],
+  getScoringSubgraphSource: mocks.getScoringSubgraphSource,
+  getScoringSubgraphSources: mocks.getScoringSubgraphSources,
 }))
 
 const userAddress = "0x0000000000000000000000000000000000000001"
@@ -87,6 +96,8 @@ function claimEvent(blockNumber: number, id: string) {
 describe("incremental scoring sync", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.getScoringSubgraphSource.mockReturnValue(gnosisSource)
+    mocks.getScoringSubgraphSources.mockReturnValue([gnosisSource])
     mocks.getScoringSyncState.mockResolvedValue({
       lastBlockNumber: 10,
       lastEventId: "0xaaa-0",
@@ -123,12 +134,22 @@ describe("incremental scoring sync", () => {
 
     const result = await runScoringSync()
 
+    expect(mocks.revalidateTag).toHaveBeenCalledWith("leaderboard")
+    expect(
+      mocks.revalidateTag.mock.invocationCallOrder[
+        mocks.revalidateTag.mock.invocationCallOrder.length - 1
+      ]
+    ).toBeGreaterThan(
+      mocks.upsertGlobalLeaderboardEntry.mock.invocationCallOrder[0]
+    )
+
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(1, {
       source: gnosisSource,
       blockNumber: 10,
       afterEventId: "0xaaa-0",
       first: 2,
       loopId: undefined,
+      excludedLoopIds: [1, 2],
       orderBy: "id",
     })
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
@@ -136,6 +157,7 @@ describe("incremental scoring sync", () => {
       fromBlock: 11,
       first: 1,
       loopId: undefined,
+      excludedLoopIds: [1, 2],
       orderBy: "blockNumber",
     })
     expect(result).toMatchObject({
@@ -161,6 +183,93 @@ describe("incremental scoring sync", () => {
       mocks.updateScoringSyncState.mock.invocationCallOrder[0]
     ).toBeGreaterThan(
       mocks.upsertGlobalLeaderboardEntry.mock.invocationCallOrder[0]
+    )
+  })
+
+  it.each(["incremental", "full"] as const)(
+    "%s sync excludes legacy loops while advancing the cursor",
+    async (mode) => {
+      const activeEvent = claimEvent(11, "0xbbb-0")
+      const ignoredEvent = { ...claimEvent(12, "0xccc-0"), loopId: 1 }
+      if (mode === "incremental") {
+        mocks.fetchClaimEventsFromSubgraph
+          .mockResolvedValueOnce([])
+          .mockResolvedValueOnce([activeEvent, ignoredEvent])
+      } else {
+        mocks.fetchClaimEventsFromSubgraph
+          .mockResolvedValueOnce([activeEvent, ignoredEvent])
+          .mockResolvedValueOnce([])
+      }
+      mocks.fetchAllClaimEventsForUserLoop.mockResolvedValue([activeEvent])
+
+      const result = await runScoringSync({ mode })
+
+      expect(result).toMatchObject({
+        processedEvents: 1,
+        affectedLoops: 1,
+        affectedUsers: 1,
+        lastBlockNumber: 12,
+        hasMore: mode === "incremental",
+      })
+      expect(mocks.upsertUserLoopStats).toHaveBeenCalledTimes(1)
+      expect(mocks.upsertUserLoopStats).toHaveBeenCalledWith(
+        expect.objectContaining({ loopId: 3 })
+      )
+      expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([activeEvent])
+      expect(mocks.getUserLoopStatsForUser).toHaveBeenCalledWith(userAddress)
+      expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
+        chainId: 100,
+        lastBlockNumber: 12,
+        lastEventId: "0xccc-0",
+      })
+    }
+  )
+
+  it("keeps the active Base loop when its mapped scoring ID matches a legacy Gnosis ID", async () => {
+    const baseEvent = {
+      ...claimEvent(11, "0xbase-0"),
+      loopId: 1,
+      chainId: 8453,
+    }
+    mocks.getScoringSubgraphSource.mockReturnValue(baseSource)
+    mocks.getScoringSubgraphSources.mockReturnValue([baseSource])
+    mocks.fetchClaimEventsFromSubgraph
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([baseEvent])
+    mocks.fetchAllClaimEventsForUserLoop.mockResolvedValue([baseEvent])
+    mocks.getUserLoopStatsForUser.mockResolvedValue([
+      {
+        userAddress,
+        loopId: 1,
+        chainId: 8453,
+        totalClaims: 1,
+        claimPoints: 1,
+        streakBonusPoints: 0,
+        totalPoints: 1,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastClaimedPeriod: 11,
+        earnedStreakBonuses: [],
+      },
+    ])
+
+    const result = await runScoringSync({ chainId: 8453 })
+
+    expect(result).toMatchObject({
+      processedEvents: 1,
+      affectedLoops: 1,
+      affectedUsers: 1,
+    })
+    expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
+      source: baseSource,
+      fromBlock: 11,
+      first: 2,
+      loopId: undefined,
+      excludedLoopIds: undefined,
+      orderBy: "blockNumber",
+    })
+    expect(mocks.upsertUserLoopStats).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: 8453, loopId: 1 })
     )
   })
 

@@ -2,7 +2,9 @@ import { Prisma } from "@prisma/client"
 
 import { prisma } from "@/lib/db/client"
 import { globalLeaderboardEntryId, loopLeaderboardEntryId } from "@/lib/db/ids"
+import { ignoredScoringLoopIds } from "@/lib/scoring/loop-filters"
 import {
+  GlobalLeaderboardSummary,
   LeaderboardFilters,
   LeaderboardQuery,
   LeaderboardSortField,
@@ -160,6 +162,42 @@ export async function getGlobalLeaderboard(input: {
   })
 }
 
+export async function getGlobalLeaderboardRank(userAddress: string) {
+  const entry = await prisma.leaderboardEntry.findUnique({
+    where: { id: globalLeaderboardEntryId(userAddress) },
+  })
+
+  if (!entry || entry.scope !== "global") return null
+
+  return getGlobalLeaderboardRankForEntry(entry)
+}
+
+export async function getGlobalLeaderboardRankForEntry(entry: {
+  userAddress: string
+  totalPoints: number
+  totalClaims: number
+}) {
+  const entriesAhead = await prisma.leaderboardEntry.count({
+    where: {
+      scope: "global",
+      OR: [
+        { totalPoints: { gt: entry.totalPoints } },
+        {
+          totalPoints: entry.totalPoints,
+          totalClaims: { gt: entry.totalClaims },
+        },
+        {
+          totalPoints: entry.totalPoints,
+          totalClaims: entry.totalClaims,
+          userAddress: { lt: entry.userAddress },
+        },
+      ],
+    },
+  })
+
+  return entriesAhead + 1
+}
+
 export async function getLoopLeaderboard(
   input: LeaderboardReadInput & {
     chainId: number
@@ -186,4 +224,50 @@ export async function getLoopLeaderboard(
 
 export async function clearLeaderboardEntries() {
   await prisma.leaderboardEntry.deleteMany()
+}
+
+export async function countGlobalLeaderboard(filters: LeaderboardFilters) {
+  return prisma.leaderboardEntry.count({
+    where: applyLeaderboardFilters({ scope: "global" }, filters),
+  })
+}
+
+export async function getGlobalLeaderboardSummary(): Promise<GlobalLeaderboardSummary> {
+  // Global projections have no per-loop breakdown. Read the same eligible
+  // loop records as profiles, grouping first so each wallet is counted once.
+  const wallets = await prisma.userLoopStats.groupBy({
+    by: ["userAddress"],
+    where: { loopId: { notIn: [...ignoredScoringLoopIds] } },
+    _sum: { totalPoints: true, totalClaims: true },
+    _max: { longestStreak: true, updatedAt: true },
+  })
+
+  return wallets.reduce<GlobalLeaderboardSummary>(
+    (summary, wallet) => {
+      if ((wallet._sum.totalClaims ?? 0) <= 0) return summary
+      summary.totalPoints += wallet._sum.totalPoints ?? 0
+      summary.totalClaims += wallet._sum.totalClaims ?? 0
+      summary.totalLoopers += 1
+      summary.longestStreak = Math.max(
+        summary.longestStreak,
+        wallet._max.longestStreak ?? 0
+      )
+      const updatedAt = wallet._max.updatedAt?.toISOString() ?? null
+      if (
+        updatedAt &&
+        (!summary.lastStatsUpdatedAt || updatedAt > summary.lastStatsUpdatedAt)
+      ) {
+        summary.lastStatsUpdatedAt = updatedAt
+      }
+      return summary
+    },
+    {
+      success: true,
+      totalPoints: 0,
+      totalClaims: 0,
+      totalLoopers: 0,
+      longestStreak: 0,
+      lastStatsUpdatedAt: null,
+    }
+  )
 }

@@ -19,6 +19,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   deriveStandardLoopClaimStatus,
   type StandardLoopSubmissionStage,
@@ -35,10 +36,12 @@ import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-re
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
+  gyralis: "/api/gyralis",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+const CLAIMS_REQUIRED_CODE = "CLAIMS_REQUIRED"
 
 type PendingAction = "enter" | "claim"
 
@@ -47,7 +50,10 @@ interface UseStandardLoopClaimParams {
   chainId: number
   currentPeriod?: bigint
   eligibilityProvider: LoopEligibilityProvider
-  onConfirmed?: () => void | Promise<void>
+  onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -66,6 +72,8 @@ function getProviderEligibilityMessage(provider: LoopEligibilityProvider) {
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
     case "gardens":
       return "Join the Gardens community required by this loop to enter."
+    case "gyralis":
+      return "Complete 50 claims in Gyralis to enter this loop."
   }
 }
 
@@ -75,6 +83,7 @@ export function useStandardLoopClaim({
   currentPeriod,
   eligibilityProvider,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseStandardLoopClaimParams) {
@@ -181,6 +190,7 @@ export function useStandardLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -191,7 +201,13 @@ export function useStandardLoopClaim({
   }, [address, chainId, connectedAccount, currentPeriod])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const confirmedAction = pendingAction
     const claimedAmount = claimableAmount
@@ -209,6 +225,15 @@ export function useStandardLoopClaim({
           : undefined,
       })
       return
+    }
+
+    if (confirmedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     }
 
     setHasEnteredNextPeriod(true)
@@ -231,15 +256,23 @@ export function useStandardLoopClaim({
     })
 
     void refreshAccountState().finally(() => {
-      void onConfirmed?.()
+      void onConfirmed?.({
+        action: confirmedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     })
   }, [
+    chainId,
     claimableAmount,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     refreshAccountState,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,
@@ -299,6 +332,7 @@ export function useStandardLoopClaim({
         }),
       })
       const payload = (await response.json()) as {
+        claimsRemaining?: number
         code?: string
         error?: string
         signature?: `0x${string}`
@@ -310,6 +344,21 @@ export function useStandardLoopClaim({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
+            type: "warning",
+          })
+          return
+        }
+
+        if (payload.code === CLAIMS_REQUIRED_CODE) {
+          const remaining = payload.claimsRemaining
+          toast({
+            title: "More claims required",
+            description:
+              typeof remaining === "number"
+                ? `${remaining} more ${
+                    remaining === 1 ? "claim is" : "claims are"
+                  } required to enter this loop.`
+                : "Complete 50 claims in Gyralis to enter this loop.",
             type: "warning",
           })
           return

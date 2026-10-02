@@ -4,10 +4,13 @@ import { useCallback, useMemo, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
 import { formatUnits, isAddress } from "viem"
 
+import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
+import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
 import { useStandardLoopBalance } from "@/lib/hooks/loops/standard/use-standard-loop-balance"
 import { useStandardLoopClaim } from "@/lib/hooks/loops/standard/use-standard-loop-claim"
 import { useStandardLoopParticipation } from "@/lib/hooks/loops/standard/use-standard-loop-participation"
 import { useStandardLoopSettings } from "@/lib/hooks/loops/standard/use-standard-loop-settings"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   getStandardLoopActionLabel,
   getStandardLoopActionPresentation,
@@ -45,6 +48,7 @@ function formatTokenAmount(
 }
 
 export function useStandardLoopCardController(loop: LoopCardData) {
+  const refreshTotalClaimsAfterClaim = useRefreshTotalClaimsAfterClaim()
   const [modalRefreshKey, setModalRefreshKey] = useState(0)
   const address = loop.address
   const configError =
@@ -67,6 +71,20 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     currentPeriod: settings.data?.currentPeriod,
     enabled: Boolean(address && settings.data),
   })
+  const syncProfileAfterClaim = useSyncProfileAfterClaim({
+    contractAddress: address,
+    loopId: loop.id,
+    periodNumber: settings.data?.currentPeriod,
+  })
+  const handleClaimConfirmed = useCallback(
+    async (confirmation: LoopActionConfirmation) => {
+      await Promise.allSettled([
+        refreshTotalClaimsAfterClaim(confirmation),
+        syncProfileAfterClaim(confirmation),
+      ])
+    },
+    [refreshTotalClaimsAfterClaim, syncProfileAfterClaim]
+  )
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch
   const refetchSettings = settings.refetch
@@ -99,10 +117,16 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     currentPeriod: settings.data?.currentPeriod,
     eligibilityProvider: loop.eligibilityProvider,
+    onClaimConfirmed: handleClaimConfirmed,
     onConfirmed: refreshCardData,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.symbol,
   })
+  const fundingUnavailable =
+    balance.data != null &&
+    balance.data.value <= 0n &&
+    claim.status !== "checking" &&
+    claim.claimableAmount <= 0n
 
   const balanceState = useMemo<SectionState<LoopBalanceViewData>>(() => {
     const data =
@@ -160,11 +184,14 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       data = {
         balanceDetail,
         balanceDetailLabel: "Balance",
-        tooltip:
-          settings.data.percentPerPeriod > 0n
-            ? `Each claim period distributes ${distributionRate} of the balance remaining after the previous period among registered Loopers.`
-            : "The loop balance is distributed evenly among registered users each period.",
+        labelDetail: fundingUnavailable ? "Out of funds" : undefined,
+        tooltip: fundingUnavailable
+          ? "This Loop has no balance available for rewards."
+          : settings.data.percentPerPeriod > 0n
+          ? `Each claim period distributes ${distributionRate} of the balance remaining after the previous period among registered Loopers.`
+          : "The loop balance is distributed evenly among registered users each period.",
         value: distributedAmountValue,
+        valueMuted: fundingUnavailable,
         valueUnit: balance.data.symbol,
       }
     }
@@ -187,6 +214,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     balance.error,
     balance.isFetching,
     configError,
+    fundingUnavailable,
     participation.data,
     participation.error,
     participation.isFetching,
@@ -253,7 +281,9 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       ? claim.lastClaimedAmount ?? claim.claimableAmount
       : claim.claimableAmount
   const amountLabel = formatTokenAmount(currentAmount, balance.data)
-  const actionStatus: LoopActionStatus = claim.isPending
+  const actionStatus: LoopActionStatus = fundingUnavailable
+    ? "unavailable"
+    : claim.isPending
     ? claim.pendingAction === "claim"
       ? "claiming"
       : "entering"
@@ -265,27 +295,37 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       : getStandardLoopActionTooltip(claim.status)
   const action: LoopActionViewModel = {
     status: actionStatus,
-    label: getStandardLoopActionLabel({
-      amountLabel,
-      isConfirming: claim.isConfirming,
-      pendingAction: claim.pendingAction,
-      status: claim.status,
-      submissionStage: claim.submissionStage,
-    }),
+    label: fundingUnavailable
+      ? "Out of funds"
+      : getStandardLoopActionLabel({
+          amountLabel,
+          isConfirming: claim.isConfirming,
+          pendingAction: claim.pendingAction,
+          status: claim.status,
+          submissionStage: claim.submissionStage,
+        }),
     amountLabel,
     disabled:
-      !claim.wrongNetwork &&
-      (claim.isPending ||
-        !address ||
-        !isAddress(address) ||
-        ["checking", "entered", "claimed"].includes(claim.status)),
+      fundingUnavailable ||
+      (!claim.wrongNetwork &&
+        (claim.isPending ||
+          !address ||
+          !isAddress(address) ||
+          ["checking", "entered", "claimed"].includes(claim.status))),
     isPending: claim.isPending,
-    presentation: getStandardLoopActionPresentation({
-      isPending: claim.isPending,
-      status: claim.status,
-      wrongNetwork: claim.wrongNetwork,
-    }),
-    tooltip: actionTooltip,
+    presentation: fundingUnavailable
+      ? "neutral"
+      : getStandardLoopActionPresentation({
+          isPending: claim.isPending,
+          status: claim.status,
+          wrongNetwork: claim.wrongNetwork,
+        }),
+    tooltip: fundingUnavailable
+      ? {
+          title: "Out of funds",
+          description: "This Loop has no balance available for rewards.",
+        }
+      : actionTooltip,
     execute: hasClaimError ? claim.refetch : claim.execute,
   }
 

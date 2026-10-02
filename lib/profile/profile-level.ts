@@ -1,0 +1,60 @@
+import type { TrueLooperClaims } from "@/lib/loops/true-looper-claims"
+
+export function getProfileLevel(totalPoints: number) {
+  if (totalPoints >= 250) {
+    return {
+      level: "LooperX",
+      nextLevel: null,
+      remainingPoints: 0,
+      progress: 100,
+      fromLabel: "True Looper",
+      toLabel: "LooperX · 250 GP",
+    }
+  }
+  const isTrueLooper = totalPoints >= 50
+  return {
+    level: isTrueLooper ? "True Looper" : "Looper",
+    nextLevel: isTrueLooper ? "LooperX" : "True Looper",
+    remainingPoints: (isTrueLooper ? 250 : 50) - totalPoints,
+    progress: isTrueLooper
+      ? ((totalPoints - 50) / 200) * 100
+      : (totalPoints / 50) * 100,
+    fromLabel: isTrueLooper ? "True Looper" : "0 GP",
+    toLabel: isTrueLooper ? "LooperX · 250 GP" : "True Looper",
+  }
+}
+
+export interface ProfileSummary {
+  address: string
+  totalPoints: number
+  totalClaims: number
+  trueLooperClaims: TrueLooperClaims & { statsUpdatedAt: string | null }
+}
+
+export function getProfilePillProgress({
+  totalPoints,
+  trueLooperClaims,
+}: ProfileSummary) {
+  const level = getProfileLevel(totalPoints)
+  const remainingClaims = trueLooperClaims.claimsRemaining
+  if (remainingClaims > 0) {
+    return {
+      level: level.level,
+      progress: Math.max(
+        0,
+        (trueLooperClaims.qualifyingClaims / trueLooperClaims.requiredClaims) *
+          100
+      ),
+      description: `${remainingClaims} ${
+        remainingClaims === 1 ? "claim" : "claims"
+      } left to join the True Loopers!`,
+    }
+  }
+  return {
+    level: level.level,
+    progress: level.progress,
+    description: level.nextLevel
+      ? `${level.remainingPoints} GP to reach ${level.nextLevel}`
+      : "LooperX reached · True Looper access unlocked",
+  }
+}

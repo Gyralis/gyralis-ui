@@ -119,9 +119,10 @@ export interface LeaderboardEntryResponse {
   longestStreak: number
   earnedStreakBonuses: EarnedStreakBonus[]
   rank: number
+  globalRank?: number
 }
 
-export interface GlobalLeaderboardResponse {
+export interface LeaderboardResponse {
   success: true
   limit: number
   offset: number
@@ -131,7 +132,25 @@ export interface GlobalLeaderboardResponse {
   entries: LeaderboardEntryResponse[]
 }
 
-export interface LoopLeaderboardResponse extends GlobalLeaderboardResponse {
+export interface GlobalLeaderboardResponse extends LeaderboardResponse {
+  totalMatching: number
+}
+
+export interface GlobalLeaderboardRequestParams
+  extends LeaderboardRequestParams {
+  includeGlobalRank?: boolean
+}
+
+export interface GlobalLeaderboardSummary {
+  success: true
+  totalPoints: number
+  totalClaims: number
+  totalLoopers: number
+  longestStreak: number
+  lastStatsUpdatedAt: string | null
+}
+
+export interface LoopLeaderboardResponse extends LeaderboardResponse {
   chainId: number
   loopId: number
 }

@@ -629,7 +629,9 @@ function AnimatedStatValue({
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion()
-  const [activeFaq, setActiveFaq] = useState(faqItems[0]?.question ?? "")
+  const [activeFaq, setActiveFaq] = useState<string>(
+    faqItems[0]?.question ?? ""
+  )
   const [heroSummary, setHeroSummary] = useState<HeroHistorySummary>({
     totalClaims: 2858,
     totalRegistrations: 3349,
@@ -729,7 +731,9 @@ export default function HomePage() {
                   alt=""
                   width={640}
                   height={640}
-                  className="size-[min(58vw,640px)] animate-[spin_120s_linear_infinite] opacity-[0.13] motion-reduce:animate-none"
+                  priority
+                  sizes="(max-width: 1103px) 58vw, 640px"
+                  className="h-auto w-[min(58vw,640px)] animate-[spin_120s_linear_infinite] opacity-[0.13] motion-reduce:animate-none"
                 />
               </motion.div>
               <div className="relative mx-auto max-w-5xl">
@@ -1205,11 +1209,6 @@ export default function HomePage() {
                     </span>{" "}
                     already claiming, returning, and building streaks across the
                     ecosystem.
-                  </p>
-                  <p>
-                    Unlock special access to the{" "}
-                    <span className="text-white">True Loopers Loop</span> —
-                    coming soon.
                   </p>
                 </div>
 

@@ -18,6 +18,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import type {
   SuperLoopConfirmedAction,
   SuperLoopSubmissionStage,
@@ -32,10 +33,12 @@ import { useToast } from "@/components/ui/use-toast"
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
+  gyralis: "/api/gyralis",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+const CLAIMS_REQUIRED_CODE = "CLAIMS_REQUIRED"
 
 export type SuperLoopPendingAction = "enter" | "claim"
 
@@ -47,7 +50,10 @@ interface UseSuperLoopClaimParams {
   eligibilityProvider: LoopEligibilityProvider
   hasClaimed: boolean
   isClaimable: boolean
-  onConfirmed?: () => void | Promise<void>
+  onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
+  onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
   tokenDecimals?: number
   tokenSymbol?: string
 }
@@ -66,6 +72,8 @@ function getProviderEligibilityMessage(provider: LoopEligibilityProvider) {
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
     case "gardens":
       return "Join the Gardens community required by this loop to enter."
+    case "gyralis":
+      return "Complete 50 claims in Gyralis to enter this SuperLoop."
   }
 }
 
@@ -78,6 +86,7 @@ export function useSuperLoopClaim({
   hasClaimed,
   isClaimable,
   onConfirmed,
+  onClaimConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseSuperLoopClaimParams) {
@@ -104,6 +113,7 @@ export function useSuperLoopClaim({
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
+  const receiptBlockNumber = receipt.data?.blockNumber
 
   useEffect(() => {
     setLastClaimedAmount(undefined)
@@ -117,7 +127,13 @@ export function useSuperLoopClaim({
   }, [address, chainId, connectedAccount])
 
   useEffect(() => {
-    if (!receipt.isSuccess || !receiptStatus || !txHash) return
+    if (
+      !receipt.isSuccess ||
+      !receiptStatus ||
+      !txHash ||
+      receiptBlockNumber == null
+    )
+      return
 
     const completedAction = pendingAction
     const completedTransactionUrl = transactionUrl
@@ -134,6 +150,15 @@ export function useSuperLoopClaim({
           : undefined,
       })
       return
+    }
+
+    if (completedAction === "claim") {
+      void onClaimConfirmed?.({
+        action: completedAction,
+        chainId,
+        transactionHash: txHash,
+        blockNumber: receiptBlockNumber,
+      })
     }
 
     setConfirmedAction({ action: completedAction, period: currentPeriod })
@@ -158,14 +183,22 @@ export function useSuperLoopClaim({
         : undefined,
     })
 
-    void onConfirmed?.()
+    void onConfirmed?.({
+      action: completedAction,
+      chainId,
+      transactionHash: txHash,
+      blockNumber: receiptBlockNumber,
+    })
   }, [
+    chainId,
     claimableAmount,
     currentPeriod,
     onConfirmed,
+    onClaimConfirmed,
     pendingAction,
     receipt.isSuccess,
     receiptStatus,
+    receiptBlockNumber,
     toast,
     tokenDecimals,
     tokenSymbol,
@@ -233,6 +266,7 @@ export function useSuperLoopClaim({
         }),
       })
       const payload = (await response.json()) as {
+        claimsRemaining?: number
         code?: string
         error?: string
         signature?: `0x${string}`
@@ -244,6 +278,21 @@ export function useSuperLoopClaim({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
+            type: "warning",
+          })
+          return
+        }
+
+        if (payload.code === CLAIMS_REQUIRED_CODE) {
+          const remaining = payload.claimsRemaining
+          toast({
+            title: "More claims required",
+            description:
+              typeof remaining === "number"
+                ? `${remaining} more ${
+                    remaining === 1 ? "claim is" : "claims are"
+                  } required to enter this SuperLoop.`
+                : "Complete 50 claims in Gyralis to enter this SuperLoop.",
             type: "warning",
           })
           return

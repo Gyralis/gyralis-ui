@@ -19,6 +19,7 @@ export function StandardLoopCard({ loop }: StandardLoopCardProps) {
         <LoopClaimAction chainId={loop.chainId} model={controller.action} />
       }
       distribution={controller.distribution}
+      eligibilityLinkDisabled={controller.action.status === "unavailable"}
       isSuper={false}
       loop={loop}
       loopers={controller.loopers}

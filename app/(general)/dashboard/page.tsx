@@ -2,11 +2,12 @@ import Image from "next/image"
 import type { IconType } from "react-icons"
 import { FaChartLine, FaCoins, FaInfoCircle, FaUsers } from "react-icons/fa"
 
-import { getDashboardPageData } from "@/lib/dashboard"
+import { getDashboardPageData, type DashboardPageData } from "@/lib/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts"
 import { DashboardSectionNav } from "@/components/dashboard/dashboard-section-nav"
 import { DashboardStatCard } from "@/components/dashboard/dashboard-stat-card"
+import { BackToLoopsLink } from "@/components/layout/back-to-loops-link"
 import { LoopTypeBadge } from "@/components/loops/loop-type-badge"
 
 type OverviewStatGroupProps = {
@@ -315,7 +316,28 @@ function LoopRateStatCard({ label, value }: LoopRateStatCardProps) {
 }
 
 export default async function DashboardPage() {
-  const data = await getDashboardPageData({ periodsBack: 7 })
+  let data: DashboardPageData
+  try {
+    data = await getDashboardPageData({ periodsBack: 7 })
+  } catch (error) {
+    console.error("[dashboard] Unable to load statistics", error)
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-16">
+        <Card>
+          <CardHeader>
+            <CardTitle>Dashboard temporarily unavailable</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground">
+              We couldn’t load the statistics right now. Please try again later.
+              You can still visit Loops.
+            </p>
+            <BackToLoopsLink />
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
   const activeTokenSummaries = data.tokenSummaries.filter(
     (summary) => Number(summary.totalDistributedAmount ?? 0) > 0
   )
@@ -378,7 +400,8 @@ export default async function DashboardPage() {
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,23,0.36)_0%,rgba(2,6,23,0.23)_38%,rgba(2,6,23,0.07)_100%),linear-gradient(180deg,rgba(2,6,23,0.04)_0%,rgba(2,6,23,0.26)_100%)] dark:bg-[linear-gradient(90deg,rgba(2,6,23,0.72)_0%,rgba(2,6,23,0.46)_38%,rgba(2,6,23,0.14)_100%),linear-gradient(180deg,rgba(2,6,23,0.08)_0%,rgba(2,6,23,0.52)_100%)]" />
-          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 p-6 sm:min-h-[380px] sm:p-8 xl:p-10">
+          <BackToLoopsLink className="absolute left-5 top-5 z-20 border-white/15 bg-black/35 text-slate-200 hover:border-primary/45 hover:bg-primary/15 hover:text-primary sm:left-6 sm:top-6" />
+          <div className="relative z-10 flex min-h-[340px] flex-col justify-end gap-5 px-6 pb-6 pt-20 sm:min-h-[380px] sm:px-8 sm:pb-8 xl:px-10 xl:pb-10">
             <div className="space-y-3">
               <h1 className="max-w-5xl text-5xl font-semibold tracking-tight text-slate-100 sm:text-6xl xl:text-7xl">
                 Gyralis{" "}

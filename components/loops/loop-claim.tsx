@@ -54,10 +54,12 @@ interface LoopClaimProps {
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
+  gyralis: "/api/gyralis",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
+const CLAIMS_REQUIRED_CODE = "CLAIMS_REQUIRED"
 
 function getPassportScoreRequiredMessage(error?: string) {
   const minScore = error?.match(/at least\s+(\d+(?:\.\d+)?)/i)?.[1]
@@ -75,6 +77,8 @@ function getProviderEligibilityMessage(
       return "Redeem the Gyralis offer in Blockscout Merits to enter this loop."
     case "gardens":
       return "Join the Gardens community required by this loop to enter."
+    case "gyralis":
+      return "Complete 50 claims in Gyralis to enter this SuperLoop."
   }
 }
 
@@ -548,6 +552,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       })
 
       const payload = (await response.json()) as {
+        claimsRemaining?: number
         code?: string
         success?: boolean
         signature?: `0x${string}`
@@ -559,6 +564,21 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           toast({
             title: "Passport score too low",
             description: getPassportScoreRequiredMessage(payload.error),
+            type: "warning",
+          })
+          return
+        }
+
+        if (payload.code === CLAIMS_REQUIRED_CODE) {
+          const remaining = payload.claimsRemaining
+          toast({
+            title: "More claims required",
+            description:
+              typeof remaining === "number"
+                ? `${remaining} more ${
+                    remaining === 1 ? "claim is" : "claims are"
+                  } required to enter this SuperLoop.`
+                : "Complete 50 claims in Gyralis to enter this SuperLoop.",
             type: "warning",
           })
           return

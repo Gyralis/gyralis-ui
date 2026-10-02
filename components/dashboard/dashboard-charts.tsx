@@ -232,7 +232,7 @@ export function DashboardCharts({
           description="Grouped bars make it easy to compare participation volume across loops in the current seven-date window."
         >
           <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={registrationsData} barGap={10}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -271,7 +271,7 @@ export function DashboardCharts({
           description="Claim activity over the same ended-date window, so the user can contrast registration interest with actual redemptions."
         >
           <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={320}>
               <LineChart data={claimsData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -313,7 +313,7 @@ export function DashboardCharts({
           description="Each ended date shows one stack per loop, split into claimed and unclaimed HNY so token flow is legible at a glance."
         >
           <div className="h-[340px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={340}>
               <BarChart data={distributionData} barGap={18}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -365,7 +365,7 @@ export function DashboardCharts({
           description="The percent of registrations that turned into claims in each ended period, compared side by side across loops."
         >
           <div className="h-[340px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={340}>
               <LineChart data={claimRateData}>
                 <CartesianGrid stroke={chartGridColor} vertical={false} />
                 <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -407,7 +407,7 @@ export function DashboardCharts({
         description="This growth curve keeps the all-time participation story visible even while the dashboard only renders the latest seven ended dates."
       >
         <div className="h-[360px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={360}>
             <LineChart data={cumulativeData}>
               <CartesianGrid stroke={chartGridColor} vertical={false} />
               <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />

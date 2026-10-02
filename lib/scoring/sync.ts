@@ -24,9 +24,12 @@ import {
   updateScoringSyncState,
 } from "@/lib/db/clients/sync-state.client"
 import { ensureUserProfile } from "@/lib/db/clients/user-profile.client"
+import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
+import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
+import { ignoredScoringLoopIds, isIgnoredScoringLoopId } from "./loop-filters"
 import { computeLoopStatsFromClaims } from "./rules"
 import {
   fetchAllClaimEventsForUserLoop,
@@ -34,7 +37,6 @@ import {
   getScoringSubgraphSource,
   getScoringSubgraphSources,
 } from "./subgraph-client"
-import { EarnedStreakBonus, UserLoopScoringStats } from "./types"
 
 type SyncMode = "incremental" | "full"
 const PROJECTION_WRITE_CONCURRENCY = 20
@@ -61,6 +63,18 @@ function keyForAffectedLoop(key: AffectedLoopKey): string {
   return [key.chainId, key.loopId, key.userAddress.toLowerCase()].join("|")
 }
 
+function ignoredLoopIdsForChain(chainId: number) {
+  return chainId === env.GYRALIS_SUBGRAPH_CHAIN_ID
+    ? ignoredScoringLoopIds
+    : undefined
+}
+
+function isIgnoredLoop(loopId: number, chainId: number) {
+  return (
+    chainId === env.GYRALIS_SUBGRAPH_CHAIN_ID && isIgnoredScoringLoopId(loopId)
+  )
+}
+
 async function mapWithConcurrency<T>(
   items: T[],
   concurrency: number,
@@ -71,44 +85,13 @@ async function mapWithConcurrency<T>(
   }
 }
 
-function parseEarnedBonuses(value: unknown): EarnedStreakBonus[] {
-  return Array.isArray(value)
-    ? value
-        .filter(
-          (item): item is EarnedStreakBonus =>
-            item != null &&
-            typeof item === "object" &&
-            typeof (item as EarnedStreakBonus).streak === "number" &&
-            typeof (item as EarnedStreakBonus).points === "number"
-        )
-        .map((item) => ({ streak: item.streak, points: item.points }))
-    : []
-}
-
-function mapDbLoopStats(
-  stats: Awaited<ReturnType<typeof getUserLoopStatsForUser>>[number]
-): UserLoopScoringStats {
-  return {
-    userAddress: stats.userAddress,
-    loopId: stats.loopId,
-    chainId: stats.chainId,
-    totalClaims: stats.totalClaims,
-    claimPoints: stats.claimPoints,
-    streakBonusPoints: stats.streakBonusPoints,
-    totalPoints: stats.totalPoints,
-    currentStreak: stats.currentStreak,
-    longestStreak: stats.longestStreak,
-    lastClaimedPeriod: stats.lastClaimedPeriod,
-    earnedStreakBonuses: parseEarnedBonuses(stats.earnedStreakBonuses),
-  }
-}
-
 async function clearScoringProjections() {
   await clearLeaderboardEntries()
   await clearUserGlobalStats()
   await clearUserLoopStats()
   await clearProcessedClaimEvents()
   await resetScoringSyncState()
+  invalidateProfilePageData()
 }
 
 export function advanceScoringSyncCursor(
@@ -213,14 +196,15 @@ export async function runScoringSync(input: SyncInput = {}) {
       [...affectedUsers],
       PROJECTION_WRITE_CONCURRENCY,
       async (userAddress) => {
-        const loopStats = (await getUserLoopStatsForUser(userAddress)).map(
-          mapDbLoopStats
-        )
+        const loopStats = (await getUserLoopStatsForUser(userAddress))
+          .filter((stats) => !isIgnoredLoop(stats.loopId, stats.chainId))
+          .map(mapDbUserLoopStatsToScoringStats)
         const globalStats = computeGlobalStatsFromLoops(userAddress, loopStats)
         await Promise.all([
           upsertUserGlobalStats(globalStats),
           upsertGlobalLeaderboardEntry(globalStats),
         ])
+        invalidateProfilePageData(userAddress)
       }
     )
 
@@ -247,6 +231,7 @@ export async function runScoringSync(input: SyncInput = {}) {
             afterEventId: syncState.lastEventId,
             first: batchSize,
             loopId: input.loopId,
+            excludedLoopIds: ignoredLoopIdsForChain(source.chainId),
             orderBy: "id",
           })
         : []
@@ -257,12 +242,16 @@ export async function runScoringSync(input: SyncInput = {}) {
           fromBlock: lastSyncedBlock + 1,
           first: batchSize - events.length,
           loopId: input.loopId,
+          excludedLoopIds: ignoredLoopIdsForChain(source.chainId),
           orderBy: "blockNumber",
         })
         events.push(...newBlockEvents)
       }
 
       for (const event of events) {
+        cursor = advanceScoringSyncCursor(cursor, event)
+        if (isIgnoredLoop(event.loopId, event.chainId)) continue
+
         const key = {
           userAddress: event.userAddress,
           loopId: event.loopId,
@@ -274,7 +263,7 @@ export async function runScoringSync(input: SyncInput = {}) {
         const loopEvents = pageClaimEventsByLoop.get(loopKey) ?? []
         loopEvents.push(event)
         pageClaimEventsByLoop.set(loopKey, loopEvents)
-        cursor = advanceScoringSyncCursor(cursor, event)
+        processedEvents += 1
       }
 
       const affectedUsers = await updateProjections(
@@ -291,11 +280,15 @@ export async function runScoringSync(input: SyncInput = {}) {
         })
       }
 
-      processedEvents += events.length
       sourceCursors.set(source.chainId, cursor)
       sourceResults.push({
         chainId: source.chainId,
-        processedEvents: events.length,
+        processedEvents: pageClaimEventsByLoop.size
+          ? [...pageClaimEventsByLoop.values()].reduce(
+              (total, loopEvents) => total + loopEvents.length,
+              0
+            )
+          : 0,
         lastBlockNumber: cursor.lastBlockNumber,
         hasMore: events.length === batchSize,
       })
@@ -327,11 +320,15 @@ export async function runScoringSync(input: SyncInput = {}) {
         afterEventId,
         first: batchSize,
         loopId: input.loopId,
+        excludedLoopIds: ignoredLoopIdsForChain(source.chainId),
         orderBy: "id",
       })
 
       if (events.length === 0) break
       for (const event of events) {
+        cursor = advanceScoringSyncCursor(cursor, event)
+        if (isIgnoredLoop(event.loopId, event.chainId)) continue
+
         const key = {
           userAddress: event.userAddress,
           loopId: event.loopId,
@@ -342,7 +339,6 @@ export async function runScoringSync(input: SyncInput = {}) {
         const loopEvents = fullModeClaimEventsByLoop.get(loopKey) ?? []
         loopEvents.push(event)
         fullModeClaimEventsByLoop.set(loopKey, loopEvents)
-        cursor = advanceScoringSyncCursor(cursor, event)
         processedEvents += 1
         sourceProcessedEvents += 1
       }
@@ -363,6 +359,8 @@ export async function runScoringSync(input: SyncInput = {}) {
     affectedLoops,
     fullModeClaimEventsByLoop
   )
+  // Also evict empty/partial snapshots read while the full rebuild was running.
+  invalidateProfilePageData()
 
   if (input.loopId == null) {
     for (const source of sources) {
