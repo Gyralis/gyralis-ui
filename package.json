@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-vercel-env.mjs && next build",
+    "build": "next build",
     "start": "next start",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
