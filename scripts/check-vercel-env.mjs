@@ -1,4 +1,4 @@
-const REQUIRED_VERCEL_ENV_VARS = ["GYRALIS_SUBGRAPH_CHAIN_ID"]
+const REQUIRED_VERCEL_ENV_VARS = ["CRON_SECRET", "SCORING_SYNC_BATCH_SIZE"]
 
 if (process.env.VERCEL !== "1") {
   console.log("Skipping Vercel environment check outside Vercel.")
