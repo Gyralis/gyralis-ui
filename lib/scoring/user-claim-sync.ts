@@ -30,12 +30,12 @@ import { invalidateProfilePageData } from "@/lib/profile/profile-cache"
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { scoringConfig } from "./config"
 import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
-import {
-  ignoredScoringLoopIds,
-  isIgnoredScoringLoopId,
-} from "./loop-filters"
+import { isIgnoredScoringLoopId } from "./loop-filters"
 import { computeLoopStatsFromClaims, normalizeAddress } from "./rules"
-import { fetchAllClaimEventsForUserLoop } from "./subgraph-client"
+import {
+  fetchAllClaimEventsForUserLoop,
+  getScoringSubgraphSource,
+} from "./subgraph-client"
 import { ClaimScoringEvent } from "./types"
 
 const canonicalClaimEvent = parseAbiItem(
@@ -147,7 +147,7 @@ export function extractClaimEventsFromReceiptLogs(input: {
     }
 
     const loopId = stringifyUint(args.loopId)
-    if (loopId !== expectedLoopId) continue
+    if (loopId != null && loopId !== expectedLoopId) continue
 
     events.push({
       id: claimEventId(input.txHash, log.logIndex),
@@ -192,11 +192,13 @@ async function recomputeUserLoopAndGlobalStats(input: {
   await upsertUserLoopStats(loopStats)
   await upsertLoopLeaderboardEntry(loopStats)
 
-  const allLoopStats = (
-    await getUserLoopStatsForUser(input.userAddress, {
-      excludedLoopIds: ignoredScoringLoopIds,
-    })
-  ).map(mapDbUserLoopStatsToScoringStats)
+  const allLoopStats = (await getUserLoopStatsForUser(input.userAddress))
+    .filter(
+      (stats) =>
+        stats.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID ||
+        !isIgnoredScoringLoopId(stats.loopId)
+    )
+    .map(mapDbUserLoopStatsToScoringStats)
   const globalStats = computeGlobalStatsFromLoops(
     input.userAddress,
     allLoopStats
@@ -209,15 +211,14 @@ async function recomputeUserLoopAndGlobalStats(input: {
 }
 
 export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
-  if (isIgnoredScoringLoopId(input.loopId)) {
+  if (
+    input.chainId === env.GYRALIS_SUBGRAPH_CHAIN_ID &&
+    isIgnoredScoringLoopId(input.loopId)
+  ) {
     return { claimed: false, alreadySynced: false, ignoredLoop: true }
   }
 
-  if (input.chainId !== env.GYRALIS_SUBGRAPH_CHAIN_ID) {
-    throw new Error(
-      "Requested chainId does not match GYRALIS_SUBGRAPH_CHAIN_ID"
-    )
-  }
+  const source = getScoringSubgraphSource(input.chainId)
 
   const client = createPublicClient({
     chain: getViemChain(input.chainId),
@@ -262,6 +263,7 @@ export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
   )
   const alreadySynced = processedEvents.every(Boolean)
   const historicalEvents = await fetchAllClaimEventsForUserLoop({
+    source,
     userAddress: input.userAddress,
     loopId: input.loopId,
     batchSize: env.SCORING_SYNC_BATCH_SIZE,

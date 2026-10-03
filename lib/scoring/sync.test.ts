@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
   revalidateTag: vi.fn(),
   fetchAllClaimEventsForUserLoop: vi.fn(),
   fetchClaimEventsFromSubgraph: vi.fn(),
+  getScoringSubgraphSource: vi.fn(),
+  getScoringSubgraphSources: vi.fn(),
   getScoringSyncState: vi.fn(),
   updateScoringSyncState: vi.fn(),
   ensureUserProfile: vi.fn(),
@@ -16,6 +18,15 @@ const mocks = vi.hoisted(() => ({
   upsertUserGlobalStats: vi.fn(),
   upsertGlobalLeaderboardEntry: vi.fn(),
 }))
+
+const gnosisSource = {
+  chainId: 100,
+  url: "https://example.com/gnosis",
+}
+const baseSource = {
+  chainId: 8453,
+  url: "https://example.com/base",
+}
 
 vi.mock("next/cache", () => ({ revalidateTag: mocks.revalidateTag }))
 
@@ -61,6 +72,8 @@ vi.mock("@/lib/db/clients/user-profile.client", () => ({
 vi.mock("./subgraph-client", () => ({
   fetchAllClaimEventsForUserLoop: mocks.fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph: mocks.fetchClaimEventsFromSubgraph,
+  getScoringSubgraphSource: mocks.getScoringSubgraphSource,
+  getScoringSubgraphSources: mocks.getScoringSubgraphSources,
 }))
 
 const userAddress = "0x0000000000000000000000000000000000000001"
@@ -83,6 +96,8 @@ function claimEvent(blockNumber: number, id: string) {
 describe("incremental scoring sync", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.getScoringSubgraphSource.mockReturnValue(gnosisSource)
+    mocks.getScoringSubgraphSources.mockReturnValue([gnosisSource])
     mocks.getScoringSyncState.mockResolvedValue({
       lastBlockNumber: 10,
       lastEventId: "0xaaa-0",
@@ -129,6 +144,7 @@ describe("incremental scoring sync", () => {
     )
 
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(1, {
+      source: gnosisSource,
       blockNumber: 10,
       afterEventId: "0xaaa-0",
       first: 2,
@@ -137,6 +153,7 @@ describe("incremental scoring sync", () => {
       orderBy: "id",
     })
     expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
+      source: gnosisSource,
       fromBlock: 11,
       first: 1,
       loopId: undefined,
@@ -151,6 +168,7 @@ describe("incremental scoring sync", () => {
       hasMore: true,
     })
     expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
+      chainId: 100,
       lastBlockNumber: 11,
       lastEventId: "0xccc-0",
     })
@@ -198,15 +216,62 @@ describe("incremental scoring sync", () => {
         expect.objectContaining({ loopId: 3 })
       )
       expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([activeEvent])
-      expect(mocks.getUserLoopStatsForUser).toHaveBeenCalledWith(userAddress, {
-        excludedLoopIds: [1, 2],
-      })
+      expect(mocks.getUserLoopStatsForUser).toHaveBeenCalledWith(userAddress)
       expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
+        chainId: 100,
         lastBlockNumber: 12,
         lastEventId: "0xccc-0",
       })
     }
   )
+
+  it("keeps the active Base loop when its mapped scoring ID matches a legacy Gnosis ID", async () => {
+    const baseEvent = {
+      ...claimEvent(11, "0xbase-0"),
+      loopId: 1,
+      chainId: 8453,
+    }
+    mocks.getScoringSubgraphSource.mockReturnValue(baseSource)
+    mocks.getScoringSubgraphSources.mockReturnValue([baseSource])
+    mocks.fetchClaimEventsFromSubgraph
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([baseEvent])
+    mocks.fetchAllClaimEventsForUserLoop.mockResolvedValue([baseEvent])
+    mocks.getUserLoopStatsForUser.mockResolvedValue([
+      {
+        userAddress,
+        loopId: 1,
+        chainId: 8453,
+        totalClaims: 1,
+        claimPoints: 1,
+        streakBonusPoints: 0,
+        totalPoints: 1,
+        currentStreak: 1,
+        longestStreak: 1,
+        lastClaimedPeriod: 11,
+        earnedStreakBonuses: [],
+      },
+    ])
+
+    const result = await runScoringSync({ chainId: 8453 })
+
+    expect(result).toMatchObject({
+      processedEvents: 1,
+      affectedLoops: 1,
+      affectedUsers: 1,
+    })
+    expect(mocks.fetchClaimEventsFromSubgraph).toHaveBeenNthCalledWith(2, {
+      source: baseSource,
+      fromBlock: 11,
+      first: 2,
+      loopId: undefined,
+      excludedLoopIds: undefined,
+      orderBy: "blockNumber",
+    })
+    expect(mocks.upsertUserLoopStats).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: 8453, loopId: 1 })
+    )
+  })
 
   it("does not checkpoint when projection writes fail", async () => {
     const event = claimEvent(11, "0xbbb-0")

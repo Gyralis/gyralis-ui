@@ -120,6 +120,20 @@ function formatTokenAmountParts(
   }
 }
 
+function formatTokenSummaryAmounts(
+  summaries: Array<{
+    tokenSymbol: string | null
+    totalDistributedAmount: string | null
+    totalClaimedAmount: string | null
+    totalUnclaimedAmount: string | null
+  }>,
+  key: "totalDistributedAmount" | "totalClaimedAmount" | "totalUnclaimedAmount"
+) {
+  return summaries
+    .map((summary) => formatTokenAmount(summary[key], summary.tokenSymbol, 2))
+    .join(" · ")
+}
+
 function OverviewStatGroup({
   title,
   mainValue,
@@ -324,7 +338,19 @@ export default async function DashboardPage() {
       </main>
     )
   }
-  const tokenSummary = data.tokenSummaries[0]
+  const activeTokenSummaries = data.tokenSummaries.filter(
+    (summary) => Number(summary.totalDistributedAmount ?? 0) > 0
+  )
+  const displayedTokenSummaries = activeTokenSummaries.length
+    ? activeTokenSummaries
+    : data.tokenSummaries
+  const tokenSummary =
+    displayedTokenSummaries.length === 1
+      ? displayedTokenSummaries[0]
+      : undefined
+  const chartTokenSummary = data.tokenSummaries.find(
+    (summary) => summary.tokenSymbol === "HNY"
+  )
   const indexedBlockLabel = data.indexedBlocks
     .map(
       (entry) =>
@@ -333,11 +359,16 @@ export default async function DashboardPage() {
         )}`
     )
     .join(" · ")
-  const totalDistributedOverview = formatTokenAmountParts(
-    data.overview.totalDistributedAmount,
-    tokenSummary?.tokenSymbol,
-    2
-  )
+  const totalDistributedOverview = tokenSummary
+    ? formatTokenAmountParts(
+        tokenSummary.totalDistributedAmount,
+        tokenSummary.tokenSymbol,
+        2
+      )
+    : {
+        value: "Mixed",
+        symbol: `${data.tokenSummaries.length} tokens`,
+      }
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0">
@@ -437,20 +468,30 @@ export default async function DashboardPage() {
                 substats={[
                   {
                     label: "Total Claimed",
-                    value: formatTokenAmount(
-                      data.overview.totalClaimedAmount,
-                      tokenSummary?.tokenSymbol,
-                      2
-                    ),
+                    value: tokenSummary
+                      ? formatTokenAmount(
+                          tokenSummary.totalClaimedAmount,
+                          tokenSummary.tokenSymbol,
+                          2
+                        )
+                      : formatTokenSummaryAmounts(
+                          displayedTokenSummaries,
+                          "totalClaimedAmount"
+                        ),
                     tone: "positive",
                   },
                   {
                     label: "Total Unclaimed",
-                    value: formatTokenAmount(
-                      data.overview.totalUnclaimedAmount,
-                      tokenSummary?.tokenSymbol,
-                      2
-                    ),
+                    value: tokenSummary
+                      ? formatTokenAmount(
+                          tokenSummary.totalUnclaimedAmount,
+                          tokenSummary.tokenSymbol,
+                          2
+                        )
+                      : formatTokenSummaryAmounts(
+                          displayedTokenSummaries,
+                          "totalUnclaimedAmount"
+                        ),
                     tone: "muted",
                   },
                 ]}
@@ -590,26 +631,28 @@ export default async function DashboardPage() {
               <FaInfoCircle className="mt-1 size-4 shrink-0 text-primary" />
               <p>
                 Charts use the day each period ended, show the latest seven
-                completed dates from live indexed data, and compare{" "}
-                {data.loopSummaries.length} Gnosis loops with synchronized
-                labels and shared token accounting.
+                completed dates from live indexed data, and compare the Gnosis
+                loops that share a period cadence and token. Loop cards and
+                headline claim counts include every configured chain.
               </p>
             </div>
 
             <DashboardCharts
-              loops={data.loopSummaries.map((loop) => {
-                const chartColors =
-                  loopChartColors[loop.loopKey] ?? fallbackLoopChartColors
+              loops={data.loopSummaries
+                .filter((loop) => loop.meta.chainName === "Gnosis")
+                .map((loop) => {
+                  const chartColors =
+                    loopChartColors[loop.loopKey] ?? fallbackLoopChartColors
 
-                return {
-                  loopKey: loop.loopKey,
-                  title: loop.meta.title,
-                  shortTitle: loop.meta.shortTitle,
-                  color: chartColors.color,
-                  softColor: chartColors.softColor,
-                }
-              })}
-              tokenSymbol={tokenSummary?.tokenSymbol ?? null}
+                  return {
+                    loopKey: loop.loopKey,
+                    title: loop.meta.title,
+                    shortTitle: loop.meta.shortTitle,
+                    color: chartColors.color,
+                    softColor: chartColors.softColor,
+                  }
+                })}
+              tokenSymbol={chartTokenSummary?.tokenSymbol ?? null}
               registrationsByPeriod={data.charts.registrationsByPeriod}
               claimsByPeriod={data.charts.claimsByPeriod}
               claimRateByPeriod={data.charts.claimRateByPeriod}
@@ -675,19 +718,19 @@ export default async function DashboardPage() {
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.distributedAmount,
-                              tokenSummary?.tokenSymbol
+                              row.tokenSymbol
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.claimedAmount,
-                              tokenSummary?.tokenSymbol
+                              row.tokenSymbol
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                             {formatTokenAmount(
                               row.unclaimedAmount,
-                              tokenSummary?.tokenSymbol
+                              row.tokenSymbol
                             )}
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
