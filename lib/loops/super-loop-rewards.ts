@@ -22,6 +22,7 @@ interface SuperLoopRewardTooltipParams {
 
 interface SuperLoopRewardValueParams {
   claimableRewardValue?: string
+  claimedRewardValue?: string
   status: SuperLoopClaimStatus
 }
 
@@ -113,6 +114,7 @@ export function getSuperLoopRewardTooltip({
 
 export function getSuperLoopRewardValue({
   claimableRewardValue,
+  claimedRewardValue,
   status,
 }: SuperLoopRewardValueParams) {
   switch (status) {
@@ -124,7 +126,7 @@ export function getSuperLoopRewardValue({
     case "claimable":
       return claimableRewardValue ?? "0"
     case "claimed":
-      return "0"
+      return claimedRewardValue ?? "0"
     default:
       return "0"
   }

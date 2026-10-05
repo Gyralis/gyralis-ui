@@ -37,14 +37,13 @@ function formatTokenAmount(
         symbol: string
       }
     | undefined,
-  decimals = 4
+  decimals = 3
 ) {
   if (!token || amount <= 0n) return undefined
 
-  return `${trimFormattedBalance(
-    formatUnits(amount, token.decimals),
-    decimals
-  )} ${token.symbol}`
+  return `${Number(formatUnits(amount, token.decimals)).toFixed(decimals)} ${
+    token.symbol
+  }`
 }
 
 export function useStandardLoopCardController(loop: LoopCardData) {
