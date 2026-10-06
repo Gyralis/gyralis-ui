@@ -1,9 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { LoopCardData, LoopCardsData } from "@/data/loops-data"
+import {
+  LoopCardData,
+  LoopCardsData,
+  SoneiumLoopCardsData,
+} from "@/data/loops-data"
 // import { motion } from "framer-motion"
 import { LuX } from "react-icons/lu"
+import { useAccount } from "wagmi"
+import { soneium } from "wagmi/chains"
 
 import { ParticipationSectionNav } from "@/components/layout/participation-section-nav"
 import LoopCard from "@/components/loops/loop-card"
@@ -18,6 +24,9 @@ const UPGRADE_NOTICE_STORAGE_KEY = "gyralis-loops-upgrade-notice-dismissed"
 
 export function LoopsPageClient() {
   const [cards, setCards] = useState<LoopCardData[]>(LoopCardsData)
+  const { isConnected, chainId } = useAccount()
+  const visibleCards =
+    isConnected && chainId === soneium.id ? SoneiumLoopCardsData : cards
   // const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [showUpgradeNotice, setShowUpgradeNotice] = useState(false)
 
@@ -240,7 +249,7 @@ export function LoopsPageClient() {
           */}
 
           <div className="grid grid-cols-[minmax(0,560px)] items-start justify-center gap-6 xl:grid-cols-[repeat(2,minmax(0,560px))]">
-            {cards.map((loop) => (
+            {visibleCards.map((loop) => (
               <div key={loop.id} id={`loop-card-${loop.id}`}>
                 {loop.enabled ? (
                   <LoopCard loop={loop} onBalanceUpdate={handleBalanceUpdate} />

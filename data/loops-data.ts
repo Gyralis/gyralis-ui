@@ -26,9 +26,10 @@ export interface LoopCardData {
   registeredAddresses?: { address: string; claimed: boolean }[]
   super?: boolean
   contractType: LoopContractType
+  inflowSource?: "superfluid" | "mockToken"
   chainId: number
   chainName: string
-  historyLoopKey: DashboardLoopKey
+  historyLoopKey?: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   gardensCommunity?: GardensCommunityKey
   passportMinScore: number
@@ -45,6 +46,31 @@ export interface LoopCardData {
   sponsorLogoUrl?: string
   sponsorUrl?: string
 }
+
+export const SoneiumLoopCardsData: LoopCardData[] = [
+  {
+    id: 7,
+    title: "Soneium Test Loop",
+    by: "Gyralis",
+    address: "0xA43A822824aF4bB40E37A816879256E3462eb5c0",
+    description: "Explore Gyralis streaming loops on Soneium.",
+    token: "0x3eE7118a0933c593CCacba843131c4E776994726",
+    communityLogoUrl: "/gyralis-logo.svg",
+    eligibilityLogoUrl: "/gyralis-logo.svg",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    super: true,
+    contractType: "superLoop",
+    inflowSource: "mockToken",
+    chainId: 1868,
+    chainName: "Soneium",
+    eligibilityProvider: "gyralis",
+    passportMinScore: 0,
+    enabled: true,
+    achievementActive: false,
+  },
+]
 
 export const LoopCardsData: LoopCardData[] = [
   {

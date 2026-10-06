@@ -1,6 +1,12 @@
 import { superLoopAbi } from "./superLoopAbi";
 
 const deployedContracts = {
+  1868: {
+    superLoop: {
+      abi: superLoopAbi,
+      inheritedFunctions: {},
+    },
+  },
   8453: {
     superLoop: {
       abi: superLoopAbi,

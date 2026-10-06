@@ -25,6 +25,17 @@ const cfaV1ForwarderAbi = [
   },
 ] as const
 
+// The Soneium test token simulates streaming with its own rate getter.
+const mockTokenRateAbi = [
+  {
+    type: "function",
+    name: "rate",
+    inputs: [],
+    outputs: [{ name: "", type: "int256" }],
+    stateMutability: "view",
+  },
+] as const
+
 type LoopTokenBalanceData = {
   flowRateError?: boolean
   flowRatePerSecond?: bigint
@@ -38,6 +49,7 @@ type UseLoopTokenBalanceParams = {
   address?: Address
   chainId: number
   contractType?: LoopContractType
+  inflowSource?: "superfluid" | "mockToken"
   enabled?: boolean
   payoutToken?: Address
   token?: Address
@@ -47,6 +59,7 @@ export function useLoopTokenBalance({
   address,
   chainId,
   contractType = DEFAULT_LOOP_CONTRACT_TYPE,
+  inflowSource = "superfluid",
   enabled = true,
   payoutToken,
   token,
@@ -54,6 +67,7 @@ export function useLoopTokenBalance({
   const queryEnabled = enabled && Boolean(token)
   const isSuperLoop = contractType === "superLoop"
   const cfaV1ForwarderAddress = cfaV1ForwarderAddresses[chainId]
+  const isMockToken = inflowSource === "mockToken"
 
   const tokenBalance = useBalance({
     address: address ?? zeroAddress,
@@ -86,13 +100,20 @@ export function useLoopTokenBalance({
         functionName: "symbol",
         chainId,
       },
-      {
-        address: cfaV1ForwarderAddress ?? zeroAddress,
-        abi: cfaV1ForwarderAbi,
-        functionName: "getAccountFlowrate",
-        args: [token ?? zeroAddress, address ?? zeroAddress],
-        chainId,
-      },
+      isMockToken
+        ? {
+            address: token ?? zeroAddress,
+            abi: mockTokenRateAbi,
+            functionName: "rate",
+            chainId,
+          }
+        : {
+            address: cfaV1ForwarderAddress ?? zeroAddress,
+            abi: cfaV1ForwarderAbi,
+            functionName: "getAccountFlowrate",
+            args: [token ?? zeroAddress, address ?? zeroAddress],
+            chainId,
+          },
       {
         address: payoutToken ?? token ?? zeroAddress,
         abi: erc20Abi,
@@ -105,7 +126,8 @@ export function useLoopTokenBalance({
         queryEnabled &&
         isSuperLoop &&
         Boolean(address) &&
-        Boolean(cfaV1ForwarderAddress),
+        (isMockToken || Boolean(cfaV1ForwarderAddress)),
+      refetchInterval: isMockToken ? 10_000 : false,
     },
   })
 

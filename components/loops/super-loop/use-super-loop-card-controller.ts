@@ -59,6 +59,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     address,
     chainId: loop.chainId,
     contractType: "superLoop",
+    inflowSource: loop.inflowSource,
     enabled: Boolean(address && settings.data?.token),
     payoutToken: loop.payoutToken,
     token: settings.data?.token,
