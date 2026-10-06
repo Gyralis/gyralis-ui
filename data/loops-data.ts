@@ -26,7 +26,6 @@ export interface LoopCardData {
   registeredAddresses?: { address: string; claimed: boolean }[]
   super?: boolean
   contractType: LoopContractType
-  inflowSource?: "superfluid" | "mockToken"
   chainId: number
   chainName: string
   historyLoopKey?: DashboardLoopKey
@@ -50,19 +49,39 @@ export interface LoopCardData {
 export const SoneiumLoopCardsData: LoopCardData[] = [
   {
     id: 7,
-    title: "Soneium Test Loop",
+    title: "Soneium Hourly Loop",
     by: "Gyralis",
-    address: "0xA43A822824aF4bB40E37A816879256E3462eb5c0",
-    description: "Explore Gyralis streaming loops on Soneium.",
-    token: "0x3eE7118a0933c593CCacba843131c4E776994726",
+    address: "0x72A7388ece62B2BAc4Cee2e4754372Cec211336B",
+    description: "Test hourly MCK rewards with Gyralis on Soneium.",
+    token: "0x8469AFAA09c775da79156e59Be9AA1a4b7411590",
     communityLogoUrl: "/gyralis-logo.svg",
     eligibilityLogoUrl: "/gyralis-logo.svg",
     shieldScore: "Passport Score 15+",
     eligibility: "+50 Claims in Gyralis",
     chainBadgeColor: "bg-custom-green",
-    super: true,
-    contractType: "superLoop",
-    inflowSource: "mockToken",
+    super: false,
+    contractType: "loop",
+    chainId: 1868,
+    chainName: "Soneium",
+    eligibilityProvider: "gyralis",
+    passportMinScore: 0,
+    enabled: true,
+    achievementActive: false,
+  },
+  {
+    id: 8,
+    title: "Soneium Daily Loop",
+    by: "Gyralis",
+    address: "0x6297F2951DbBF0B3a797D6D6c4496dE1d6735034",
+    description: "Test 24-hour oMCK rewards with Gyralis on Soneium.",
+    token: "0xD209d4737B467e507B382525fB1F00Bb7d86b3c4",
+    communityLogoUrl: "/gyralis-logo.svg",
+    eligibilityLogoUrl: "/gyralis-logo.svg",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    super: false,
+    contractType: "loop",
     chainId: 1868,
     chainName: "Soneium",
     eligibilityProvider: "gyralis",

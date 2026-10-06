@@ -73,7 +73,8 @@ export function useStandardLoopWalletRegistration({
       enabled &&
       isAddress(address) &&
       Boolean(publicClient && user) &&
-      currentPeriod != null,
+      currentPeriod != null &&
+      currentPeriod > 0n,
     staleTime: 10_000,
     refetchOnWindowFocus: false,
   })

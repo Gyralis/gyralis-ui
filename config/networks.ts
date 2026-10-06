@@ -26,7 +26,13 @@ const mainnetRpcUrl = alchemyApiKey
 const baseRpcUrl =
   process.env.NEXT_PUBLIC_BASE_RPC_URL?.trim() || "https://mainnet.base.org"
 
-export const deployedChains = [base, gnosis, soneium] as const
+const soneiumWithIcon = {
+  ...soneium,
+  iconUrl: "/icons/NetworkSoneium.webp",
+  iconBackground: "#ffffff",
+} as const
+
+export const deployedChains = [base, gnosis, soneiumWithIcon] as const
 
 export const chains = [
   mainnet,
@@ -44,7 +50,7 @@ export const chains = [
   gnosisChiado,
   optimismSepolia,
   arbitrumSepolia,
-  soneium,
+  soneiumWithIcon,
 ] as const
 
 export const transports = {

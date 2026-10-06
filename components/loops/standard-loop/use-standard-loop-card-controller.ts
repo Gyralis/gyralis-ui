@@ -183,7 +183,6 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       data = {
         balanceDetail,
         balanceDetailLabel: "Balance",
-        labelDetail: fundingUnavailable ? "Out of funds" : undefined,
         tooltip: fundingUnavailable
           ? "This Loop has no balance available for rewards."
           : settings.data.percentPerPeriod > 0n
@@ -254,7 +253,10 @@ export function useStandardLoopCardController(loop: LoopCardData) {
           nextPeriodStart:
             settings.data.firstPeriodStart +
             settings.data.periodLength * (settings.data.currentPeriod + 1n),
-          timerTitle: getStandardLoopTimerTitle(claim.status),
+          timerTitle:
+            settings.data.currentPeriod === 0n
+              ? "Loop opens in"
+              : getStandardLoopTimerTitle(claim.status),
         }
       : undefined
 
@@ -292,41 +294,56 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     claim.isPending || claim.wrongNetwork
       ? undefined
       : getStandardLoopActionTooltip(claim.status)
-  const action: LoopActionViewModel = {
-    status: actionStatus,
-    label: fundingUnavailable
-      ? "Out of funds"
-      : getStandardLoopActionLabel({
-          amountLabel,
-          isConfirming: claim.isConfirming,
-          pendingAction: claim.pendingAction,
-          status: claim.status,
-          submissionStage: claim.submissionStage,
-        }),
-    amountLabel,
-    disabled:
-      fundingUnavailable ||
-      (!claim.wrongNetwork &&
-        (claim.isPending ||
-          !address ||
-          !isAddress(address) ||
-          ["checking", "entered", "claimed"].includes(claim.status))),
-    isPending: claim.isPending,
-    presentation: fundingUnavailable
-      ? "neutral"
-      : getStandardLoopActionPresentation({
-          isPending: claim.isPending,
-          status: claim.status,
-          wrongNetwork: claim.wrongNetwork,
-        }),
-    tooltip: fundingUnavailable
+  const action: LoopActionViewModel =
+    settings.data?.currentPeriod === 0n
       ? {
-          title: "Out of funds",
-          description: "This Loop has no balance available for rewards.",
+          status: "unavailable",
+          label: "Waiting for next period",
+          disabled: true,
+          isPending: false,
+          presentation: "neutral",
+          tooltip: {
+            title: "Loop not open yet",
+            description:
+              "Period 0 is the initial setup period. This Loop becomes available when the next period starts.",
+          },
+          execute: claim.execute,
         }
-      : actionTooltip,
-    execute: hasClaimError ? claim.refetch : claim.execute,
-  }
+      : {
+          status: actionStatus,
+          label: fundingUnavailable
+            ? "Out of funds"
+            : getStandardLoopActionLabel({
+                amountLabel,
+                isConfirming: claim.isConfirming,
+                pendingAction: claim.pendingAction,
+                status: claim.status,
+                submissionStage: claim.submissionStage,
+              }),
+          amountLabel,
+          disabled:
+            fundingUnavailable ||
+            (!claim.wrongNetwork &&
+              (claim.isPending ||
+                !address ||
+                !isAddress(address) ||
+                ["checking", "entered", "claimed"].includes(claim.status))),
+          isPending: claim.isPending,
+          presentation: fundingUnavailable
+            ? "neutral"
+            : getStandardLoopActionPresentation({
+                isPending: claim.isPending,
+                status: claim.status,
+                wrongNetwork: claim.wrongNetwork,
+              }),
+          tooltip: fundingUnavailable
+            ? {
+                title: "Out of funds",
+                description: "This Loop has no balance available for rewards.",
+              }
+            : actionTooltip,
+          execute: hasClaimError ? claim.refetch : claim.execute,
+        }
 
   return {
     action,

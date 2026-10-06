@@ -1,9 +1,11 @@
 import { superLoopAbi } from "./superLoopAbi";
+import { standardLoopAbi } from "../contracts/standard-loop-abi";
 
 const deployedContracts = {
   1868: {
-    superLoop: {
-      abi: superLoopAbi,
+    loop: {
+      address: "0x72A7388ece62B2BAc4Cee2e4754372Cec211336B",
+      abi: standardLoopAbi,
       inheritedFunctions: {},
     },
   },

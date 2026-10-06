@@ -22,6 +22,7 @@ import {
 import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   deriveStandardLoopClaimStatus,
+  normalizeStandardLoopClaimerStatus,
   type StandardLoopSubmissionStage,
 } from "@/lib/loops/standard-loop-state"
 import {
@@ -99,6 +100,7 @@ export function useStandardLoopClaim({
   const { writeContractAsync } = useWriteContract()
   const abi = useMemo(() => getLoopContractAbi(chainId, "loop"), [chainId])
   const validAddress = isAddress(address)
+  const hasClaimPeriod = currentPeriod != null && currentPeriod > 0n
 
   const claimerStatusQuery = useReadContract({
     address,
@@ -107,7 +109,7 @@ export function useStandardLoopClaim({
     args: [connectedAccount ?? zeroAddress],
     chainId,
     query: {
-      enabled: validAddress && Boolean(connectedAccount),
+      enabled: validAddress && Boolean(connectedAccount) && hasClaimPeriod,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -120,8 +122,7 @@ export function useStandardLoopClaim({
     account: connectedAccount,
     chainId,
     query: {
-      enabled:
-        validAddress && Boolean(connectedAccount) && currentPeriod != null,
+      enabled: validAddress && Boolean(connectedAccount) && hasClaimPeriod,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -129,9 +130,12 @@ export function useStandardLoopClaim({
   const claimerStatus = claimerStatusQuery.data as
     | readonly [boolean, boolean]
     | undefined
-  const isRegistered = Boolean(claimerStatus?.[0])
-  const hasClaimed = Boolean(claimerStatus?.[1])
+  const { isRegistered, hasClaimed } = normalizeStandardLoopClaimerStatus({
+    claimerStatus,
+    currentPeriod,
+  })
   const shouldCheckNextPeriodRegistration =
+    hasClaimPeriod &&
     validAddress &&
     Boolean(connectedAccount) &&
     claimerStatus != null &&
@@ -298,6 +302,7 @@ export function useStandardLoopClaim({
 
   const execute = async () => {
     if (!connectedAccount) return
+    if (currentPeriod === 0n) return
 
     if (!validAddress) {
       toast({

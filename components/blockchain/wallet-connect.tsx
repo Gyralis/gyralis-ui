@@ -20,6 +20,7 @@ import {
 const CHAIN_ICONS: Record<number, string> = {
   8453: "/icons/NetworkBaseTest.svg",
   100: "/icons/NetworkGnosis.svg",
+  1868: "/icons/NetworkSoneium.webp",
 }
 
 export const WalletConnect = ({

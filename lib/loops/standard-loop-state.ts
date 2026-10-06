@@ -13,6 +13,23 @@ export type StandardLoopSubmissionStage =
 
 export type StandardLoopActionPresentation = "button" | "neutral" | "success"
 
+export function normalizeStandardLoopClaimerStatus({
+  claimerStatus,
+  currentPeriod,
+}: {
+  claimerStatus?: readonly [boolean, boolean]
+  currentPeriod?: bigint
+}) {
+  // Period zero is the entry window. Default zero-valued storage makes the
+  // contract's status getter report both flags as true for untouched wallets.
+  const hasClaimPeriod = currentPeriod != null && currentPeriod > 0n
+
+  return {
+    isRegistered: hasClaimPeriod && claimerStatus?.[0] === true,
+    hasClaimed: hasClaimPeriod && claimerStatus?.[1] === true,
+  }
+}
+
 interface StandardLoopParticipationInput {
   claimedUsers: readonly string[]
   registeredUsers: readonly string[]
