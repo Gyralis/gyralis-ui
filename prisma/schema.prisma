@@ -122,6 +122,58 @@ model LoopRegistrationCache {
   registerEventId String?
 }
 
+model SeasonUserLoopStats {
+  id                          String   @id @map("_id")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  seasonId                    String
+  userAddress                 String
+  loopId                      Int
+  chainId                     Int
+  totalClaims                 Int      @default(0)
+  claimPointsHundredths       Int      @default(0)
+  streakBonusPointsHundredths Int      @default(0)
+  totalPointsHundredths       Int      @default(0)
+  currentStreak               Int      @default(0)
+  longestStreak               Int      @default(0)
+  lastClaimedPeriod           Int?
+  earnedStreakBonuses         Json
+
+  @@unique([seasonId, userAddress, chainId, loopId])
+  @@index([seasonId, totalPointsHundredths])
+  @@index([seasonId, userAddress])
+}
+
+model SeasonUserGlobalStats {
+  id                          String   @id @map("_id")
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  seasonId                    String
+  userAddress                 String
+  totalClaims                 Int      @default(0)
+  claimPointsHundredths       Int      @default(0)
+  streakBonusPointsHundredths Int      @default(0)
+  totalPointsHundredths       Int      @default(0)
+  activeLoopStreaks           Int      @default(0)
+  longestStreak               Int      @default(0)
+  loopCount                   Int      @default(0)
+  earnedStreakBonuses         Json
+
+  @@unique([seasonId, userAddress])
+  @@index([seasonId, totalPointsHundredths])
+}
+
+model SeasonScoringState {
+  id                 String    @id @map("_id")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  configHash         String
+  status             String
+  rebuildStartedAt   DateTime?
+  rebuildCompletedAt DateTime?
+  error              String?
+}
+
 model LitProtocolMessage {
   id              String              @id @default(uuid()) @map("_id")
   encryptedString String

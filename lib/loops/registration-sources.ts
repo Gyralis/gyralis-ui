@@ -24,6 +24,10 @@ const baseLoopSources = {
     address: "0x213310e1dbD6991cD488AB247c81faD82CD88E7A",
     subgraphId: "0x213310e1dbd6991cd488ab247c81fad82cd88e7a",
   },
+  trueLoopers: {
+    address: "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0",
+    subgraphId: "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
+  },
 } as const
 
 export function getLoopRegistrationSource(

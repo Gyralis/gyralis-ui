@@ -33,6 +33,11 @@ import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
 import { isIgnoredScoringLoopId } from "./loop-filters"
 import { computeLoopStatsFromClaims, normalizeAddress } from "./rules"
 import {
+  seasonProjectionsAreReady,
+  updateSeasonGlobalProjections,
+  updateSeasonLoopProjections,
+} from "./season-projections"
+import {
   fetchAllClaimEventsForUserLoop,
   getScoringSubgraphSource,
 } from "./subgraph-client"
@@ -205,6 +210,15 @@ async function recomputeUserLoopAndGlobalStats(input: {
   )
   await upsertUserGlobalStats(globalStats)
   await upsertGlobalLeaderboardEntry(globalStats)
+  if (await seasonProjectionsAreReady()) {
+    await updateSeasonLoopProjections({
+      userAddress: input.userAddress,
+      loopId: input.loopId,
+      chainId: input.chainId,
+      claimEvents: input.claimEvents,
+    })
+    await updateSeasonGlobalProjections(input.userAddress)
+  }
   invalidateProfilePageData(input.userAddress)
 
   return { loopStats, globalStats }

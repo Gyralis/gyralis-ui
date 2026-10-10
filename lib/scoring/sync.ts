@@ -16,8 +16,15 @@ import {
 } from "@/lib/db/clients/loop-stats.client"
 import {
   clearProcessedClaimEvents,
+  createProcessedClaimEvents,
   markProcessedClaimEvents,
 } from "@/lib/db/clients/processed-claim-events.client"
+import {
+  beginSeasonScoringRebuild,
+  clearSeasonScoringProjections,
+  completeSeasonScoringRebuild,
+  failSeasonScoringRebuild,
+} from "@/lib/db/clients/season-scoring.client"
 import {
   getScoringSyncState,
   resetScoringSyncState,
@@ -31,6 +38,12 @@ import { scoringConfig } from "./config"
 import { mapDbUserLoopStatsToScoringStats } from "./db-mappers"
 import { ignoredScoringLoopIds, isIgnoredScoringLoopId } from "./loop-filters"
 import { computeLoopStatsFromClaims } from "./rules"
+import {
+  seasonProjectionsAreReady,
+  updateSeasonGlobalProjections,
+  updateSeasonLoopProjections,
+} from "./season-projections"
+import { seasonConfigHash } from "./seasons"
 import {
   fetchAllClaimEventsForUserLoop,
   fetchClaimEventsFromSubgraph,
@@ -118,7 +131,7 @@ export function advanceScoringSyncCursor(
   return cursor
 }
 
-export async function runScoringSync(input: SyncInput = {}) {
+async function runScoringSyncInternal(input: SyncInput = {}) {
   const mode = input.mode ?? "incremental"
   if (mode === "full" && (input.loopId != null || input.chainId != null)) {
     throw new Error(
@@ -153,6 +166,8 @@ export async function runScoringSync(input: SyncInput = {}) {
     hasMore: boolean
   }> = []
   let processedEvents = 0
+  const shouldUpdateSeasons =
+    mode === "full" || (await seasonProjectionsAreReady())
 
   async function updateProjections(
     pageAffectedLoops: Map<string, AffectedLoopKey>,
@@ -162,12 +177,22 @@ export async function runScoringSync(input: SyncInput = {}) {
     >
   ) {
     const affectedUsers = new Set<string>()
+    const pageUsers = [
+      ...new Set([...pageAffectedLoops.values()].map((key) => key.userAddress)),
+    ]
+
+    await mapWithConcurrency(
+      pageUsers,
+      PROJECTION_WRITE_CONCURRENCY,
+      async (userAddress) => {
+        await ensureUserProfile(userAddress)
+      }
+    )
 
     await mapWithConcurrency(
       [...pageAffectedLoops.values()],
       PROJECTION_WRITE_CONCURRENCY,
       async (key) => {
-        await ensureUserProfile(key.userAddress)
         const loopKey = keyForAffectedLoop(key)
         const claimEvents =
           mode === "full"
@@ -186,8 +211,13 @@ export async function runScoringSync(input: SyncInput = {}) {
         await Promise.all([
           upsertUserLoopStats(loopStats),
           upsertLoopLeaderboardEntry(loopStats),
-          markProcessedClaimEvents(newClaimEventsByLoop.get(loopKey) ?? []),
+          mode === "full"
+            ? Promise.resolve({ count: 0 })
+            : markProcessedClaimEvents(newClaimEventsByLoop.get(loopKey) ?? []),
         ])
+        if (shouldUpdateSeasons) {
+          await updateSeasonLoopProjections({ ...key, claimEvents })
+        }
         affectedUsers.add(key.userAddress)
       }
     )
@@ -204,6 +234,9 @@ export async function runScoringSync(input: SyncInput = {}) {
           upsertUserGlobalStats(globalStats),
           upsertGlobalLeaderboardEntry(globalStats),
         ])
+        if (shouldUpdateSeasons) {
+          await updateSeasonGlobalProjections(userAddress)
+        }
         invalidateProfilePageData(userAddress)
       }
     )
@@ -359,6 +392,9 @@ export async function runScoringSync(input: SyncInput = {}) {
     affectedLoops,
     fullModeClaimEventsByLoop
   )
+  await createProcessedClaimEvents(
+    [...fullModeClaimEventsByLoop.values()].flat()
+  )
   // Also evict empty/partial snapshots read while the full rebuild was running.
   invalidateProfilePageData()
 
@@ -385,5 +421,27 @@ export async function runScoringSync(input: SyncInput = {}) {
     ),
     hasMore: false,
     chains: sourceResults,
+  }
+}
+
+export async function runScoringSync(input: SyncInput = {}) {
+  const mode = input.mode ?? "incremental"
+  if (mode !== "full") return runScoringSyncInternal(input)
+  if (input.loopId != null || input.chainId != null) {
+    throw new Error(
+      "Full scoring recompute must run without chain or loop filters"
+    )
+  }
+
+  const configHash = seasonConfigHash()
+  await beginSeasonScoringRebuild(configHash)
+  await clearSeasonScoringProjections()
+  try {
+    const result = await runScoringSyncInternal(input)
+    await completeSeasonScoringRebuild(configHash)
+    return result
+  } catch (error) {
+    await failSeasonScoringRebuild(configHash, error)
+    throw error
   }
 }

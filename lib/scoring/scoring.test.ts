@@ -1,5 +1,5 @@
 import { encodeAbiParameters, encodeEventTopics, parseAbiItem } from "viem"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { parseScoringConfig, scoringConfig } from "./config"
@@ -14,7 +14,10 @@ import {
   BASE_MARKEE_SCORING_LOOP_ID,
   BASE_MARKEE_SUBGRAPH_LOOP_ID,
   BASE_SCORING_CHAIN_ID,
+  BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+  BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID,
   buildClaimEventsQuery,
+  fetchClaimEventsFromSubgraph,
   parseSubgraphLoopId,
 } from "./subgraph-client"
 import { advanceScoringSyncCursor } from "./sync"
@@ -394,6 +397,22 @@ describe("scoring sync cursors", () => {
     ).toBe(BASE_MARKEE_SCORING_LOOP_ID)
   })
 
+  it("maps the factory-discovered True Loopers address to product loop 6", () => {
+    expect(
+      parseSubgraphLoopId(
+        {
+          chainId: BASE_SCORING_CHAIN_ID,
+          url: "https://example.com/base",
+          loopIdsBySubgraphId: {
+            [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]:
+              BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+          },
+        },
+        BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID.toUpperCase()
+      )
+    ).toBe(BASE_TRUE_LOOPERS_SCORING_LOOP_ID)
+  })
+
   it("tracks the highest event id for the highest synced block", () => {
     const cursor = [
       { blockNumber: 10, id: "0xbbb-1" },
@@ -441,6 +460,41 @@ describe("scoring sync cursors", () => {
     expect(query).toContain("orderBy: id")
     expect(query).toContain("blockNumber: $blockNumber")
     expect(query).toContain("id_gt: $afterEventId")
+  })
+
+  it("can constrain factory-discovered events to application-mapped loops", () => {
+    const query = buildClaimEventsQuery({ includedLoopIds: true })
+    expect(query).toContain("$includedLoopIds: [ID!]")
+    expect(query).toContain("loop_in: $includedLoopIds")
+  })
+
+  it("queries only mapped Base loops during unfiltered sync", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { claimEvents: [] } }))
+      )
+    await fetchClaimEventsFromSubgraph({
+      source: {
+        chainId: BASE_SCORING_CHAIN_ID,
+        url: "https://example.com/base",
+        loopIdsBySubgraphId: {
+          [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
+          [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]:
+            BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+        },
+      },
+      fromBlock: 0,
+      first: 100,
+    })
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
+    expect(body.variables.includedLoopIds).toEqual([
+      BASE_MARKEE_SUBGRAPH_LOOP_ID,
+      BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID,
+    ])
+    expect(body.query).toContain("loop_in: $includedLoopIds")
+    fetchMock.mockRestore()
   })
 })
 

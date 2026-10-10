@@ -41,12 +41,16 @@ describe("getLoopRegistrationSource", () => {
     })
   })
 
-  it("does not claim subgraph coverage for an unindexed Base loop", () => {
-    expect(
-      getLoopRegistrationSource(
-        8453,
-        "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0"
-      )
-    ).toBeUndefined()
+  it("routes True Loopers to the factory-discovered Base subgraph", () => {
+    const source = getLoopRegistrationSource(
+      8453,
+      "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0"
+    )
+
+    expect(source).toMatchObject({
+      chainId: 8453,
+      subgraphId: "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
+      subgraphUrl: "https://base-subgraph.example",
+    })
   })
 })
