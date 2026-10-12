@@ -12,7 +12,19 @@ export interface SeasonConfig {
   loops: readonly SeasonLoopConfig[]
 }
 
-export const seasons: readonly SeasonConfig[] = []
+export const seasons: readonly SeasonConfig[] = [
+  {
+    id: "test-2026-08-10-oct-10",
+    name: "August 10 - October 10 Test Season",
+    startsAt: "2026-08-10T00:00:00.000Z",
+    // Season ranges are [startsAt, endsAt), so this includes all of October 10.
+    endsAt: "2026-10-11T00:00:00.000Z",
+    loops: [
+      { chainId: 8453, loopId: 1 },
+      { chainId: 8453, loopId: 6 },
+    ],
+  },
+]
 
 // Season 1 example (commented out intentionally; it does not activate a season):
 // {
