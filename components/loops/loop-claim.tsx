@@ -25,6 +25,7 @@ import {
 import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
+import { getSavedRwagmiToken } from "@/lib/loops/rwagmi-token-store"
 import {
   getClaimedTokenTitle,
   getConfirmationDelayedToast,
@@ -55,6 +56,7 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
   gyralis: "/api/gyralis",
+  rwagmi: "/api/rwagmi/register",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
@@ -79,6 +81,8 @@ function getProviderEligibilityMessage(
       return "Join the Gardens community required by this loop to enter."
     case "gyralis":
       return "Complete 50 claims in Gyralis to enter this SuperLoop."
+    case "rwagmi":
+      return "Connect the wallet that created your RWAGMI token to enter this loop."
   }
 }
 
@@ -520,6 +524,19 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
       return
     }
 
+    const rwagmiToken =
+      eligibilityProvider === "rwagmi"
+        ? getSavedRwagmiToken(connectedAccount)
+        : undefined
+    if (eligibilityProvider === "rwagmi" && !rwagmiToken) {
+      toast({
+        title: "Add your RWAGMI token",
+        description: "Use Add token on the Loop card before registering.",
+        type: "info",
+      })
+      return
+    }
+
     if (hasClaimed) {
       toast({
         title: "Already claimed",
@@ -548,6 +565,7 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
           userAddress: connectedAccount,
           loopAddress: address,
           chainId,
+          ...(rwagmiToken ? { tokenAddress: rwagmiToken } : {}),
         }),
       })
 
@@ -600,7 +618,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
         throw new Error(payload.error ?? "Eligibility check failed")
       }
 
+      if (
+        eligibilityProvider === "rwagmi" &&
+        getSavedRwagmiToken(connectedAccount) !== rwagmiToken
+      ) {
+        throw new Error(
+          "The saved token changed. Check the new token before registering."
+        )
+      }
       const hash = await writeContractAsync({
+        ...(eligibilityProvider === "rwagmi"
+          ? { account: connectedAccount }
+          : {}),
         address,
         abi: loopAbi,
         functionName: loopMethods.claimAndRegister,

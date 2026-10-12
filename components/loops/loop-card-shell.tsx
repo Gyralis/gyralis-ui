@@ -22,6 +22,7 @@ import {
 import { useGetScore } from "@/integrations/gitcoin-passport/hooks/use-get-score"
 
 import { LoopIdentityMark } from "./loop-identity-mark"
+import { RwagmiTokenEligibility } from "./rwagmi-token-eligibility"
 import { LoopDistributionStat, LoopPeriodStat } from "./loop-settings"
 import { LoopTypeBadge } from "./loop-type-badge"
 import { LoopersModal } from "./loopers-modal"
@@ -73,7 +74,9 @@ export function LoopCardShell({
 }: LoopCardShellProps) {
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const { isConnected } = useAccount()
-  const passportScoreQuery = useGetScore({ enabled: isConnected })
+  const passportScoreQuery = useGetScore({
+    enabled: isConnected && loop.eligibilityProvider !== "rwagmi",
+  })
   const shieldThreshold = loop.shieldScore
     .match(/\+?\d+(\.\d+)?/)?.[0]
     ?.replace(/^\+/, "")
@@ -209,12 +212,12 @@ export function LoopCardShell({
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 rounded-[10px] bg-muted/20 px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-baseline gap-2">
+          <div className={`flex gap-2 rounded-[10px] bg-muted/20 px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors hover:bg-muted/30 ${loop.eligibilityProvider === "rwagmi" ? "flex-row items-center justify-between" : "flex-col sm:flex-row sm:items-center sm:justify-between"}`}>
+            <div className="flex min-w-0 flex-1 items-baseline gap-2">
               <p className="shrink-0 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Eligibility:
               </p>
-              {loop.eligibilityUrl && !eligibilityLinkDisabled ? (
+              {loop.eligibilityUrl && (!eligibilityLinkDisabled || loop.eligibilityProvider === "rwagmi") ? (
                 <Link
                   href={loop.eligibilityUrl}
                   target="_blank"
@@ -241,17 +244,21 @@ export function LoopCardShell({
                 </p>
               )}
             </div>
-            <div className="flex shrink-0 items-center gap-3">
-              <PassportScoreBadge
-                hasPassed={hasPassedShield}
-                thresholdLabel={
-                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
-                }
-                value={
-                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
-                }
-              />
-            </div>
+            {loop.eligibilityProvider === "rwagmi" ? (
+              <RwagmiTokenEligibility compact />
+            ) : (
+              <div className="flex shrink-0 items-center gap-3">
+                <PassportScoreBadge
+                  hasPassed={hasPassedShield}
+                  thresholdLabel={
+                    shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                  }
+                  value={
+                    shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                  }
+                />
+              </div>
+            )}
           </div>
 
           {action}

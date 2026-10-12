@@ -3,7 +3,11 @@ import { Address } from "viem"
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "gardens" | "blockscout" | "gyralis"
+export type LoopEligibilityProvider =
+  | "gardens"
+  | "blockscout"
+  | "gyralis"
+  | "rwagmi"
 export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
@@ -28,7 +32,8 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
-  historyLoopKey: DashboardLoopKey
+  // Development test Loops do not have indexed dashboard history.
+  historyLoopKey?: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   gardensCommunity?: GardensCommunityKey
   passportMinScore: number
@@ -44,6 +49,29 @@ export interface LoopCardData {
   sponsorName?: string
   sponsorLogoUrl?: string
   sponsorUrl?: string
+}
+
+export const rwagmiTestLoop: LoopCardData = {
+  id: 7,
+  title: "RWAGMI (Test)",
+  by: "Gyralis",
+  address: "0xe714bc7F58726490a15d2197BCded598223f5319",
+  description:
+    "Test token creator eligibility on Base with daily Loop periods.",
+  token: "0xb200000000000000000000Bf0548AB2ebD00bA5e",
+  shieldScore: "Human Passport required",
+  eligibility: "Launch a B20 Token",
+  eligibilityUrl: "https://rwagmi.com/launch",
+  chainBadgeColor: "bg-custom-green",
+  super: false,
+  contractType: "loop",
+  chainId: 8453,
+  chainName: "Base",
+  eligibilityProvider: "rwagmi",
+  passportMinScore: 0,
+  enabled: true,
+  achievementActive: false,
+  rewardsSummary: "RWAGMI rewards · daily periods",
 }
 
 export const LoopCardsData: LoopCardData[] = [
@@ -133,6 +161,7 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorLogoUrl: "/1Hive-logo.png",
     sponsorUrl: "https://1hive.org",
   },
+  /* Markee SuperLoop temporarily hidden.
   {
     id: 5,
     title: "Markee",
@@ -167,4 +196,6 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorLogoUrl: "/markee-logo.png",
     sponsorUrl: "https://www.markee.xyz/",
   },
+  */
+  ...(process.env.NODE_ENV === "development" ? [rwagmiTestLoop] : []),
 ]
