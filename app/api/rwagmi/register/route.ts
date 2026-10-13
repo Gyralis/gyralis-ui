@@ -72,7 +72,7 @@ export async function POST(req: Request) {
   } catch {
     return failure(
       "LOOP_UNAVAILABLE",
-      "Unable to read the Loop registration period. Please try again shortly.",
+      "Unable to read the Loop registration period. Please try again.",
       503
     )
   }

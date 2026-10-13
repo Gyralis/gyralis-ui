@@ -57,7 +57,7 @@ export function createRwagmiLaunchLookup() {
             : NaN
         throw new RwagmiVerificationError(
           "RWAGMI_RATE_LIMITED",
-          "RWAGMI is busy. Please try again shortly.",
+          "RWAGMI is busy. Please try again.",
           Number.isFinite(seconds) ? Math.min(3600, Math.max(1, seconds)) : 60
         )
       }
@@ -77,7 +77,7 @@ export function createRwagmiLaunchLookup() {
       ) {
         throw new RwagmiVerificationError(
           "RWAGMI_DATA_STALE",
-          "RWAGMI launch data is updating. Please try again shortly."
+          "RWAGMI launch data is updating. Please try again."
         )
       }
       if (item && item.tokenAddress.toLowerCase() !== token) {
@@ -95,7 +95,7 @@ export function createRwagmiLaunchLookup() {
       if (error instanceof RwagmiVerificationError) throw error
       throw new RwagmiVerificationError(
         "RWAGMI_UNAVAILABLE",
-        "Unable to verify your RWAGMI launch right now. Please try again shortly."
+        "Unable to verify your RWAGMI launch right now. Please try again."
       )
     }
   }
@@ -110,7 +110,7 @@ export function createRwagmiLaunchLookup() {
     if (pending.size >= CACHE_LIMIT) {
       throw new RwagmiVerificationError(
         "RWAGMI_UNAVAILABLE",
-        "Launch verification is busy. Please try again shortly.",
+        "Launch verification is busy. Please try again.",
         60
       )
     }

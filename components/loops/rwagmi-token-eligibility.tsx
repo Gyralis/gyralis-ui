@@ -10,6 +10,7 @@ import {
 } from "react"
 import Link from "next/link"
 import { useConnectModal } from "@rainbow-me/rainbowkit"
+import { LuExternalLink } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
 import {
@@ -110,7 +111,7 @@ function WalletTokenEligibility({
         {(
           [
             ["passport", "Human Passport"],
-            ["creator", "Token creator"],
+            ["creator", "Token Creator"],
           ] as const
         ).map(([key, label]) => {
           const status = (state.result?.checks ?? uncheckedRwagmiChecks)[key]
@@ -249,17 +250,6 @@ function WalletTokenEligibility({
               Paste the Base token address you created on RWAGMI.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-            <p title={wallet}>
-              Connected wallet:{" "}
-              <span className="font-mono" aria-label={wallet}>
-                {wallet ? shorten(wallet) : "Disconnected"}
-              </span>
-            </p>
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold">
-              Base network
-            </span>
-          </div>
           <form
             className="space-y-4"
             onSubmit={(event) => {
@@ -322,36 +312,22 @@ function WalletTokenEligibility({
                     ? "Checking eligibility…"
                     : retrySeconds
                     ? `Try again in ${retrySeconds}s`
-                    : "Check and save"}
+                    : "Check and Save"}
                 </Button>
               )}
             </DialogFooter>
           </form>
           {compact && state.token ? (
-            <p className="text-xs text-muted-foreground">
-              Launch data from RWAGMI ·{" "}
-              <a
-                href={`https://rwagmi.com/token/${state.token}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-4"
-              >
-                View token
-              </a>
-            </p>
-          ) : null}
-          {state.token ? (
-            <Button
-              requireWallet={false}
-              variant="secondary"
-              className="min-h-10 px-4 text-sm"
-              onClick={() => {
-                store.remove()
-                setDialogOpen(false)
-              }}
+            <a
+              href={`https://rwagmi.com/token/${state.token}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-fit items-baseline gap-1 text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:text-primary"
+              title="View Token on RWAGMI"
             >
-              Remove token
-            </Button>
+              <span>Launch data from RWAGMI</span>
+              <LuExternalLink className="size-3 shrink-0" aria-hidden="true" />
+            </a>
           ) : null}
         </DialogContent>
       </Dialog>

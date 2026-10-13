@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     console.error(`[${requestId}] Passport verification unavailable`, error)
     return failure(
       "PASSPORT_UNAVAILABLE",
-      "Unable to check Human Passport right now. Please try again shortly.",
+      "Unable to check Human Passport right now. Please try again.",
       503,
       { passport: "unavailable", creator: "not_checked" }
     )
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     if (!launch)
       return failure(
         "TOKEN_NOT_FOUND",
-        "Token not found on RWAGMI. Check the address, or try again shortly if you just launched it.",
+        "Token not found on RWAGMI. Check the address, or try again if you just launched it.",
         404,
         failed
       )
@@ -125,7 +125,7 @@ export async function POST(req: Request) {
     console.error(`[${requestId}] RWAGMI verification failed`, error)
     return failure(
       "RWAGMI_UNAVAILABLE",
-      "Unable to verify your RWAGMI launch right now. Please try again shortly.",
+      "Unable to verify your RWAGMI launch right now. Please try again.",
       503,
       checks
     )
