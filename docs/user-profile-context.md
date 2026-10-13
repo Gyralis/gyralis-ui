@@ -56,17 +56,19 @@ Navbar connected wallet → React Query → /api/users/[address]/profile-summary
 
 Source: `lib/profile/profile-level.ts`.
 
-| Level | Total GP |
-| --- | --- |
-| Looper | 0–49 |
-| True Looper | 50–249 |
-| LooperX | 250+ |
+| Level       | Total GP |
+| ----------- | -------- |
+| Looper      | 0–49     |
+| True Looper | 50–249   |
+| LooperX     | 250+     |
 
 - Profile progress: 0→50 GP, then 50→250 GP, then full.
 - True Looper LOOP ACCESS separately requires 50 CLAIMS. Bonus GP cannot substitute for claims.
 - Pill progress/copy prioritizes remaining claims until 50; afterward shows GP toward next level.
 - Wording: “X claims to access True Looper loop” versus “X GP to reach LooperX.”
-- Beta levels may change; do not imply season scoring is implemented.
+- Beta levels may change. Season scoring has API and projection support, but no
+  season is active until `config/seasons.ts` contains an uncommented entry, and
+  no season frontend is implemented yet.
 - Claim points: 1 per scored claim. Bonuses from `config/scoring.json`: 3→2 GP, 7→5 GP, 14→12 GP, 30→30 GP. Each awarded once per loop.
 
 ## Profile visual system
@@ -75,24 +77,24 @@ Source: `lib/profile/profile-level.ts`.
 
 These are the current implementation values, not proposals. Mobile-specific changes use the base styles; `sm` restores the larger typography. The hero does not become two columns until `lg`, and the full navbar profile pill appears at `2xl`.
 
-| Element | Mobile/base | Larger screens |
-| --- | --- | --- |
-| Page spacing | 16px horizontal, 32px vertical; 24px between sections | 48px vertical from sm; max-w-6xl container |
-| Hero title | 24px | 30px from sm |
-| Hero subtitle | 12px | 14px from sm |
-| Hero GP value | 36px, normal numeric font | 48px from sm |
-| Progress marker | 11px, percentage only | Same size with “completed” from sm |
-| Header stats | Best streak then claims side by side; claim-rate gauge below | At xl: best streak, claims, claim-rate gauge in three columns; 16px gap |
-| Per-loop card padding | 20px | 32px from sm |
-| Per-loop heading | 20px, left | 30px from sm |
-| Per-loop total | 24px + muted 12px GP, right, baseline-aligned | 36px + stacked 10px GYRA / POINTS label |
-| Per-loop subtitle | 10px, below heading/total | 14px from sm |
-| Achievements heading | 18px, left | 30px from sm |
-| Achievements badge | 10px, below title; 2px row gap | 12px, same row, right |
-| Achievements info icon | Top-right of header grid | Beside title |
-| Achievements subtitle | 12px, below the header grid | 14px from sm |
-| Explore / empty-state subtitle | 12px | 14px from sm |
-| Table values | 14px bold; total column 16px; muted 12px GP suffix | Same sizes; never shrink table values to fit mobile |
+| Element                        | Mobile/base                                                  | Larger screens                                                          |
+| ------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Page spacing                   | 16px horizontal, 32px vertical; 24px between sections        | 48px vertical from sm; max-w-6xl container                              |
+| Hero title                     | 24px                                                         | 30px from sm                                                            |
+| Hero subtitle                  | 12px                                                         | 14px from sm                                                            |
+| Hero GP value                  | 36px, normal numeric font                                    | 48px from sm                                                            |
+| Progress marker                | 11px, percentage only                                        | Same size with “completed” from sm                                      |
+| Header stats                   | Best streak then claims side by side; claim-rate gauge below | At xl: best streak, claims, claim-rate gauge in three columns; 16px gap |
+| Per-loop card padding          | 20px                                                         | 32px from sm                                                            |
+| Per-loop heading               | 20px, left                                                   | 30px from sm                                                            |
+| Per-loop total                 | 24px + muted 12px GP, right, baseline-aligned                | 36px + stacked 10px GYRA / POINTS label                                 |
+| Per-loop subtitle              | 10px, below heading/total                                    | 14px from sm                                                            |
+| Achievements heading           | 18px, left                                                   | 30px from sm                                                            |
+| Achievements badge             | 10px, below title; 2px row gap                               | 12px, same row, right                                                   |
+| Achievements info icon         | Top-right of header grid                                     | Beside title                                                            |
+| Achievements subtitle          | 12px, below the header grid                                  | 14px from sm                                                            |
+| Explore / empty-state subtitle | 12px                                                         | 14px from sm                                                            |
+| Table values                   | 14px bold; total column 16px; muted 12px GP suffix           | Same sizes; never shrink table values to fit mobile                     |
 
 Hero and achievements outer cards still use 32px padding on mobile; the per-loop card has the explicit 20px exception. All main section corners remain 24px. Achievement cards themselves use a 92px icon header and 20px content padding, with muted borders and a low-contrast gradient. Do not restore the earlier bright borders or uniform centered-card experiment.
 
@@ -182,7 +184,9 @@ Main composition: `components/profile/profile-page-view.tsx`.
 - Streak/levels info and row/card details use it. Not every legacy tooltip has been converted.
 - `components/loops/streak-milestone-icon.tsx`: 3 FaFireFlameCurved; 7 FaFire; 14 GiFlame; 30 GiFlameSpin. Props streak, glowing=false, disabled=false, className, title.
 - Claims use bolt icon.
-- Streak explanation: consecutive periods within SAME loop; each milestone once per loop; future-season bonus availability described, not implemented.
+- Streak explanation: consecutive periods within SAME loop; each milestone once
+  per loop. Season projections reset this calculation at the season boundary;
+  season UI remains unimplemented.
 
 ## Navbar profile pill and navigation
 

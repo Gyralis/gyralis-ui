@@ -1,5 +1,5 @@
 import { encodeAbiParameters, encodeEventTopics, parseAbiItem } from "viem"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { computeGlobalStatsFromLoops } from "./aggregate"
 import { parseScoringConfig, scoringConfig } from "./config"
@@ -10,7 +10,16 @@ import {
   createEmptyLoopStats,
   normalizeClaimEvents,
 } from "./rules"
-import { buildClaimEventsQuery } from "./subgraph-client"
+import {
+  BASE_MARKEE_SCORING_LOOP_ID,
+  BASE_MARKEE_SUBGRAPH_LOOP_ID,
+  BASE_SCORING_CHAIN_ID,
+  BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+  BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID,
+  buildClaimEventsQuery,
+  fetchClaimEventsFromSubgraph,
+  parseSubgraphLoopId,
+} from "./subgraph-client"
 import { advanceScoringSyncCursor } from "./sync"
 import { ClaimScoringEvent, ScoringConfig } from "./types"
 import { extractClaimEventsFromReceiptLogs } from "./user-claim-sync"
@@ -373,6 +382,37 @@ describe("leaderboard scoring responses", () => {
 })
 
 describe("scoring sync cursors", () => {
+  it("maps the address-based Base loop entity to its chain-scoped scoring id", () => {
+    expect(
+      parseSubgraphLoopId(
+        {
+          chainId: BASE_SCORING_CHAIN_ID,
+          url: "https://example.com/base-subgraph",
+          loopIdsBySubgraphId: {
+            [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
+          },
+        },
+        BASE_MARKEE_SUBGRAPH_LOOP_ID.toUpperCase()
+      )
+    ).toBe(BASE_MARKEE_SCORING_LOOP_ID)
+  })
+
+  it("maps the factory-discovered True Loopers address to product loop 6", () => {
+    expect(
+      parseSubgraphLoopId(
+        {
+          chainId: BASE_SCORING_CHAIN_ID,
+          url: "https://example.com/base",
+          loopIdsBySubgraphId: {
+            [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]:
+              BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+          },
+        },
+        BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID.toUpperCase()
+      )
+    ).toBe(BASE_TRUE_LOOPERS_SCORING_LOOP_ID)
+  })
+
   it("tracks the highest event id for the highest synced block", () => {
     const cursor = [
       { blockNumber: 10, id: "0xbbb-1" },
@@ -421,9 +461,90 @@ describe("scoring sync cursors", () => {
     expect(query).toContain("blockNumber: $blockNumber")
     expect(query).toContain("id_gt: $afterEventId")
   })
+
+  it("can constrain factory-discovered events to application-mapped loops", () => {
+    const query = buildClaimEventsQuery({ includedLoopIds: true })
+    expect(query).toContain("$includedLoopIds: [ID!]")
+    expect(query).toContain("loop_in: $includedLoopIds")
+  })
+
+  it("queries only mapped Base loops during unfiltered sync", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { claimEvents: [] } }))
+      )
+    await fetchClaimEventsFromSubgraph({
+      source: {
+        chainId: BASE_SCORING_CHAIN_ID,
+        url: "https://example.com/base",
+        loopIdsBySubgraphId: {
+          [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
+          [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]:
+            BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+        },
+      },
+      fromBlock: 0,
+      first: 100,
+    })
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
+    expect(body.variables.includedLoopIds).toEqual([
+      BASE_MARKEE_SUBGRAPH_LOOP_ID,
+      BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID,
+    ])
+    expect(body.query).toContain("loop_in: $includedLoopIds")
+    fetchMock.mockRestore()
+  })
 })
 
 describe("receipt claim scoring sync", () => {
+  it("extracts Base claim events that identify the loop by contract address", () => {
+    const claimEvent = parseAbiItem(
+      "event Claim(address indexed claimer,address indexed token,uint256 indexed periodNumber,uint256 payout)"
+    )
+    const txHash: `0x${string}` = `0x${"3".repeat(64)}`
+    const token = "0xF6627cF19317C33B457f77452876e6e297c4942F"
+    const topics = encodeEventTopics({
+      abi: [claimEvent],
+      eventName: "Claim",
+      args: {
+        claimer: userAddress,
+        token,
+        periodNumber: 12n,
+      },
+    })
+    const data = encodeAbiParameters([{ type: "uint256" }], [100n])
+
+    expect(
+      extractClaimEventsFromReceiptLogs({
+        logs: [
+          {
+            address: secondLoopAddress,
+            data,
+            topics,
+            logIndex: 9,
+          },
+        ],
+        txHash,
+        blockNumber: 49833897,
+        userAddress,
+        contractAddress: secondLoopAddress,
+        chainId: BASE_SCORING_CHAIN_ID,
+        periodNumber: 12,
+        loopId: BASE_MARKEE_SCORING_LOOP_ID,
+      })
+    ).toEqual([
+      expect.objectContaining({
+        id: `${txHash}-9`,
+        loopId: BASE_MARKEE_SCORING_LOOP_ID,
+        chainId: BASE_SCORING_CHAIN_ID,
+        periodNumber: 12,
+        payout: "100",
+      }),
+    ])
+  })
+
   it("extracts future loopId claim events from transaction receipt logs", () => {
     const claimEvent = parseAbiItem(
       "event Claim(uint256 indexed loopId,address indexed claimer,uint256 indexed periodNumber,uint256 payout)"

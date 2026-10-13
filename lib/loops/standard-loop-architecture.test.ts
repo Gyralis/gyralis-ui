@@ -19,6 +19,10 @@ const CLAIM_HOOK_PATH = resolve(
   process.cwd(),
   "lib/hooks/loops/standard/use-standard-loop-claim.ts"
 )
+const REGISTRATION_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/standard/use-standard-loop-wallet-registration.ts"
+)
 const CARD_CONTROLLER_PATH = resolve(
   process.cwd(),
   "components/loops/standard-loop/use-standard-loop-card-controller.ts"
@@ -87,5 +91,13 @@ describe("standard Loop architecture boundary", () => {
     expect(claimHook).toContain("!hasClaimed")
     expect(claimHook).toContain("enabled: shouldCheckNextPeriodRegistration")
     expect(claimHook).toContain("void refreshAccountState().finally")
+  })
+
+  it("checks wallet registration through the cached server API", () => {
+    const registrationHook = readFileSync(REGISTRATION_HOOK_PATH, "utf8")
+
+    expect(registrationHook).toContain("/api/loops/registration-status")
+    expect(registrationHook).not.toContain("getLogsChunked")
+    expect(registrationHook).not.toContain("usePublicClient")
   })
 })

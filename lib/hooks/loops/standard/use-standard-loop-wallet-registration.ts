@@ -1,18 +1,8 @@
 "use client"
 
+import { useCallback } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { isAddress, parseAbiItem, type Address } from "viem"
-import { usePublicClient } from "wagmi"
-
-import { getLogsChunked } from "@/lib/hooks/app/get-logs-chunked"
-
-const registerEvent = parseAbiItem(
-  "event Register(address indexed sender, uint256 indexed periodNumber)"
-)
-const tokenRegisterEvent = parseAbiItem(
-  "event Register(address indexed sender, address indexed token, uint256 indexed periodNumber)"
-)
-const LOG_LOOKBACK_BLOCKS = 100_000n
+import { isAddress, type Address } from "viem"
 
 interface UseStandardLoopWalletRegistrationParams {
   address: Address
@@ -29,7 +19,32 @@ export function useStandardLoopWalletRegistration({
   enabled = true,
   user,
 }: UseStandardLoopWalletRegistrationParams) {
-  const publicClient = usePublicClient({ chainId })
+  const fetchRegistrationStatus = useCallback(async () => {
+    if (!user || currentPeriod == null) {
+      throw new Error("Wallet registration is not ready")
+    }
+
+    const params = new URLSearchParams({
+      chainId: chainId.toString(),
+      loopAddress: address,
+      periodNumber: (currentPeriod + 1n).toString(),
+      userAddress: user,
+    })
+    const response = await fetch(
+      `/api/loops/registration-status?${params.toString()}`,
+      { cache: "no-store" }
+    )
+    const payload = (await response.json()) as {
+      error?: string
+      result?: { registered?: boolean }
+      success?: boolean
+    }
+    if (!response.ok || !payload.success || !payload.result) {
+      throw new Error(payload.error ?? "Registration status lookup failed")
+    }
+
+    return Boolean(payload.result.registered)
+  }, [address, chainId, currentPeriod, user])
   const query = useQuery({
     queryKey: [
       "standard-loop",
@@ -39,43 +54,12 @@ export function useStandardLoopWalletRegistration({
       user?.toLowerCase(),
       currentPeriod?.toString(),
     ],
-    queryFn: async () => {
-      if (!publicClient || !user || currentPeriod == null) {
-        throw new Error("Wallet registration is not ready")
-      }
-
-      const latestBlock = await publicClient.getBlockNumber()
-      const fromBlock =
-        latestBlock > LOG_LOOKBACK_BLOCKS
-          ? latestBlock - LOG_LOOKBACK_BLOCKS
-          : 0n
-      const periodNumber = currentPeriod + 1n
-      const [legacyLogs, tokenLogs] = await Promise.all([
-        getLogsChunked(publicClient, {
-          address,
-          event: registerEvent,
-          args: { sender: user, periodNumber },
-          fromBlock,
-          toBlock: latestBlock,
-        }),
-        getLogsChunked(publicClient, {
-          address,
-          event: tokenRegisterEvent,
-          args: { sender: user, periodNumber },
-          fromBlock,
-          toBlock: latestBlock,
-        }),
-      ])
-
-      return legacyLogs.length > 0 || tokenLogs.length > 0
-    },
+    queryFn: fetchRegistrationStatus,
     enabled:
-      enabled &&
-      isAddress(address) &&
-      Boolean(publicClient && user) &&
-      currentPeriod != null,
-    staleTime: 10_000,
+      enabled && isAddress(address) && Boolean(user) && currentPeriod != null,
+    staleTime: 30_000,
     refetchOnWindowFocus: false,
+    retry: 1,
   })
 
   return {
