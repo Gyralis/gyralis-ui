@@ -99,7 +99,12 @@ export function useStandardLoopClaim({
   const [submissionStage, setSubmissionStage] =
     useState<StandardLoopSubmissionStage>("idle")
   const [txHash, setTxHash] = useState<`0x${string}`>()
+  const [confirmedClaimScope, setConfirmedClaimScope] = useState<string>()
   const { address: connectedAccount } = useAccount()
+  const claimScope = `${chainId}:${address.toLowerCase()}:${
+    connectedAccount?.toLowerCase() ?? ""
+  }:${currentPeriod?.toString() ?? ""}`
+  const hasConfirmedClaim = confirmedClaimScope === claimScope
   const currentChainId = useChainId()
   const { toast } = useToast()
   const { writeContractAsync } = useWriteContract()
@@ -149,12 +154,14 @@ export function useStandardLoopClaim({
     : Boolean(claimerStatus?.[0])
   // Cooldown can coexist with a completed current-period claim. Period zero's
   // default latestClaimPeriod is zero, so its boolean alone is not a real claim.
-  const hasClaimed = usesUserPhase
-    ? (currentPeriod != null &&
-        currentPeriod > 0n &&
-        Boolean(claimerStatus?.[1])) ||
-      userPhase === StandardLoopPhase.Claimed
-    : Boolean(claimerStatus?.[1])
+  const hasClaimed =
+    hasConfirmedClaim ||
+    (usesUserPhase
+      ? (currentPeriod != null &&
+          currentPeriod > 0n &&
+          Boolean(claimerStatus?.[1])) ||
+        userPhase === StandardLoopPhase.Claimed
+      : Boolean(claimerStatus?.[1]))
   const payoutQuery = useReadContract({
     address,
     abi,
@@ -231,7 +238,7 @@ export function useStandardLoopClaim({
     (isRegistered && !hasClaimed ? payoutQuery.error : undefined)
   const status = deriveStandardLoopClaimStatus({
     hasClaimed,
-    hasError: Boolean(error),
+    hasError: Boolean(error) && !hasConfirmedClaim,
     isClaimable,
     isEntered,
     isLoading,
@@ -288,7 +295,12 @@ export function useStandardLoopClaim({
     }
 
     setHasEnteredNextPeriod(true)
-    if (confirmedAction === "claim") setLastClaimedAmount(claimedAmount)
+    if (confirmedAction === "claim") {
+      setLastClaimedAmount(claimedAmount)
+      // A successful receipt proves the claim even if the RPC's next read lags.
+      // Scope this to the wallet, Loop, chain, and period so it cannot leak.
+      setConfirmedClaimScope(claimScope)
+    }
 
     toast({
       title:
@@ -316,6 +328,7 @@ export function useStandardLoopClaim({
     })
   }, [
     chainId,
+    claimScope,
     claimableAmount,
     onConfirmed,
     onClaimConfirmed,
