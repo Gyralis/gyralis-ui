@@ -131,7 +131,7 @@ export function LoopCardShell({
             {sponsor ? (
               <div
                 aria-label={`Sponsored by ${sponsor.name}`}
-                className="flex min-h-[42px] shrink-0 items-center gap-1 rounded-full border border-border/80 bg-background px-2.5 py-1.5 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)]"
+                className="flex min-h-[42px] shrink-0 items-center gap-1 rounded-full border border-border/80 bg-background px-[11.5px] py-1.5 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_8px_20px_-18px_rgba(15,23,42,0.16)] dark:border-white/8 dark:bg-background dark:text-white/90 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_20px_-18px_rgba(0,0,0,0.72)]"
               >
                 <SponsorBadgeMark
                   logoUrl={sponsor.logoUrl}

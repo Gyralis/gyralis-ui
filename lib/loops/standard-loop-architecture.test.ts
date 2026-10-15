@@ -84,12 +84,13 @@ describe("standard Loop architecture boundary", () => {
     expect(modal).toMatch(/const claimedUsersEnabled\s*=\s*isOpen &&/)
   })
 
-  it("skips wallet registration logs after the user has claimed", () => {
+  it("uses the contract status without an additional registration lookup", () => {
     const claimHook = readFileSync(CLAIM_HOOK_PATH, "utf8")
 
-    expect(claimHook).toContain("claimerStatus != null &&")
+    expect(claimHook).toContain("loopContractMethods.loop.getClaimerStatus")
     expect(claimHook).toContain("!hasClaimed")
-    expect(claimHook).toContain("enabled: shouldCheckNextPeriodRegistration")
+    expect(claimHook).not.toContain("useStandardLoopWalletRegistration")
+    expect(claimHook).not.toContain("registration.error")
     expect(claimHook).toContain("void refreshAccountState().finally")
   })
 

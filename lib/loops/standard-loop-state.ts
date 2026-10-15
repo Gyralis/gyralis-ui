@@ -1,3 +1,10 @@
+export enum StandardLoopPhase {
+  NotRegistered = 0,
+  Cooldown = 1,
+  Claimable = 2,
+  Claimed = 3,
+}
+
 export type StandardLoopClaimStatus =
   | "checking"
   | "enter"

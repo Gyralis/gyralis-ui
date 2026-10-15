@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import type { LoopEligibilityProvider } from "@/data/loops-data"
-import { isAddress, zeroAddress, type Address } from "viem"
+import { isAddress, parseAbi, zeroAddress, type Address } from "viem"
 import {
   useAccount,
   useChainId,
@@ -23,6 +23,7 @@ import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmatio
 import { getSavedRwagmiToken } from "@/lib/loops/rwagmi-token-store"
 import {
   deriveStandardLoopClaimStatus,
+  StandardLoopPhase,
   type StandardLoopSubmissionStage,
 } from "@/lib/loops/standard-loop-state"
 import {
@@ -31,8 +32,6 @@ import {
   getRevertedTransactionToast,
 } from "@/lib/transaction-toast-messages"
 import { useToast } from "@/components/ui/use-toast"
-
-import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-registration"
 
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
@@ -44,6 +43,9 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
 const PROVIDER_ELIGIBILITY_REQUIRED_CODE = "PROVIDER_ELIGIBILITY_REQUIRED"
 const CLAIMS_REQUIRED_CODE = "CLAIMS_REQUIRED"
+const USER_PHASE_ABI = parseAbi([
+  "function getUserPhase(address user) view returns (uint8)",
+])
 
 type PendingAction = "enter" | "claim"
 
@@ -103,6 +105,7 @@ export function useStandardLoopClaim({
   const { writeContractAsync } = useWriteContract()
   const abi = useMemo(() => getLoopContractAbi(chainId, "loop"), [chainId])
   const validAddress = isAddress(address)
+  const usesUserPhase = eligibilityProvider === "rwagmi"
 
   const claimerStatusQuery = useReadContract({
     address,
@@ -111,11 +114,38 @@ export function useStandardLoopClaim({
     args: [connectedAccount ?? zeroAddress],
     chainId,
     query: {
-      enabled: validAddress && Boolean(connectedAccount),
+      enabled: validAddress && Boolean(connectedAccount) && !usesUserPhase,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
   })
+  const userPhaseQuery = useReadContract({
+    address,
+    abi: USER_PHASE_ABI,
+    functionName: "getUserPhase",
+    args: [connectedAccount ?? zeroAddress],
+    chainId,
+    scopeKey: currentPeriod?.toString(),
+    query: {
+      enabled:
+        validAddress &&
+        Boolean(connectedAccount) &&
+        usesUserPhase &&
+        currentPeriod != null,
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+  const userPhase = userPhaseQuery.data
+  const claimerStatus = claimerStatusQuery.data as
+    | readonly [boolean, boolean]
+    | undefined
+  const isRegistered = usesUserPhase
+    ? userPhase === StandardLoopPhase.Claimable
+    : Boolean(claimerStatus?.[0])
+  const hasClaimed = usesUserPhase
+    ? userPhase === StandardLoopPhase.Claimed
+    : Boolean(claimerStatus?.[1])
   const payoutQuery = useReadContract({
     address,
     abi,
@@ -125,27 +155,14 @@ export function useStandardLoopClaim({
     chainId,
     query: {
       enabled:
-        validAddress && Boolean(connectedAccount) && currentPeriod != null,
+        validAddress &&
+        Boolean(connectedAccount) &&
+        currentPeriod != null &&
+        isRegistered &&
+        !hasClaimed,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
-  })
-  const claimerStatus = claimerStatusQuery.data as
-    | readonly [boolean, boolean]
-    | undefined
-  const isRegistered = Boolean(claimerStatus?.[0])
-  const hasClaimed = Boolean(claimerStatus?.[1])
-  const shouldCheckNextPeriodRegistration =
-    validAddress &&
-    Boolean(connectedAccount) &&
-    claimerStatus != null &&
-    !hasClaimed
-  const registration = useStandardLoopWalletRegistration({
-    address,
-    chainId,
-    currentPeriod,
-    enabled: shouldCheckNextPeriodRegistration,
-    user: connectedAccount,
   })
   const receipt = useWaitForTransactionReceipt({
     hash: txHash,
@@ -153,35 +170,43 @@ export function useStandardLoopClaim({
     query: { enabled: Boolean(txHash) },
   })
   const refetchClaimerStatus = claimerStatusQuery.refetch
+  const refetchUserPhase = userPhaseQuery.refetch
   const refetchPayout = payoutQuery.refetch
-  const refetchRegistration = registration.refetch
   const refreshAccountState = useCallback(async () => {
-    await Promise.allSettled([refetchClaimerStatus(), refetchPayout()])
-  }, [refetchClaimerStatus, refetchPayout])
-  const refetch = useCallback(async () => {
-    await refreshAccountState()
-    if (shouldCheckNextPeriodRegistration) await refetchRegistration()
-  }, [
-    refetchRegistration,
-    refreshAccountState,
-    shouldCheckNextPeriodRegistration,
-  ])
+    if (usesUserPhase) {
+      const result = await refetchUserPhase()
+      if (!result.isError && result.data === StandardLoopPhase.Claimable) {
+        await refetchPayout()
+      }
+      return
+    }
+    const result = await refetchClaimerStatus()
+    const freshStatus = result.data as readonly [boolean, boolean] | undefined
+    if (!result.isError && freshStatus?.[0] && !freshStatus[1]) {
+      await refetchPayout()
+    }
+  }, [refetchClaimerStatus, refetchPayout, refetchUserPhase, usesUserPhase])
+  const refetch = refreshAccountState
   const claimableAmount =
     typeof payoutQuery.data === "bigint" ? payoutQuery.data : 0n
-  const isClaimable = isRegistered && !hasClaimed && claimableAmount > 0n
+  const isClaimable = usesUserPhase
+    ? userPhase === StandardLoopPhase.Claimable
+    : isRegistered && !hasClaimed && claimableAmount > 0n
   const isEntered =
     hasEnteredNextPeriod ||
-    registration.registeredForNextPeriod ||
+    (usesUserPhase && userPhase === StandardLoopPhase.Cooldown) ||
     (isRegistered && !hasClaimed && !isClaimable)
   const isLoading = Boolean(
     connectedAccount &&
       (currentPeriod == null ||
-        claimerStatusQuery.isLoading ||
-        payoutQuery.isLoading ||
-        registration.isLoading)
+        (usesUserPhase
+          ? userPhaseQuery.isLoading
+          : claimerStatusQuery.isLoading) ||
+        (isRegistered && !hasClaimed && payoutQuery.isLoading))
   )
   const error =
-    claimerStatusQuery.error ?? payoutQuery.error ?? registration.error
+    (usesUserPhase ? userPhaseQuery.error : claimerStatusQuery.error) ??
+    (isRegistered && !hasClaimed ? payoutQuery.error : undefined)
   const status = deriveStandardLoopClaimStatus({
     hasClaimed,
     hasError: Boolean(error),

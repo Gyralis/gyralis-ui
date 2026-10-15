@@ -53,12 +53,13 @@ export interface LoopCardData {
 
 export const rwagmiTestLoop: LoopCardData = {
   id: 7,
-  title: "RWAGMI (Test)",
-  by: "Gyralis",
+  title: "RWAGMI Token Launcher",
+  by: "RWAGMI",
   address: "0xe714bc7F58726490a15d2197BCded598223f5319",
   description:
     "Test token creator eligibility on Base with daily Loop periods.",
   token: "0xb200000000000000000000Bf0548AB2ebD00bA5e",
+  eligibilityLogoUrl: "/rwagmi-logo.png",
   shieldScore: "Human Passport required",
   eligibility: "Launch a B20 Token",
   eligibilityUrl: "https://rwagmi.com/launch",
@@ -72,6 +73,9 @@ export const rwagmiTestLoop: LoopCardData = {
   enabled: true,
   achievementActive: false,
   rewardsSummary: "RWAGMI rewards · daily periods",
+  sponsorName: "RWAGMI",
+  sponsorLogoUrl: "/rwagmi-logo.png",
+  sponsorUrl: "https://rwagmi.com",
 }
 
 export const LoopCardsData: LoopCardData[] = [
