@@ -26,6 +26,7 @@ interface ClaimEventsQueryFilters {
   afterEventId?: boolean
   loopId?: boolean
   excludedLoopIds?: boolean
+  includedLoopIds?: boolean
   userAddress?: boolean
 }
 
@@ -39,6 +40,10 @@ export const BASE_SCORING_CHAIN_ID = 8453
 export const BASE_MARKEE_SCORING_LOOP_ID = 1
 export const BASE_MARKEE_SUBGRAPH_LOOP_ID =
   "0x213310e1dbd6991cd488ab247c81fad82cd88e7a"
+export const BASE_TRUE_LOOPERS_SCORING_LOOP_ID = 6
+export const BASE_TRUE_LOOPERS_FACTORY_LOOP_ID = 24
+export const BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID =
+  "0xb7902fae80eb57abac621dc68eb30ffff42f76f0"
 
 export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
   if (!env.GYRALIS_SUBGRAPH_URL) {
@@ -58,6 +63,7 @@ export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
       url: env.GYRALIS_BASE_SUBGRAPH_URL,
       loopIdsBySubgraphId: {
         [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
+        [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]: BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
       },
     })
   }
@@ -105,6 +111,10 @@ export function buildClaimEventsQuery(
   if (filters.excludedLoopIds) {
     variables.push("$excludedLoopIds: [ID!]")
     where.push("loop_not_in: $excludedLoopIds")
+  }
+  if (filters.includedLoopIds) {
+    variables.push("$includedLoopIds: [ID!]")
+    where.push("loop_in: $includedLoopIds")
   }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
@@ -156,6 +166,8 @@ export async function fetchClaimEventsFromSubgraph(input: {
         afterEventId: input.afterEventId != null,
         loopId: input.loopId != null,
         excludedLoopIds: Boolean(input.excludedLoopIds?.length),
+        includedLoopIds:
+          input.loopId == null && input.source.loopIdsBySubgraphId != null,
       },
       input.orderBy
     ),
@@ -171,6 +183,10 @@ export async function fetchClaimEventsFromSubgraph(input: {
       excludedLoopIds: input.excludedLoopIds?.map((loopId) =>
         subgraphLoopIdForScoringLoop(input.source, loopId)
       ),
+      includedLoopIds:
+        input.loopId == null && input.source.loopIdsBySubgraphId
+          ? Object.keys(input.source.loopIdsBySubgraphId)
+          : undefined,
     },
     source: input.source,
   })

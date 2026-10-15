@@ -2,12 +2,20 @@
 
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { LuCheck, LuChevronDown, LuInfo, LuUnlock } from "react-icons/lu"
+import {
+  LuCheck,
+  LuChevronDown,
+  LuInfo,
+  LuTarget,
+  LuUnlock,
+} from "react-icons/lu"
 
 import { useRoadTo10k } from "@/lib/hooks/app/use-road-to-10k"
 import { ProfileDetails } from "@/components/profile/profile-details"
 
-const GOAL = 10_000
+const COMPLETED_GOAL = 10_000
+const ACTIVE_GOAL = 25_000
+const ACTIVE_GOAL_RANGE = ACTIVE_GOAL - COMPLETED_GOAL
 const format = (value: number) => value.toLocaleString("en-US")
 
 function RollingNumber({
@@ -59,7 +67,7 @@ function lastChecked(checkedAt: string, now: number) {
   return `Last checked ${hours} ${hours === 1 ? "hour" : "hours"} ago`
 }
 
-export function RoadTo10k() {
+export function ClaimsMilestoneBanner() {
   const model = useRoadTo10k()
   const reduced = Boolean(useReducedMotion())
   const [now, setNow] = useState(Date.now)
@@ -89,14 +97,14 @@ export function RoadTo10k() {
     if (next == null) return
     if (
       previousIndexedTotal.current != null &&
-      previousIndexedTotal.current < GOAL &&
-      next >= GOAL &&
+      previousIndexedTotal.current < ACTIVE_GOAL &&
+      next >= ACTIVE_GOAL &&
       !celebrated.current
     ) {
       celebrated.current = true
       try {
-        if (sessionStorage.getItem("road-to-10k-celebrated")) return
-        sessionStorage.setItem("road-to-10k-celebrated", "true")
+        if (sessionStorage.getItem("claims-milestone-25k-celebrated")) return
+        sessionStorage.setItem("claims-milestone-25k-celebrated", "true")
       } catch {
         /* Celebration still works if session storage is unavailable. */
       }
@@ -106,8 +114,11 @@ export function RoadTo10k() {
   }, [model.data?.totalClaims])
 
   const total = model.total
-  const percent = Math.min(100, ((total ?? 0) / GOAL) * 100)
-  const complete = (model.data?.totalClaims ?? 0) >= GOAL
+  const percent = Math.min(
+    100,
+    Math.max(0, (((total ?? 0) - COMPLETED_GOAL) / ACTIVE_GOAL_RANGE) * 100)
+  )
+  const complete = (model.data?.totalClaims ?? 0) >= ACTIVE_GOAL
   const delayed = model.pendingCount > 0 && !model.syncing
   const status = model.syncing
     ? model.pendingCount > 0
@@ -129,8 +140,8 @@ export function RoadTo10k() {
 
   return (
     <section
-      id="road-to-10k"
-      aria-labelledby="road-to-10k-title"
+      id="claims-milestones"
+      aria-labelledby="claims-milestones-title"
       className="relative mb-[42px] w-full overflow-hidden bg-slate-950"
       style={{
         backgroundImage: "url('/dashboard-header.png')",
@@ -157,16 +168,22 @@ export function RoadTo10k() {
       </AnimatePresence>
       <div className="relative mx-auto max-w-screen-xl p-4 sm:p-7 lg:p-8">
         <div className="relative mb-5 flex flex-col items-start gap-3 lg:flex-row lg:items-center lg:gap-4">
-          <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/25 bg-black/50 px-4 py-2 text-xs font-semibold text-white backdrop-blur-xl">
-            <LuCheck className="size-3.5 text-emerald-400" aria-hidden="true" />
-            10K Claim Milestone
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-xs font-semibold text-white/55 backdrop-blur-xl">
+              <LuCheck className="size-3.5" aria-hidden="true" />
+              10K Claim Milestone
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-primary/55 bg-primary/15 px-4 py-2 text-xs font-semibold text-primary shadow-[0_0_22px_hsl(var(--primary)/0.18)] backdrop-blur-xl">
+              <LuTarget className="size-3.5" aria-hidden="true" />
+              25K Claim Milestone
+            </span>
+          </div>
           <div className="flex min-w-0 items-center gap-2">
             <h2
-              id="road-to-10k-title"
+              id="claims-milestones-title"
               className="font-baloo text-lg font-semibold leading-snug text-white sm:text-xl"
             >
-              True Looper SuperLoop is ready!
+              Next stop: 25K claims — Every claim counts!
             </h2>
             <ProfileDetails
               label="About True Looper rewards and eligibility"
@@ -186,9 +203,10 @@ export function RoadTo10k() {
                 True Looper rewards
               </h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                At the 10,000-claim community milestone, a shared $50 USDC
-                reward pool unlocks for eligible Loopers. For now, milestone
-                progress counts Gnosis claims only.
+                The 10,000-claim milestone is complete, and its shared $50 USDC
+                reward pool is active for eligible Loopers. The next community
+                milestone is 25,000 claims. For now, milestone progress counts
+                Gnosis claims only.
               </p>
               <p className="mt-4 border-t border-border pt-4 text-sm leading-6">
                 <span className="font-semibold">Who qualifies?</span> Every
@@ -221,7 +239,7 @@ export function RoadTo10k() {
                 ) : (
                   <div className="mt-1 font-baloo text-4xl font-bold leading-none text-primary sm:text-5xl">
                     <span className="sr-only" role="status">
-                      {format(total)} of {format(GOAL)} community claims
+                      {format(total)} of {format(ACTIVE_GOAL)} community claims
                       {model.pendingCount > 0
                         ? `, including ${model.pendingCount} awaiting total update`
                         : ""}
@@ -233,7 +251,7 @@ export function RoadTo10k() {
               </div>
               <div className="text-right">
                 <p className="font-baloo text-2xl font-semibold sm:text-3xl">
-                  10K{" "}
+                  25K{" "}
                   <span className="text-xs font-medium uppercase text-foreground">
                     claims
                   </span>
@@ -306,13 +324,18 @@ export function RoadTo10k() {
                     </motion.div>
                     <div
                       role="progressbar"
-                      aria-label="Road to 10,000 community claims"
-                      aria-valuemin={0}
-                      aria-valuemax={GOAL}
-                      aria-valuenow={Math.min(total, GOAL)}
+                      aria-label="Progress from 10,000 to 25,000 community claims"
+                      aria-valuemin={COMPLETED_GOAL}
+                      aria-valuemax={ACTIVE_GOAL}
+                      aria-valuenow={Math.min(
+                        ACTIVE_GOAL,
+                        Math.max(COMPLETED_GOAL, total)
+                      )}
                       aria-valuetext={`${format(
                         total
-                      )} claims, ${percent.toFixed(2)} percent of goal`}
+                      )} claims, ${percent.toFixed(
+                        2
+                      )} percent from the 10,000 milestone to the 25,000 milestone`}
                       className="h-7 rounded-full border border-border/60 bg-muted/50 p-1 sm:h-9"
                     >
                       <motion.div
@@ -333,12 +356,12 @@ export function RoadTo10k() {
                       {complete ? (
                         <>
                           <LuCheck className="text-primary" />
-                          10,000 claims reached!
+                          25,000 claims reached!
                         </>
-                      ) : total >= GOAL ? (
+                      ) : total >= ACTIVE_GOAL ? (
                         "Confirming milestone…"
                       ) : (
-                        "Progress"
+                        "Progress to 25K"
                       )}
                     </span>
                     <span className="tabular-nums">{percent.toFixed(2)}%</span>
@@ -350,7 +373,7 @@ export function RoadTo10k() {
 
           <aside
             aria-label="Milestone reward and claim status"
-            className={`${glass} flex flex-col p-[30px] text-foreground`}
+            className={`${glass} flex flex-col border-primary/30 p-[30px] text-foreground shadow-[0_0_30px_hsl(var(--primary)/0.08)]`}
           >
             <div className="flex items-center justify-between gap-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
@@ -358,7 +381,7 @@ export function RoadTo10k() {
               </p>
               <div
                 className="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary shadow-[0_0_22px_hsl(var(--primary)/0.16)]"
-                aria-label="Milestone unlocked"
+                aria-label="True Looper rewards active"
               >
                 <LuUnlock className="size-5" aria-hidden="true" />
               </div>

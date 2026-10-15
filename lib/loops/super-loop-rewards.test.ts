@@ -155,6 +155,13 @@ describe("SuperLoop reward estimate", () => {
       })
     ).toBe("1.2")
     expect(getSuperLoopRewardValue({ status: "claimed" })).toBe("0")
+    expect(
+      getSuperLoopRewardValue({
+        claimableRewardValue: "0",
+        claimedRewardValue: "1.2",
+        status: "claimed",
+      })
+    ).toBe("1.2")
 
     expect(superLoopRewardShowsToken("active")).toBe(true)
     expect(superLoopRewardShowsToken("claimable")).toBe(true)

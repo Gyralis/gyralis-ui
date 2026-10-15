@@ -37,14 +37,13 @@ function formatTokenAmount(
         symbol: string
       }
     | undefined,
-  decimals = 4
+  decimals = 3
 ) {
   if (!token || amount <= 0n) return undefined
 
-  return `${trimFormattedBalance(
-    formatUnits(amount, token.decimals),
-    decimals
-  )} ${token.symbol}`
+  return `${Number(formatUnits(amount, token.decimals)).toFixed(decimals)} ${
+    token.symbol
+  }`
 }
 
 export function useStandardLoopCardController(loop: LoopCardData) {
@@ -125,6 +124,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const fundingUnavailable =
     balance.data != null &&
     balance.data.value <= 0n &&
+    claim.status !== "claimed" &&
     claim.status !== "checking" &&
     claim.claimableAmount <= 0n
 
@@ -292,7 +292,12 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const actionTooltip =
     claim.isPending || claim.wrongNetwork
       ? undefined
-      : getStandardLoopActionTooltip(claim.status)
+      : getStandardLoopActionTooltip(
+          claim.status,
+          loop.eligibilityProvider === "rwagmi"
+            ? { registeredForNextPeriod: claim.registeredForNextPeriod }
+            : undefined
+        )
   const action: LoopActionViewModel = {
     status: actionStatus,
     label: fundingUnavailable

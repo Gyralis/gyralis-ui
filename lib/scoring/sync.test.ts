@@ -15,8 +15,13 @@ const mocks = vi.hoisted(() => ({
   upsertUserLoopStats: vi.fn(),
   upsertLoopLeaderboardEntry: vi.fn(),
   markProcessedClaimEvents: vi.fn(),
+  createProcessedClaimEvents: vi.fn(),
   upsertUserGlobalStats: vi.fn(),
   upsertGlobalLeaderboardEntry: vi.fn(),
+  beginSeasonScoringRebuild: vi.fn(),
+  clearSeasonScoringProjections: vi.fn(),
+  completeSeasonScoringRebuild: vi.fn(),
+  failSeasonScoringRebuild: vi.fn(),
 }))
 
 const gnosisSource = {
@@ -56,6 +61,7 @@ vi.mock("@/lib/db/clients/loop-stats.client", () => ({
 
 vi.mock("@/lib/db/clients/processed-claim-events.client", () => ({
   clearProcessedClaimEvents: vi.fn(),
+  createProcessedClaimEvents: mocks.createProcessedClaimEvents,
   markProcessedClaimEvents: mocks.markProcessedClaimEvents,
 }))
 
@@ -67,6 +73,19 @@ vi.mock("@/lib/db/clients/sync-state.client", () => ({
 
 vi.mock("@/lib/db/clients/user-profile.client", () => ({
   ensureUserProfile: mocks.ensureUserProfile,
+}))
+
+vi.mock("@/lib/db/clients/season-scoring.client", () => ({
+  beginSeasonScoringRebuild: mocks.beginSeasonScoringRebuild,
+  clearSeasonScoringProjections: mocks.clearSeasonScoringProjections,
+  completeSeasonScoringRebuild: mocks.completeSeasonScoringRebuild,
+  failSeasonScoringRebuild: mocks.failSeasonScoringRebuild,
+}))
+
+vi.mock("./season-projections", () => ({
+  seasonProjectionsAreReady: vi.fn().mockResolvedValue(true),
+  updateSeasonGlobalProjections: vi.fn(),
+  updateSeasonLoopProjections: vi.fn(),
 }))
 
 vi.mock("./subgraph-client", () => ({
@@ -176,6 +195,7 @@ describe("incremental scoring sync", () => {
       lastBlockEvent,
       newBlockEvent,
     ])
+    expect(mocks.ensureUserProfile).toHaveBeenCalledTimes(1)
     expect(
       mocks.updateScoringSyncState.mock.invocationCallOrder[0]
     ).toBeGreaterThan(mocks.upsertUserLoopStats.mock.invocationCallOrder[0])
@@ -215,13 +235,28 @@ describe("incremental scoring sync", () => {
       expect(mocks.upsertUserLoopStats).toHaveBeenCalledWith(
         expect.objectContaining({ loopId: 3 })
       )
-      expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([activeEvent])
+      if (mode === "full") {
+        expect(mocks.createProcessedClaimEvents).toHaveBeenCalledWith([
+          activeEvent,
+        ])
+        expect(mocks.markProcessedClaimEvents).not.toHaveBeenCalled()
+      } else {
+        expect(mocks.markProcessedClaimEvents).toHaveBeenCalledWith([
+          activeEvent,
+        ])
+      }
       expect(mocks.getUserLoopStatsForUser).toHaveBeenCalledWith(userAddress)
       expect(mocks.updateScoringSyncState).toHaveBeenCalledWith({
         chainId: 100,
         lastBlockNumber: 12,
         lastEventId: "0xccc-0",
       })
+      if (mode === "full") {
+        expect(mocks.beginSeasonScoringRebuild).toHaveBeenCalledTimes(1)
+        expect(mocks.clearSeasonScoringProjections).toHaveBeenCalledTimes(1)
+        expect(mocks.completeSeasonScoringRebuild).toHaveBeenCalledTimes(1)
+        expect(mocks.failSeasonScoringRebuild).not.toHaveBeenCalled()
+      }
     }
   )
 
@@ -283,5 +318,22 @@ describe("incremental scoring sync", () => {
 
     await expect(runScoringSync()).rejects.toThrow("write failed")
     expect(mocks.updateScoringSyncState).not.toHaveBeenCalled()
+  })
+
+  it("marks a failed full season rebuild without publishing ready state", async () => {
+    const event = claimEvent(11, "0xbbb-0")
+    mocks.fetchClaimEventsFromSubgraph
+      .mockResolvedValueOnce([event])
+      .mockResolvedValueOnce([])
+    mocks.upsertUserLoopStats.mockRejectedValueOnce(new Error("write failed"))
+
+    await expect(runScoringSync({ mode: "full" })).rejects.toThrow(
+      "write failed"
+    )
+    expect(mocks.failSeasonScoringRebuild).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ message: "write failed" })
+    )
+    expect(mocks.completeSeasonScoringRebuild).not.toHaveBeenCalled()
   })
 })

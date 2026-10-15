@@ -43,6 +43,17 @@ const erc20Abi = parseAbi([
 ])
 
 const liveLoopSources = {
+  "true-loopers": {
+    subgraphId: "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
+    address: "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0",
+    chain: base,
+    contractType: "superLoop",
+    fallbackTokenSymbol: "USDCx",
+    fallbackTokenDecimals: 18,
+    // Indexed payouts use SuperToken units, not the underlying USDC's 6 decimals.
+    payoutTokenAddress: null,
+    getEndpoint: () => env.GYRALIS_BASE_SUBGRAPH_URL,
+  },
   "1hive": {
     subgraphId: "3",
     address: "0x8995641fb3E452bC1359E79A738a6DE556015696",

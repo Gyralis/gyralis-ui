@@ -84,10 +84,6 @@ describe("Loop card eligibility links", () => {
       "https://app.gardens.fund/gardens/100/0xe2396fe2169ca026962971d3b2e373ba925b6257",
     ],
     [4, "https://merits.blockscout.com/?tab=spend"],
-    [
-      5,
-      "https://app.gardens.fund/gardens/8453/0x9a378ebed22610e9fbb941fe27323fe00cdeebc6",
-    ],
   ] as const)("maps Loop %s to its eligibility destination", (id, url) => {
     expect(LoopCardsData.find((loop) => loop.id === id)?.eligibilityUrl).toBe(
       url

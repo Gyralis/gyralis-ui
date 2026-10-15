@@ -21,6 +21,7 @@ export const env = createEnv({
       .string()
       .url()
       .default(DEFAULT_GYRALIS_BASE_SUBGRAPH_URL),
+    GNOSIS_RPC_URL: z.string().url().optional(),
     BASE_RPC_URL: z.string().url().optional(),
     GYRALIS_SUBGRAPH_CHAIN_ID: z.coerce.number().int().positive().default(100),
     SCORING_SYNC_BATCH_SIZE: z.coerce.number().int().positive().default(500),
@@ -63,6 +64,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     GYRALIS_SUBGRAPH_URL: process.env.GYRALIS_SUBGRAPH_URL,
     GYRALIS_BASE_SUBGRAPH_URL: process.env.GYRALIS_BASE_SUBGRAPH_URL,
+    GNOSIS_RPC_URL: process.env.GNOSIS_RPC_URL,
     BASE_RPC_URL: process.env.BASE_RPC_URL,
     GYRALIS_SUBGRAPH_CHAIN_ID: process.env.GYRALIS_SUBGRAPH_CHAIN_ID,
     SCORING_SYNC_BATCH_SIZE: process.env.SCORING_SYNC_BATCH_SIZE,

@@ -33,3 +33,29 @@ export function processedClaimEventId(input: {
 }): string {
   return [input.chainId, input.txHash.toLowerCase(), input.logIndex].join("-")
 }
+
+export function seasonUserLoopStatsId(input: {
+  seasonId: string
+  chainId: number
+  loopId: number
+  userAddress: string
+}): string {
+  return [
+    "season-loop",
+    input.seasonId,
+    input.chainId,
+    input.loopId,
+    normalizeDbAddress(input.userAddress),
+  ].join("-")
+}
+
+export function seasonUserGlobalStatsId(input: {
+  seasonId: string
+  userAddress: string
+}): string {
+  return [
+    "season-global",
+    input.seasonId,
+    normalizeDbAddress(input.userAddress),
+  ].join("-")
+}

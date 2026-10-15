@@ -1,6 +1,10 @@
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 
-export type DashboardLoopKey = "1hive" | "blockscout" | "markee-gardens"
+export type DashboardLoopKey =
+  | "1hive"
+  | "blockscout"
+  | "markee-gardens"
+  | "true-loopers"
 
 export interface DashboardLoopMeta {
   loopKey: DashboardLoopKey

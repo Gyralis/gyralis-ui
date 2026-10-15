@@ -162,10 +162,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       : undefined
   const claimableRewardValue =
     balance.data && claimableAmount > 0n
-      ? trimFormattedBalance(
-          formatUnits(claimableAmount, balance.data.decimals),
-          7
-        )
+      ? Number(formatUnits(claimableAmount, balance.data.decimals)).toFixed(3)
       : undefined
   const claimableRewardLabel =
     balance.data && claimableRewardValue
@@ -177,6 +174,12 @@ export function useSuperLoopCardController(loop: LoopCardData) {
         statusReads.data.previousPeriodPayout ??
         claimableAmount
       : undefined
+  const claimedRewardValue =
+    balance.data && claimedRewardAmount != null
+      ? Number(formatUnits(claimedRewardAmount, balance.data.decimals)).toFixed(
+          3
+        )
+      : undefined
   const rewardsTooltip = getSuperLoopRewardTooltip({
     claimableRewardLabel,
     estimatedPeriodPayoutLabel,
@@ -187,9 +190,8 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     status === "claimed" ? claimedRewardAmount ?? 0n : claimableAmount
   const amountLabel =
     balance.data && displayedAmount > 0n
-      ? `${trimFormattedBalance(
-          formatUnits(displayedAmount, balance.data.decimals),
-          4
+      ? `${Number(formatUnits(displayedAmount, balance.data.decimals)).toFixed(
+          3
         )} ${balance.data.payoutSymbol}`
       : undefined
   const actionStatus: LoopActionStatus = fundingUnavailable
@@ -273,6 +275,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
               : rewardsTooltip,
             value: getSuperLoopRewardValue({
               claimableRewardValue,
+              claimedRewardValue,
               status,
             }),
             valueMuted: status === "claimed" || fundingUnavailable,
@@ -295,6 +298,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     accumulatingUsers,
     calculatedPeriodPayout,
     claimableRewardValue,
+    claimedRewardValue,
     configError,
     estimatedPeriodPayout,
     estimatedPeriodPayoutLabel,

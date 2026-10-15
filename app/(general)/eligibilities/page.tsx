@@ -62,6 +62,31 @@ const eligibilityRequirements = [
     type: "loop",
   },
   {
+    id: 4,
+    name: "RWAGMI",
+    description:
+      "Launch a B20 token on RWAGMI with the wallet you use in Gyralis. Add your token address to the RWAGMI Loop to verify your eligibility.",
+    modalDescription:
+      "Launch a B20 token on Base through RWAGMI. Gyralis checks that your connected wallet launched the token you provide.",
+    requirement: "Launch a B20 Token",
+    network: "Base",
+    status: "active",
+    icon: LuLaptop,
+    color: "text-green-500",
+    bgColor: "bg-green-50 dark:bg-green-900/20",
+    steps: [
+      "Open RWAGMI Launch and connect the same wallet you use in Gyralis.",
+      "Launch a B20 token on Base and copy its token address.",
+      "Return to the RWAGMI Loop in Gyralis and select Add token beside Eligibility.",
+      "Paste your token address and select Check and Save. Gyralis checks Human Passport first, then verifies that your wallet launched the token.",
+      "Once eligible, select Enter the Loop and confirm in your wallet. Return daily to claim your rewards.",
+    ],
+    protocolUrl: "https://rwagmi.com/launch",
+    coverUrl: "/rwagmi-cover.png",
+    logoUrl: "/rwagmi-logo.png",
+    type: "loop",
+  },
+  {
     id: 3,
     name: "Human Passport",
     description:
