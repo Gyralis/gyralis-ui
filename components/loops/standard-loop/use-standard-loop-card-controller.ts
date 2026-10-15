@@ -124,6 +124,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const fundingUnavailable =
     balance.data != null &&
     balance.data.value <= 0n &&
+    claim.status !== "claimed" &&
     claim.status !== "checking" &&
     claim.claimableAmount <= 0n
 
@@ -291,7 +292,12 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const actionTooltip =
     claim.isPending || claim.wrongNetwork
       ? undefined
-      : getStandardLoopActionTooltip(claim.status)
+      : getStandardLoopActionTooltip(
+          claim.status,
+          loop.eligibilityProvider === "rwagmi"
+            ? { registeredForNextPeriod: claim.registeredForNextPeriod }
+            : undefined
+        )
   const action: LoopActionViewModel = {
     status: actionStatus,
     label: fundingUnavailable

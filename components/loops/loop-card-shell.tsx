@@ -75,11 +75,11 @@ export function LoopCardShell({
   const [isLoopersModalOpen, setIsLoopersModalOpen] = useState(false)
   const { isConnected } = useAccount()
   const passportScoreQuery = useGetScore({
-    enabled: isConnected && loop.eligibilityProvider !== "rwagmi",
+    enabled: isConnected,
   })
-  const shieldThreshold = loop.shieldScore
-    .match(/\+?\d+(\.\d+)?/)?.[0]
-    ?.replace(/^\+/, "")
+  const shieldThreshold =
+    loop.shieldScore.match(/\+?\d+(\.\d+)?/)?.[0]?.replace(/^\+/, "") ??
+    String(loop.passportMinScore)
   const shieldThresholdValue =
     shieldThreshold == null ? Number.NaN : Number.parseFloat(shieldThreshold)
   const passportScoreValue =
@@ -244,21 +244,20 @@ export function LoopCardShell({
                 </p>
               )}
             </div>
-            {loop.eligibilityProvider === "rwagmi" ? (
-              <RwagmiTokenEligibility compact />
-            ) : (
-              <div className="flex shrink-0 items-center gap-3">
-                <PassportScoreBadge
-                  hasPassed={hasPassedShield}
-                  thresholdLabel={
-                    shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
-                  }
-                  value={
-                    shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
-                  }
-                />
-              </div>
-            )}
+            <div className="flex shrink-0 items-center gap-3">
+              {loop.eligibilityProvider === "rwagmi" ? (
+                <RwagmiTokenEligibility compact />
+              ) : null}
+              <PassportScoreBadge
+                hasPassed={hasPassedShield}
+                thresholdLabel={
+                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                }
+                value={
+                  shieldThreshold ? `+${shieldThreshold}` : loop.shieldScore
+                }
+              />
+            </div>
           </div>
 
           {action}

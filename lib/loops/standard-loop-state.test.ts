@@ -27,7 +27,7 @@ describe("standard Loop claim state", () => {
         hasClaimed: true,
         hasError: false,
         isClaimable: false,
-        isEntered: false,
+        isEntered: true,
         isLoading: true,
       },
     },
@@ -134,6 +134,14 @@ describe("standard Loop claim state", () => {
     expect(getStandardLoopActionTooltip("claimed")).toEqual({
       title: "Your rewards were claimed successfully.",
       description: "You’re registered for the next claim period.",
+    })
+    expect(
+      getStandardLoopActionTooltip("claimed", {
+        registeredForNextPeriod: false,
+      })
+    ).toEqual({
+      title: "Your rewards were claimed successfully.",
+      description: "You’ve claimed your rewards for this period.",
     })
     expect(getStandardLoopActionTooltip("error")).toEqual({
       title: "We couldn’t load your Loop status.",

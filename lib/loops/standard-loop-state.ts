@@ -135,7 +135,10 @@ export function getStandardLoopActionPresentation({
   return "button"
 }
 
-export function getStandardLoopActionTooltip(status: StandardLoopClaimStatus) {
+export function getStandardLoopActionTooltip(
+  status: StandardLoopClaimStatus,
+  { registeredForNextPeriod = true }: { registeredForNextPeriod?: boolean } = {}
+) {
   switch (status) {
     case "entered":
       return {
@@ -145,7 +148,9 @@ export function getStandardLoopActionTooltip(status: StandardLoopClaimStatus) {
     case "claimed":
       return {
         title: "Your rewards were claimed successfully.",
-        description: "You’re registered for the next claim period.",
+        description: registeredForNextPeriod
+          ? "You’re registered for the next claim period."
+          : "You’ve claimed your rewards for this period.",
       }
     case "error":
       return {

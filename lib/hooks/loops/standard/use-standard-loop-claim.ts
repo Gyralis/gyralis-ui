@@ -113,8 +113,12 @@ export function useStandardLoopClaim({
     functionName: loopContractMethods.loop.getClaimerStatus,
     args: [connectedAccount ?? zeroAddress],
     chainId,
+    scopeKey: usesUserPhase ? currentPeriod?.toString() : undefined,
     query: {
-      enabled: validAddress && Boolean(connectedAccount) && !usesUserPhase,
+      enabled:
+        validAddress &&
+        Boolean(connectedAccount) &&
+        (!usesUserPhase || currentPeriod != null),
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -143,8 +147,13 @@ export function useStandardLoopClaim({
   const isRegistered = usesUserPhase
     ? userPhase === StandardLoopPhase.Claimable
     : Boolean(claimerStatus?.[0])
+  // Cooldown can coexist with a completed current-period claim. Period zero's
+  // default latestClaimPeriod is zero, so its boolean alone is not a real claim.
   const hasClaimed = usesUserPhase
-    ? userPhase === StandardLoopPhase.Claimed
+    ? (currentPeriod != null &&
+        currentPeriod > 0n &&
+        Boolean(claimerStatus?.[1])) ||
+      userPhase === StandardLoopPhase.Claimed
     : Boolean(claimerStatus?.[1])
   const payoutQuery = useReadContract({
     address,
@@ -174,8 +183,19 @@ export function useStandardLoopClaim({
   const refetchPayout = payoutQuery.refetch
   const refreshAccountState = useCallback(async () => {
     if (usesUserPhase) {
-      const result = await refetchUserPhase()
-      if (!result.isError && result.data === StandardLoopPhase.Claimable) {
+      const [statusResult, phaseResult] = await Promise.all([
+        refetchClaimerStatus(),
+        refetchUserPhase(),
+      ])
+      const freshStatus = statusResult.data as
+        | readonly [boolean, boolean]
+        | undefined
+      if (
+        !statusResult.isError &&
+        !freshStatus?.[1] &&
+        !phaseResult.isError &&
+        phaseResult.data === StandardLoopPhase.Claimable
+      ) {
         await refetchPayout()
       }
       return
@@ -190,22 +210,24 @@ export function useStandardLoopClaim({
   const claimableAmount =
     typeof payoutQuery.data === "bigint" ? payoutQuery.data : 0n
   const isClaimable = usesUserPhase
-    ? userPhase === StandardLoopPhase.Claimable
+    ? !hasClaimed && userPhase === StandardLoopPhase.Claimable
     : isRegistered && !hasClaimed && claimableAmount > 0n
-  const isEntered =
+  const registeredForNextPeriod =
     hasEnteredNextPeriod ||
-    (usesUserPhase && userPhase === StandardLoopPhase.Cooldown) ||
+    (usesUserPhase && userPhase === StandardLoopPhase.Cooldown)
+  const isEntered =
+    (registeredForNextPeriod && (!usesUserPhase || claimerStatus != null)) ||
     (isRegistered && !hasClaimed && !isClaimable)
   const isLoading = Boolean(
     connectedAccount &&
       (currentPeriod == null ||
-        (usesUserPhase
-          ? userPhaseQuery.isLoading
-          : claimerStatusQuery.isLoading) ||
+        claimerStatusQuery.isLoading ||
+        (usesUserPhase && !hasClaimed && userPhaseQuery.isLoading) ||
         (isRegistered && !hasClaimed && payoutQuery.isLoading))
   )
   const error =
-    (usesUserPhase ? userPhaseQuery.error : claimerStatusQuery.error) ??
+    claimerStatusQuery.error ??
+    (usesUserPhase && !hasClaimed ? userPhaseQuery.error : undefined) ??
     (isRegistered && !hasClaimed ? payoutQuery.error : undefined)
   const status = deriveStandardLoopClaimStatus({
     hasClaimed,
@@ -462,6 +484,7 @@ export function useStandardLoopClaim({
     isPending,
     lastClaimedAmount,
     pendingAction,
+    registeredForNextPeriod,
     refetch,
     status,
     submissionStage,

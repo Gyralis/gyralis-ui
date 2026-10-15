@@ -79,6 +79,7 @@ export const rwagmiTestLoop: LoopCardData = {
 }
 
 export const LoopCardsData: LoopCardData[] = [
+  ...(process.env.NODE_ENV === "development" ? [rwagmiTestLoop] : []),
   {
     id: 3,
     title: "1Hive Gardens",
@@ -127,7 +128,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "superLoop",
     chainId: 8453,
     chainName: "Base",
-    historyLoopKey: "markee-gardens",
+    historyLoopKey: "true-loopers",
     eligibilityProvider: "gyralis",
     passportMinScore: 0,
     enabled: true,
@@ -201,5 +202,4 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorUrl: "https://www.markee.xyz/",
   },
   */
-  ...(process.env.NODE_ENV === "development" ? [rwagmiTestLoop] : []),
 ]

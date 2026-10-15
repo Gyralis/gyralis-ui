@@ -323,9 +323,9 @@ function WalletTokenEligibility({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex w-fit items-baseline gap-1 text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:text-primary"
-              title="View Token on RWAGMI"
+              title="Token data page in RWAGMI app"
             >
-              <span>Launch data from RWAGMI</span>
+              <span>Token data page in RWAGMI app</span>
               <LuExternalLink className="size-3 shrink-0" aria-hidden="true" />
             </a>
           ) : null}
