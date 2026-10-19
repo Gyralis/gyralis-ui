@@ -62,6 +62,13 @@ export function getLoopContractAbi(
     chainId as keyof typeof deployedContracts
   ] as Partial<Record<LoopContractType, LoopContractEntry>> | undefined
 
+  // Base's generated deployment registry contains only the streaming variant.
+  // Standard Loop interfaces are chain-independent; use the existing standard
+  // ABI for Base contracts instead of returning an empty interface.
+  if (chainId === 8453 && contractType === "loop") {
+    return contracts?.loop?.abi ?? deployedContracts[100].loop.abi
+  }
+
   return contracts?.[contractType]?.abi ?? contracts?.loop?.abi ?? []
 }
 

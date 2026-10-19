@@ -20,7 +20,7 @@ vi.mock("viem", async (importOriginal) => ({
 }))
 
 const catalogLoop: LoopCardData = {
-  ...LoopCardsData[0],
+  ...LoopCardsData.find((loop) => loop.id === 3)!,
   id: 3,
   chainId: 100,
   enabled: true,

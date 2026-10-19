@@ -4,9 +4,23 @@ export const defaultDashboardLoopKeys = [
   "1hive",
   "blockscout",
   "markee-gardens",
+  "true-loopers",
 ] as const satisfies readonly DashboardLoopKey[]
 
 export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
+  "true-loopers": {
+    loopKey: "true-loopers",
+    contractType: "superLoop",
+    title: "True Loopers",
+    shortTitle: "True Loopers",
+    by: "Gyralis",
+    description: "Streaming rewards for active Gyralis participants.",
+    logoSrc: "/gyralis-logo.svg",
+    brandColor: "#8C4BFF",
+    chainName: "Base",
+    tokenSymbol: "USDCx",
+    isVisibleInDashboard: true,
+  },
   "1hive": {
     loopKey: "1hive",
     contractType: "loop",

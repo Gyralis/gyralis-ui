@@ -48,7 +48,6 @@ export function useSyncProfileAfterClaim({
     async (confirmation: LoopActionConfirmation) => {
       if (
         confirmation.action !== "claim" ||
-        confirmation.chainId !== 100 ||
         !connectedAccount ||
         !contractAddress ||
         !isAddress(contractAddress)

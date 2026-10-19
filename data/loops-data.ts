@@ -3,7 +3,11 @@ import { Address } from "viem"
 import type { LoopContractType } from "@/lib/contracts/loop-contracts"
 import type { DashboardLoopKey } from "@/lib/dashboard/types"
 
-export type LoopEligibilityProvider = "gardens" | "blockscout" | "gyralis"
+export type LoopEligibilityProvider =
+  | "gardens"
+  | "blockscout"
+  | "gyralis"
+  | "rwagmi"
 export type GardensCommunityKey = "1hive" | "markee"
 
 export interface LoopCardData {
@@ -28,6 +32,7 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
+  // Development test Loops do not have indexed dashboard history.
   historyLoopKey?: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   gardensCommunity?: GardensCommunityKey
@@ -91,7 +96,35 @@ export const SoneiumLoopCardsData: LoopCardData[] = [
   },
 ]
 
+export const rwagmiTestLoop: LoopCardData = {
+  id: 9,
+  title: "RWAGMI Token Launcher",
+  by: "RWAGMI",
+  address: "0xe714bc7F58726490a15d2197BCded598223f5319",
+  description:
+    "Test token creator eligibility on Base with daily Loop periods.",
+  token: "0xb200000000000000000000Bf0548AB2ebD00bA5e",
+  eligibilityLogoUrl: "/rwagmi-logo.png",
+  shieldScore: "Human Passport required",
+  eligibility: "Launch a B20 Token",
+  eligibilityUrl: "https://rwagmi.com/launch",
+  chainBadgeColor: "bg-custom-green",
+  super: false,
+  contractType: "loop",
+  chainId: 8453,
+  chainName: "Base",
+  eligibilityProvider: "rwagmi",
+  passportMinScore: 0,
+  enabled: true,
+  achievementActive: false,
+  rewardsSummary: "RWAGMI rewards · daily periods",
+  sponsorName: "RWAGMI",
+  sponsorLogoUrl: "/rwagmi-logo.png",
+  sponsorUrl: "https://rwagmi.com",
+}
+
 export const LoopCardsData: LoopCardData[] = [
+  rwagmiTestLoop,
   {
     id: 3,
     title: "1Hive Gardens",
@@ -140,7 +173,7 @@ export const LoopCardsData: LoopCardData[] = [
     contractType: "superLoop",
     chainId: 8453,
     chainName: "Base",
-    historyLoopKey: "markee-gardens",
+    historyLoopKey: "true-loopers",
     eligibilityProvider: "gyralis",
     passportMinScore: 0,
     enabled: true,
@@ -178,6 +211,7 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorLogoUrl: "/1Hive-logo.png",
     sponsorUrl: "https://1hive.org",
   },
+  /* Markee SuperLoop temporarily hidden.
   {
     id: 5,
     title: "Markee",
@@ -212,4 +246,5 @@ export const LoopCardsData: LoopCardData[] = [
     sponsorLogoUrl: "/markee-logo.png",
     sponsorUrl: "https://www.markee.xyz/",
   },
+  */
 ]

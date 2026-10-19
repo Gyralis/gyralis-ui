@@ -13,7 +13,7 @@ const mock = vi.hoisted(() => ({
     isLoading: false,
     data: { status: "success", blockNumber: 12345n },
   },
-  refetch: vi.fn().mockResolvedValue(undefined),
+  refetch: vi.fn().mockResolvedValue({ data: undefined, isError: false }),
 }))
 vi.mock("react", () => ({
   useState: () => [mock.states.shift(), vi.fn()],

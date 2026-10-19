@@ -12,11 +12,11 @@ import { useAccount } from "wagmi"
 import { soneium } from "wagmi/chains"
 
 import { ParticipationSectionNav } from "@/components/layout/participation-section-nav"
-import LoopCard from "@/components/loops/loop-card"
-import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
 // import { LuLayoutGrid, LuList } from "react-icons/lu"
 
-import { RoadTo10k } from "@/components/loops/road-to-10k"
+import { ClaimsMilestoneBanner } from "@/components/loops/claims-milestone-banner"
+import LoopCard from "@/components/loops/loop-card"
+import { LoopCardInactive } from "@/components/loops/loop-card-inactive"
 
 // import { LoopsTable } from "@/components/loops/loops-table"
 
@@ -57,7 +57,7 @@ export function LoopsPageClient() {
 
   return (
     <div className="min-h-screen">
-      <RoadTo10k />
+      <ClaimsMilestoneBanner />
       <div className="relative">
         <div
           id="loops-grid"

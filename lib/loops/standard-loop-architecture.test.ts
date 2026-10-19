@@ -19,6 +19,10 @@ const CLAIM_HOOK_PATH = resolve(
   process.cwd(),
   "lib/hooks/loops/standard/use-standard-loop-claim.ts"
 )
+const REGISTRATION_HOOK_PATH = resolve(
+  process.cwd(),
+  "lib/hooks/loops/standard/use-standard-loop-wallet-registration.ts"
+)
 const CARD_CONTROLLER_PATH = resolve(
   process.cwd(),
   "components/loops/standard-loop/use-standard-loop-card-controller.ts"
@@ -80,12 +84,21 @@ describe("standard Loop architecture boundary", () => {
     expect(modal).toMatch(/const claimedUsersEnabled\s*=\s*isOpen &&/)
   })
 
-  it("skips wallet registration logs after the user has claimed", () => {
+  it("uses the contract status without an additional registration lookup", () => {
     const claimHook = readFileSync(CLAIM_HOOK_PATH, "utf8")
 
-    expect(claimHook).toContain("claimerStatus != null &&")
+    expect(claimHook).toContain("loopContractMethods.loop.getClaimerStatus")
     expect(claimHook).toContain("!hasClaimed")
-    expect(claimHook).toContain("enabled: shouldCheckNextPeriodRegistration")
+    expect(claimHook).not.toContain("useStandardLoopWalletRegistration")
+    expect(claimHook).not.toContain("registration.error")
     expect(claimHook).toContain("void refreshAccountState().finally")
+  })
+
+  it("checks wallet registration through the cached server API", () => {
+    const registrationHook = readFileSync(REGISTRATION_HOOK_PATH, "utf8")
+
+    expect(registrationHook).toContain("/api/loops/registration-status")
+    expect(registrationHook).not.toContain("getLogsChunked")
+    expect(registrationHook).not.toContain("usePublicClient")
   })
 })

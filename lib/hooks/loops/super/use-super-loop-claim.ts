@@ -34,6 +34,7 @@ const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
   gyralis: "/api/gyralis",
+  rwagmi: "/api/rwagmi",
 }
 
 const PASSPORT_SCORE_REQUIRED_CODE = "PASSPORT_SCORE_REQUIRED"
@@ -74,6 +75,8 @@ function getProviderEligibilityMessage(provider: LoopEligibilityProvider) {
       return "Join the Gardens community required by this loop to enter."
     case "gyralis":
       return "Complete 50 claims in Gyralis to enter this SuperLoop."
+    case "rwagmi":
+      return "Connect the wallet that created your RWAGMI token to enter this loop."
   }
 }
 
@@ -223,6 +226,15 @@ export function useSuperLoopClaim({
   }, [receipt.isError, toast, transactionUrl, txHash])
 
   const execute = async () => {
+    if (eligibilityProvider === "rwagmi") {
+      toast({
+        title: "Registration unavailable",
+        description:
+          "RWAGMI eligibility checks are available, but Loop registration is not configured yet.",
+        type: "info",
+      })
+      return
+    }
     if (!connectedAccount) {
       toast({
         title: "Wallet not connected",

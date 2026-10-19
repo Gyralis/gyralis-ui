@@ -26,7 +26,61 @@ interface ClaimEventsQueryFilters {
   afterEventId?: boolean
   loopId?: boolean
   excludedLoopIds?: boolean
+  includedLoopIds?: boolean
   userAddress?: boolean
+}
+
+export interface ScoringSubgraphSource {
+  chainId: number
+  url: string
+  loopIdsBySubgraphId?: Readonly<Record<string, number>>
+}
+
+export const BASE_SCORING_CHAIN_ID = 8453
+export const BASE_MARKEE_SCORING_LOOP_ID = 1
+export const BASE_MARKEE_SUBGRAPH_LOOP_ID =
+  "0x213310e1dbd6991cd488ab247c81fad82cd88e7a"
+export const BASE_TRUE_LOOPERS_SCORING_LOOP_ID = 6
+export const BASE_TRUE_LOOPERS_FACTORY_LOOP_ID = 24
+export const BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID =
+  "0xb7902fae80eb57abac621dc68eb30ffff42f76f0"
+
+export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
+  if (!env.GYRALIS_SUBGRAPH_URL) {
+    throw new Error("GYRALIS_SUBGRAPH_URL is required for scoring sync")
+  }
+
+  const sources: ScoringSubgraphSource[] = [
+    {
+      chainId: env.GYRALIS_SUBGRAPH_CHAIN_ID,
+      url: env.GYRALIS_SUBGRAPH_URL,
+    },
+  ]
+
+  if (env.GYRALIS_BASE_SUBGRAPH_URL) {
+    sources.push({
+      chainId: BASE_SCORING_CHAIN_ID,
+      url: env.GYRALIS_BASE_SUBGRAPH_URL,
+      loopIdsBySubgraphId: {
+        [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
+        [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]: BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+      },
+    })
+  }
+
+  return sources
+}
+
+export function getScoringSubgraphSource(
+  chainId: number
+): ScoringSubgraphSource {
+  const source = getScoringSubgraphSources().find(
+    (candidate) => candidate.chainId === chainId
+  )
+  if (!source) {
+    throw new Error(`No scoring subgraph is configured for chain ${chainId}`)
+  }
+  return source
 }
 
 export type ClaimEventsOrderBy = "id" | "blockNumber"
@@ -58,6 +112,10 @@ export function buildClaimEventsQuery(
     variables.push("$excludedLoopIds: [ID!]")
     where.push("loop_not_in: $excludedLoopIds")
   }
+  if (filters.includedLoopIds) {
+    variables.push("$includedLoopIds: [ID!]")
+    where.push("loop_in: $includedLoopIds")
+  }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
     where.push("account: $userAddress")
@@ -87,6 +145,7 @@ export function buildClaimEventsQuery(
 }
 
 export async function fetchClaimEventsFromSubgraph(input: {
+  source: ScoringSubgraphSource
   fromBlock?: number
   blockNumber?: number
   afterEventId?: string
@@ -107,6 +166,8 @@ export async function fetchClaimEventsFromSubgraph(input: {
         afterEventId: input.afterEventId != null,
         loopId: input.loopId != null,
         excludedLoopIds: Boolean(input.excludedLoopIds?.length),
+        includedLoopIds:
+          input.loopId == null && input.source.loopIdsBySubgraphId != null,
       },
       input.orderBy
     ),
@@ -115,13 +176,24 @@ export async function fetchClaimEventsFromSubgraph(input: {
       fromBlock: input.fromBlock,
       blockNumber: input.blockNumber,
       afterEventId: input.afterEventId,
-      loopId: input.loopId?.toString(),
-      excludedLoopIds: input.excludedLoopIds?.map(String),
+      loopId:
+        input.loopId == null
+          ? undefined
+          : subgraphLoopIdForScoringLoop(input.source, input.loopId),
+      excludedLoopIds: input.excludedLoopIds?.map((loopId) =>
+        subgraphLoopIdForScoringLoop(input.source, loopId)
+      ),
+      includedLoopIds:
+        input.loopId == null && input.source.loopIdsBySubgraphId
+          ? Object.keys(input.source.loopIdsBySubgraphId)
+          : undefined,
     },
+    source: input.source,
   })
 }
 
 export async function fetchAllClaimEventsForUserLoop(input: {
+  source: ScoringSubgraphSource
   userAddress: string
   loopId: number
   batchSize: number
@@ -140,9 +212,10 @@ export async function fetchAllClaimEventsForUserLoop(input: {
       variables: {
         first: input.batchSize,
         afterEventId,
-        loopId: input.loopId.toString(),
+        loopId: subgraphLoopIdForScoringLoop(input.source, input.loopId),
         userAddress: input.userAddress.toLowerCase(),
       },
+      source: input.source,
     })
     events.push(...batch)
     if (batch.length < input.batchSize) {
@@ -161,7 +234,13 @@ function parseSubgraphLogIndex(id: string): number | undefined {
   return Number(raw)
 }
 
-function parseSubgraphLoopId(id: string): number {
+export function parseSubgraphLoopId(
+  source: ScoringSubgraphSource,
+  id: string
+): number {
+  const mappedLoopId = source.loopIdsBySubgraphId?.[id.toLowerCase()]
+  if (mappedLoopId != null) return mappedLoopId
+
   const loopId = Number(id)
   if (!Number.isSafeInteger(loopId) || loopId < 0) {
     throw new Error(`Invalid numeric loop id from subgraph: ${id}`)
@@ -169,15 +248,22 @@ function parseSubgraphLoopId(id: string): number {
   return loopId
 }
 
+function subgraphLoopIdForScoringLoop(
+  source: ScoringSubgraphSource,
+  loopId: number
+): string {
+  const mappedEntry = Object.entries(source.loopIdsBySubgraphId ?? {}).find(
+    ([, mappedLoopId]) => mappedLoopId === loopId
+  )
+  return mappedEntry?.[0] ?? loopId.toString()
+}
+
 async function fetchClaimEventPage(input: {
   query: string
   variables: Record<string, unknown>
+  source: ScoringSubgraphSource
 }): Promise<ClaimScoringEvent[]> {
-  if (!env.GYRALIS_SUBGRAPH_URL) {
-    throw new Error("GYRALIS_SUBGRAPH_URL is required for scoring sync")
-  }
-
-  const response = await fetch(env.GYRALIS_SUBGRAPH_URL, {
+  const response = await fetch(input.source.url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -195,8 +281,8 @@ async function fetchClaimEventPage(input: {
   return (payload.data?.claimEvents ?? []).map((event) => ({
     id: event.id,
     userAddress: event.account.id.toLowerCase(),
-    loopId: parseSubgraphLoopId(event.loop.id),
-    chainId: env.GYRALIS_SUBGRAPH_CHAIN_ID,
+    loopId: parseSubgraphLoopId(input.source, event.loop.id),
+    chainId: input.source.chainId,
     periodNumber: Number(event.periodNumber),
     payout: event.payout,
     blockNumber: Number(event.blockNumber),
