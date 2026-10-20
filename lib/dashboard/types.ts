@@ -5,6 +5,7 @@ export type DashboardLoopKey =
   | "blockscout"
   | "markee-gardens"
   | "true-loopers"
+  | "rwagmi"
 
 export interface DashboardLoopMeta {
   loopKey: DashboardLoopKey

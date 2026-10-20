@@ -10,6 +10,7 @@ const LOOP_KEYS = new Set<DashboardLoopKey>([
   "blockscout",
   "markee-gardens",
   "true-loopers",
+  "rwagmi",
 ])
 
 function parseLoopKey(value: string): DashboardLoopKey | null {

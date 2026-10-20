@@ -5,9 +5,23 @@ export const defaultDashboardLoopKeys = [
   "blockscout",
   "markee-gardens",
   "true-loopers",
+  "rwagmi",
 ] as const satisfies readonly DashboardLoopKey[]
 
 export const loopDashboardMeta: Record<DashboardLoopKey, DashboardLoopMeta> = {
+  rwagmi: {
+    loopKey: "rwagmi",
+    contractType: "loop",
+    title: "RWAGMI Token Launcher",
+    shortTitle: "RWAGMI",
+    by: "RWAGMI",
+    description: "Daily RWAGMI rewards for eligible B20 token creators.",
+    logoSrc: "/rwagmi-logo.png",
+    brandColor: "#22C55E",
+    chainName: "Base",
+    tokenSymbol: "RWAGMI",
+    isVisibleInDashboard: true,
+  },
   "true-loopers": {
     loopKey: "true-loopers",
     contractType: "superLoop",

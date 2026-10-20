@@ -32,7 +32,7 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
-  // Development test Loops do not have indexed dashboard history.
+  // Set for loops with indexed dashboard history.
   historyLoopKey?: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   gardensCommunity?: GardensCommunityKey
@@ -104,6 +104,7 @@ export const rwagmiTestLoop: LoopCardData = {
   description:
     "Test token creator eligibility on Base with daily Loop periods.",
   token: "0xb200000000000000000000Bf0548AB2ebD00bA5e",
+  historyLoopKey: "rwagmi",
   eligibilityLogoUrl: "/rwagmi-logo.png",
   shieldScore: "Human Passport required",
   eligibility: "Launch a B20 Token",
