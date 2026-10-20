@@ -56,7 +56,11 @@ export function useStandardLoopWalletRegistration({
     ],
     queryFn: fetchRegistrationStatus,
     enabled:
-      enabled && isAddress(address) && Boolean(user) && currentPeriod != null,
+      enabled &&
+      isAddress(address) &&
+      Boolean(user) &&
+      currentPeriod != null &&
+      currentPeriod > 0n,
     staleTime: 30_000,
     refetchOnWindowFocus: false,
     retry: 1,

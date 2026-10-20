@@ -43,6 +43,16 @@ const erc20Abi = parseAbi([
 ])
 
 const liveLoopSources = {
+  rwagmi: {
+    subgraphId: "0xe714bc7f58726490a15d2197bcded598223f5319",
+    address: "0xe714bc7F58726490a15d2197BCded598223f5319",
+    chain: base,
+    contractType: "loop",
+    fallbackTokenSymbol: "RWAGMI",
+    fallbackTokenDecimals: 18,
+    payoutTokenAddress: null,
+    getEndpoint: () => env.GYRALIS_BASE_SUBGRAPH_URL,
+  },
   "true-loopers": {
     subgraphId: "0xb7902fae80eb57abac621dc68eb30ffff42f76f0",
     address: "0xb7902fAE80EB57aBac621dc68eb30FFff42F76F0",

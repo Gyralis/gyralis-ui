@@ -2,6 +2,7 @@ import {
   LoopCardData,
   LoopCardsData,
   LoopEligibilityProvider,
+  SoneiumLoopCardsData,
   type GardensCommunityKey,
 } from "@/data/loops-data"
 import { z } from "zod"
@@ -31,7 +32,7 @@ export function findAllowlistedLoop(
 ): AllowlistedLoop | undefined {
   const targetAddress = normalizeAddress(loopAddress)
 
-  const loop = LoopCardsData.find(
+  const loop = [...LoopCardsData, ...SoneiumLoopCardsData].find(
     (item: LoopCardData) =>
       item.enabled &&
       item.eligibilityProvider === provider &&

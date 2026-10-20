@@ -23,6 +23,7 @@ import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmatio
 import { getSavedRwagmiToken } from "@/lib/loops/rwagmi-token-store"
 import {
   deriveStandardLoopClaimStatus,
+  normalizeStandardLoopClaimerStatus,
   StandardLoopPhase,
   type StandardLoopSubmissionStage,
 } from "@/lib/loops/standard-loop-state"
@@ -110,6 +111,7 @@ export function useStandardLoopClaim({
   const { writeContractAsync } = useWriteContract()
   const abi = useMemo(() => getLoopContractAbi(chainId, "loop"), [chainId])
   const validAddress = isAddress(address)
+  const hasClaimPeriod = currentPeriod != null && currentPeriod > 0n
   const usesUserPhase = eligibilityProvider === "rwagmi"
 
   const claimerStatusQuery = useReadContract({
@@ -120,10 +122,7 @@ export function useStandardLoopClaim({
     chainId,
     scopeKey: usesUserPhase ? currentPeriod?.toString() : undefined,
     query: {
-      enabled:
-        validAddress &&
-        Boolean(connectedAccount) &&
-        (!usesUserPhase || currentPeriod != null),
+      enabled: validAddress && Boolean(connectedAccount) && hasClaimPeriod,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -140,7 +139,7 @@ export function useStandardLoopClaim({
         validAddress &&
         Boolean(connectedAccount) &&
         usesUserPhase &&
-        currentPeriod != null,
+        hasClaimPeriod,
       staleTime: 10_000,
       refetchOnWindowFocus: false,
     },
@@ -149,9 +148,13 @@ export function useStandardLoopClaim({
   const claimerStatus = claimerStatusQuery.data as
     | readonly [boolean, boolean]
     | undefined
+  const normalizedStatus = normalizeStandardLoopClaimerStatus({
+    claimerStatus,
+    currentPeriod,
+  })
   const isRegistered = usesUserPhase
     ? userPhase === StandardLoopPhase.Claimable
-    : Boolean(claimerStatus?.[0])
+    : normalizedStatus.isRegistered
   // Cooldown can coexist with a completed current-period claim. Period zero's
   // default latestClaimPeriod is zero, so its boolean alone is not a real claim.
   const hasClaimed =
@@ -161,7 +164,7 @@ export function useStandardLoopClaim({
           currentPeriod > 0n &&
           Boolean(claimerStatus?.[1])) ||
         userPhase === StandardLoopPhase.Claimed
-      : Boolean(claimerStatus?.[1]))
+      : normalizedStatus.hasClaimed)
   const payoutQuery = useReadContract({
     address,
     abi,
@@ -173,7 +176,7 @@ export function useStandardLoopClaim({
       enabled:
         validAddress &&
         Boolean(connectedAccount) &&
-        currentPeriod != null &&
+        hasClaimPeriod &&
         isRegistered &&
         !hasClaimed,
       staleTime: 10_000,
@@ -189,6 +192,7 @@ export function useStandardLoopClaim({
   const refetchUserPhase = userPhaseQuery.refetch
   const refetchPayout = payoutQuery.refetch
   const refreshAccountState = useCallback(async () => {
+    if (!hasClaimPeriod) return
     if (usesUserPhase) {
       const [statusResult, phaseResult] = await Promise.all([
         refetchClaimerStatus(),
@@ -212,7 +216,13 @@ export function useStandardLoopClaim({
     if (!result.isError && freshStatus?.[0] && !freshStatus[1]) {
       await refetchPayout()
     }
-  }, [refetchClaimerStatus, refetchPayout, refetchUserPhase, usesUserPhase])
+  }, [
+    hasClaimPeriod,
+    refetchClaimerStatus,
+    refetchPayout,
+    refetchUserPhase,
+    usesUserPhase,
+  ])
   const refetch = refreshAccountState
   const claimableAmount =
     typeof payoutQuery.data === "bigint" ? payoutQuery.data : 0n
@@ -362,6 +372,7 @@ export function useStandardLoopClaim({
 
   const execute = async () => {
     if (!connectedAccount) return
+    if (currentPeriod === 0n) return
 
     if (!validAddress) {
       toast({

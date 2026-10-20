@@ -59,6 +59,7 @@ interface LoopCardShellProps {
 const CHAIN_ICON_SRC: Record<string, string> = {
   Base: "/icons/NetworkBaseTest.svg",
   Gnosis: "/icons/NetworkGnosis.svg",
+  Soneium: "/icons/NetworkSoneium.webp",
 }
 
 export function LoopCardShell({

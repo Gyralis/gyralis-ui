@@ -7,7 +7,50 @@ import {
   getStandardLoopActionPresentation,
   getStandardLoopActionTooltip,
   getStandardLoopTimerTitle,
+  normalizeStandardLoopClaimerStatus,
 } from "./standard-loop-state"
+
+describe("standard Loop period-zero status", () => {
+  it("ignores default registered and claimed flags during period zero", () => {
+    const flags = normalizeStandardLoopClaimerStatus({
+      claimerStatus: [true, true],
+      currentPeriod: 0n,
+    })
+
+    expect(flags).toEqual({ isRegistered: false, hasClaimed: false })
+    expect(
+      deriveStandardLoopClaimStatus({
+        hasClaimed: flags.hasClaimed,
+        hasError: false,
+        isClaimable: flags.isRegistered,
+        isEntered: false,
+        isLoading: false,
+      })
+    ).toBe("enter")
+  })
+
+  it.each([
+    { period: 1n, flags: [true, false] as const },
+    { period: 1n, flags: [false, true] as const },
+    { period: 2n, flags: [true, true] as const },
+  ])(
+    "preserves status flags after period zero: $period",
+    ({ period, flags }) => {
+      expect(
+        normalizeStandardLoopClaimerStatus({
+          claimerStatus: flags,
+          currentPeriod: period,
+        })
+      ).toEqual({ isRegistered: flags[0], hasClaimed: flags[1] })
+    }
+  )
+
+  it("waits for the period before accepting claimed status", () => {
+    expect(
+      normalizeStandardLoopClaimerStatus({ claimerStatus: [true, true] })
+    ).toEqual({ isRegistered: false, hasClaimed: false })
+  })
+})
 
 describe("standard Loop claim state", () => {
   it.each([

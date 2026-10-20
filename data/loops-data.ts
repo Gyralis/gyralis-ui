@@ -32,7 +32,7 @@ export interface LoopCardData {
   contractType: LoopContractType
   chainId: number
   chainName: string
-  // Development test Loops do not have indexed dashboard history.
+  // Set for loops with indexed dashboard history.
   historyLoopKey?: DashboardLoopKey
   eligibilityProvider: LoopEligibilityProvider
   gardensCommunity?: GardensCommunityKey
@@ -51,14 +51,60 @@ export interface LoopCardData {
   sponsorUrl?: string
 }
 
+export const SoneiumLoopCardsData: LoopCardData[] = [
+  {
+    id: 7,
+    title: "Soneium Hourly Loop",
+    by: "Gyralis",
+    address: "0x72A7388ece62B2BAc4Cee2e4754372Cec211336B",
+    description: "Test hourly MCK rewards with Gyralis on Soneium.",
+    token: "0x8469AFAA09c775da79156e59Be9AA1a4b7411590",
+    communityLogoUrl: "/gyralis-logo.svg",
+    eligibilityLogoUrl: "/gyralis-logo.svg",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    super: false,
+    contractType: "loop",
+    chainId: 1868,
+    chainName: "Soneium",
+    eligibilityProvider: "gyralis",
+    passportMinScore: 0,
+    enabled: true,
+    achievementActive: false,
+  },
+  {
+    id: 8,
+    title: "Soneium Daily Loop",
+    by: "Gyralis",
+    address: "0x6297F2951DbBF0B3a797D6D6c4496dE1d6735034",
+    description: "Test 24-hour oMCK rewards with Gyralis on Soneium.",
+    token: "0xD209d4737B467e507B382525fB1F00Bb7d86b3c4",
+    communityLogoUrl: "/gyralis-logo.svg",
+    eligibilityLogoUrl: "/gyralis-logo.svg",
+    shieldScore: "Passport Score 15+",
+    eligibility: "+50 Claims in Gyralis",
+    chainBadgeColor: "bg-custom-green",
+    super: false,
+    contractType: "loop",
+    chainId: 1868,
+    chainName: "Soneium",
+    eligibilityProvider: "gyralis",
+    passportMinScore: 0,
+    enabled: true,
+    achievementActive: false,
+  },
+]
+
 export const rwagmiTestLoop: LoopCardData = {
-  id: 7,
+  id: 9,
   title: "RWAGMI Token Launcher",
   by: "RWAGMI",
   address: "0xe714bc7F58726490a15d2197BCded598223f5319",
   description:
     "Test token creator eligibility on Base with daily Loop periods.",
   token: "0xb200000000000000000000Bf0548AB2ebD00bA5e",
+  historyLoopKey: "rwagmi",
   eligibilityLogoUrl: "/rwagmi-logo.png",
   shieldScore: "Human Passport required",
   eligibility: "Launch a B20 Token",

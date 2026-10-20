@@ -16,6 +16,7 @@ import {
   polygon,
   polygonMumbai,
   sepolia,
+  soneium,
 } from "wagmi/chains"
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY?.trim()
@@ -24,6 +25,14 @@ const mainnetRpcUrl = alchemyApiKey
   : undefined
 const baseRpcUrl =
   process.env.NEXT_PUBLIC_BASE_RPC_URL?.trim() || "https://mainnet.base.org"
+
+const soneiumWithIcon = {
+  ...soneium,
+  iconUrl: "/icons/NetworkSoneium.webp",
+  iconBackground: "#ffffff",
+} as const
+
+export const deployedChains = [base, gnosis, soneiumWithIcon] as const
 
 export const chains = [
   mainnet,
@@ -41,6 +50,7 @@ export const chains = [
   gnosisChiado,
   optimismSepolia,
   arbitrumSepolia,
+  soneiumWithIcon,
 ] as const
 
 export const transports = {
@@ -54,4 +64,8 @@ export const transports = {
   [polygon.id]: http(),
   [gnosis.id]: http(),
   [base.id]: http(baseRpcUrl),
+  [baseSepolia.id]: http(),
+  [optimismSepolia.id]: http(),
+  [arbitrumSepolia.id]: http(),
+  [soneium.id]: http(),
 } as const

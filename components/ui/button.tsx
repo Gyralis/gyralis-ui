@@ -10,6 +10,7 @@ const CHAIN_ICON_SRC: Partial<Record<number, string>> = {
   8453: "/icons/NetworkBaseTest.svg",
   10200: "/icons/NetworkGnosis.svg",
   84532: "/icons/NetworkBaseTest.svg",
+  1868: "/icons/NetworkSoneium.webp",
 }
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
