@@ -79,7 +79,7 @@ export const rwagmiTestLoop: LoopCardData = {
 }
 
 export const LoopCardsData: LoopCardData[] = [
-  ...(process.env.NODE_ENV === "development" ? [rwagmiTestLoop] : []),
+  rwagmiTestLoop,
   {
     id: 3,
     title: "1Hive Gardens",

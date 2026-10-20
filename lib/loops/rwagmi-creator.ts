@@ -61,7 +61,10 @@ export function createRwagmiLaunchLookup() {
           Number.isFinite(seconds) ? Math.min(3600, Math.max(1, seconds)) : 60
         )
       }
-      if (!response.ok) throw new Error(`RWAGMI HTTP ${response.status}`)
+      if (!response.ok)
+        throw new Error(
+          `RWAGMI HTTP ${response.status}; content-type=${response.headers.get("content-type") ?? "unknown"}`
+        )
       const result = launchResponseSchema.safeParse(await response.json())
       if (!result.success) throw new Error("Invalid RWAGMI response")
       const { item, state } = result.data
@@ -93,6 +96,15 @@ export function createRwagmiLaunchLookup() {
       return item
     } catch (error) {
       if (error instanceof RwagmiVerificationError) throw error
+      console.error("[RWAGMI] Launch lookup failed", {
+        token,
+        error: error instanceof Error ? error.message : "Unknown error",
+        name: error instanceof Error ? error.name : undefined,
+        cause:
+          error instanceof Error && error.cause instanceof Error
+            ? error.cause.message
+            : undefined,
+      })
       throw new RwagmiVerificationError(
         "RWAGMI_UNAVAILABLE",
         "Unable to verify your RWAGMI launch right now. Please try again."
