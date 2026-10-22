@@ -179,16 +179,19 @@ export function LeaderboardPageView({
   const loadingRows = pendingSearch || rows.isPending || rows.isFetching
 
   return (
-    <main className="min-w-0 px-4 py-8 sm:py-12">
+    <section
+      className="min-w-0 px-4 py-8 sm:py-12"
+      aria-label="Live all-time leaderboard"
+    >
       <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-6">
         <Card className="min-w-0 rounded-3xl border-border/70 bg-card p-5 text-card-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_0_-1px_0_rgba(0,0,0,0.05),0_8px_32px_rgba(28,231,131,0.06),0_4px_16px_rgba(140,75,255,0.04),0_2px_8px_rgba(0,0,0,0.08)] sm:p-8">
           <div className="grid min-w-0 grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:gap-8">
             <header className="min-w-0">
               <div className="flex items-start gap-2">
-                <h1 className="min-w-0 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                <h2 className="min-w-0 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   All-Time{" "}
                   <span className="text-primary">Gyralis Leaderboard</span>
-                </h1>
+                </h2>
                 <LeaderboardInfo
                   updatedAt={summary.data?.lastStatsUpdatedAt ?? null}
                 />
@@ -433,6 +436,6 @@ export function LeaderboardPageView({
           )}
         </Card>
       </div>
-    </main>
+    </section>
   )
 }

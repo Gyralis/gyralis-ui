@@ -155,7 +155,7 @@ export function ProfilePageView({ data }: { data: ProfilePageData }) {
   )
 }
 
-function AchievementsSection({ data }: { data: ProfilePageData }) {
+export function AchievementsSection({ data }: { data: ProfilePageData }) {
   const milestones = scoringConfig.streakBonuses.map((milestone) => ({
     ...milestone,
     loopStatuses: getAchievementLoopStatuses(data.loopStats, milestone.streak),

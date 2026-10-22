@@ -1,7 +1,9 @@
 "use client"
 
 import { ReactNode } from "react"
+import { usePathname } from "next/navigation"
 
+import { isParticipationRoute } from "@/lib/participation/routes"
 import { Footer } from "@/components/layout/footer"
 import { SiteHeader } from "@/components/layout/site-header"
 
@@ -10,6 +12,9 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const pathname = usePathname()
+  if (isParticipationRoute(pathname)) return <>{children}</>
+
   return (
     <>
       <div className="relative flex min-h-screen flex-col">

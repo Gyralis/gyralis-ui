@@ -1,5 +1,7 @@
 import "@/styles/app.css"
 import "@/styles/globals.css"
+import "@/styles/participation.css"
+import "@/styles/magic-bento.css"
 
 import { ReactNode } from "react"
 import { env } from "@/env.mjs"

@@ -48,7 +48,9 @@ export function MobileNav() {
         <div className="flex min-w-0 items-center justify-end gap-1.5">
           {!isLandingPage ? <ProfileUserPill compact /> : null}
           {!isLandingPage ? <IdentityHubDrawer compact /> : null}
-          {!isLandingPage ? <WalletConnect compact className="shrink-0" /> : null}
+          {!isLandingPage ? (
+            <WalletConnect compact className="shrink-0" />
+          ) : null}
           <SheetTrigger asChild>
             <Button
               requireWallet={false}
@@ -87,7 +89,7 @@ export function MobileNav() {
             <Separator className="my-0.5" />
 
             {isLandingPage ? (
-              <MobileLink href="/loops" onOpenChange={setOpen}>
+              <MobileLink href="/discover" onOpenChange={setOpen}>
                 Launch App
               </MobileLink>
             ) : (

@@ -1,5 +1,5 @@
-import { LoopsPageClient } from "@/components/loops/loops-page-client"
+import { LoopDirectory } from "@/components/participation/loop-directory"
 
 export default function LoopsPage() {
-  return <LoopsPageClient />
+  return <LoopDirectory />
 }

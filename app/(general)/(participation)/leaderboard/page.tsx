@@ -8,6 +8,7 @@ import {
   parseLeaderboardPage,
 } from "@/lib/leaderboard/query"
 import { LeaderboardPageView } from "@/components/leaderboard/leaderboard-page-view"
+import { LeaderboardSections } from "@/components/participation/leaderboard-sections"
 
 export const dynamic = "force-dynamic"
 
@@ -25,13 +26,15 @@ export default async function LeaderboardPage({
     getLeaderboardSummary(),
   ])
   return (
-    <LeaderboardPageView
-      initialSearch={search}
-      initialPage={page}
-      initialRows={rows.status === "fulfilled" ? rows.value : undefined}
-      initialSummary={
-        summary.status === "fulfilled" ? summary.value : undefined
-      }
-    />
+    <LeaderboardSections>
+      <LeaderboardPageView
+        initialSearch={search}
+        initialPage={page}
+        initialRows={rows.status === "fulfilled" ? rows.value : undefined}
+        initialSummary={
+          summary.status === "fulfilled" ? summary.value : undefined
+        }
+      />
+    </LeaderboardSections>
   )
 }

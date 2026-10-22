@@ -1,0 +1,150 @@
+/* Decorative effects adapted from the supplied React Bits MagicBento source. */
+.magic-bento {
+  position: relative;
+  min-width: 0;
+}
+.magic-bento > [data-magic-bento-card] {
+  position: relative;
+  isolation: isolate;
+  --mb-hot: 0;
+  --mb-near: 0;
+  --mb-wa: 0;
+}
+.magic-bento[data-motion] > [data-magic-bento-card] {
+  transform: scale(var(--mb-press, 1));
+  transition-property: border-color, background-color;
+}
+.magic-bento:not([data-motion]) > [data-magic-bento-card] {
+  transform: none;
+}
+.magic-bento[data-motion] > [data-magic-bento-card]::before,
+.magic-bento[data-motion] > [data-magic-bento-card]::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.magic-bento[data-motion] > [data-magic-bento-card]::before {
+  z-index: 5;
+  padding: 1px;
+  background: radial-gradient(
+      calc(var(--mb-spot-size) * 0.75) circle at var(--mb-x, -999px)
+        var(--mb-y, -999px),
+      rgba(var(--mb-glow-rgb), calc(var(--mb-near) * 0.9)),
+      rgba(var(--mb-glow-rgb), calc(var(--mb-near) * 0.3)) 50%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle at var(--mb-wx, -999px) var(--mb-wy, -999px),
+      transparent calc(var(--mb-wr, 0px) - 90px),
+      rgba(var(--mb-glow-rgb), calc(var(--mb-wa) * 0.55))
+        calc(var(--mb-wr, 0px) - 28px),
+      rgba(var(--mb-glow-rgb), var(--mb-wa)) calc(var(--mb-wr, 0px) - 3px),
+      transparent var(--mb-wr, 0px)
+    );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.magic-bento[data-motion] > [data-magic-bento-card]::after {
+  z-index: 4;
+  background: radial-gradient(
+      var(--mb-spot-size) circle at var(--mb-x, -999px) var(--mb-y, -999px),
+      rgba(var(--mb-glow-rgb), calc(var(--mb-hot) * 0.1)),
+      transparent 75%
+    ),
+    radial-gradient(
+      circle at var(--mb-wx, -999px) var(--mb-wy, -999px),
+      transparent calc(var(--mb-wr, 0px) - 60px),
+      rgba(var(--mb-glow-rgb), calc(var(--mb-wa) * 0.045))
+        calc(var(--mb-wr, 0px) - 20px),
+      transparent var(--mb-wr, 0px)
+    );
+}
+.p-motion-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #10191f;
+  border: 1px solid #26353e;
+  border-radius: 12px;
+}
+.p-motion-preview > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c6d2df;
+}
+.p-motion-preview > div:first-child svg {
+  width: 16px;
+  height: 16px;
+  color: #1ce783;
+}
+.p-motion-options {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid #30404b;
+  border-radius: 9px;
+}
+.p-motion-options button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-height: 34px;
+  color: #a8bbce;
+  font-size: 11px;
+}
+.p-motion-options button[aria-pressed="true"] {
+  color: #1ce783;
+  background: #143c30;
+}
+.p-motion-options button:hover {
+  color: #fff;
+}
+.p-motion-replay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  min-height: 34px;
+  color: #becddd;
+  margin-left: auto;
+}
+.p-motion-replay:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.p-motion-preview > p {
+  flex-basis: 100%;
+  color: #97adc1;
+  font-size: 11px;
+}
+@media (max-width: 640px) {
+  .p-motion-preview {
+    gap: 10px;
+    padding: 14px;
+  }
+  .p-motion-replay {
+    margin-left: 0;
+    min-height: 40px;
+  }
+  .p-motion-options button {
+    min-height: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .magic-bento > [data-magic-bento-card] {
+    transform: none !important;
+    translate: none !important;
+  }
+  .magic-bento > [data-magic-bento-card]::before,
+  .magic-bento > [data-magic-bento-card]::after {
+    display: none !important;
+  }
+}

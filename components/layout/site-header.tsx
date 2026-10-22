@@ -7,9 +7,9 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer"
 import { MainNav, MainNavMenu } from "@/components/layout/main-nav"
+import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 //import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/shared/mode-toggle"
-import { ProfileUserPill } from "@/components/profile/profile-user-pill"
 
 import { WalletConnect } from "../blockchain/wallet-connect"
 import { MobileNav } from "./mobile-nav"
@@ -84,15 +84,19 @@ export function SiteHeader() {
         <div className="col-start-2 row-start-1 hidden items-center justify-end justify-self-end gap-2 md:flex xl:col-start-3">
           {isLandingPage ? (
             <Link
-              href="/loops"
+              href="/discover"
               className="tamagotchi-button inline-flex items-center justify-center px-4 py-2 text-sm"
             >
               Launch App
             </Link>
           ) : (
             <>
-              <div className="hidden items-center 2xl:flex"><ProfileUserPill /></div>
-              <div className="flex items-center 2xl:hidden"><ProfileUserPill compact /></div>
+              <div className="hidden items-center 2xl:flex">
+                <ProfileUserPill />
+              </div>
+              <div className="flex items-center 2xl:hidden">
+                <ProfileUserPill compact />
+              </div>
               <IdentityHubDrawer />
               <WalletConnect />
               <ModeToggle />
