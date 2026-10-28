@@ -82,7 +82,7 @@ export function LoopOpportunityCard({
             <h3>{loop.title}</h3>
             <p>
               {loop.chainName}
-              {demoStatus ? " · Demo status" : ` · ${loop.by}`}
+              {demoStatus ? " status" : ` · ${loop.by}`}
             </p>
           </div>
         </div>
@@ -112,7 +112,6 @@ function LoopDirectoryContent() {
   const params = useSearchParams()
   const search = useParticipationSearch().toLowerCase()
   const [filter, setFilter] = useState("All")
-  const [network, setNetwork] = useState("All networks")
   const cards = chainId === 1868 ? SoneiumLoopCardsData : LoopCardsData
   const selectedId = params.get("loop")
   const selectedLoop = [...LoopCardsData, ...SoneiumLoopCardsData].find(
@@ -126,8 +125,7 @@ function LoopDirectoryContent() {
           .includes(search)) &&
       (filter !== "SuperLoops" || loop.super) &&
       (filter !== "Standard Loops" || !loop.super) &&
-      (filter !== "Active" || loop.enabled) &&
-      (network === "All networks" || loop.chainName === network)
+      (filter !== "Active" || loop.enabled)
   )
   useEffect(() => {
     const id = window.location.hash.replace("#loop-card-", "")
@@ -164,27 +162,12 @@ function LoopDirectoryContent() {
           onChange={setFilter}
           label="Loop type"
         />
-        <label className="p-select">
-          <span className="sr-only">Filter by network</span>
-          <select
-            value={network}
-            onChange={(event) => setNetwork(event.target.value)}
-          >
-            {[
-              "All networks",
-              ...Array.from(new Set(cards.map((loop) => loop.chainName))),
-            ].map((name) => (
-              <option key={name}>{name}</option>
-            ))}
-          </select>
-        </label>
       </div>
       <div className="p-section-title">
         <h2>
           {filtered.length} {filtered.length === 1 ? "Loop" : "Loops"} to
           explore
         </h2>
-        <span className="p-caption">Live Loop directory</span>
       </div>
       {filtered.length ? (
         <MagicBento className="p-loop-grid directory">
@@ -195,38 +178,13 @@ function LoopDirectoryContent() {
       ) : (
         <EmptyState
           title="No Loops found"
-          description="Try another network, Loop type, or search."
+          description="Try another Loop type or search."
           onReset={() => {
             setFilter("All")
-            setNetwork("All networks")
           }}
         />
       )}
-      <section className="p-how-it-works">
-        <h2>Every claim is a reason to return.</h2>
-        <div>
-          {[
-            {
-              title: "Join",
-              text: "Meet the community’s eligibility requirements.",
-            },
-            {
-              title: "Claim",
-              text: "Open a Loop to see its live claim or registration state.",
-            },
-            {
-              title: "Return",
-              text: "Participate again next period and build your streak.",
-            },
-          ].map(({ title, text }, i) => (
-            <div key={title}>
-              <span>0{i + 1}</span>
-              <h3>{title}</h3>
-              <p>{text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
       <Dialog
         open={Boolean(selectedLoop)}
         onOpenChange={(open) => {

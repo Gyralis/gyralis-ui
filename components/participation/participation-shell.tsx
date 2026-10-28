@@ -11,31 +11,26 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { demoParticipation as user } from "@/data/participation-demo"
+import { AnimatePresence } from "framer-motion"
 import {
-  LuArrowRight,
   LuBarChart2,
-  LuBell,
   LuBookOpen,
-  LuCalendarCheck,
-  LuChevronDown,
   LuCompass,
   LuGamepad2,
   LuInfo,
   LuLayers,
+  LuLayoutDashboard,
   LuMenu,
   LuSearch,
-  LuSparkles,
-  LuStar,
   LuTrophy,
   LuUser,
   LuX,
 } from "react-icons/lu"
 
 import { WalletConnect } from "@/components/blockchain/wallet-connect"
-import { IdentityHubDrawer } from "@/components/identity-hub/identity-hub-drawer"
 
-import { ProgressBar } from "./participation-ui"
+import { useCardMotion } from "./card-motion-preview"
+import { RightSide, RightSideToggle } from "./right-side"
 
 const SearchContext = createContext("")
 export const useParticipationSearch = () => useContext(SearchContext)
@@ -49,127 +44,47 @@ const links = [
   { href: "/profile", label: "Profile", icon: LuUser },
 ]
 
-export function ParticipationRail() {
-  return (
-    <aside className="p-rail" aria-label="Demo participation summary">
-      <section className="p-surface p-identity">
-        <div className="p-eyebrow-row">
-          <h2 className="p-eyebrow">Your participation</h2>
-          <span className="p-small-label">Demo</span>
-        </div>
-        <div className="p-rail-stat">
-          <span className="p-icon">
-            <LuCalendarCheck />
-          </span>
-          <div>
-            <p>Current streak</p>
-            <strong>{user.currentStreak} days</strong>
-          </div>
-        </div>
-        <div className="p-rail-stat">
-          <span className="p-icon">
-            <LuStar />
-          </span>
-          <div>
-            <p>All-time GP</p>
-            <strong>{user.totalGP}</strong>
-          </div>
-        </div>
-        <div className="p-rail-stat">
-          <span className="p-icon">
-            <LuBarChart2 />
-          </span>
-          <div>
-            <p>Level</p>
-            <strong>{user.level}</strong>
-          </div>
-        </div>
-        <Link className="p-text-link" href="/profile">
-          Your participation profile <LuArrowRight />
-        </Link>
-      </section>
-      <section className="p-surface p-season-summary">
-        <div className="p-eyebrow-row">
-          <h2 className="p-eyebrow">Season 01</h2>
-          <Link href="/games" aria-label="View Season games">
-            <LuArrowRight />
-          </Link>
-        </div>
-        <div className="p-season-numbers">
-          <div>
-            <p>Season GP</p>
-            <strong>{user.seasonGP.toLocaleString()}</strong>
-          </div>
-          <div>
-            <p>Season rank</p>
-            <strong>#{user.seasonRank}</strong>
-          </div>
-        </div>
-        <ProgressBar value={40} label="Demo Season elapsed" />
-        <p className="p-caption">Day 12 of 30 · 18 days left</p>
-      </section>
-      <section className="p-rail-activity">
-        <div className="p-section-title">
-          <h2>Latest activity</h2>
-          <Link href="/profile">
-            View all <LuArrowRight />
-          </Link>
-        </div>
-        {[
-          {
-            icon: LuLayers,
-            title: "Claimed 1Hive Gardens",
-            time: "2h ago",
-            gp: "+1 GP",
-          },
-          {
-            icon: LuCalendarCheck,
-            title: "Completed 7-day streak",
-            time: "6h ago",
-            gp: "+5 GP",
-          },
-          {
-            icon: LuSparkles,
-            title: "Joined True Loopers",
-            time: "1d ago",
-            gp: "",
-          },
-        ].map(({ icon: Icon, title, time, gp }) => (
-          <div className="p-activity-row" key={title}>
-            <span className="p-icon small">
-              <Icon />
-            </span>
-            <div>
-              <p>{title}</p>
-              <span>{time}</span>
-            </div>
-            <b>{gp}</b>
-          </div>
-        ))}
-      </section>
-    </aside>
-  )
-}
-
 export function ParticipationShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [search, setSearch] = useState("")
   const [menuOpen, setMenuOpen] = useState(false)
-  const [notifications, setNotifications] = useState(false)
+  const [rightSideOpen, setRightSideOpen] = useState(true)
+  const [rightSideExiting, setRightSideExiting] = useState(false)
+  const [rightSideStacked, setRightSideStacked] = useState(false)
+  const { mode, reducedMotion } = useCardMotion()
+  const rightSideMotion = mode !== "off" && !reducedMotion
   const input = useRef<HTMLInputElement>(null)
-  const notificationBox = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1250px)")
+    const update = () => setRightSideStacked(media.matches)
+    update()
+    media.addEventListener("change", update)
+    return () => media.removeEventListener("change", update)
+  }, [])
+
+  function toggleRightSide() {
+    setRightSideExiting(rightSideOpen && rightSideMotion)
+    setRightSideOpen(!rightSideOpen)
+  }
 
   useEffect(() => {
     setMenuOpen(false)
-    setNotifications(false)
     setSearch(new URLSearchParams(window.location.search).get("q") ?? "")
   }, [pathname])
+
+  useEffect(() => {
+    // Pointer effects cache card positions; refresh after an instant layout change.
+    const frame = requestAnimationFrame(() =>
+      window.dispatchEvent(new Event("gyralis:layout-change"))
+    )
+    return () => cancelAnimationFrame(frame)
+  }, [rightSideOpen, rightSideStacked])
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setMenuOpen(false)
-        setNotifications(false)
       }
       if (
         event.key === "/" &&
@@ -183,18 +98,9 @@ export function ParticipationShell({ children }: { children: ReactNode }) {
         input.current?.focus()
       }
     }
-    function onPointer(event: PointerEvent) {
-      if (
-        notificationBox.current &&
-        !notificationBox.current.contains(event.target as Node)
-      )
-        setNotifications(false)
-    }
     window.addEventListener("keydown", onKey)
-    window.addEventListener("pointerdown", onPointer)
     return () => {
       window.removeEventListener("keydown", onKey)
-      window.removeEventListener("pointerdown", onPointer)
     }
   }, [])
 
@@ -234,14 +140,11 @@ export function ParticipationShell({ children }: { children: ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="p-sidebar-season">
-            <span className="p-small-label">Gyralis Games · Demo</span>
-            <Link href="/games">
-              <LuSparkles /> Season 01 <LuArrowRight />
-            </Link>
-            <p>Every claim counts.</p>
-          </div>
           <div className="p-sidebar-footer">
+            <Link href="/dashboard">
+              <LuLayoutDashboard aria-hidden="true" />
+              Dashboard
+            </Link>
             <a
               href="https://github.com/orgs/Gyralis/repositories"
               target="_blank"
@@ -296,46 +199,35 @@ export function ParticipationShell({ children }: { children: ReactNode }) {
                 </button>
               )}
             </form>
-            <span className="p-demo-chip">Demo preview</span>
-            <div className="p-notifications" ref={notificationBox}>
-              <button
-                type="button"
-                className="p-icon-button"
-                aria-label="Notifications"
-                aria-expanded={notifications}
-                onClick={() => setNotifications(!notifications)}
-              >
-                <LuBell />
-              </button>
-              {notifications && (
-                <div className="p-notification-panel p-surface">
-                  <h2>You’re in the Loop</h2>
-                  <p>No notifications in this preview.</p>
-                  <span className="p-caption">
-                    Season and game previews use demo data.
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="p-identity-control">
-              <IdentityHubDrawer compact />
-            </div>
-            <WalletConnect compact />
+            <WalletConnect compact className="p-topbar-wallet" />
+            <RightSideToggle open={rightSideOpen} onToggle={toggleRightSide} />
           </header>
-          <details className="p-inline-participation">
-            <summary>
-              <span>Your participation</span>
-              <span>
-                11-day streak · Demo <LuChevronDown />
-              </span>
-            </summary>
-            <ParticipationRail />
-          </details>
-          <div className="p-app-grid">
+          <div
+            className={`p-app-grid ${
+              rightSideOpen || (rightSideExiting && rightSideStacked)
+                ? "is-right-side-open"
+                : ""
+            }`}
+            data-right-side-motion={rightSideMotion ? "" : undefined}
+            onTransitionEnd={(event) => {
+              if (
+                event.target === event.currentTarget &&
+                event.propertyName === "transform"
+              )
+                window.dispatchEvent(new Event("gyralis:layout-change"))
+            }}
+          >
             <main id="participation-content" className="p-page">
               {children}
             </main>
-            <ParticipationRail />
+            <AnimatePresence
+              initial={false}
+              onExitComplete={() => setRightSideExiting(false)}
+            >
+              {rightSideOpen && (
+                <RightSide key="right-side" stacked={rightSideStacked} />
+              )}
+            </AnimatePresence>
           </div>
         </div>
         <nav className="p-bottom-nav" aria-label="Mobile navigation">

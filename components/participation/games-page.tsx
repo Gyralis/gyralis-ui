@@ -18,7 +18,6 @@ import MagicBento from "@/components/ui/magic-bento"
 
 import { useParticipationSearch } from "./participation-shell"
 import {
-  DemoNotice,
   EmptyState,
   FilterTabs,
   PageIntro,
@@ -69,8 +68,8 @@ function GamesContent() {
     }
     setMessage(
       next.includes(id)
-        ? "Joined the demo game. Explore live Loops to continue participating."
-        : "Left the demo game."
+        ? "Joined the game. Explore live Loops to continue participating."
+        : "Left the game."
     )
   }
   function openGame(id: string | null) {
@@ -91,10 +90,6 @@ function GamesContent() {
         title="Gyralis Games"
         description="Many games. One participation layer."
       />
-      <DemoNotice>
-        Games and Season participation are interactive demos. Joining a demo
-        does not register an onchain entry.
-      </DemoNotice>
       <FilterTabs
         items={["Explore", "My Games"]}
         value={tab}
@@ -139,12 +134,12 @@ function GamesContent() {
                 {joined.includes(game.id) && (
                   <span className="p-game-joined">
                     <LuCheck />
-                    Joined demo
+                    Joined
                   </span>
                 )}
               </button>
               <div className="p-game-content">
-                <p className="p-eyebrow">{game.status} · Demo</p>
+                <p className="p-eyebrow">{game.status}</p>
                 <h2>{game.title}</h2>
                 <p>{game.description}</p>
                 <div className="p-game-meta">
@@ -167,7 +162,7 @@ function GamesContent() {
                   </span>
                   <ProgressBar
                     value={(game.current / game.target) * 100}
-                    label={`${game.title} demo progress`}
+                    label={`${game.title} progress`}
                   />
                 </div>
                 <button
@@ -188,7 +183,7 @@ function GamesContent() {
           }
           description={
             tab === "My Games"
-              ? "Join a demo game from Explore to see it here. Try other status filters for past games."
+              ? "Join a game from Explore to see it here. Try other status filters for past games."
               : "Try another status or search."
           }
           onReset={() => {
@@ -205,7 +200,7 @@ function GamesContent() {
       >
         <DialogContent className="participation-theme participation-dialog dark">
           <DialogHeader>
-            <p className="p-eyebrow">{selected?.type} · Demo game</p>
+            <p className="p-eyebrow">{selected?.type}</p>
             <DialogTitle>{selected?.title}</DialogTitle>
             <DialogDescription>{selected?.description}</DialogDescription>
           </DialogHeader>
@@ -225,11 +220,11 @@ function GamesContent() {
               </div>
               <ProgressBar
                 value={(selected.current / selected.target) * 100}
-                label="Demo game progress"
+                label="Game progress"
               />
               <p className="p-muted">
                 This preview uses sample progress. Live Loop claims do not
-                update demo game scores or award demo rewards.
+                update these game scores or award game rewards.
               </p>
               {selected.status === "Live" ? (
                 <div className="p-dialog-actions">
@@ -239,9 +234,7 @@ function GamesContent() {
                     className="p-button"
                     onClick={() => updateJoined(selected.id)}
                   >
-                    {joined.includes(selected.id)
-                      ? "Leave demo game"
-                      : "Join demo game"}
+                    {joined.includes(selected.id) ? "Leave game" : "Join game"}
                   </button>
                   <Link className="p-button secondary" href="/loops">
                     Explore live Loops <LuArrowRight />

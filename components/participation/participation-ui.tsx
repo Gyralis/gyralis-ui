@@ -118,16 +118,3 @@ export function EmptyState({
     </div>
   )
 }
-
-export function DemoNotice({
-  children = "Season, game, and progression values are sample data. Loop actions use the existing live experience.",
-}: {
-  children?: ReactNode
-}) {
-  return (
-    <p className="p-demo-notice">
-      <span>Demo</span>
-      {children}
-    </p>
-  )
-}

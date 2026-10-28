@@ -315,6 +315,7 @@ export default function MagicBento({
       passive: true,
       capture: true,
     })
+    window.addEventListener("gyralis:layout-change", invalidate)
     document.addEventListener("visibilitychange", visibilityChanged)
     wake()
 
@@ -332,6 +333,7 @@ export default function MagicBento({
       window.removeEventListener("pointerup", release)
       window.removeEventListener("pointercancel", release)
       window.removeEventListener("scroll", invalidate, { capture: true })
+      window.removeEventListener("gyralis:layout-change", invalidate)
       document.removeEventListener("visibilitychange", visibilityChanged)
       for (const animation of entrances.values()) animation.cancel()
       for (const card of cards.keys()) clearStyles(card)

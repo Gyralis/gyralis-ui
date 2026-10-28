@@ -5,18 +5,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { LoopCardsData } from "@/data/loops-data"
 import { demoGames } from "@/data/participation-demo"
-import { LuArrowRight, LuCalendarCheck, LuCompass } from "react-icons/lu"
+import { LuArrowRight, LuCompass } from "react-icons/lu"
 
 import MagicBento from "@/components/ui/magic-bento"
 
-import { CardMotionPreview } from "./card-motion-preview"
 import { LoopOpportunityCard } from "./loop-directory"
 import { useParticipationSearch } from "./participation-shell"
 import {
-  DemoNotice,
   EmptyState,
   FilterTabs,
-  PageIntro,
   ProgressBar,
   SectionTitle,
 } from "./participation-ui"
@@ -94,11 +91,7 @@ function DiscoverContent() {
     !(showEcosystems && eco.length)
   return (
     <>
-      <PageIntro
-        title="Discover"
-        description="Find your next Loop, game or ecosystem. Keep showing up."
-      />
-      <CardMotionPreview />
+      <SeasonPreview pageHeader />
       <FilterTabs
         items={[
           "For You",
@@ -115,26 +108,6 @@ function DiscoverContent() {
         }}
         label="Discover categories"
       />
-      {showForYou && (
-        <>
-          <section className="p-continue p-surface">
-            <span className="p-icon">
-              <LuCalendarCheck />
-            </span>
-            <div>
-              <p className="p-eyebrow">
-                Keep your streak <span className="p-small-label">Demo</span>
-              </p>
-              <h2>11 days. Every claim counts.</h2>
-              <p>Your next participation starts with a Loop.</p>
-            </div>
-            <Link href="/loops?loop=3" className="p-button">
-              View ready Loops <LuArrowRight />
-            </Link>
-          </section>
-          <SeasonPreview />
-        </>
-      )}
       {search && <p className="p-muted">Search results for “{inputSearch}”</p>}
       {ecosystem && (
         <div className="p-section-title">
@@ -224,7 +197,7 @@ function DiscoverContent() {
               >
                 <Image src={game.art} width={220} height={180} alt="" />
                 <div>
-                  <p className="p-eyebrow">{game.type} · Demo</p>
+                  <p className="p-eyebrow">{game.type}</p>
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
                   <span className="p-caption">
@@ -232,7 +205,7 @@ function DiscoverContent() {
                   </span>
                   <ProgressBar
                     value={(game.current / game.target) * 100}
-                    label={`${game.title} demo progress`}
+                    label={`${game.title} progress`}
                   />
                 </div>
                 <LuArrowRight />
@@ -257,14 +230,13 @@ function DiscoverContent() {
           appear here as the ecosystem grows.
         </p>
       )}
-      <DemoNotice />
     </>
   )
 }
 
 export function DiscoverPage() {
   return (
-    <Suspense fallback={<p className="p-muted">Loading Discover…</p>}>
+    <Suspense fallback={<p className="p-muted">Loading Explore…</p>}>
       <DiscoverContent />
     </Suspense>
   )

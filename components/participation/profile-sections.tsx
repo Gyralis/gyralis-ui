@@ -15,7 +15,7 @@ import {
 import type { ProfilePageData } from "@/lib/profile/get-profile-page-data"
 import { WalletConnect } from "@/components/blockchain/wallet-connect"
 
-import { DemoNotice, FilterTabs, PageIntro } from "./participation-ui"
+import { FilterTabs, PageIntro } from "./participation-ui"
 import { SeasonPreview } from "./season-preview"
 
 export function ProfileSections({
@@ -39,14 +39,10 @@ export function ProfileSections({
       />
       {preview && (
         <>
-          <DemoNotice>
-            This is a sample profile. Connect your wallet to see your live
-            claims, GP, streaks, and achievements.
-          </DemoNotice>
           <section className="p-profile-hero p-surface">
             <Image src="/images/img_2.png" width={90} height={90} alt="" />
             <div>
-              <p className="p-eyebrow">Demo profile</p>
+              <p className="p-eyebrow">Participation profile</p>
               <h2>{user.name}</h2>
               <p>Level {user.level} · True Looper</p>
             </div>
@@ -100,9 +96,7 @@ export function ProfileSections({
         ))}
       {tab === "Activity" && (
         <section className="p-surface p-profile-activity">
-          <h2>
-            {preview ? "Latest activity · Demo" : "Participation summary"}
-          </h2>
+          <h2>{preview ? "Latest activity" : "Participation summary"}</h2>
           {preview ? (
             [
               "Claimed 1Hive Gardens · +1 GP",
@@ -154,10 +148,6 @@ export function ProfileSections({
         ))}
       {tab === "Seasons" && (
         <>
-          <DemoNotice>
-            Season history is a preview. All-time wallet data remains
-            independent.
-          </DemoNotice>
           <SeasonPreview />
         </>
       )}
@@ -172,7 +162,7 @@ export function ProfileSections({
               <Link key={loop.id} href={`/loops?loop=${loop.id}`}>
                 <span>
                   <strong>{loop.title}</strong>
-                  <small>{loop.streak} · Demo</small>
+                  <small>{loop.streak}</small>
                 </span>
                 <LuArrowRight />
               </Link>
@@ -190,7 +180,6 @@ function PreviewAchievements() {
     <section>
       <div className="p-section-title">
         <h2>Achievements</h2>
-        <span className="p-small-label">Demo</span>
       </div>
       <div className="p-achievement-grid">
         {[

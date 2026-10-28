@@ -17,14 +17,24 @@ import MagicBento from "@/components/ui/magic-bento"
 
 import { FilterTabs, ProgressBar } from "./participation-ui"
 
-export function SeasonPreview({ compact = false }: { compact?: boolean }) {
+export function SeasonPreview({
+  compact = false,
+  pageHeader = false,
+}: {
+  compact?: boolean
+  pageHeader?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState("Overview")
+  const Hero = pageHeader ? "header" : "section"
+  const Heading = pageHeader ? "h1" : "h2"
   return (
     <>
       <MagicBento>
-        <section
-          className={`p-season-hero p-surface ${compact ? "compact" : ""}`}
+        <Hero
+          className={`p-season-hero p-surface ${compact ? "compact" : ""} ${
+            pageHeader ? "is-page-header" : ""
+          }`}
           data-magic-bento-card=""
         >
           <Image
@@ -36,10 +46,8 @@ export function SeasonPreview({ compact = false }: { compact?: boolean }) {
             priority
           />
           <div className="p-season-copy">
-            <p className="p-eyebrow">
-              Featured Season <span className="p-small-label">Demo</span>
-            </p>
-            <h2>Gyralis Games — Season 01</h2>
+            <p className="p-eyebrow">Featured Season</p>
+            <Heading>Gyralis Games — Season 01</Heading>
             <p>30 days of claiming, streaks, games and rewards.</p>
             <div className="p-hero-stats">
               <span>
@@ -66,12 +74,12 @@ export function SeasonPreview({ compact = false }: { compact?: boolean }) {
               View Season <LuArrowRight />
             </button>
           </div>
-        </section>
+        </Hero>
       </MagicBento>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="participation-theme participation-dialog dark">
           <DialogHeader>
-            <p className="p-eyebrow">Season preview · Demo</p>
+            <p className="p-eyebrow">Season overview</p>
             <DialogTitle>Gyralis Games — Season 01</DialogTitle>
             <DialogDescription>
               30 days of recurring participation. All Season values are sample
@@ -82,7 +90,7 @@ export function SeasonPreview({ compact = false }: { compact?: boolean }) {
             items={["Overview", "Games", "Rules"]}
             value={tab}
             onChange={setTab}
-            label="Season preview sections"
+            label="Season overview sections"
           />
           {tab === "Overview" && (
             <>

@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import { LuArrowRight } from "react-icons/lu"
 
-import { DemoNotice, FilterTabs, PageIntro } from "./participation-ui"
+import { FilterTabs, PageIntro } from "./participation-ui"
 
 export function LeaderboardSections({ children }: { children: ReactNode }) {
   const [tab, setTab] = useState("All-Time")
@@ -25,13 +25,9 @@ export function LeaderboardSections({ children }: { children: ReactNode }) {
       )}
       {tab === "Season" && (
         <>
-          <DemoNotice>
-            Season rankings are sample data. The All-Time tab uses the existing
-            live leaderboard.
-          </DemoNotice>
           <div className="p-table-wrap p-surface">
             <table className="p-table">
-              <caption className="sr-only">Demo Season 01 standings</caption>
+              <caption className="sr-only">Season 01 standings</caption>
               <thead>
                 <tr>
                   <th>Rank</th>
@@ -44,7 +40,7 @@ export function LeaderboardSections({ children }: { children: ReactNode }) {
                   { rank: 1, name: "orbit.eth", gp: 2840 },
                   { rank: 2, name: "garden.eth", gp: 2718 },
                   { rank: 3, name: "return.eth", gp: 2604 },
-                  { rank: 38, name: "Mati0x · Demo profile", gp: 1840 },
+                  { rank: 38, name: "Mati0x", gp: 1840 },
                 ].map((row) => (
                   <tr
                     className={row.rank === 38 ? "is-current" : ""}

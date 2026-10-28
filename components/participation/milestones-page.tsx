@@ -16,12 +16,7 @@ import {
 import MagicBento from "@/components/ui/magic-bento"
 
 import { CardMotionPreview } from "./card-motion-preview"
-import {
-  DemoNotice,
-  FilterTabs,
-  PageIntro,
-  ProgressBar,
-} from "./participation-ui"
+import { FilterTabs, PageIntro, ProgressBar } from "./participation-ui"
 
 export function MilestonesPage() {
   const [tab, setTab] = useState("In progress")
@@ -41,9 +36,6 @@ export function MilestonesPage() {
         description="Track the collective progress of the Gyralis ecosystem."
       />
       <CardMotionPreview />
-      <DemoNotice>
-        Milestone totals and completion states are sample data for this preview.
-      </DemoNotice>
       <MagicBento>
         <section
           className="p-milestone-hero p-surface"
@@ -51,7 +43,7 @@ export function MilestonesPage() {
         >
           <Image src="/images/img_1.png" width={360} height={360} alt="" />
           <div>
-            <p className="p-eyebrow">LOOP TOGETHER · Demo</p>
+            <p className="p-eyebrow">LOOP TOGETHER</p>
             <h2>Road to 25K claims</h2>
             <p>Every return moves the whole ecosystem forward.</p>
             <div className="p-milestone-total">
@@ -60,7 +52,7 @@ export function MilestonesPage() {
             </div>
             <ProgressBar
               value={(22481 / 25000) * 100}
-              label="Demo 25K claims milestone"
+              label="25K claims milestone"
             />
             <div className="p-section-title">
               <span>89.9% complete</span>
@@ -101,7 +93,7 @@ export function MilestonesPage() {
             <p>{item.unlock}</p>
             <ProgressBar
               value={(item.current / item.target) * 100}
-              label={`${item.title} demo progress`}
+              label={`${item.title} progress`}
             />
             <div className="p-section-title">
               <span>
@@ -123,7 +115,7 @@ export function MilestonesPage() {
       >
         <DialogContent className="participation-theme participation-dialog dark">
           <DialogHeader>
-            <p className="p-eyebrow">Collective progress · Demo</p>
+            <p className="p-eyebrow">Collective progress</p>
             <DialogTitle>{selected?.title}</DialogTitle>
             <DialogDescription>{selected?.unlock}</DialogDescription>
           </DialogHeader>
