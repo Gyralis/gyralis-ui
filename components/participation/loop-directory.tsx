@@ -81,8 +81,7 @@ export function LoopOpportunityCard({
           <div>
             <h3>{loop.title}</h3>
             <p>
-              {loop.chainName}
-              {demoStatus ? " status" : ` · ${loop.by}`}
+              {loop.chainName} · {loop.by}
             </p>
           </div>
         </div>
