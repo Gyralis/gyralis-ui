@@ -40,6 +40,7 @@ import {
 import {
   fetchAllClaimEventsForUserLoop,
   getScoringSubgraphSource,
+  resolveContractScoringLoopId,
 } from "./subgraph-client"
 import { ClaimScoringEvent } from "./types"
 
@@ -266,6 +267,13 @@ export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
     return { claimed: false, alreadySynced: false }
   }
 
+  const scoringLoopId = await resolveContractScoringLoopId(
+    source,
+    input.contractAddress,
+    input.loopId
+  )
+  for (const event of receiptEvents) event.loopId = scoringLoopId
+
   const processedEvents = await Promise.all(
     receiptEvents.map((event) =>
       getProcessedClaimEvent({
@@ -279,13 +287,13 @@ export async function syncUserClaimFromReceipt(input: SyncClaimInput) {
   const historicalEvents = await fetchAllClaimEventsForUserLoop({
     source,
     userAddress: input.userAddress,
-    loopId: input.loopId,
+    loopId: scoringLoopId,
     batchSize: env.SCORING_SYNC_BATCH_SIZE,
   })
   const claimEvents = mergeReceiptEvents(historicalEvents, receiptEvents)
   const { loopStats, globalStats } = await recomputeUserLoopAndGlobalStats({
     userAddress: input.userAddress,
-    loopId: input.loopId,
+    loopId: scoringLoopId,
     chainId: input.chainId,
     claimEvents,
   })

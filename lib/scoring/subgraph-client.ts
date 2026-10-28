@@ -9,7 +9,7 @@ interface ClaimEventNode {
   blockNumber: string
   timestamp: string
   txHash: string
-  loop: { id: string }
+  loop: { id: string; factoryLoopId?: string | null }
   account: { id: string }
 }
 
@@ -26,7 +26,8 @@ interface ClaimEventsQueryFilters {
   afterEventId?: boolean
   loopId?: boolean
   excludedLoopIds?: boolean
-  includedLoopIds?: boolean
+  factoryLoopId?: boolean
+  factoryMetadata?: boolean
   userAddress?: boolean
 }
 
@@ -44,6 +45,13 @@ export const BASE_TRUE_LOOPERS_SCORING_LOOP_ID = 6
 export const BASE_TRUE_LOOPERS_FACTORY_LOOP_ID = 24
 export const BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID =
   "0xb7902fae80eb57abac621dc68eb30ffff42f76f0"
+
+// Keep historical product IDs stable. New factory loops use a separate Int-safe
+// namespace so factory IDs 1/6/7 cannot collide with existing product IDs.
+export const FACTORY_SCORING_ID_OFFSET = 1_000_000_000
+export const BASE_RWAGMI_SUBGRAPH_LOOP_ID =
+  "0xe714bc7f58726490a15d2197bcded598223f5319"
+export const BASE_RWAGMI_SCORING_LOOP_ID = 7
 
 export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
   if (!env.GYRALIS_SUBGRAPH_URL) {
@@ -64,6 +72,7 @@ export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
       loopIdsBySubgraphId: {
         [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
         [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]: BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+        [BASE_RWAGMI_SUBGRAPH_LOOP_ID]: BASE_RWAGMI_SCORING_LOOP_ID,
       },
     })
   }
@@ -112,9 +121,9 @@ export function buildClaimEventsQuery(
     variables.push("$excludedLoopIds: [ID!]")
     where.push("loop_not_in: $excludedLoopIds")
   }
-  if (filters.includedLoopIds) {
-    variables.push("$includedLoopIds: [ID!]")
-    where.push("loop_in: $includedLoopIds")
+  if (filters.factoryLoopId) {
+    variables.push("$factoryLoopId: BigInt!")
+    where.push("loop_: { factoryLoopId: $factoryLoopId }")
   }
   if (filters.userAddress) {
     variables.push("$userAddress: ID!")
@@ -137,7 +146,7 @@ export function buildClaimEventsQuery(
       blockNumber
       timestamp
       txHash
-      loop { id }
+      loop { id ${filters.factoryMetadata ? "factoryLoopId" : ""} }
       account { id }
     }
   }
@@ -164,10 +173,12 @@ export async function fetchClaimEventsFromSubgraph(input: {
         fromBlock: input.fromBlock != null,
         blockNumber: input.blockNumber != null,
         afterEventId: input.afterEventId != null,
-        loopId: input.loopId != null,
+        loopId:
+          input.loopId != null &&
+          !isFactoryScoringId(input.source, input.loopId),
+        factoryLoopId: isFactoryScoringId(input.source, input.loopId),
+        factoryMetadata: input.source.chainId === BASE_SCORING_CHAIN_ID,
         excludedLoopIds: Boolean(input.excludedLoopIds?.length),
-        includedLoopIds:
-          input.loopId == null && input.source.loopIdsBySubgraphId != null,
       },
       input.orderBy
     ),
@@ -183,10 +194,9 @@ export async function fetchClaimEventsFromSubgraph(input: {
       excludedLoopIds: input.excludedLoopIds?.map((loopId) =>
         subgraphLoopIdForScoringLoop(input.source, loopId)
       ),
-      includedLoopIds:
-        input.loopId == null && input.source.loopIdsBySubgraphId
-          ? Object.keys(input.source.loopIdsBySubgraphId)
-          : undefined,
+      factoryLoopId: isFactoryScoringId(input.source, input.loopId)
+        ? String(input.loopId! - FACTORY_SCORING_ID_OFFSET)
+        : undefined,
     },
     source: input.source,
   })
@@ -206,13 +216,18 @@ export async function fetchAllClaimEventsForUserLoop(input: {
     const batch = await fetchClaimEventPage({
       query: buildClaimEventsQuery({
         afterEventId: afterEventId != null,
-        loopId: true,
+        loopId: !isFactoryScoringId(input.source, input.loopId),
+        factoryLoopId: isFactoryScoringId(input.source, input.loopId),
+        factoryMetadata: input.source.chainId === BASE_SCORING_CHAIN_ID,
         userAddress: true,
       }),
       variables: {
         first: input.batchSize,
         afterEventId,
         loopId: subgraphLoopIdForScoringLoop(input.source, input.loopId),
+        factoryLoopId: isFactoryScoringId(input.source, input.loopId)
+          ? String(input.loopId - FACTORY_SCORING_ID_OFFSET)
+          : undefined,
         userAddress: input.userAddress.toLowerCase(),
       },
       source: input.source,
@@ -236,11 +251,26 @@ function parseSubgraphLogIndex(id: string): number | undefined {
 
 export function parseSubgraphLoopId(
   source: ScoringSubgraphSource,
-  id: string
+  id: string,
+  factoryLoopId?: string | null
 ): number {
   const mappedLoopId = source.loopIdsBySubgraphId?.[id.toLowerCase()]
   if (mappedLoopId != null) return mappedLoopId
 
+  if (source.chainId === BASE_SCORING_CHAIN_ID) {
+    if (factoryLoopId == null || !/^\d+$/.test(factoryLoopId)) {
+      throw new Error(`Missing factory loop id for ${id}`)
+    }
+    const scoringId = FACTORY_SCORING_ID_OFFSET + Number(factoryLoopId)
+    if (!Number.isSafeInteger(scoringId) || scoringId > 2_147_483_647) {
+      throw new Error(
+        `Factory loop id exceeds scoring storage range: ${factoryLoopId}`
+      )
+    }
+    return scoringId
+  }
+  if (!/^\d+$/.test(id))
+    throw new Error(`Invalid numeric loop id from subgraph: ${id}`)
   const loopId = Number(id)
   if (!Number.isSafeInteger(loopId) || loopId < 0) {
     throw new Error(`Invalid numeric loop id from subgraph: ${id}`)
@@ -281,7 +311,11 @@ async function fetchClaimEventPage(input: {
   return (payload.data?.claimEvents ?? []).map((event) => ({
     id: event.id,
     userAddress: event.account.id.toLowerCase(),
-    loopId: parseSubgraphLoopId(input.source, event.loop.id),
+    loopId: parseSubgraphLoopId(
+      input.source,
+      event.loop.id,
+      event.loop.factoryLoopId
+    ),
     chainId: input.source.chainId,
     periodNumber: Number(event.periodNumber),
     payout: event.payout,
@@ -290,4 +324,47 @@ async function fetchClaimEventPage(input: {
     txHash: event.txHash,
     logIndex: parseSubgraphLogIndex(event.id),
   }))
+}
+
+function isFactoryScoringId(source: ScoringSubgraphSource, loopId?: number) {
+  return (
+    source.chainId === BASE_SCORING_CHAIN_ID &&
+    loopId != null &&
+    loopId >= FACTORY_SCORING_ID_OFFSET
+  )
+}
+
+// Resolve receipt scoring by contract identity, never by a newly assigned UI ID.
+export async function resolveContractScoringLoopId(
+  source: ScoringSubgraphSource,
+  contractAddress: string,
+  legacyLoopId: number
+): Promise<number> {
+  if (source.chainId !== BASE_SCORING_CHAIN_ID) return legacyLoopId
+  const id = contractAddress.toLowerCase()
+  const mapped = source.loopIdsBySubgraphId?.[id]
+  if (mapped != null) return mapped
+  const response = await fetch(source.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query:
+        "query LoopIdentity($id: ID!) { loop(id: $id) { id factoryLoopId } }",
+      variables: { id },
+    }),
+  })
+  if (!response.ok)
+    throw new Error(`Subgraph request failed with status ${response.status}`)
+  const payload = (await response.json()) as {
+    data?: { loop?: { id: string; factoryLoopId: string | null } | null }
+    errors?: Array<{ message: string }>
+  }
+  if (payload.errors?.length)
+    throw new Error(payload.errors.map((error) => error.message).join("; "))
+  if (!payload.data?.loop) throw new Error(`Loop is not indexed yet: ${id}`)
+  return parseSubgraphLoopId(
+    source,
+    payload.data.loop.id,
+    payload.data.loop.factoryLoopId
+  )
 }

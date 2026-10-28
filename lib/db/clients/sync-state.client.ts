@@ -2,7 +2,11 @@ import { prisma } from "@/lib/db/client"
 
 export const SCORING_SYNC_STATE_ID = "scoring-sync"
 
-function scoringSyncStateId(chainId: number) {
+export function scoringSyncStateId(chainId: number) {
+  // Replay Base incrementally once after removing the old allowlist. Existing
+  // projections are recomputed/upserted, never cleared or incremented twice.
+  if (chainId === 8453)
+    return `${SCORING_SYNC_STATE_ID}-${chainId}-all-loops-v1`
   return chainId === 100
     ? SCORING_SYNC_STATE_ID
     : `${SCORING_SYNC_STATE_ID}-${chainId}`

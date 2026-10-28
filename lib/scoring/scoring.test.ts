@@ -462,13 +462,7 @@ describe("scoring sync cursors", () => {
     expect(query).toContain("id_gt: $afterEventId")
   })
 
-  it("can constrain factory-discovered events to application-mapped loops", () => {
-    const query = buildClaimEventsQuery({ includedLoopIds: true })
-    expect(query).toContain("$includedLoopIds: [ID!]")
-    expect(query).toContain("loop_in: $includedLoopIds")
-  })
-
-  it("queries only mapped Base loops during unfiltered sync", async () => {
+  it("queries every Base loop during unfiltered sync", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(
@@ -480,20 +474,15 @@ describe("scoring sync cursors", () => {
         url: "https://example.com/base",
         loopIdsBySubgraphId: {
           [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
-          [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]:
-            BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
         },
       },
       fromBlock: 0,
       first: 100,
     })
-
     const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
-    expect(body.variables.includedLoopIds).toEqual([
-      BASE_MARKEE_SUBGRAPH_LOOP_ID,
-      BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID,
-    ])
-    expect(body.query).toContain("loop_in: $includedLoopIds")
+    expect(body.variables.includedLoopIds).toBeUndefined()
+    expect(body.query).not.toContain("loop_in:")
+    expect(body.query).toContain("factoryLoopId")
     fetchMock.mockRestore()
   })
 })
