@@ -22,7 +22,6 @@ import {
   FilterTabs,
   PageIntro,
   ProgressBar,
-  SectionTitle,
 } from "./participation-ui"
 import { SeasonPreview } from "./season-preview"
 
@@ -88,7 +87,7 @@ function GamesContent() {
     <>
       <PageIntro
         title="Gyralis Games"
-        description="Many games. One participation layer."
+        description="One participation layer. Many ways to earn"
       />
       <FilterTabs
         items={["Explore", "My Games"]}
@@ -254,11 +253,6 @@ function GamesContent() {
           )}
         </DialogContent>
       </Dialog>
-      <SectionTitle title="One participation layer. More ways to play." />
-      <p className="p-muted">
-        Games build on your Loop participation. Your all-time identity stays
-        with you through every Season.
-      </p>
     </>
   )
 }

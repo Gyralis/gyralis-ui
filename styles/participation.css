@@ -81,7 +81,8 @@
   gap: 7px;
   margin-top: 42px;
 }
-.p-sidebar nav a {
+.p-sidebar nav a,
+.p-sidebar-footer a {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -92,7 +93,8 @@
   font-weight: 500;
   border-left: 2px solid transparent;
 }
-.p-sidebar nav a:hover {
+.p-sidebar nav a:hover,
+.p-sidebar-footer a:hover {
   color: white;
   background: #ffffff05;
 }
@@ -108,14 +110,9 @@
 .p-sidebar-footer {
   margin-top: auto;
   display: grid;
-  gap: 24px;
-  padding: 20px 16px;
+  gap: 7px;
+  padding: 20px 0;
   color: #b9c5d4;
-}
-.p-sidebar-footer a {
-  display: flex;
-  align-items: center;
-  gap: 15px;
 }
 .p-sidebar-footer svg {
   width: 18px;
