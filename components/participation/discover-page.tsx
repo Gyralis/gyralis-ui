@@ -4,9 +4,12 @@ import { Suspense, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardsData } from "@/data/loops-data"
-import { demoGames } from "@/data/participation-demo"
 import { LuArrowRight, LuCompass } from "react-icons/lu"
 
+import {
+  seasonGameProgress,
+  seasonGames,
+} from "@/lib/participation/season-games"
 import MagicBento from "@/components/ui/magic-bento"
 
 import { LoopOpportunityCard } from "./loop-directory"
@@ -17,6 +20,7 @@ import {
   ProgressBar,
   SectionTitle,
 } from "./participation-ui"
+import { useSeason } from "./season-context"
 import { SeasonPreview } from "./season-preview"
 
 const ecosystems = [
@@ -53,6 +57,7 @@ const ecosystems = [
 ]
 
 function DiscoverContent() {
+  const { state } = useSeason()
   const [tab, setTab] = useState("For You")
   const [ecosystem, setEcosystem] = useState<string | null>(null)
   const inputSearch = useParticipationSearch()
@@ -75,10 +80,8 @@ function DiscoverContent() {
   )
   const displayedLoops =
     tab === "New" ? activeLoops.filter((loop) => loop.id === 9) : activeLoops
-  const games = demoGames.filter(
-    (game) =>
-      game.status === "Live" &&
-      matches(`${game.title} ${game.type} ${game.description}`)
+  const games = seasonGames.filter((game) =>
+    matches(`${game.title} ${game.type} ${game.description}`)
   )
   const eco = ecosystems.filter((item) => matches(`${item.name} ${item.type}`))
   const showForYou = tab === "For You" && !search && !ecosystem
@@ -140,9 +143,10 @@ function DiscoverContent() {
                   loop={loop}
                   demoStatus={
                     showForYou
-                      ? loop.id === 4
-                        ? "Next claim in 5h 12m"
-                        : "Ready to claim"
+                      ? state.loops.find((item) => item.id === loop.id)
+                          ?.claimedToday
+                        ? "Claimed in Season preview"
+                        : "View live claim state"
                       : undefined
                   }
                 />
@@ -180,12 +184,8 @@ function DiscoverContent() {
       {showGames && games.length > 0 && (
         <section>
           <SectionTitle
-            title={
-              tab === "Ending Soon"
-                ? "Season games · 18 days left"
-                : "Keep playing. Keep progressing."
-            }
-            href="/games"
+            title="Season Games · your claims go further"
+            href="/games?view=bonus"
           />
           <MagicBento className="p-featured-grid">
             {games.slice(0, tab === "Games" ? 4 : 2).map((game) => (
@@ -201,10 +201,13 @@ function DiscoverContent() {
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
                   <span className="p-caption">
-                    {game.current} / {game.target} {game.unit}
+                    {Math.min(game.target, seasonGameProgress(game.id, state))}{" "}
+                    / {game.target} {game.unit}
                   </span>
                   <ProgressBar
-                    value={(game.current / game.target) * 100}
+                    value={
+                      (seasonGameProgress(game.id, state) / game.target) * 100
+                    }
                     label={`${game.title} progress`}
                   />
                 </div>

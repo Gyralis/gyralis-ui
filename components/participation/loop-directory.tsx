@@ -17,6 +17,7 @@ import {
 } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
+import { seasonMilestones } from "@/lib/participation/season-preview"
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ import LoopCard from "@/components/loops/loop-card"
 
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs, PageIntro } from "./participation-ui"
+import { useSeason } from "./season-context"
 
 export const loopArtwork = (loop: LoopCardData) =>
   loop.eligibilityProvider === "blockscout"
@@ -48,6 +50,11 @@ export function LoopOpportunityCard({
   loop: LoopCardData
   demoStatus?: string
 }) {
+  const { state } = useSeason()
+  const seasonLoop = state.loops.find((item) => item.id === loop.id)
+  const nextBonus =
+    seasonLoop &&
+    seasonMilestones.find((m) => !seasonLoop.earned.includes(m.streak))
   return (
     <article className="p-loop-card p-surface" data-magic-bento-card="">
       <Link
@@ -85,6 +92,14 @@ export function LoopOpportunityCard({
             </p>
           </div>
         </div>
+        {seasonLoop && (
+          <p className="s-loop-season-note">
+            Season preview · {seasonLoop.streak}-day streak
+            {nextBonus
+              ? ` · +${nextBonus.points} at ${nextBonus.streak}`
+              : " · all bonuses earned"}
+          </p>
+        )}
         <div className="p-loop-card-bottom">
           <span>
             {loop.chainId === 100

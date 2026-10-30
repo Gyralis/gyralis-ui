@@ -16,6 +16,8 @@ import type { ProfilePageData } from "@/lib/profile/get-profile-page-data"
 import { WalletConnect } from "@/components/blockchain/wallet-connect"
 
 import { FilterTabs, PageIntro } from "./participation-ui"
+import { useSeason } from "./season-context"
+import { SeasonScore } from "./season-panels"
 import { SeasonPreview } from "./season-preview"
 
 export function ProfileSections({
@@ -30,6 +32,7 @@ export function ProfileSections({
   loops?: ReactNode
 }) {
   const [tab, setTab] = useState("Overview")
+  const { state: season } = useSeason()
   const preview = !data
   return (
     <>
@@ -45,6 +48,11 @@ export function ProfileSections({
               <p className="p-eyebrow">Participation profile</p>
               <h2>{user.name}</h2>
               <p>Level {user.level} · True Looper</p>
+              {season.earlyBird && season.registered && (
+                <span className="s-pill is-green">
+                  <LuAward /> Season 01 · Early Bird
+                </span>
+              )}
             </div>
             <WalletConnect />
           </section>
@@ -149,6 +157,7 @@ export function ProfileSections({
       {tab === "Seasons" && (
         <>
           <SeasonPreview />
+          <SeasonScore />
         </>
       )}
       {tab === "Loops" &&

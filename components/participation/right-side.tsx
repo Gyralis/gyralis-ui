@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react"
 import Link from "next/link"
-import { demoParticipation as user } from "@/data/participation-demo"
 import { motion, useIsPresent } from "framer-motion"
 import {
   LuArrowRight,
@@ -13,8 +12,11 @@ import {
   LuSparkles,
 } from "react-icons/lu"
 
+import { seasonPhases } from "@/lib/participation/season-preview"
+
 import { useCardMotion } from "./card-motion-preview"
 import { ProgressBar } from "./participation-ui"
+import { useSeason } from "./season-context"
 
 export function RightSideToggle({
   open,
@@ -44,6 +46,7 @@ export function RightSideToggle({
 }
 
 export function RightSide({ stacked = false }: { stacked?: boolean }) {
+  const { state, score, rank } = useSeason()
   const { mode, reducedMotion } = useCardMotion()
   const motionEnabled = mode !== "off" && !reducedMotion
   const isPresent = useIsPresent()
@@ -99,43 +102,60 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
         </div>
         <div className="p-season-numbers">
           <div>
-            <p>Season GP</p>
-            <strong>{user.seasonGP.toLocaleString()}</strong>
+            <p>{state.registered ? "Season points" : "Potential points"}</p>
+            <strong>{score.total.toLocaleString()}</strong>
           </div>
           <div>
             <p>Season rank</p>
-            <strong>#{user.seasonRank}</strong>
+            <strong>
+              {state.registered && state.phase !== "registration"
+                ? `#${rank ?? "—"}`
+                : "—"}
+            </strong>
           </div>
         </div>
-        <ProgressBar value={40} label="Season elapsed" />
-        <p className="p-caption">Day 12 of 30 · 18 days left</p>
+        <ProgressBar
+          value={(seasonPhases[state.phase].day / 30) * 100}
+          label="Season elapsed"
+        />
+        <p className="p-caption">{seasonPhases[state.phase].timing}</p>
       </section>
       <section className="p-rail-activity">
         <div className="p-section-title">
-          <h2>Latest activity</h2>
-          <Link href="/profile">
-            View all <LuArrowRight />
+          <h2>Season activity</h2>
+          <Link href="/games">
+            Your Season <LuArrowRight />
           </Link>
         </div>
         {[
-          {
-            icon: LuLayers,
-            title: "Claimed 1Hive Gardens",
-            time: "2h ago",
-            gp: "+1 GP",
-          },
-          {
-            icon: LuCalendarCheck,
-            title: "Completed 7-day streak",
-            time: "6h ago",
-            gp: "+5 GP",
-          },
-          {
-            icon: LuSparkles,
-            title: "Joined True Loopers",
-            time: "1d ago",
-            gp: "",
-          },
+          ...(state.dayClaimed
+            ? [
+                {
+                  icon: LuSparkles,
+                  title: "Day Game claim preview",
+                  time: "Just now",
+                  gp: "+4 points",
+                },
+              ]
+            : []),
+          ...state.loops
+            .filter((loop) => loop.claimedToday)
+            .map((loop) => ({
+              icon: LuLayers,
+              title: `${loop.name} claim preview`,
+              time: "Just now",
+              gp: `+${loop.lastAward} points`,
+            })),
+          ...(state.registered
+            ? [
+                {
+                  icon: LuCalendarCheck,
+                  title: state.earlyBird ? "Early Bird entry" : "Season entry",
+                  time: "Season 01",
+                  gp: "",
+                },
+              ]
+            : []),
         ].map(({ icon: Icon, title, time, gp }) => (
           <div className="p-activity-row" key={title}>
             <span className="p-icon small">
@@ -148,6 +168,12 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
             <b>{gp}</b>
           </div>
         ))}
+        {!state.registered &&
+          !state.loops.some((loop) => loop.claimedToday) && (
+            <p className="p-caption">
+              Enter the Season to build your participation history.
+            </p>
+          )}
       </section>
     </motion.aside>
   )
