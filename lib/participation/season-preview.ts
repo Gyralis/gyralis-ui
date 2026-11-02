@@ -97,6 +97,20 @@ export const canEnter = (phase: SeasonPhase) =>
   phase === "registration" || phase === "late"
 export const canScore = (phase: SeasonPhase) =>
   phase === "late" || phase === "live"
+
+export function previewNextClaimPoints(
+  loop: Pick<PreviewLoop, "streak" | "earned">
+) {
+  const streakBonus = seasonMilestones
+    .filter(
+      (milestone) =>
+        loop.streak + 1 >= milestone.streak &&
+        !loop.earned.includes(milestone.streak)
+    )
+    .reduce((total, milestone) => total + milestone.points, 0)
+  return { claimPoints: 1, streakBonus, total: 1 + streakBonus }
+}
+
 export function previewScore(state: PreviewState) {
   const claims =
     state.loops.reduce((sum, loop) => sum + loop.claims, 0) +

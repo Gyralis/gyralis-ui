@@ -2639,3 +2639,35 @@
 .s-catalog-challenge {
   grid-column: 1 / -1;
 }
+
+.s-loop-progression {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.s-claim-estimate {
+  padding: 10px 12px;
+  border: 1px solid #315268;
+  border-radius: 8px;
+  background: #102432;
+}
+.s-claim-estimate > p {
+  margin-bottom: 5px;
+  color: #91b6cf;
+  font-size: 10px;
+}
+.s-claim-estimate > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px 10px;
+}
+.s-claim-estimate span {
+  color: #bbd9ed;
+  font-size: 11px;
+}
+.s-claim-estimate strong {
+  color: #1ce783;
+  font-size: 12px;
+  font-weight: 600;
+}

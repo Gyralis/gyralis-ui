@@ -23,7 +23,9 @@ import {
 import {
   canEnter,
   canScore,
+  previewNextClaimPoints,
   seasonMilestones,
+  type PreviewLoop,
 } from "@/lib/participation/season-preview"
 import {
   Dialog,
@@ -222,11 +224,16 @@ function GamesContent() {
                       </button>
                     </div>
                   </div>
-                  <StreakMilestones
-                    streak={loop.streak}
-                    earned={loop.earned}
-                    name={loop.name}
-                  />
+                  <div className="s-loop-progression">
+                    <StreakMilestones
+                      streak={loop.streak}
+                      earned={loop.earned}
+                      name={loop.name}
+                    />
+                    {playing && state.registered && !loop.claimedToday && (
+                      <ClaimPointEstimate loop={loop} />
+                    )}
+                  </div>
                   <div className="s-loop-actions">
                     <span
                       className={`s-pill ${
@@ -253,7 +260,9 @@ function GamesContent() {
                       >
                         {loop.claimedToday
                           ? "Next daily period"
-                          : "Preview claim · +1"}
+                          : `Preview claim · +${
+                              previewNextClaimPoints(loop).total
+                            }`}
                       </button>
                     )}
                     <Link
@@ -501,6 +510,27 @@ function GamesContent() {
         </DialogContent>
       </Dialog>
     </>
+  )
+}
+
+function ClaimPointEstimate({ loop }: { loop: PreviewLoop }) {
+  const points = previewNextClaimPoints(loop)
+  return (
+    <div
+      className="s-claim-estimate"
+      aria-label={`This ${loop.name} claim earns ${points.total} Season points in the preview`}
+    >
+      <p>This claim</p>
+      <div>
+        <span>+{points.claimPoints} claim point</span>
+        {points.streakBonus > 0 && (
+          <span>+{points.streakBonus} streak bonus</span>
+        )}
+        <strong>
+          = {points.total} Season {points.total === 1 ? "point" : "points"}
+        </strong>
+      </div>
+    </div>
   )
 }
 

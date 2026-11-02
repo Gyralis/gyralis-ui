@@ -5,12 +5,34 @@ import {
   canEnter,
   canScore,
   createSeasonPreview,
+  previewNextClaimPoints,
   previewScore,
   previewStandings,
   seasonPreviewReducer,
 } from "./season-preview"
 
 describe("Season interaction preview", () => {
+  it.each([
+    { streak: 6, earned: [3], bonus: 5, total: 6 },
+    { streak: 2, earned: [], bonus: 2, total: 3 },
+    { streak: 11, earned: [3, 7], bonus: 0, total: 1 },
+    { streak: 2, earned: [3], bonus: 0, total: 1 },
+  ])(
+    "previews $total points accurately at streak $streak",
+    ({ streak, earned, bonus, total }) => {
+      const state = createSeasonPreview()
+      state.loops[0] = { ...state.loops[0], streak, earned }
+      expect(previewNextClaimPoints(state.loops[0])).toEqual({
+        claimPoints: 1,
+        streakBonus: bonus,
+        total,
+      })
+      const claimed = seasonPreviewReducer(state, { type: "claim", id: 4 })
+      expect(previewScore(claimed).total - previewScore(state).total).toBe(
+        total
+      )
+    }
+  )
   it("starts with reconciled, plausible claim and streak components", () => {
     expect(previewScore(createSeasonPreview())).toEqual({
       claims: 19,
