@@ -33,7 +33,7 @@ function LeaderboardContent({ children }: { children: ReactNode }) {
         title="Leaderboard"
         description={
           tab === "Season"
-            ? "One Season. Every claim, streak and game bonus counts."
+            ? "Season Points (SP) rank this Season only. They do not increase all-time GP."
             : "All-time Gyralis participation rankings. Every return counts."
         }
       />
@@ -146,7 +146,7 @@ function SeasonStandings() {
                 <tr>
                   <th>Rank</th>
                   <th>Looper</th>
-                  <th>Season points</th>
+                  <th>Season Points (SP)</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,7 +170,7 @@ function SeasonStandings() {
                       )}
                     </td>
                     <td>
-                      <strong>{row.total}</strong>
+                      <strong>{row.total} SP</strong>
                       <details>
                         <summary>Point breakdown</summary>
                         <p>

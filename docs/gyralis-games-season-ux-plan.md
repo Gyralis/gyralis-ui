@@ -75,6 +75,8 @@ Treat scoring and event windows as start-inclusive and end-exclusive.
 
 ### Regular scoring Loops
 
+**SP (Season Points)** is the Season-only score. SP does not accumulate into all-time GP or change the all-time leaderboard. Each Season starts with fresh SP and streak progression.
+
 - Use a confirmed roster of daily Loops on Base.
 - A regular eligible claim earns **1 Season point**.
 - Every regular Loop has its own independent Season streak.
@@ -148,19 +150,24 @@ Preserve the existing design, navigation, 1080px content limit, and embedded rig
 | Page | Main responsibility |
 | --- | --- |
 | Explore | Introduce the Season and surface the next useful action |
-| Games | Main Season dashboard: daily claims, streaks, games, and prizes |
-| Loops | Individual Loop requirements, eligibility, claim availability, and streaks |
+| Games | Season competition: total points, Season Games challenges, prizes and rules |
+| Loops | All Loops directory plus My Streaks for individual Season streaks, eligibility and claim availability |
 | Leaderboard | Full Season standings, point breakdowns, and payout cutoff |
 | Profile | Personal history, all-time progression, and Season badges |
 | Milestones | Collective participation goals, distinct from personal Season scoring |
 
 ### Games navigation
 
-Use three tabs:
+Use two tabs:
 
-1. **Overview**
-2. **Season Games**
-3. **Prizes & Rules**
+1. **Season Games** — the default tab, with the Season points header, rank and challenge progress.
+2. **Prizes & Rules** — pool, payouts, calendar and scoring rules.
+
+The Season points header belongs inside Season Games and includes claims, streak bonuses and challenge bonuses. Keep a compact link to ready Loop claims leading to My Streaks.
+
+### Loops navigation
+
+Use two page-level tabs: **All** and **My Streaks** in a single tab bar beneath the Loop introduction. All retains the directory and search; there are no separate Active, Standard Loops or SuperLoops filters. My Streaks owns per-Loop Season streaks, availability, claim-value breakdowns and next bonuses. Live Loop dialogs remain available from either tab.
 
 Keep the full leaderboard on the existing Leaderboard page. Link to its Season context from Games and Explore.
 
@@ -196,25 +203,13 @@ Registered players continue claiming and progressing in games. The final entry c
 
 Unregistered visitors can still explore and use available Loop functionality, but cannot enter this Season or earn a Season payout. Keep that distinction clear without blocking ordinary Loop participation.
 
-### Daily routine: Overview
+### Daily routine: Loops → My Streaks
 
-Present sections in this order:
+Present a clear Season 01 label, separate per-Loop streaks, the next-return opportunity and each Loop's claim availability. Keep the 3 / 7 / 14 / 28 milestones and the next-claim breakdown beside each Loop, including the +1 claim point and any newly earned streak bonus.
 
-1. **Season header:** dates, phase, countdown, registration status, pool, and primary action.
-2. **Your Season score:** total, rank, and Claims + Streak bonuses + Game bonuses.
-3. **Today's Loops:** claimable Loops first, followed by upcoming windows.
-4. **Next streak bonuses:** progress toward the next milestone for each regular Loop.
-5. **Bonus opportunities:** active Day Games and other games close to completion.
+Provide View requirements, a clearly labeled claim preview when available, and access to the existing live Loop experience. Season entry does not grant Loop eligibility. A live detail dialog opened from My Streaks must close back to that tab.
 
-Each regular Loop row shows:
-
-- Loop identity and eligibility state.
-- Current claim availability or next window.
-- Its independent Season streak.
-- The next milestone and reward.
-- A View Loop action, or Claim after eligibility and availability are verified.
-
-Keep eligibility messaging actionable. Do not imply that paying the Season entry makes a player eligible for a Loop.
+Games → Season Games contains the total Season points breakdown and rank, followed by the challenge collection. Its compact ready-claims link points to `/loops?view=streaks`; do not repeat the detailed Loop list in Games.
 
 ### Claim result
 
@@ -377,7 +372,7 @@ These dependencies must not be filled with invented payout amounts, game rewards
 
 The first implementation is a frontend-only UX preview using shared sample Season state. It does not activate a real Season, change production scoring, authorize eligibility, or send payments.
 
-- Games provides Overview, Season Games, and Prizes & Rules tabs.
+- Games provides Season Games and Prizes & Rules tabs. Loops provides All and My Streaks. Detailed streak tracking and claim-value previews live in My Streaks; total Season points live in the Season Games tab.
 - Preview controls switch between registration, late entry, live play, review, and prize interactions. Each stage loads its own fixture; reset reloads that stage. State is retained between participation-page navigations and resets on a full reload.
 - Registration, wallet/network/funding steps, entry-fee refunds, failures, retries, and prize confirmations are simulated and labeled in their dialogs.
 - Regular claim previews update independent Loop streaks and the shared score. Day Game previews credit 1 claim point and 3 game bonus points without streak bonuses.
@@ -387,3 +382,23 @@ The first implementation is a frontend-only UX preview using shared sample Seaso
 - Live Loop links retain the existing claim flow and network/eligibility behavior.
 
 Review entry point: `/games`. Start the local application with `pnpm dev`, then use Preview controls to inspect each phase. The default stage is a registered player on December 12; it is an example date, not the actual current Season state.
+
+## 10. Deferred proposal: Season participation GP bonus
+
+Saved November 2, 2026. Status: idea for later discussion; not an approved scoring rule or implemented award.
+
+Give everyone with qualifying game participation a small, lasting contribution to the all-time leaderboard through a separate end-of-Season **Season participation bonus** in GP. Keep the difference between participants modest and limit the overall addition to all-time points.
+
+SP remains the Season-only score used for Season rankings and prizes. SP is not directly converted into GP. This proposal would introduce a separate, bounded GP award after the Season ends, subject to approval; the existing rules above remain in effect until then.
+
+Suggested starting parameters, pending approval:
+
+- Set the bonus pool to **5% of regular all-time GP newly earned during that same Season**, excluding this participation bonus from its own calculation. Use the Season's new GP issuance as the baseline, rather than the cumulative historical GP total.
+- Include every player with qualifying game participation.
+- Distribute most of the pool equally, with a small additional share for completing more games.
+- Consider a cap of **10 GP per player per Season** to keep differences modest.
+- Award the bonus once after the Season finishes and results are finalized, without duplicate credits on retries.
+
+Illustrative example: 10,000 regular GP earned during a Season allows up to 500 additional GP for the participation bonus. With 100 eligible players, the average award would be 5 GP.
+
+Before implementation, confirm the percentage, per-player cap, qualifying activity, distribution formula, and handling of rounding or unused budget. No scoring or leaderboard changes are authorized by saving this proposal.

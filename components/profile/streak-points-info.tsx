@@ -4,16 +4,25 @@ import { scoringConfig } from "@/lib/scoring/config"
 import { StreakMilestoneIcon } from "@/components/loops/streak-milestone-icon"
 import { ProfileDetails } from "@/components/profile/profile-details"
 
-export function StreakPointsInfo() {
+export function StreakPointsInfo({
+  scope = "all-time",
+}: { scope?: "all-time" | "season" } = {}) {
+  const unit = scope === "season" ? "SP" : "GP"
   return (
     <ProfileDetails
-      label="How streak points work"
+      label={
+        scope === "season" ? "How Season Points work" : "How streak points work"
+      }
       align="start"
       className="w-80 max-w-[calc(100vw-2rem)] rounded-2xl border-border/70 bg-card !p-4 !text-left text-card-foreground"
       trigger={
         <button
           type="button"
-          aria-label="How streak points work"
+          aria-label={
+            scope === "season"
+              ? "How Season Points work"
+              : "How streak points work"
+          }
           className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <FaInfoCircle className="size-4" aria-hidden="true" />
@@ -24,11 +33,12 @@ export function StreakPointsInfo() {
         id="streak-points-info-title"
         className="font-heading text-lg font-bold text-foreground"
       >
-        How streak points work
+        {scope === "season" ? "SP · Season Points" : "How streak points work"}
       </h3>
       <p className="mt-2 text-xs leading-5 text-muted-foreground">
-        Claim in consecutive periods within the same loop to unlock extra
-        points.
+        {scope === "season"
+          ? "Claim in consecutive eligible periods within the same Loop to earn SP during this Season."
+          : "Claim in consecutive periods within the same loop to unlock extra points."}
       </p>
       <ul className="my-3 space-y-2">
         {scoringConfig.streakBonuses.map((milestone) => (
@@ -44,14 +54,15 @@ export function StreakPointsInfo() {
               {milestone.streak}-claim streak
             </span>
             <span className="ml-auto font-medium text-primary tabular-nums">
-              +{milestone.points} GP
+              +{milestone.points} {unit}
             </span>
           </li>
         ))}
       </ul>
       <p className="border-t border-border/70 pt-3 text-xs leading-5 text-muted-foreground">
-        Each milestone is awarded once per loop. You’ll be able to earn these
-        bonuses again when our first season begins.
+        {scope === "season"
+          ? "Each milestone is awarded once per Loop per Season. SP resets each Season and does not increase all-time GP or your all-time leaderboard score."
+          : "Each milestone is awarded once per loop. You’ll be able to earn these bonuses again when our first season begins."}
       </p>
     </ProfileDetails>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -20,13 +20,7 @@ import {
   seasonGameProgress,
   seasonGames,
 } from "@/lib/participation/season-games"
-import {
-  canEnter,
-  canScore,
-  previewNextClaimPoints,
-  seasonMilestones,
-  type PreviewLoop,
-} from "@/lib/participation/season-preview"
+import { canEnter, canScore } from "@/lib/participation/season-preview"
 import {
   Dialog,
   DialogContent,
@@ -37,37 +31,25 @@ import {
 import MagicBento from "@/components/ui/magic-bento"
 
 import { useParticipationSearch } from "./participation-shell"
-import {
-  EmptyState,
-  FilterTabs,
-  PageIntro,
-  ProgressBar,
-  SectionTitle,
-} from "./participation-ui"
+import { EmptyState, FilterTabs, ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
 import {
   SeasonControls,
   SeasonHeader,
   SeasonRules,
   SeasonScore,
-  StreakMilestones,
 } from "./season-panels"
 
 function GamesContent() {
   const router = useRouter()
   const params = useSearchParams()
   const { state, dispatch, score } = useSeason()
-  const [tab, setTab] = useState("Overview")
-  const [requirements, setRequirements] = useState<number | null>(null)
+  const tab =
+    !params.get("game") && params.get("view") === "prizes"
+      ? "Prizes & Rules"
+      : "Season Games"
   const search = useParticipationSearch().trim().toLowerCase()
   const selected = seasonGames.find((game) => game.id === params.get("game"))
-  useEffect(() => {
-    const view = params.get("view")
-    if (params.get("game")) setTab("Season Games")
-    else if (view === "prizes") setTab("Prizes & Rules")
-    else if (view === "bonus") setTab("Season Games")
-    else setTab("Overview")
-  }, [params])
   function changeTab(value: string) {
     const view =
       value === "Prizes & Rules"
@@ -75,7 +57,6 @@ function GamesContent() {
         : value === "Season Games"
         ? "?view=bonus"
         : ""
-    setTab(value)
     router.replace(`/games${view}`, { scroll: false })
   }
   function openGame(id: string | null) {
@@ -83,32 +64,20 @@ function GamesContent() {
       scroll: false,
     })
   }
-  const playing = canScore(state.phase)
-  const visibleLoops = [...state.loops]
-    .filter((loop) => loop.name.toLowerCase().includes(search))
-    .sort((a, b) => Number(a.claimedToday) - Number(b.claimedToday))
+  const readyCount = canScore(state.phase)
+    ? state.loops.filter((loop) => !loop.claimedToday).length
+    : 0
   const games = seasonGames.filter((game) =>
     `${game.title} ${game.type} ${game.description}`
       .toLowerCase()
       .includes(search)
   )
-  const nextLoop = state.loops.find(
-    (loop) =>
-      !loop.claimedToday &&
-      seasonMilestones.some(
-        (m) => m.streak === loop.streak + 1 && !loop.earned.includes(m.streak)
-      )
-  )
   return (
     <>
-      <PageIntro
-        title="Gyralis Games"
-        description="One participation layer. Many ways to earn"
-      />
+      <SeasonHeader home pageHeader />
       <SeasonControls />
-      <SeasonHeader home />
       <FilterTabs
-        items={["Overview", "Season Games", "Prizes & Rules"]}
+        items={["Season Games", "Prizes & Rules"]}
         value={tab}
         onChange={changeTab}
         label="Season sections"
@@ -125,7 +94,7 @@ function GamesContent() {
           </button>
         </div>
       )}
-      {tab === "Overview" && (
+      {tab === "Season Games" && (
         <>
           <SeasonScore />
           {!state.registered && (
@@ -135,7 +104,7 @@ function GamesContent() {
                 <strong>
                   {canEnter(state.phase)
                     ? state.phase === "late"
-                      ? `${score.total} potential points are waiting.`
+                      ? `${score.total} potential SP are waiting.`
                       : "Your daily routine starts December 1."
                     : "You're viewing this Season as a visitor."}
                 </strong>
@@ -156,8 +125,7 @@ function GamesContent() {
                     : "Explore the prize-claim experience."}
                 </strong>
                 <br />
-                No new Season points are earned. Loop rewards continue
-                independently.{" "}
+                No new SP are earned. Loop rewards continue independently.{" "}
                 <button
                   className="p-text-link"
                   onClick={() => changeTab("Prizes & Rules")}
@@ -167,159 +135,27 @@ function GamesContent() {
               </p>
             </div>
           )}
-          {nextLoop && state.registered && playing && (
-            <div className="s-next-return">
-              <span className="p-icon">
-                <LuCalendarCheck />
-              </span>
-              <div>
-                <p className="p-eyebrow">Your next return</p>
-                <h2>{nextLoop.name}: one claim from a bonus.</h2>
-                <p>
-                  Claim today to reach {nextLoop.streak + 1} days. Your streak
-                  belongs to this Loop.
-                </p>
-              </div>
-              <a
-                href={`#season-loop-${nextLoop.id}`}
-                className="p-button secondary"
-              >
-                See your Loop <LuArrowRight />
-              </a>
-            </div>
-          )}
-          <section id="season-daily-loops">
-            <SectionTitle
-              title={
-                playing
-                  ? "Today's Loops"
-                  : state.phase === "registration"
-                  ? "Get to know your Loops"
-                  : "Your Season Loops"
-              }
-              href="/loops"
-              label="Live Loop directory"
-            />
-            <p className="s-section-caption">
-              Regular Season Loops · +1 per eligible daily claim · independent 3
-              / 7 / 14 / 28-day streaks
-            </p>
-            <div className="s-daily-loops p-surface">
-              {visibleLoops.map((loop) => (
-                <article
-                  id={`season-loop-${loop.id}`}
-                  className="s-daily-loop"
-                  key={loop.id}
-                >
-                  <div className="s-loop-identity">
-                    <Image src={loop.logo} width={44} height={44} alt="" />
-                    <div>
-                      <h3>{loop.name}</h3>
-                      <p>Daily · Base roster preview</p>
-                      <button
-                        className="p-text-link"
-                        onClick={() => setRequirements(loop.id)}
-                      >
-                        View requirements <LuArrowRight />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="s-loop-progression">
-                    <StreakMilestones
-                      streak={loop.streak}
-                      earned={loop.earned}
-                      name={loop.name}
-                    />
-                    {playing && state.registered && !loop.claimedToday && (
-                      <ClaimPointEstimate loop={loop} />
-                    )}
-                  </div>
-                  <div className="s-loop-actions">
-                    <span
-                      className={`s-pill ${
-                        loop.claimedToday ? "" : playing ? "is-green" : ""
-                      }`}
-                    >
-                      {loop.claimedToday ? (
-                        <>
-                          <LuCheck /> Claimed · +{loop.lastAward} points
-                        </>
-                      ) : playing ? (
-                        "Ready in preview"
-                      ) : state.phase === "registration" ? (
-                        "Starts Dec 1"
-                      ) : (
-                        "Season ended"
-                      )}
-                    </span>
-                    {playing && state.registered && (
-                      <button
-                        className="p-button small"
-                        disabled={loop.claimedToday}
-                        onClick={() => dispatch({ type: "claim", id: loop.id })}
-                      >
-                        {loop.claimedToday
-                          ? "Next daily period"
-                          : `Preview claim · +${
-                              previewNextClaimPoints(loop).total
-                            }`}
-                      </button>
-                    )}
-                    <Link
-                      className="p-text-link"
-                      href={`/loops?loop=${loop.id}`}
-                    >
-                      Open live Loop <LuArrowRight />
-                    </Link>
-                  </div>
-                </article>
-              ))}
-              {!visibleLoops.length && (
-                <EmptyState
-                  title="No matching Loops"
-                  description="Try a different name in the top search."
-                />
-              )}
-            </div>
-            <p className="s-section-caption">
-              Planned daily Base roster. Live Loop links retain their current
-              networks and eligibility; deployment is still to be confirmed.
-            </p>
-          </section>
-          <DayGame />
-          <section>
-            <SectionTitle
-              title="Make your next claim count for more."
-              href="/games?view=bonus"
-              label="All Season Games"
-            />
-            <div className="s-bonus-teasers">
-              {seasonGames.slice(0, 2).map((game) => (
-                <button
-                  className="p-surface s-bonus-teaser"
-                  key={game.id}
-                  onClick={() => openGame(game.id)}
-                >
-                  <LuSparkles />
-                  <span>
-                    <strong>{game.title}</strong>
-                    <small>
-                      {Math.min(
-                        game.target,
-                        seasonGameProgress(game.id, state)
-                      )}{" "}
-                      / {game.target} {game.unit} · reward to be announced
-                    </small>
-                  </span>
-                  <LuArrowRight />
-                </button>
-              ))}
-            </div>
-          </section>
-        </>
-      )}
-      {tab === "Season Games" && (
-        <>
+          <Link
+            className="s-streaks-shortcut p-surface"
+            href="/loops?view=streaks"
+          >
+            <LuCalendarCheck />
+            <span>
+              <strong>
+                {readyCount > 0
+                  ? `${readyCount} Loop ${
+                      readyCount === 1 ? "claim" : "claims"
+                    } ready in preview`
+                  : "Your Loop streaks"}
+              </strong>
+              <small>
+                Claim availability, per-Loop streaks and next bonuses
+              </small>
+            </span>
+            <span>
+              My Streaks <LuArrowRight />
+            </span>
+          </Link>
           <div className="s-section-intro">
             <div>
               <p className="p-eyebrow">Your claims go further</p>
@@ -331,7 +167,7 @@ function GamesContent() {
               </p>
             </div>
             <span className="s-pill">
-              <LuSparkles /> Season points only
+              <LuSparkles /> SP only
             </span>
           </div>
           <div className="s-callout">
@@ -340,7 +176,7 @@ function GamesContent() {
               Challenge objectives are for UX review. Rewards and final rules
               for consistency, race and exploration challenges are awaiting
               approval. The timed Day Game challenge already has a defined
-              reward: 1 claim point + 3 bonus points.
+              reward: 1 claim SP + 3 bonus SP.
             </p>
           </div>
           <MagicBento className="p-games-grid">
@@ -435,7 +271,7 @@ function GamesContent() {
             <>
               <div className="s-entry-price">
                 <span>
-                  Bonus reward<small>Season points only</small>
+                  Bonus reward<small>SP only</small>
                 </span>
                 <strong>To be announced</strong>
               </div>
@@ -468,69 +304,14 @@ function GamesContent() {
                   remain pending before launch.
                 </p>
               )}
-              <button
-                className="p-button"
-                onClick={() => changeTab("Overview")}
-              >
-                See your daily Loops <LuArrowRight />
-              </button>
+              <Link className="p-button" href="/loops?view=streaks">
+                See My Streaks <LuArrowRight />
+              </Link>
             </>
           )}
         </DialogContent>
       </Dialog>
-      <Dialog
-        open={requirements !== null}
-        onOpenChange={(open) => {
-          if (!open) setRequirements(null)
-        }}
-      >
-        <DialogContent className="participation-theme participation-dialog dark">
-          <DialogHeader>
-            <DialogTitle>
-              {state.loops.find((loop) => loop.id === requirements)?.name}:
-              requirements
-            </DialogTitle>
-            <DialogDescription>
-              Season entry and Loop eligibility are separate. This preview does
-              not verify your wallet.
-            </DialogDescription>
-          </DialogHeader>
-          <p className="p-muted">
-            The planned Season roster uses daily Loops on Base. Open the
-            existing live Loop to check its current network, membership
-            requirements and claim state.
-          </p>
-          <Link
-            className="p-button"
-            href={`/loops?loop=${requirements ?? ""}`}
-            onClick={() => setRequirements(null)}
-          >
-            Check live requirements <LuArrowRight />
-          </Link>
-        </DialogContent>
-      </Dialog>
     </>
-  )
-}
-
-function ClaimPointEstimate({ loop }: { loop: PreviewLoop }) {
-  const points = previewNextClaimPoints(loop)
-  return (
-    <div
-      className="s-claim-estimate"
-      aria-label={`This ${loop.name} claim earns ${points.total} Season points in the preview`}
-    >
-      <p>This claim</p>
-      <div>
-        <span>+{points.claimPoints} claim point</span>
-        {points.streakBonus > 0 && (
-          <span>+{points.streakBonus} streak bonus</span>
-        )}
-        <strong>
-          = {points.total} Season {points.total === 1 ? "point" : "points"}
-        </strong>
-      </div>
-    </div>
   )
 }
 
@@ -565,13 +346,13 @@ function DayGame({ catalog = false }: { catalog?: boolean }) {
         <h2>Day Game: a bigger return.</h2>
         <p>December 12, 12:00 – December 13, 12:00 UTC</p>
         <small>
-          Designated event Loop only. Zero Season points outside this window. No
-          streak bonuses.
+          Designated event Loop only. Zero SP outside this window. No streak
+          bonuses.
         </small>
       </div>
       <div className="s-day-points">
         <strong>
-          4<span>points / claim</span>
+          4<span>SP / claim</span>
         </strong>
         <small>1 claim + 3 game bonus</small>
         {active && state.registered && (

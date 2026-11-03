@@ -177,7 +177,7 @@ export function seasonPreviewReducer(
           ? state.phase === "late"
             ? `Entry preview confirmed. ${
                 previewScore(state).total
-              } backdated points included.`
+              } backdated SP included.`
             : "Entry preview confirmed. Your Early Bird badge is ready."
           : "Withdrawal preview complete. 1 USDC entry fee refunded; network fees excluded.",
       }
@@ -205,7 +205,7 @@ export function seasonPreviewReducer(
               }
             : item
         ),
-        message: `${loop.name}: +${1 + bonus} Season points · +1 claim${
+        message: `${loop.name}: +${1 + bonus} SP · +1 claim${
           bonus ? ` + ${bonus} streak bonus` : ""
         }. Claim preview only; no tokens moved.`,
       }
@@ -217,7 +217,7 @@ export function seasonPreviewReducer(
         ...state,
         dayClaimed: true,
         message:
-          "Day Game: +4 Season points · +1 claim +3 game bonus. No streak bonus. Claim preview only.",
+          "Day Game: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only.",
       }
     case "prize":
       if (

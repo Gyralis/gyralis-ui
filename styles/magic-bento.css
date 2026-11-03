@@ -79,7 +79,7 @@
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #c6d2df;
+  color: var(--p-text-muted);
 }
 .p-motion-preview > div:first-child svg {
   width: 16px;
@@ -97,7 +97,7 @@
   padding: 6px 10px;
   border-radius: 6px;
   min-height: 34px;
-  color: #a8bbce;
+  color: var(--p-text-muted);
   font-size: 11px;
 }
 .p-motion-options button[aria-pressed="true"] {
@@ -105,7 +105,7 @@
   background: #143c30;
 }
 .p-motion-options button:hover {
-  color: #fff;
+  color: var(--p-text-primary);
 }
 .p-motion-replay {
   display: flex;
@@ -113,7 +113,7 @@
   gap: 6px;
   font-size: 11px;
   min-height: 34px;
-  color: #becddd;
+  color: var(--p-text-muted);
   margin-left: auto;
 }
 .p-motion-replay:disabled {
@@ -122,7 +122,7 @@
 }
 .p-motion-preview > p {
   flex-basis: 100%;
-  color: #97adc1;
+  color: var(--p-text-muted);
   font-size: 11px;
 }
 @media (max-width: 640px) {

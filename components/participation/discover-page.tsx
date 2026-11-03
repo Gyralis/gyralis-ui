@@ -141,6 +141,7 @@ function DiscoverContent() {
                 <LoopOpportunityCard
                   key={loop.id}
                   loop={loop}
+                  compact={tab === "Loops" || tab === "For You"}
                   demoStatus={
                     showForYou
                       ? state.loops.find((item) => item.id === loop.id)

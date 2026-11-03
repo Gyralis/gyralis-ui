@@ -5,16 +5,14 @@ import Link from "next/link"
 import { motion, useIsPresent } from "framer-motion"
 import {
   LuArrowRight,
-  LuCalendarCheck,
-  LuLayers,
   LuPanelRightClose,
   LuPanelRightOpen,
-  LuSparkles,
 } from "react-icons/lu"
 
 import { seasonPhases } from "@/lib/participation/season-preview"
 
 import { useCardMotion } from "./card-motion-preview"
+import { LatestActivity } from "./latest-activity"
 import { ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
 
@@ -102,8 +100,8 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
         </div>
         <div className="p-season-numbers">
           <div>
-            <p>{state.registered ? "Season points" : "Potential points"}</p>
-            <strong>{score.total.toLocaleString()}</strong>
+            <p>{state.registered ? "Season Points (SP)" : "Potential SP"}</p>
+            <strong>{score.total.toLocaleString()} SP</strong>
           </div>
           <div>
             <p>Season rank</p>
@@ -119,62 +117,11 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
           label="Season elapsed"
         />
         <p className="p-caption">{seasonPhases[state.phase].timing}</p>
+        <p className="p-caption">
+          SP counts only toward this Season. All-time GP stays separate.
+        </p>
       </section>
-      <section className="p-rail-activity">
-        <div className="p-section-title">
-          <h2>Season activity</h2>
-          <Link href="/games">
-            Your Season <LuArrowRight />
-          </Link>
-        </div>
-        {[
-          ...(state.dayClaimed
-            ? [
-                {
-                  icon: LuSparkles,
-                  title: "Day Game claim preview",
-                  time: "Just now",
-                  gp: "+4 points",
-                },
-              ]
-            : []),
-          ...state.loops
-            .filter((loop) => loop.claimedToday)
-            .map((loop) => ({
-              icon: LuLayers,
-              title: `${loop.name} claim preview`,
-              time: "Just now",
-              gp: `+${loop.lastAward} points`,
-            })),
-          ...(state.registered
-            ? [
-                {
-                  icon: LuCalendarCheck,
-                  title: state.earlyBird ? "Early Bird entry" : "Season entry",
-                  time: "Season 01",
-                  gp: "",
-                },
-              ]
-            : []),
-        ].map(({ icon: Icon, title, time, gp }) => (
-          <div className="p-activity-row" key={title}>
-            <span className="p-icon small">
-              <Icon />
-            </span>
-            <div>
-              <p>{title}</p>
-              <span>{time}</span>
-            </div>
-            <b>{gp}</b>
-          </div>
-        ))}
-        {!state.registered &&
-          !state.loops.some((loop) => loop.claimedToday) && (
-            <p className="p-caption">
-              Enter the Season to build your participation history.
-            </p>
-          )}
-      </section>
+      <LatestActivity />
     </motion.aside>
   )
 }

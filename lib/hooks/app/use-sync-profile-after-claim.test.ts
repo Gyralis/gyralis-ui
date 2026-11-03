@@ -63,6 +63,18 @@ describe("profile sync after a claim", () => {
     )
     expect(mocks.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [
+        "season-streaks",
+        "0x1111111111111111111111111111111111111111",
+      ],
+    })
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
+        "latest-activity",
+        "0x1111111111111111111111111111111111111111",
+      ],
+    })
+    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
         "profile-summary",
         "0x1111111111111111111111111111111111111111",
       ],

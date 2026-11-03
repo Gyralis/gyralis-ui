@@ -6,11 +6,13 @@ import Link from "next/link"
 import {
   LuArrowRight,
   LuAward,
+  LuCalendarDays,
   LuCheck,
-  LuClock,
+  LuDollarSign,
   LuInfo,
   LuShieldCheck,
   LuTrophy,
+  LuUser,
 } from "react-icons/lu"
 
 import {
@@ -334,7 +336,6 @@ export function SeasonHeader({
   compact?: boolean
 }) {
   const { state, entries } = useSeason()
-  const phase = seasonPhases[state.phase]
   const Heading = pageHeader ? "h1" : "h2"
   return (
     <header
@@ -342,31 +343,17 @@ export function SeasonHeader({
         pageHeader || home ? "is-prominent" : ""
       } ${compact ? "is-compact" : ""}`}
     >
-      <Image
-        className="s-season-art"
-        src="/images/img_2.png"
-        width={430}
-        height={430}
-        alt=""
-        priority
-      />
       <div className="s-season-header-copy">
+        <div className="s-season-brand" aria-hidden="true">
+          <Image src="/gyralis-logo.svg" width={38} height={38} alt="" />
+        </div>
         <div className="s-header-eyebrow">
-          <span className="p-eyebrow">
-            {pageHeader ? "Featured Season" : "Gyralis Games · Season 01"}
-          </span>
-          <span
-            className={`s-pill ${
-              state.phase === "live" || state.phase === "late" ? "is-green" : ""
-            }`}
-          >
-            <LuClock />
-            {phase.label}
-          </span>
+          <span className="p-eyebrow">Season 1</span>
+          <span className="s-pill is-green">Season Announced</span>
         </div>
         <Heading>
           {pageHeader ? (
-            "Gyralis Games — Season 01"
+            "Gyralis Games"
           ) : state.phase === "registration" ? (
             <>
               Your next month.
@@ -395,38 +382,53 @@ export function SeasonHeader({
         </Heading>
         <p>
           {pageHeader
-            ? "30 days of claiming, streaks, games and rewards."
+            ? "One participation layer. Many ways to earn."
             : "December 1–30, 2026 · Daily claims. Real streaks. One Season."}
         </p>
         <div className="s-hero-metrics">
-          <span>
-            <strong>$250</strong>
-            <small>Guaranteed pool</small>
-          </span>
-          <span>
-            <strong>{entries}</strong>
-            <small>
-              {state.phase === "registration" || state.phase === "late"
-                ? "Current entries"
-                : "Entries"}
-            </small>
-          </span>
-          <span>
-            <strong>Top 15%</strong>
-            <small>Paid positions · rounded up</small>
-          </span>
+          <div className="s-hero-metric">
+            <LuUser className="s-hero-metric-icon" aria-hidden="true" />
+            <span>
+              <strong>{entries}</strong>
+              <small>Entries</small>
+            </span>
+          </div>
+          <div
+            className="s-hero-metric"
+            aria-label="$250 guaranteed prize pool"
+          >
+            <LuDollarSign className="s-hero-metric-icon" aria-hidden="true" />
+            <span>
+              <strong>$250</strong>
+              <small>GTD</small>
+            </span>
+          </div>
+          <div className="s-hero-metric">
+            <LuCalendarDays className="s-hero-metric-icon" aria-hidden="true" />
+            <span>
+              <strong>
+                <time dateTime="2026-12-01T00:00:00Z">Dec 1, 2026</time>
+              </strong>
+              <small>Starts · UTC</small>
+            </span>
+          </div>
         </div>
-        <div className="s-header-actions">
-          {home ? (
+        {home && (
+          <div className="s-header-actions">
             <SeasonEntryButton />
-          ) : (
-            <Link className="p-button" href="/games">
-              {state.registered ? "Your Season" : "Explore the Season"}{" "}
-              <LuArrowRight />
-            </Link>
-          )}
-          <span className="p-caption">{phase.timing}</span>
-        </div>
+          </div>
+        )}
+      </div>
+      <div className="s-season-visual" aria-hidden="true">
+        <Image
+          className="s-season-art"
+          src="/images/img_2.png"
+          width={560}
+          height={560}
+          sizes="(max-width: 640px) 180px, (max-width: 1200px) 40vw, 560px"
+          alt=""
+          priority
+        />
       </div>
     </header>
   )
@@ -437,13 +439,15 @@ export function SeasonScore() {
   return (
     <section
       className="s-score-panel p-surface"
-      aria-label="Season points breakdown"
+      aria-label="Season Points (SP) breakdown"
     >
       <div className="s-score-total">
         <span className="p-eyebrow">
-          {state.registered ? "Your Season points" : "Potential Season points"}
+          {state.registered ? "Your Season Points (SP)" : "Potential SP"}
         </span>
-        <strong>{score.total}</strong>
+        <strong>
+          {score.total} <small>SP</small>
+        </strong>
         <span className="p-caption">
           {state.registered
             ? state.phase === "registration"
@@ -456,23 +460,27 @@ export function SeasonScore() {
       </div>
       <div className="s-score-equation">
         <div>
-          <strong>{score.claims}</strong>
+          <strong>{score.claims} SP</strong>
           <span>Claim points</span>
-          <small>1 per eligible claim</small>
+          <small>1 SP per eligible claim</small>
         </div>
         <b>+</b>
         <div>
-          <strong>{score.streaks}</strong>
+          <strong>{score.streaks} SP</strong>
           <span>Streak bonuses</span>
           <small>Per Loop · 3 / 7 / 14 / 28</small>
         </div>
         <b>+</b>
         <div>
-          <strong>{score.games}</strong>
+          <strong>{score.games} SP</strong>
           <span>Game bonuses</span>
           <small>Includes timed challenges</small>
         </div>
       </div>
+      <p className="p-caption s-points-scope">
+        SP (Season Points) resets each Season and does not add to your all-time
+        GP or leaderboard score.
+      </p>
       <Link href="/leaderboard?view=season" className="p-text-link">
         View leaderboard <LuArrowRight />
       </Link>
@@ -524,10 +532,10 @@ export function SeasonRules() {
       </section>
       <section className="p-surface s-panel">
         <p className="p-eyebrow">Three ways to earn</p>
-        <h2>Every point explained.</h2>
+        <h2>Every SP explained.</h2>
         <ol className="s-rule-list">
           <li>
-            <strong>Claim daily · +1 point</strong>
+            <strong>Claim daily · +1 SP</strong>
             <span>
               One eligible claim per daily period in each regular Season Loop.
             </span>
@@ -548,8 +556,8 @@ export function SeasonRules() {
           </li>
         </ol>
         <p className="p-caption">
-          Day Game timed challenges: 4 total points per eligible claim during
-          the event, zero outside it, and no Season streak bonuses.
+          Day Game timed challenges: 4 SP per eligible claim during the event,
+          zero outside it, and no Season streak bonuses.
         </p>
       </section>
       <section className="p-surface s-panel">
@@ -600,7 +608,7 @@ export function SeasonRules() {
             <strong>Early Bird badge</strong>
             <br />
             Register before December 1 and retain your entry at the start. No
-            extra leaderboard points.
+            extra SP.
           </p>
         </div>
         <p>
@@ -707,7 +715,7 @@ export function StreakMilestones({
         <strong>{streak}-day streak</strong>
         <span>
           {next
-            ? `${next.streak - streak} more to +${next.points}`
+            ? `${next.streak - streak} more to +${next.points} SP`
             : "All milestones earned"}
         </span>
       </div>
@@ -716,13 +724,13 @@ export function StreakMilestones({
           <span
             className={earned.includes(m.streak) ? "is-earned" : ""}
             key={m.streak}
-            aria-label={`${name}: ${m.streak} days, ${m.points} bonus points, ${
+            aria-label={`${name}: ${m.streak} days, ${m.points} bonus SP, ${
               earned.includes(m.streak) ? "earned" : "not earned"
             }`}
           >
             {earned.includes(m.streak) && <LuCheck />}
             {m.streak}
-            <small>+{m.points}</small>
+            <small>+{m.points} SP</small>
           </span>
         ))}
       </div>

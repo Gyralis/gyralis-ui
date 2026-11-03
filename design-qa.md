@@ -1,3 +1,58 @@
+# Shared Season header — 2026-11-03
+
+- Source: user-supplied `Screenshot 2026-11-03 at 12.36.52 AM.png`, used as layout inspiration. The user explicitly excluded the progress bar.
+- Scope: the shared Explore and Games header now places a Gyralis logo tile above the eyebrow, title, description, Season stats, and existing action. Existing Gyralis loop artwork fills the right column. A dark blue surface, 24px outer corners, and the existing primary/muted text tokens retain the app styling. No progress bar was added.
+- Responsive implementation: copy and artwork occupy separate desktop grid columns; at mobile widths the artwork occupies the top-right area above the full-width title and copy. Current Season preview values, phase states, and entry actions are preserved.
+- Reference-inspired metrics: a person icon sits beside the bold primary-color entry count with muted Entries below; a treasure chest icon sits beside bold $250 with muted GTD below. A calendar icon accompanies the bold December 1, 2026 preview starting date, with Starts · UTC muted below. Season Announced appears as a pill beside SEASON 1 rather than in the bottom metrics.
+- Metric values and descriptions are left-aligned with a 1px gap. Values use 18px semibold type (16px on mobile), with tighter spacing and 24px icons.
+- Header color accents: matching green person, dollar-sign, and calendar icons, plus a green-tinted Season Announced pill. Metric columns have a 30px gap (24px on mobile). The title and metric values retain primary white; descriptions retain the muted token.
+- The Explore header's Your Season / Explore the Season link is removed. The Games page's existing Season entry action remains available.
+- The header eyebrow reads SEASON 1, the page title reads Gyralis Games, and the phase badge is removed.
+- The title uses the primary white text color throughout. The subtitle reads One participation layer. Many ways to earn. The phase timing caption (including Day 12 of 30 · 18 days left) is removed from the header.
+- Validation: TypeScript, targeted ESLint, formatting, and Git whitespace checks passed.
+- Browser visual comparison remains unavailable under the existing browser execution restriction. Desktop/mobile rendering and interactive behavior have not been visually verified.
+
+final result: blocked
+
+---
+
+# Explore Loops mini cards — 2026-11-03
+
+- Scope: For You and Loops on Explore use the compact variant. The main Loops directory uses a larger variant with a left-offset curved artwork cutout, the logo on the left, and the title beside it. Daily rewards appear below; the same access-help control and full-card link remain.
+- The card shows artwork with a centered circular cutout, a logo seated in that cutout, the Loop name, and Daily rewards with the example amount. Header badges, sponsor byline, eligibility, Season preview streak text, example-date caption, coin icon, and View Loop button are omitted from this variant.
+- A full-card link retains keyboard navigation and the existing live Loop dialog destination. A separate question-mark button opens a popover with requirements, network instructions, the configured qualification link when available, and Check eligibility leading to the existing live Loop. The help button is a sibling of the card link, avoiding nested interactive controls. MagicBento's card marker and wrapper remain intact. Reward snapshot provenance is retained in the reward tooltip.
+- Static markup checks confirm the compact branch excludes the removed content. Browser visual comparison remains unavailable under the existing browser restrictions, so the image-mask curve and responsive presentation are not visually verified.
+
+final result: blocked
+
+---
+
+# Loop card surface refinement — 2026-11-02
+
+- Approved source: the existing `.p-streak-card` background gradient, border treatment, and 24px rounded corners, combined with the existing shared `LoopOpportunityCard` artwork/body/action layout.
+- Changes: matching green-black surface, inset rounded artwork, a single chain-icon + Loop/SuperLoop badge, compact eligibility summary, Daily rewards footer, stronger pill-shaped View Loop link, and a subdued existing Season preview note with explicit SP units.
+- Daily reward examples were read from the six visible Loop contracts at 2026-11-03 02:48:15 UTC (November 2 in Uruguay). 1Hive: 0.036414699878409818 HNY; Blockscout: 0.019570059080118519 HNY; RWAGMI: 562.396691539443564128 RWAGMI; True Loopers: 0 USDCx; Soneium Hourly/Daily: 0 MCK/oMCK. Examples are date-stamped snapshots, normalized by period length, not automatic live quotes. Three snapshot tests passed.
+- Animation integration: existing `data-magic-bento-card` markers and MagicBento wrappers are preserved. Existing spotlight, border glow, entrance, and click waves remain controlled by the shared motion provider. Additional artwork/arrow hover motion only applies inside an enabled MagicBento container.
+- Validation: TypeScript, targeted ESLint, formatting, asset-path checks, and whitespace checks passed. Existing card links and live dialog wiring remain in the shared component.
+- Browser screenshot comparison and interactive motion verification remain unavailable under the previously recorded browser execution restriction. No visual pass is claimed.
+
+final result: blocked
+
+---
+
+# Profile streak pill cards — 2026-11-02
+
+- Source: `/Users/mati/Desktop/Screenshot 2026-11-02 at 10.37.42 PM.png`, opened during implementation. The user requested the rounded card and segmented pill-bar idea adapted to real Gyralis profile streaks, rather than reproducing the reference's staking content.
+- Implementation: `components/participation/loop-streaks.tsx`, `lib/profile/streak-card-state.ts`, and the `.p-streak*` rules in `styles/participation.css`.
+- Scope: design preview is visible by default, including without a wallet or active Season. Four sample cards demonstrate completed, in-progress, and locked milestones, explicitly labeled sample SP with no score writes. The Use live data control switches to real connected-wallet Season projection records, isolated from all-time GP; no active Season in live mode shows an explicit empty state. SP (Season Points) labels and the all-time separation are visible throughout the Season views. Pill card presentation: large current-Season streak value; thirty segmented pills; profile flame icons; completed, in-progress, locked, and reached-but-uncredited milestone states; existing 3/7/14/30 scoring thresholds; logo name on hover/focus. Preview claim controls, readiness labels, live-loop links, and per-claim point calculations were removed from these cards.
+- Automated evidence: 44 targeted tests passed, including the existing profile milestone tests, saved-bonus persistence after a streak resets, long streaks beyond the last milestone, RWAGMI's legacy profile identity, disconnected/error states, and absence of the removed preview controls. TypeScript and targeted ESLint passed.
+- The implementation screenshot and interactive browser comparison are unavailable. No in-app browser tool is exposed in this session, and prior direct browser execution requests were declined. An HTTP response or server-rendered markup is not a visual comparison. No visual fidelity pass is claimed.
+- Remaining visual checks: desktop two-column and mobile single-column layout; pill spacing at narrow widths; logo hover/focus names; readable completed/in-progress/locked colors; milestone tooltips; loading and profile-fetch error states.
+
+final result: blocked
+
+---
+
 # MagicBento motion preview — 2026-10-21
 
 - Source: user-supplied `Pasted text.txt` containing the MagicBento animation component. The existing option-1 layout remains the visual target.
