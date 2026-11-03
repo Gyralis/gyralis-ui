@@ -58,6 +58,7 @@ export function useStandardLoopParticipation({
 
       return {
         registeredCount: Number(registeredCount),
+        periodIndividualPayout,
         totalPeriodPayout: periodIndividualPayout * registeredCount,
       }
     },

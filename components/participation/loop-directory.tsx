@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/popover"
 import LoopCard from "@/components/loops/loop-card"
 
+import { LoopClaimPanel } from "./loop-claim-panel"
 import { LoopStreaks } from "./loop-streaks"
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs, PageIntro } from "./participation-ui"
@@ -133,12 +134,15 @@ export function LoopOpportunityCard({
           </span>
           <div className="p-mini-loop-body">
             <h3>{loop.title}</h3>
-            <div className="p-mini-loop-reward" title={rewardDescription}>
-              <span>Daily rewards</span>
-              <strong>{rewardAmount}</strong>
-            </div>
+            {!large && (
+              <div className="p-mini-loop-reward" title={rewardDescription}>
+                <span>Daily rewards</span>
+                <strong>{rewardAmount}</strong>
+              </div>
+            )}
           </div>
         </Link>
+        {large && <LoopClaimPanel loop={loop} />}
         <LoopAccessHelp loop={loop} />
       </article>
     )
@@ -286,7 +290,7 @@ function LoopDirectoryContent() {
   const router = useRouter()
   const params = useSearchParams()
   const search = useParticipationSearch().toLowerCase()
-  const tab = params.get("view") === "streaks" ? "My Streaks" : "All"
+  const tab = params.get("view") === "streaks" ? "Season streaks" : "Claim"
   const cards = chainId === 1868 ? SoneiumLoopCardsData : LoopCardsData
   const selectedId = params.get("loop")
   const selectedLoop = [...LoopCardsData, ...SoneiumLoopCardsData].find(
@@ -328,12 +332,12 @@ function LoopDirectoryContent() {
         </Link>
       </div>
       <FilterTabs
-        items={["All", "My Streaks"]}
+        items={["Claim", "Season streaks"]}
         value={tab}
         onChange={(value) => {
           const next = new URLSearchParams(params.toString())
           next.delete("loop")
-          if (value === "My Streaks") next.set("view", "streaks")
+          if (value === "Season streaks") next.set("view", "streaks")
           else next.delete("view")
           router.replace(`/loops${next.size ? `?${next.toString()}` : ""}`, {
             scroll: false,
@@ -341,7 +345,7 @@ function LoopDirectoryContent() {
         }}
         label="Loop sections"
       />
-      {tab === "My Streaks" ? (
+      {tab === "Season streaks" ? (
         <LoopStreaks />
       ) : (
         <>

@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { LoopCardsData } from "@/data/loops-data"
-import { LuArrowRight, LuCompass } from "react-icons/lu"
+import { LuArrowRight } from "react-icons/lu"
 
 import {
   seasonGameProgress,
@@ -78,32 +78,23 @@ function DiscoverContent() {
   const activeLoops = [...loops].sort(
     (a, b) => [3, 4, 6, 9].indexOf(a.id) - [3, 4, 6, 9].indexOf(b.id)
   )
-  const displayedLoops =
-    tab === "New" ? activeLoops.filter((loop) => loop.id === 9) : activeLoops
   const games = seasonGames.filter((game) =>
     matches(`${game.title} ${game.type} ${game.description}`)
   )
   const eco = ecosystems.filter((item) => matches(`${item.name} ${item.type}`))
   const showForYou = tab === "For You" && !search && !ecosystem
-  const showLoops = ["For You", "Loops", "New"].includes(tab)
-  const showGames = ["For You", "Games", "New", "Ending Soon"].includes(tab)
+  const showLoops = ["For You", "Loops"].includes(tab)
+  const showGames = ["For You", "Games"].includes(tab)
   const showEcosystems = ["For You", "Ecosystems"].includes(tab) && !ecosystem
   const noResults =
-    !(showLoops && displayedLoops.length) &&
+    !(showLoops && activeLoops.length) &&
     !(showGames && games.length) &&
     !(showEcosystems && eco.length)
   return (
     <>
       <SeasonPreview pageHeader />
       <FilterTabs
-        items={[
-          "For You",
-          "New",
-          "Loops",
-          "Games",
-          "Ecosystems",
-          "Ending Soon",
-        ]}
+        items={["For You", "Loops", "Games", "Ecosystems"]}
         value={tab}
         onChange={(value) => {
           setTab(value)
@@ -123,20 +114,14 @@ function DiscoverContent() {
           </button>
         </div>
       )}
-      {showLoops && displayedLoops.length > 0 && (
+      {showLoops && activeLoops.length > 0 && (
         <section>
           <SectionTitle
-            title={
-              showForYou
-                ? "Your active Loops"
-                : tab === "New"
-                ? "Recently added Loops"
-                : "Explore Loops"
-            }
+            title={showForYou ? "Your active Loops" : "Explore Loops"}
             href="/loops"
           />
           <MagicBento className="p-loop-grid">
-            {(showForYou ? displayedLoops.slice(0, 3) : displayedLoops).map(
+            {(showForYou ? activeLoops.slice(0, 3) : activeLoops).map(
               (loop) => (
                 <LoopOpportunityCard
                   key={loop.id}
@@ -185,7 +170,8 @@ function DiscoverContent() {
       {showGames && games.length > 0 && (
         <section>
           <SectionTitle
-            title="Season Games · your claims go further"
+            title="Go further this Season"
+            subtitle="Complete challenges. Earn extra SP."
             href="/games?view=bonus"
           />
           <MagicBento className="p-featured-grid">
@@ -196,9 +182,7 @@ function DiscoverContent() {
                 key={game.id}
                 href={`/games?game=${game.id}`}
               >
-                <Image src={game.art} width={220} height={180} alt="" />
                 <div>
-                  <p className="p-eyebrow">{game.type}</p>
                   <h3>{game.title}</h3>
                   <p>{game.description}</p>
                   <span className="p-caption">
@@ -227,12 +211,6 @@ function DiscoverContent() {
             setEcosystem(null)
           }}
         />
-      )}
-      {!showForYou && tab === "New" && (
-        <p className="p-muted">
-          <LuCompass className="inline" /> New features and opportunities will
-          appear here as the ecosystem grows.
-        </p>
       )}
     </>
   )

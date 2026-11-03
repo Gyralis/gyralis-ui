@@ -1,3 +1,38 @@
+# Text-first Season Game cards — 2026-11-03
+
+- Scope: game cards on Games and Explore omit artwork and header/category strips. Titles, descriptions, progress, and existing challenge actions remain. The timed Day Game omits its decorative icon/header and places its status alongside reward/action details. Pending rewards remain explicit in the card caption and challenge details.
+- Responsive adjustment: the timed challenge's content column uses an explicit class after removing the decorative icon; Explore cards use the available text width rather than reserving image space.
+- Browser visual comparison remains unavailable under the existing browser execution restriction; no rendered visual pass is claimed.
+
+final result: blocked
+
+---
+
+# Season Points summaries — 2026-11-03
+
+- Scope: the user selected both the main Season Points breakdown and the sidebar summary. A single shared SeasonPoints component now presents the full and compact variants, keeping totals and rank consistent across Season leaderboard, profile Seasons, and the participation sidebar. Following the user's navigation feedback, the duplicate main summary is removed from Games: the Season Games tab leads directly to its game catalog, with Loop shortcuts and supporting Season notices below the cards. The sidebar retains the persistent user summary.
+- Presentation: dark green surface with 24px corners matching Loop/streak cards, larger semibold SP total, a separate Season rank, green icons, primary/muted text tokens, and linked Claims, Streaks, and Games breakdowns. The full view uses three columns; compact/mobile views use rows. The former formula layout and sidebar elapsed-time bar are removed.
+- Data: the existing frontend Season preview model is retained without scoring changes. Both variants explicitly display Preview. Visitor scores are labeled potential, ranks are hidden before scoring or registration, and closed registration does not promise a later entry. SP remains explicitly separate from all-time GP.
+- Validation: 27 targeted tests passed, including full/compact consistency, potential scores, rank availability, closed registration, and existing Season preview scoring. TypeScript, targeted ESLint, formatting, and whitespace checks passed.
+- Browser visual comparison, responsive rendering, and interactive browser verification remain unavailable under the existing browser execution restriction. No visual pass is claimed.
+
+final result: blocked
+
+---
+
+# Live Loop claim cards — 2026-11-03
+
+- Scope: large cards on the Claim tab show a live per-wallet daily reward estimate on the left, current-period registered Loopers on the right, and a full-width action below. Artwork/title links and the eligibility help remain separate interactive controls. Explore mini cards retain their existing presentation.
+- Standard and SuperLoop controllers provide registration, checking, wallet confirmation, transaction confirmation, claimed, and unavailable states. Disconnected cards open the wallet connection modal; connected actions retain existing chain switching. RWAGMI retains its required saved-token control. Period boundaries refresh contract data, with countdown hints for registered/accumulating/claimed states.
+- Daily estimates normalize contract period payouts to 24 hours using token decimals; the action uses the wallet's live claimable amount. Loading/error states do not invent zero values, and failed metric loads provide retries. SuperLoop receipt-confirmed claims now also invoke the shared profile/Season/activity refresh hook.
+- Action styling initially uses a flat green fill without gradient, glow, sheen, or hover lift, scoped to these cards. Additional subtler visual alternatives are being explored at the user's request; a final treatment has not been selected.
+- Validation: 99 targeted tests passed across claim state logic, receipt confirmation, profile sync, daily reward normalization, controller boundaries, and the new claim-panel states. TypeScript, targeted ESLint, formatting, and whitespace checks passed. No wallet transactions were executed.
+- Browser visual comparison and end-to-end wallet interaction verification remain unavailable under the existing browser execution restriction.
+
+final result: blocked
+
+---
+
 # Shared Season header — 2026-11-03
 
 - Source: user-supplied `Screenshot 2026-11-03 at 12.36.52 AM.png`, used as layout inspiration. The user explicitly excluded the progress bar.

@@ -10,6 +10,10 @@ import { useStandardLoopBalance } from "@/lib/hooks/loops/standard/use-standard-
 import { useStandardLoopClaim } from "@/lib/hooks/loops/standard/use-standard-loop-claim"
 import { useStandardLoopParticipation } from "@/lib/hooks/loops/standard/use-standard-loop-participation"
 import { useStandardLoopSettings } from "@/lib/hooks/loops/standard/use-standard-loop-settings"
+import {
+  formatDailyRewardAmount,
+  type DailyRewardEstimate,
+} from "@/lib/loops/daily-reward"
 import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   getStandardLoopActionLabel,
@@ -351,8 +355,29 @@ export function useStandardLoopCardController(loop: LoopCardData) {
           execute: hasClaimError ? claim.refetch : claim.execute,
         }
 
+  const dailyRewards = createLoopSectionState<DailyRewardEstimate>({
+    data:
+      settings.data && balance.data && participation.data
+        ? {
+            value: formatDailyRewardAmount({
+              periodPayout: participation.data.periodIndividualPayout,
+              periodLength: settings.data.periodLength,
+              decimals: balance.data.decimals,
+            }),
+            symbol: balance.data.symbol,
+          }
+        : undefined,
+    error:
+      configError ?? settings.error ?? balance.error ?? participation.error,
+    errorMessage: "Daily rewards could not be loaded",
+    isFetching:
+      settings.isFetching || balance.isFetching || participation.isFetching,
+    retry: retryDistribution,
+  })
+
   return {
     action,
+    dailyRewards,
     balance: balanceState,
     distribution: distributionState,
     loopers: loopersState,

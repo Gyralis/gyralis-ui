@@ -434,59 +434,7 @@ export function SeasonHeader({
   )
 }
 
-export function SeasonScore() {
-  const { state, score, rank, entries } = useSeason()
-  return (
-    <section
-      className="s-score-panel p-surface"
-      aria-label="Season Points (SP) breakdown"
-    >
-      <div className="s-score-total">
-        <span className="p-eyebrow">
-          {state.registered ? "Your Season Points (SP)" : "Potential SP"}
-        </span>
-        <strong>
-          {score.total} <small>SP</small>
-        </strong>
-        <span className="p-caption">
-          {state.registered
-            ? state.phase === "registration"
-              ? "Scoring starts December 1"
-              : `Rank #${rank ?? "—"} · ${entries} entries`
-            : canEnter(state.phase)
-            ? "Eligible activity since December 1"
-            : "Not entered in this Season"}
-        </span>
-      </div>
-      <div className="s-score-equation">
-        <div>
-          <strong>{score.claims} SP</strong>
-          <span>Claim points</span>
-          <small>1 SP per eligible claim</small>
-        </div>
-        <b>+</b>
-        <div>
-          <strong>{score.streaks} SP</strong>
-          <span>Streak bonuses</span>
-          <small>Per Loop · 3 / 7 / 14 / 28</small>
-        </div>
-        <b>+</b>
-        <div>
-          <strong>{score.games} SP</strong>
-          <span>Game bonuses</span>
-          <small>Includes timed challenges</small>
-        </div>
-      </div>
-      <p className="p-caption s-points-scope">
-        SP (Season Points) resets each Season and does not add to your all-time
-        GP or leaderboard score.
-      </p>
-      <Link href="/leaderboard?view=season" className="p-text-link">
-        View leaderboard <LuArrowRight />
-      </Link>
-    </section>
-  )
-}
+export { SeasonPoints as SeasonScore } from "./season-points"
 
 export function SeasonRules() {
   const { state, entries, pending, transact, rank } = useSeason()

@@ -1,20 +1,12 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import Link from "next/link"
 import { motion, useIsPresent } from "framer-motion"
-import {
-  LuArrowRight,
-  LuPanelRightClose,
-  LuPanelRightOpen,
-} from "react-icons/lu"
-
-import { seasonPhases } from "@/lib/participation/season-preview"
+import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu"
 
 import { useCardMotion } from "./card-motion-preview"
 import { LatestActivity } from "./latest-activity"
-import { ProgressBar } from "./participation-ui"
-import { useSeason } from "./season-context"
+import { SeasonPoints } from "./season-points"
 
 export function RightSideToggle({
   open,
@@ -44,7 +36,6 @@ export function RightSideToggle({
 }
 
 export function RightSide({ stacked = false }: { stacked?: boolean }) {
-  const { state, score, rank } = useSeason()
   const { mode, reducedMotion } = useCardMotion()
   const motionEnabled = mode !== "off" && !reducedMotion
   const isPresent = useIsPresent()
@@ -91,36 +82,7 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
         ease: [0.22, 1, 0.36, 1],
       }}
     >
-      <section className="p-surface p-season-summary">
-        <div className="p-eyebrow-row">
-          <h2 className="p-eyebrow">Season 01</h2>
-          <Link href="/games" aria-label="View Season games">
-            <LuArrowRight />
-          </Link>
-        </div>
-        <div className="p-season-numbers">
-          <div>
-            <p>{state.registered ? "Season Points (SP)" : "Potential SP"}</p>
-            <strong>{score.total.toLocaleString()} SP</strong>
-          </div>
-          <div>
-            <p>Season rank</p>
-            <strong>
-              {state.registered && state.phase !== "registration"
-                ? `#${rank ?? "—"}`
-                : "—"}
-            </strong>
-          </div>
-        </div>
-        <ProgressBar
-          value={(seasonPhases[state.phase].day / 30) * 100}
-          label="Season elapsed"
-        />
-        <p className="p-caption">{seasonPhases[state.phase].timing}</p>
-        <p className="p-caption">
-          SP counts only toward this Season. All-time GP stays separate.
-        </p>
-      </section>
+      <SeasonPoints compact />
       <LatestActivity />
     </motion.aside>
   )

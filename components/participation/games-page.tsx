@@ -1,7 +1,6 @@
 "use client"
 
 import { Suspense } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
@@ -9,11 +8,8 @@ import {
   LuCalendarCheck,
   LuCheck,
   LuInfo,
-  LuLock,
-  LuSparkles,
   LuTrophy,
   LuX,
-  LuZap,
 } from "react-icons/lu"
 
 import {
@@ -33,12 +29,7 @@ import MagicBento from "@/components/ui/magic-bento"
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs, ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
-import {
-  SeasonControls,
-  SeasonHeader,
-  SeasonRules,
-  SeasonScore,
-} from "./season-panels"
+import { SeasonControls, SeasonHeader, SeasonRules } from "./season-panels"
 
 function GamesContent() {
   const router = useRouter()
@@ -96,7 +87,60 @@ function GamesContent() {
       )}
       {tab === "Season Games" && (
         <>
-          <SeasonScore />
+          <MagicBento className="p-games-grid">
+            {(!search || "day game timed challenge".includes(search)) && (
+              <DayGame catalog />
+            )}
+            {games.map((game) => {
+              const current = Math.min(
+                game.target,
+                seasonGameProgress(game.id, state)
+              )
+              return (
+                <article
+                  key={game.id}
+                  className="p-game-card p-surface"
+                  data-magic-bento-card=""
+                >
+                  <div className="p-game-content">
+                    <h2>{game.title}</h2>
+                    <p>{game.description}</p>
+                    <div className="p-game-progress">
+                      <span>
+                        {current} / {game.target} {game.unit}
+                      </span>
+                      <ProgressBar
+                        value={(current / game.target) * 100}
+                        label={`${game.title} progress`}
+                      />
+                    </div>
+                    <p className="p-caption">
+                      Reward pending ·{" "}
+                      {current >= game.target
+                        ? "Goal reached in preview · reward not yet published"
+                        : game.id === "race"
+                        ? "First 50 qualify · provisional during late entry"
+                        : "Runs December 1–30 · UTC"}
+                    </p>
+                    <button
+                      className="p-button secondary"
+                      onClick={() => openGame(game.id)}
+                    >
+                      View challenge <LuArrowRight />
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </MagicBento>
+          {!games.length &&
+            search &&
+            !"day game timed challenge".includes(search) && (
+              <EmptyState
+                title="No matching challenges"
+                description="Try another search to see the Season Games."
+              />
+            )}
           {!state.registered && (
             <div className="s-callout">
               <LuInfo />
@@ -153,23 +197,9 @@ function GamesContent() {
               </small>
             </span>
             <span>
-              My Streaks <LuArrowRight />
+              Season streaks <LuArrowRight />
             </span>
           </Link>
-          <div className="s-section-intro">
-            <div>
-              <p className="p-eyebrow">Your claims go further</p>
-              <h2>Small challenges. More ways to earn.</h2>
-              <p>
-                Complete challenges through your Loop participation, including
-                timed Day Game challenges. Progress is automatic, with no extra
-                entry fee or separate joining.
-              </p>
-            </div>
-            <span className="s-pill">
-              <LuSparkles /> SP only
-            </span>
-          </div>
           <div className="s-callout">
             <LuInfo />
             <p>
@@ -179,79 +209,6 @@ function GamesContent() {
               reward: 1 claim SP + 3 bonus SP.
             </p>
           </div>
-          <MagicBento className="p-games-grid">
-            {(!search || "day game timed challenge".includes(search)) && (
-              <DayGame catalog />
-            )}
-            {games.map((game) => {
-              const current = Math.min(
-                game.target,
-                seasonGameProgress(game.id, state)
-              )
-              return (
-                <article
-                  key={game.id}
-                  className="p-game-card p-surface"
-                  data-magic-bento-card=""
-                >
-                  <button
-                    className="p-game-art"
-                    type="button"
-                    aria-label={`View ${game.title}`}
-                    onClick={() => openGame(game.id)}
-                  >
-                    <Image
-                      src={game.art}
-                      fill
-                      alt=""
-                      sizes="(max-width: 640px) 90vw, 440px"
-                    />
-                    <span className="p-status">{game.type}</span>
-                  </button>
-                  <div className="p-game-content">
-                    <div className="s-game-reward">
-                      <p className="p-eyebrow">Season Games</p>
-                      <span>
-                        <LuLock /> Reward pending
-                      </span>
-                    </div>
-                    <h2>{game.title}</h2>
-                    <p>{game.description}</p>
-                    <div className="p-game-progress">
-                      <span>
-                        {current} / {game.target} {game.unit}
-                      </span>
-                      <ProgressBar
-                        value={(current / game.target) * 100}
-                        label={`${game.title} progress`}
-                      />
-                    </div>
-                    <p className="p-caption">
-                      {current >= game.target
-                        ? "Goal reached in preview · reward not yet published"
-                        : game.id === "race"
-                        ? "First 50 qualify · provisional during late entry"
-                        : "Runs December 1–30 · UTC"}
-                    </p>
-                    <button
-                      className="p-button secondary"
-                      onClick={() => openGame(game.id)}
-                    >
-                      View challenge <LuArrowRight />
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
-          </MagicBento>
-          {!games.length &&
-            search &&
-            !"day game timed challenge".includes(search) && (
-              <EmptyState
-                title="No matching challenges"
-                description="Try another search to see the Season Games."
-              />
-            )}
         </>
       )}
       {tab === "Prizes & Rules" && <SeasonRules />}
@@ -305,7 +262,7 @@ function GamesContent() {
                 </p>
               )}
               <Link className="p-button" href="/loops?view=streaks">
-                See My Streaks <LuArrowRight />
+                See Season streaks <LuArrowRight />
               </Link>
             </>
           )}
@@ -327,22 +284,7 @@ function DayGame({ catalog = false }: { catalog?: boolean }) {
       aria-label="Day Game timed challenge"
       data-magic-bento-card=""
     >
-      <span className="s-day-icon">
-        <LuZap />
-      </span>
-      <div>
-        <div className="s-header-eyebrow">
-          <p className="p-eyebrow">Season Games · Timed challenge</p>
-          <span className={`s-pill ${active ? "is-green" : ""}`}>
-            {state.dayClaimed
-              ? "Claimed in preview"
-              : active
-              ? "Active now"
-              : ended
-              ? "Ended"
-              : "Scheduled"}
-          </span>
-        </div>
+      <div className="s-day-copy">
         <h2>Day Game: a bigger return.</h2>
         <p>December 12, 12:00 – December 13, 12:00 UTC</p>
         <small>
@@ -355,6 +297,15 @@ function DayGame({ catalog = false }: { catalog?: boolean }) {
           4<span>SP / claim</span>
         </strong>
         <small>1 claim + 3 game bonus</small>
+        <span className={`s-pill ${active ? "is-green" : ""}`}>
+          {state.dayClaimed
+            ? "Claimed in preview"
+            : active
+            ? "Active now"
+            : ended
+            ? "Ended"
+            : "Scheduled"}
+        </span>
         {active && state.registered && (
           <button
             className="p-button small"

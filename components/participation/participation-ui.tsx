@@ -26,16 +26,25 @@ export function PageIntro({
 
 export function SectionTitle({
   title,
+  subtitle,
   href,
   label = "View all",
 }: {
   title: string
+  subtitle?: string
   href?: string
   label?: string
 }) {
   return (
     <div className="p-section-title">
-      <h2>{title}</h2>
+      {subtitle ? (
+        <div className="p-section-heading">
+          <h2>{title}</h2>
+          <p className="p-section-subtitle">{subtitle}</p>
+        </div>
+      ) : (
+        <h2>{title}</h2>
+      )}
       {href && (
         <Link href={href}>
           {label}

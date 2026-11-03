@@ -8,10 +8,16 @@ import { useAccount } from "wagmi"
 import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
+import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
 import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
 import { useSuperLoopParticipation } from "@/lib/hooks/loops/super/use-super-loop-participation"
 import { useSuperLoopSettings } from "@/lib/hooks/loops/super/use-super-loop-settings"
 import { useSuperLoopStatus } from "@/lib/hooks/loops/super/use-super-loop-status"
+import {
+  formatDailyRewardAmount,
+  type DailyRewardEstimate,
+} from "@/lib/loops/daily-reward"
+import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import {
   calculateSuperLoopEstimatedPeriodPayout,
   getSuperLoopRewardTooltip,
@@ -102,6 +108,20 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     isLoading: statusReads.isLoading,
     userPhase: statusReads.data.userPhase,
   })
+  const syncProfileAfterClaim = useSyncProfileAfterClaim({
+    contractAddress: address,
+    loopId: loop.id,
+    periodNumber: statusReads.data.currentPeriod,
+  })
+  const handleClaimConfirmed = useCallback(
+    async (confirmation: LoopActionConfirmation) => {
+      await Promise.allSettled([
+        refreshTotalClaimsAfterClaim(confirmation),
+        syncProfileAfterClaim(confirmation),
+      ])
+    },
+    [refreshTotalClaimsAfterClaim, syncProfileAfterClaim]
+  )
   const claim = useSuperLoopClaim({
     address,
     chainId: loop.chainId,
@@ -110,7 +130,7 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     eligibilityProvider: loop.eligibilityProvider,
     hasClaimed: Boolean(claimerStatus?.hasClaimed),
     isClaimable: statusReads.data.isClaimable === true,
-    onClaimConfirmed: refreshTotalClaimsAfterClaim,
+    onClaimConfirmed: handleClaimConfirmed,
     onConfirmed: refreshAfterAction,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.payoutSymbol,
@@ -369,8 +389,32 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     retryParticipation,
   ])
 
+  const dailyRewards = createLoopSectionState<DailyRewardEstimate>({
+    data:
+      settings.data && balance.data && participation.data
+        ? {
+            value: formatDailyRewardAmount({
+              periodPayout:
+                balance.data.flowRatePerSecond === 0n
+                  ? 0n
+                  : calculatedPeriodPayout,
+              periodLength: settings.data.periodLength,
+              decimals: balance.data.decimals,
+            }),
+            symbol: balance.data.payoutSymbol,
+          }
+        : undefined,
+    error:
+      configError ?? settings.error ?? balance.error ?? participation.error,
+    errorMessage: "Daily rewards could not be loaded",
+    isFetching:
+      settings.isFetching || balance.isFetching || participation.isFetching,
+    retry: refreshCardData,
+  })
+
   return {
     action,
+    dailyRewards,
     distribution,
     error:
       statusReads.error ??
