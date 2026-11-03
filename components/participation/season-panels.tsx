@@ -498,14 +498,16 @@ export function SeasonRules() {
           <li>
             <strong>Complete Season Games challenges</strong>
             <span>
-              Consistency, race, exploration and timed challenges all add to the
-              same game-bonus total. Progress happens automatically.
+              Sprint +15 SP, Long Game +30 SP and exploration +15 SP add to the
+              same game-bonus total. Sprint and Long Game stack. The race is on
+              hold and awards no points until its rules are finalized.
             </span>
           </li>
         </ol>
         <p className="p-caption">
-          Day Game timed challenges: 4 SP per eligible claim during the event,
-          zero outside it, and no Season streak bonuses.
+          Weekend Loop: register each Saturday and claim Sunday for 4 total SP
+          (1 claim +3 game bonus). Four opportunities, up to 16 SP. No regular
+          streak bonus. Only this dedicated Loop counts for its weekend reward.
         </p>
       </section>
       <section className="p-surface s-panel">

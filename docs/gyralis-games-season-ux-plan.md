@@ -50,7 +50,9 @@ Daily participation must remain the main activity. Season Games challenges shoul
 
 ### Calendar
 
-Use UTC boundaries as the source of truth. Offer local-time equivalents in the interface and make the UTC reference available. Write dates with month names to avoid ambiguity.
+The user confirmed that new Season Loops will be deployed on Base and their period configuration will be known. The dates below remain planning and test references. During implementation, derive Loop availability and event windows from the configured contract periods, validate the timing in tests, and reconcile reference dates as needed. Do not reopen timing questions while defining game goals and rewards.
+
+Represent configured boundaries in UTC, offer local-time equivalents in the interface and make the UTC reference available. Write dates with month names to avoid ambiguity.
 
 | Event | UTC boundary | Meaning |
 | --- | --- | --- |
@@ -77,7 +79,7 @@ Treat scoring and event windows as start-inclusive and end-exclusive.
 
 **SP (Season Points)** is the Season-only score. SP does not accumulate into all-time GP or change the all-time leaderboard. Each Season starts with fresh SP and streak progression.
 
-- Use a confirmed roster of daily Loops on Base.
+- Deploy new Season Loops on Base and use their known configured periods. The regular daily Loops share the agreed common period schedule.
 - Working Season 01 scoring-budget estimate: five regular Loops. Exact identities and eligible period counts remain to be confirmed.
 - A regular eligible claim earns **1 Season point**.
 - Every regular Loop has its own independent Season streak.
@@ -120,7 +122,7 @@ The current concepts are templates, not final approved game definitions:
 
 Do not publish a game as active until its objective, reward, dates, and qualification rules are approved. Limited-place games need provisional qualification while late registration can introduce backdated activity. Final qualification also depends on the approved tie policy.
 
-### Day Games
+### Weekend Loop (the agreed Day Game format)
 
 A Day Game is a timed challenge within Season Games. It uses a designated standard Loop with a configured scoring window; it is not a separate game category or competition.
 
@@ -130,8 +132,13 @@ A Day Game is a timed challenge within Season Games. It uses a designated standa
 - Day Game Loops do not award regular Season streak bonuses.
 - Ordinary Season Loops continue earning 1 point per eligible claim.
 - Day Game availability is scheduled, rather than permanently active.
-- Planning budget: four eligible Day Game claim opportunities per player across the Season, worth 16 total SP (4 claim SP + 12 game-bonus SP). Exact event Loops and windows remain to be specified.
-- The user confirmed that Day Game becomes a dedicated Weekend Loop with Saturday registration and Sunday claiming every Season weekend. Only claims from that Loop count for its event reward; arbitrary claims from other Loops do not substitute. The December 2026 Season contains four such weekends: December 5–6, 12–13, 19–20 and 26–27. Weekly registration mechanics, eligibility and exact period boundaries are the current planning focus. Exploration inclusion is deferred.
+- Confirmed budget: four eligible Weekend Loop claim opportunities per player across the Season, worth 16 total SP (4 claim SP + 12 game-bonus SP).
+- The user confirmed that Day Game becomes a dedicated Weekend Loop with Saturday registration and Sunday claiming every Season weekend. Only claims from that Loop count for its event reward; arbitrary claims from other Loops do not substitute. The December 2026 Season contains four such weekends: December 5–6, 12–13, 19–20 and 26–27. Exploration inclusion remains deferred.
+- Every valid Season entrant is eligible, with no additional Weekend Loop eligibility requirement.
+- Register again each Saturday, during Saturday 00:00–Sunday 00:00 UTC, to qualify for that Sunday's claim. Season entry does not automatically complete a weekend registration, and a previous weekend's registration does not cover the next one.
+- Claim during Sunday 00:00–Monday 00:00 UTC. A player who misses Saturday registration cannot make an eligible Sunday claim that weekend. Claims outside Sunday's event window receive no Weekend Loop Season points.
+- Each weekend is independent: missed weekends do not remove previously earned points or block later registration. No additional all-four-weekends completion bonus is defined.
+- Read and verify exact windows from the actual dedicated Loop period setup before implementing live availability; its deployed identity and contract mapping remain implementation work.
 - Underlying Loop rewards and claim availability remain distinct from the event's Season scoring window.
 
 Show Scheduled, Active, and Ended states. Active cards explain the eligible Loop, exact window, countdown, and 4-point reward. After the event ends, retain its result and point history without implying that further claims earn event points.

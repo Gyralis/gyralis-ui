@@ -108,7 +108,15 @@ describe("Season interaction preview", () => {
   })
   it("credits Day Games as 1 claim +3 bonus with no streak change", () => {
     const state = createSeasonPreview()
-    const next = seasonPreviewReducer(state, { type: "day-claim" })
+    const registered = seasonPreviewReducer(state, {
+      type: "weekend-register",
+      id: 2,
+    })
+    const sunday = seasonPreviewReducer(registered, {
+      type: "weekend-clock",
+      time: "2026-12-13T00:00:00Z",
+    })
+    const next = seasonPreviewReducer(sunday, { type: "weekend-claim", id: 2 })
     expect(previewScore(next)).toEqual({
       claims: 20,
       streaks: 9,
@@ -116,13 +124,17 @@ describe("Season interaction preview", () => {
       total: 32,
     })
     expect(next.loops).toEqual(state.loops)
-    expect(seasonPreviewReducer(next, { type: "day-claim" })).toBe(next)
+    expect(seasonPreviewReducer(next, { type: "weekend-claim", id: 2 })).toBe(
+      next
+    )
   })
   it.each(["registration", "late", "review", "prizes"] as const)(
     "awards no event points in the %s scenario",
     (phase) => {
       const state = { ...createSeasonPreview(phase), registered: true }
-      expect(seasonPreviewReducer(state, { type: "day-claim" })).toBe(state)
+      expect(
+        seasonPreviewReducer(state, { type: "weekend-claim", id: 2 })
+      ).toBe(state)
     }
   )
   it("requires entry for claim scoring and freezes scoring in review", () => {
@@ -144,7 +156,8 @@ describe("Season interaction preview", () => {
   })
   it("keeps personal score and leaderboard totals identical", () => {
     const state = seasonPreviewReducer(createSeasonPreview(), {
-      type: "day-claim",
+      type: "claim",
+      id: 4,
     })
     const standings = previewStandings(state)
     expect(standings).toHaveLength(227)

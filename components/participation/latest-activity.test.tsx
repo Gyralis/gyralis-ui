@@ -77,6 +77,8 @@ describe("latest activity panel", () => {
       expect.objectContaining({
         queryKey: ["latest-activity", wallet],
         enabled: true,
+        refetchInterval: false,
+        refetchOnWindowFocus: true,
       })
     )
   })
@@ -107,5 +109,16 @@ describe("latest activity panel", () => {
     const html = renderToStaticMarkup(<LatestActivity />)
     expect(html).toContain("Base activity is temporarily unavailable")
     expect(html).toContain("No recent claims found on the available chain")
+  })
+
+  it("keeps confirmed rows visible while indexing is delayed", () => {
+    mocks.useQuery.mockReturnValue({
+      data: { ...snapshot, indexingStatus: "delayed" },
+      isError: true,
+    })
+    const html = renderToStaticMarkup(<LatestActivity />)
+    expect(html).toContain("Your claim is confirmed. History update delayed")
+    expect(html).toContain("+601.035 RWAGMI")
+    expect(html).toContain("Showing the last update.")
   })
 })

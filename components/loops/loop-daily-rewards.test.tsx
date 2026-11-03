@@ -20,6 +20,9 @@ vi.mock("@/lib/hooks/app/use-refresh-total-claims-after-claim", () => ({
 vi.mock("@/lib/hooks/app/use-sync-profile-after-claim", () => ({
   useSyncProfileAfterClaim: () => vi.fn(),
 }))
+vi.mock("@/lib/hooks/app/use-refresh-latest-activity-after-claim", () => ({
+  useRefreshLatestActivityAfterClaim: () => vi.fn(),
+}))
 
 function settings() {
   return {

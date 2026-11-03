@@ -15,6 +15,12 @@ For every game, a player should be able to explain:
 
 Game completion bonuses and Season placement prizes are different rewards. Completing a game does not guarantee a paid Season leaderboard position.
 
+## Deployment and timing reference
+
+The user confirmed that new Loops will be deployed on Base for the Season, with their period configuration known. Use those configured Loop periods as the authoritative timing input during implementation. The existing live directory is not a substitute for that new Season deployment configuration.
+
+Retain the current December 2026 Season and weekend dates as reference fixtures for planning, examples and later tests. Do not spend further planning rounds reconfirming these dates. Validate the configured contract periods and registration/claim boundary behavior in implementation tests, then reconcile any fixture dates as needed. The current focus remains clear game goals, qualifying actions and points.
+
 ## Existing decisions
 
 - Season Games are challenges within the overall Season, including the timed Day Game.
@@ -36,7 +42,7 @@ Game completion bonuses and Season placement prizes are different rewards. Compl
 | First 50 to 20 claims | On hold at the user's request; regular Season Loop claims are the agreed qualifying source | 20 SP reserved in the working budget; final game remains on hold | User's later suggestions; objective revisions, ordering, ties, late-entry reconciliation and award timing |
 | Find your next Loop | Confirmed revised goal: claim in every required Season Loop at least three times; required roster is fixed before the Season | 15 SP, agreed for planning | Publish the actual required Loop list; weekend inclusion is unresolved and deferred while focusing on Weekend Loop |
 | The long game | Confirmed: at least one qualifying regular Loop claim in every shared daily Season period | 30 SP, confirmed for planning; stacks with Sprint | Actual published roster and period calendar |
-| Weekend Loop (formerly Day Game) | Confirmed: a dedicated Loop with Saturday registration and Sunday claiming, every Season weekend. Other Loop claims do not substitute. | 4 total SP per eligible claim: 1 claim SP + 3 game-bonus SP | Weekly registration requirement, exact period boundaries and eligibility; current planning focus |
+| Weekend Loop (formerly Day Game) | Confirmed: each Saturday register for that Sunday's dedicated Loop claim, using full UTC-day windows. Every Season entrant is eligible without extra requirements. | 4 total SP per eligible Sunday claim: 1 claim SP + 3 game-bonus SP; four opportunities, maximum 16 SP | Publish actual Loop identity and verify its configured registration/claim boundaries before implementation |
 
 The user has proposed five regular Loops as a working Season 01 estimate. Loop identities and final availability are not yet confirmed. The current preview still contains only three regular Loop examples; it does not yet represent the required all-Loops, three-claims-each exploration objective. The user confirmed that the required exploration roster must be fixed and published before the Season. Do not assume a six-Loop/18-claim target: Weekend Loop inclusion in that roster has not been settled, and its clarification is deferred while the user focuses on Weekend Loop's own mechanics.
 
@@ -132,7 +138,7 @@ Assuming each regular Loop offers 30 eligible claim periods and every entrant is
 | 4 | 316 SP | 79,000 SP |
 | 5 | 395 SP | 98,750 SP |
 
-These totals exclude Day Game claims and all completion bonuses. The $250 cash pool is not a cap on Season points, and Season points have no fixed dollar conversion. A final points ceiling still requires the regular Loop count, actual claim-period opportunities and event schedule.
+These totals exclude Weekend Loop claims and all completion bonuses. The $250 cash pool is not a cap on Season points, and Season points have no fixed dollar conversion. A final launch ceiling still requires the actual regular Loop roster and eligible period counts, plus resolution of the remaining game definitions; the four Weekend Loop claim opportunities and UTC windows are now agreed.
 
 ### Completion-game budget selected for planning
 
@@ -146,7 +152,7 @@ The user selected the following allocation for planning. With five regular Loops
 | The long game | 30 SP | Participate in every shared daily Season period |
 | Maximum combined completion bonuses, including the reserved race allocation | 80 SP | Sprint and Long Game stack; the race and exploration qualification rules still need completing |
 
-The user also selected four eligible Day Game claim opportunities per player across the Season for planning. Event identities, dates and period windows remain unspecified. Under the existing 4-SP event claim rule, these four opportunities add 16 SP. A player who can earn all four completion bonuses would have an illustrative maximum of **491 SP**.
+The user selected four eligible Weekend Loop claim opportunities per player across the Season: Sunday December 6, 13, 20 and 27, with Saturday registration and full UTC-day windows. The actual deployed Loop identity and contract period mapping remain implementation work. Under the 4-SP event claim rule, these four opportunities add 16 SP. A player who can earn all four completion bonuses, including the on-hold race's reserved allocation, would have an illustrative maximum of **491 SP**.
 
 | Point source | Maximum SP per player in the working scenario |
 | --- | --- |
@@ -163,7 +169,7 @@ The race is now on hold, so 491 SP is a planning ceiling that includes its reser
 
 At the 250-entrant estimate, if all entrants could complete the regular participation, unlimited completion games and four event claims, but only 50 could receive the selected 20-SP race reward, the aggregate upper bound would be 250 × (395 + 15 + 15 + 30 + 16) + 50 × 20 = 118,750 SP. This remains a conditional planning example, not predicted participation or an approved points issuance target.
 
-Recommended planning order: finalize the regular roster and eligible period counts, determine the timed-event schedule, choose the desired influence of game bonuses, and then assign fixed published bonus amounts to each game. Do not make an individual's bonus change with registrations unless that is an explicitly approved game mechanic.
+The working reward allocation and weekend schedule are now agreed. Remaining work is to publish the regular and required exploration rosters, verify actual eligible contract periods and return to the race only when the user resumes that discussion. Do not make an individual's bonus change with registrations unless that is an explicitly approved game mechanic.
 
 ## 2. First 50 to 20 claims: on hold
 
@@ -243,13 +249,24 @@ A player can earn both the 15-SP Sprint bonus and the 30-SP Long Game bonus. Spr
 - Switching qualifying regular Loops between periods can preserve attendance even if individual Loop streaks differ. Multiple claims in one shared period still count as one attendance unit.
 - Completing all 30 qualifying periods also meets Sprint's 20-period target, awarding 45 SP in attendance bonuses across the two confirmed completions.
 
-## 5. Weekend Loop (formerly Day Game): current focus
+## 5. Weekend Loop (formerly Day Game): agreed definition
 
 Existing approved scoring: 1 claim SP + 3 game-bonus SP = 4 total Season points for an eligible event claim. No regular Season streak bonuses. Claims from that designated event Loop outside the window earn zero Season points from the event.
 
 The user confirmed that Day Game becomes the Weekend Loop: a dedicated Loop to register for on Saturday and claim from on Sunday, every Season weekend. It is its own Loop, not an any-Loop participation objective. Only a qualifying claim in that designated Weekend Loop can earn its event points. Regular Loop claims and registrations do not substitute for the required Weekend Loop action.
 
-The user previously selected four eligible event claim opportunities per player across the Season. Existing 4-SP scoring and the four-claim budget are retained; no new point amount was requested. No regular Season streak bonus applies to Weekend Loop claims. The current interview is about this Loop's own weekly registration, period boundaries and eligibility, not its possible contribution to other games.
+Confirmed by the user:
+
+- The player must register again each Saturday for that Sunday's claim. One registration does not cover the remaining Season weekends.
+- Registration window: Saturday 00:00 UTC up to, but not including, Sunday 00:00 UTC.
+- Claim window: Sunday 00:00 UTC up to, but not including, Monday 00:00 UTC.
+- Configure and read these windows from the dedicated Loop's actual period setup; a browser timer alone does not establish eligibility.
+- Every valid Season entrant may register. No additional Weekend Loop eligibility requirement is imposed.
+- There are four eligible Sunday claim opportunities per player during this Season, one per weekend.
+- Each confirmed eligible claim awards 4 SP: 1 claim SP + 3 game-bonus SP. Four claims award at most 16 SP: 4 claim SP + 12 game-bonus SP.
+- No regular Season streak bonuses apply. Missing a weekend does not erase previous Weekend Loop points or prevent participation in a later weekend.
+
+Each weekend is its own earning opportunity. There is no additional four-weekend completion bonus in the agreed reward schedule. A player's successful Saturday registration earns no claim points on its own; the eligible Sunday claim is the scoring action.
 
 The flow must distinguish Season entry from Weekend Loop registration. The existing Season late-entry cutoff is December 4, before the first planned weekend, so Saturday registration must not be presented as a way to enter the Season after its deadline.
 
@@ -262,13 +279,34 @@ The flow must distinguish Season entry from Weekend Loop registration. The exist
 | 3 | December 19 | December 20 |
 | 4 | December 26 | December 27 |
 
-These are calendar planning dates, not a published transaction schedule. Exact time zone, on-chain period mapping, opening/closing boundaries and actual deployed Loop identity remain to be finalized. The four-weekend calendar matches the four eligible claim opportunities selected for planning. The old December 12–13 UI window is a fixture, not authoritative evidence of these new rules.
+All listed Saturdays use the agreed reference 00:00–00:00 UTC registration window; their following Sundays use the agreed reference 00:00–00:00 UTC claim window. Keep these dates for reference and later tests. During implementation, use the new Base Loop's known configured periods and test their boundary behavior. The four-weekend calendar matches the four eligible claim opportunities selected for planning. The old December 12–13 UI window remains a separate old fixture and does not implement these new rules.
 
-### Questions for its discussion
+### Player-facing definition
 
-1. Must a player register each Saturday for that Sunday's claim, or can one registration cover the remaining Sundays?
-2. Configure full Saturday and Sunday periods in UTC (Saturday 00:00–Sunday 00:00 registration, Sunday 00:00–Monday 00:00 claiming), or use different explicit boundaries? The interface must read actual configured Loop boundaries.
-3. Is every Season entrant eligible without extra requirements, or must they meet additional Weekend Loop eligibility rules? Season SP still requires a valid Season entry.
+- Goal: "Register Saturday. Claim Sunday."
+- How: register in this dedicated Weekend Loop during Saturday's window, then make its eligible claim during Sunday's window. Repeat the registration step for each weekend you want to participate in.
+- Eligibility: "Open to all Season entrants."
+- Earn: "+4 SP per Sunday claim", explained as "+1 claim SP +3 game-bonus SP."
+- Season progress: "2 / 4 weekend claims · 8 SP earned", based only on confirmed eligible claims.
+- Maximum: "Up to 16 SP this Season."
+- Timing: show the next relevant registration or claim deadline, explicitly in UTC. A local-time helper may be supplementary, not a replacement for the published window.
+
+### Weekend states and next action
+
+| State | What the player needs to know | Next action |
+| --- | --- | --- |
+| Wallet or Season entry not verified | Personal eligibility and registration are not yet known | Check wallet/Season entry; do not promise a ready claim |
+| Before Saturday | Exact next Saturday opening time | View the Weekend Loop and its upcoming registration window |
+| Saturday, not yet registered | Register for the following Sunday before Sunday 00:00 UTC | Register for Sunday |
+| Saturday, registration confirmed | Registration is complete for this weekend only; Sunday opening time | Show Registered and the claim-opening countdown |
+| Sunday, registration confirmed, not claimed | Eligible dedicated Loop claim is available until Monday 00:00 UTC | Claim +4 SP |
+| Sunday, no qualifying Saturday registration | This weekend's registration window was missed | Show the next weekend's registration window; do not offer this Sunday's claim as eligible |
+| Sunday, claim confirmed | Credit +1 claim SP and +3 bonus SP once | Preserve the confirmation and show the next weekend window |
+| Claim transaction confirmed but scoring not refreshed | Token transaction success and Season scoring confirmation are distinct | Show Points updating; do not invent another credit or rank change |
+| Sunday window ended without an eligible claim | No Weekend Loop SP was earned for that weekend | Show next registration, without removing previous weekend points |
+| Final Sunday window ended | All Season weekend opportunities have ended | Show confirmed weekend history and total points |
+
+Missing Saturday registration means no eligible claim for that Sunday. Missing the Sunday window means that weekend's Season points cannot be made up by a claim outside its event window. Underlying token rewards, if any, still follow the actual Loop rules; do not invent token forfeiture or token carryover behavior in the Season explanation.
 
 ### Worked examples
 
@@ -276,6 +314,21 @@ These are calendar planning dates, not a published transaction schedule. Exact t
 - The event claim receives no regular Season streak bonus, even if an ordinary Loop would otherwise be at a milestone.
 - A token claim outside the designated window can still follow its underlying Loop's reward rules, but contributes zero Season SP from this event Loop.
 - If the event covers a single claimable period and the player has already claimed it, show "Claimed" and the credited breakdown. Do not leave an enabled claim action or imply another event reward is available.
+
+### Acceptance cases for later implementation
+
+- Saturday 00:00 UTC opens this weekend's registration; Sunday 00:00 UTC closes it and opens claiming; Monday 00:00 UTC closes the claim window.
+- A valid Season entrant needs no extra human-score, community-membership or special Weekend Loop eligibility check.
+- A player registered for weekend 1 must register again for weekend 2. Weekend 1 registration alone does not authorize weekend 2's claim.
+- Saturday registration without an eligible Sunday claim earns no Weekend Loop SP.
+- One confirmed eligible Sunday claim credits exactly 4 SP, split 1 claim + 3 game bonus, with no regular Season streak award.
+- Failed registrations do not produce a confirmed registration state. Failed claims do not produce a success receipt or points.
+- Retrying, refreshing or receiving the same confirmed claim twice does not duplicate the weekend credit. Count one eligible claim per player per weekend.
+- A regular Loop claim on Sunday does not satisfy this dedicated Weekend Loop claim.
+- Missing one weekend leaves prior earned points intact and later weekends available under their own registration rules.
+- Four successful weekend claims produce 16 SP, split 4 claim + 12 game bonus. There is no extra fifth point, regular streak bonus or additional completion prize.
+- Publish and verify the actual Loop/contract period schedule before presenting these planned windows as a live claim promise.
+- Use the reference dates as test fixtures, then check them against the new Base deployment's known period configuration. Verify transitions immediately before, at and after registration opening, registration closing/claim opening, and claim closing; do not derive live availability from hardcoded example dates.
 
 ## Timing and presentation decisions shared by all games
 

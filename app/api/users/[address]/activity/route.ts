@@ -2,11 +2,12 @@ import { NextResponse } from "next/server"
 import { isAddress } from "viem"
 
 import { getLatestActivity } from "@/lib/activity/get-latest-activity"
+import { parseActivityScope } from "@/lib/activity/scope"
 
 export const dynamic = "force-dynamic"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { address: string } }
 ) {
   if (!isAddress(params.address, { strict: false })) {
@@ -15,8 +16,17 @@ export async function GET(
       { status: 400 }
     )
   }
+  let scope
   try {
-    return NextResponse.json(await getLatestActivity(params.address), {
+    scope = parseActivityScope(new URL(request.url).searchParams.get("scope"))
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid activity scope" },
+      { status: 400 }
+    )
+  }
+  try {
+    return NextResponse.json(await getLatestActivity(params.address, scope), {
       headers: { "Cache-Control": "private, no-store" },
     })
   } catch {

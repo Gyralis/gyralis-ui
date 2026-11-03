@@ -1338,6 +1338,15 @@
   margin: auto 0 0 auto;
   z-index: 1;
 }
+.p-featured-card > .s-featured-game-art {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 170px;
+  height: auto;
+  opacity: 0.25;
+  pointer-events: none;
+}
 .p-muted {
   color: var(--p-text-muted);
   font-size: 14px;
@@ -3418,6 +3427,423 @@
 }
 .s-catalog-challenge {
   grid-column: 1 / -1;
+}
+
+/* Shared illustrated Season Games cards. */
+.s-games-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.s-games-intro h2 {
+  margin: 10px 0 8px;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+.s-games-intro > div > p:last-child {
+  max-width: 58ch;
+  color: var(--p-text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.s-games-earned {
+  flex: none;
+  display: grid;
+  gap: 5px;
+  text-align: right;
+}
+.s-games-earned > span,
+.s-games-earned > small {
+  color: var(--p-text-muted);
+  font-size: 10px;
+}
+.s-games-earned > strong {
+  font-size: 30px;
+  font-weight: 650;
+  color: #1ce783;
+  line-height: 1.2;
+}
+.s-games-earned > strong > small {
+  font-size: 13px;
+}
+.s-game-card {
+  position: relative;
+  border-radius: 22px;
+  border-color: #ffffff0e;
+  background: linear-gradient(145deg, #141f1e 0%, #101516 72%);
+  isolation: isolate;
+}
+.s-game-card-art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+.s-game-card-art img {
+  position: absolute;
+  top: -35px;
+  right: -50px;
+  width: 310px;
+  max-width: 75%;
+  height: auto;
+  opacity: 0.8;
+}
+.s-game-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #141f1e 5%, #141f1ebb 45%, #10151600 100%),
+    linear-gradient(0deg, #101516 30%, #10151600 85%);
+}
+.s-game-card-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 410px;
+  padding: 26px;
+}
+.s-game-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.s-game-card-top .p-eyebrow {
+  color: var(--p-text-muted);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.s-game-card-top .s-pill {
+  background: #101a14bb;
+}
+.s-game-card h2 {
+  max-width: 78%;
+  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+}
+.s-game-description {
+  max-width: 36ch;
+  min-height: 44px;
+  color: var(--p-text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.s-game-reward-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0;
+}
+.s-game-reward {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.s-game-reward > strong {
+  color: #1ce783;
+  font-size: 40px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.s-game-reward > span {
+  color: var(--p-text-muted);
+  font-size: 11px;
+}
+.s-game-earned {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  flex: none;
+}
+.s-game-earned > strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.s-game-earned > span {
+  color: var(--p-text-muted);
+  font-size: 10px;
+}
+.s-game-card-progress {
+  margin-top: auto;
+  min-height: 44px;
+  color: var(--p-text-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.s-game-card-progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-bottom: 9px;
+}
+.s-game-card-progress .p-progress {
+  height: 5px;
+}
+.s-game-card-progress > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.s-game-card-progress > p > svg {
+  flex: none;
+  margin-top: 3px;
+}
+.s-game-card-progress > small {
+  display: block;
+  margin-top: 9px;
+  font-size: 10px;
+}
+.s-game-card-content > .p-button {
+  margin-top: 20px;
+  justify-content: space-between;
+  min-height: 42px;
+}
+.s-game-card.is-held {
+  grid-column: 1 / -1;
+}
+.s-game-card.is-held .s-game-card-content {
+  min-height: 300px;
+}
+.s-game-card.is-held .s-game-description {
+  max-width: 56ch;
+  min-height: 0;
+}
+.s-game-card.is-held .s-game-reward > strong {
+  color: var(--p-text-muted);
+  font-size: 30px;
+}
+.s-game-card.is-held .s-game-card-art img {
+  max-width: 55%;
+  width: 340px;
+  right: 5%;
+  opacity: 0.5;
+}
+.s-game-card.is-held .s-game-card-content > .p-button {
+  align-self: flex-start;
+  gap: 24px;
+}
+.s-game-dialog {
+  max-width: min(680px, calc(100vw - 28px));
+  max-height: 90dvh;
+  overflow-y: auto;
+  border-radius: 24px;
+}
+.s-game-dialog-header {
+  position: relative;
+  padding: 14px 0 20px;
+  border-bottom: 1px solid #ffffff0d;
+  overflow: hidden;
+  isolation: isolate;
+}
+.s-game-dialog-header > h2 {
+  max-width: 80%;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+.s-game-dialog-header > p {
+  max-width: 44ch;
+  line-height: 1.7;
+}
+.s-game-dialog-art {
+  position: absolute;
+  z-index: -1;
+  top: -65px;
+  right: -45px;
+  width: 230px;
+  height: auto;
+  opacity: 0.3;
+  pointer-events: none;
+}
+.s-game-details {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.s-game-detail-reward {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.s-game-detail-reward > span {
+  max-width: 28ch;
+  color: var(--p-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.s-game-detail-reward > strong {
+  color: #1ce783;
+  font-size: 30px;
+  font-weight: 650;
+}
+.s-game-detail-reward > strong > small {
+  font-size: 12px;
+  font-weight: 500;
+}
+.s-game-definition {
+  display: grid;
+  gap: 20px;
+}
+.s-game-definition dt {
+  margin-bottom: 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #1ce783;
+}
+.s-game-definition dd {
+  color: var(--p-text-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.s-game-detail-progress {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #ffffff0d;
+  border-radius: 12px;
+  background: #ffffff03;
+  font-size: 12px;
+}
+.s-game-detail-progress > p,
+.s-weekend-participation > p {
+  color: var(--p-text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.s-game-loop-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.s-game-rules {
+  display: grid;
+  gap: 12px;
+  padding-left: 17px;
+  list-style: disc;
+  color: var(--p-text-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.s-weekend-participation {
+  display: grid;
+  gap: 18px;
+}
+.s-weekend-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 14px;
+}
+.s-weekend-windows,
+.s-weekend-history {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.s-weekend-windows > div,
+.s-weekend-history > div {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid #ffffff0d;
+  border-radius: 10px;
+  background: #ffffff03;
+}
+.s-weekend-windows span,
+.s-weekend-windows small,
+.s-weekend-history small {
+  display: block;
+  color: var(--p-text-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+.s-weekend-windows strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.s-weekend-history {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.s-weekend-history > div {
+  padding: 10px;
+  font-size: 11px;
+}
+.s-weekend-history strong {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #1ce783;
+  font-size: 11px;
+  font-weight: 500;
+}
+.s-weekend-clock {
+  padding-top: 16px;
+  border-top: 1px solid #ffffff0d;
+  color: var(--p-text-muted);
+  font-size: 11px;
+}
+.s-weekend-clock > summary {
+  cursor: pointer;
+}
+.s-weekend-clock label {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+.s-weekend-clock select {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px;
+  border: 1px solid #344653;
+  border-radius: 8px;
+  background: #111c24;
+}
+.s-weekend-clock p {
+  margin-top: 10px;
+  line-height: 1.7;
+}
+@media (max-width: 640px) {
+  .s-games-intro {
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .s-games-intro h2 {
+    font-size: 24px;
+  }
+  .s-games-earned > span {
+    max-width: 11ch;
+  }
+  .s-game-card-content {
+    min-height: 400px;
+    padding: 22px;
+  }
+  .s-game-card h2 {
+    font-size: 26px;
+  }
+  .s-weekend-windows {
+    grid-template-columns: 1fr;
+  }
+  .s-weekend-history {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .s-game-dialog-header > h2 {
+    font-size: 26px;
+  }
 }
 
 .s-loop-progression {

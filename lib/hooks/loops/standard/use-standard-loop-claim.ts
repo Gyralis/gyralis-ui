@@ -261,6 +261,7 @@ export function useStandardLoopClaim({
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
   const receiptBlockNumber = receipt.data?.blockNumber
+  const receiptLogs = receipt.data?.logs
 
   useEffect(() => {
     setHasEnteredNextPeriod(false)
@@ -303,6 +304,7 @@ export function useStandardLoopClaim({
         chainId,
         transactionHash: txHash,
         blockNumber: receiptBlockNumber,
+        logs: receiptLogs,
       })
     }
 
@@ -349,6 +351,7 @@ export function useStandardLoopClaim({
     receipt.isSuccess,
     receiptStatus,
     receiptBlockNumber,
+    receiptLogs,
     toast,
     tokenDecimals,
     tokenSymbol,

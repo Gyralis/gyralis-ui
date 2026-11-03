@@ -79,11 +79,6 @@ export function useSyncProfileAfterClaim({
           })
         } catch (error) {
           console.error("[profile-claim-sync] failed", error)
-        } finally {
-          // Claim activity comes from the subgraph even if scoring sync fails.
-          await queryClient.invalidateQueries({
-            queryKey: ["latest-activity", wallet],
-          })
         }
       })()
 

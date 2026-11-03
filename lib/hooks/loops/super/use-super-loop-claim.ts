@@ -117,6 +117,7 @@ export function useSuperLoopClaim({
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
   const receiptStatus = receipt.data?.status
   const receiptBlockNumber = receipt.data?.blockNumber
+  const receiptLogs = receipt.data?.logs
 
   useEffect(() => {
     setLastClaimedAmount(undefined)
@@ -161,6 +162,7 @@ export function useSuperLoopClaim({
         chainId,
         transactionHash: txHash,
         blockNumber: receiptBlockNumber,
+        logs: receiptLogs,
       })
     }
 
@@ -202,6 +204,7 @@ export function useSuperLoopClaim({
     receipt.isSuccess,
     receiptStatus,
     receiptBlockNumber,
+    receiptLogs,
     toast,
     tokenDecimals,
     tokenSymbol,

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
 import { isAddress } from "viem"
 
+import { useRefreshLatestActivityAfterClaim } from "@/lib/hooks/app/use-refresh-latest-activity-after-claim"
 import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
 import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
 import { useStandardLoopBalance } from "@/lib/hooks/loops/standard/use-standard-loop-balance"
@@ -60,6 +61,9 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     currentPeriod: settings.data?.currentPeriod,
     enabled: Boolean(address && settings.data),
   })
+  const refreshLatestActivityAfterClaim = useRefreshLatestActivityAfterClaim(
+    balance.data?.decimals
+  )
   const syncProfileAfterClaim = useSyncProfileAfterClaim({
     contractAddress: address,
     loopId: loop.id,
@@ -68,11 +72,16 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const handleClaimConfirmed = useCallback(
     async (confirmation: LoopActionConfirmation) => {
       await Promise.allSettled([
+        refreshLatestActivityAfterClaim(confirmation),
         refreshTotalClaimsAfterClaim(confirmation),
         syncProfileAfterClaim(confirmation),
       ])
     },
-    [refreshTotalClaimsAfterClaim, syncProfileAfterClaim]
+    [
+      refreshLatestActivityAfterClaim,
+      refreshTotalClaimsAfterClaim,
+      syncProfileAfterClaim,
+    ]
   )
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch

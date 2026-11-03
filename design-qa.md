@@ -1,3 +1,18 @@
+# Illustrated Season Games — 2026-11-03
+
+- Current scope: five shared cards and detail views now show the discussed game goals, point rewards, earned game bonuses and appropriate progress states. Each has unique, inspected dark-green 3D artwork. The user explicitly selected keeping this artwork and matching card backgrounds to the Season Points card.
+- Latest copy refinement: the Loops count is dynamic and reads “4 Active Loops · Claim every day” for the current roster.
+- Approved reference: the user's Layer3 Rewards screenshot informs artwork placement and dark text areas within the existing Gyralis design. This is an incremental implementation in the existing app, not a recreated Layer3 page.
+- Scoring checks: 60 focused tests passed. Sprint awards +15 SP for 20 participating periods, Long Game +30 SP for all 30, and the two stack. Weekend claims require their own Saturday registration and credit 1 claim SP +3 bonus SP without a regular streak bonus. Explorer is gated on a published required roster. The held race awards no points.
+- Assets: all five transparent PNGs are saved under `public/games/`, with exact built-in image-generation prompts linked in `docs/season-game-assets.md`. Their standalone appearance was inspected. In-page crop and rendering are unverified.
+- TypeScript and targeted ESLint passed. Reference-date boundary tests validate the frontend preview, not the as-yet separate new Base deployment.
+- Browser evidence: no implementation screenshot was captured. `pnpm dev` failed with sandbox `listen EPERM` for port 3000, and the request to start it outside the sandbox was declined. No further browser execution was attempted after that refusal.
+- Outstanding visual checks: desktop/mobile card wrapping, actual image loading/crop, dialog scrolling, focus restoration, right side geometry and motion-disabled behavior. No visual pass is claimed.
+
+final result: blocked
+
+---
+
 # Text-first Season Game cards — 2026-11-03
 
 - Scope: game cards on Games and Explore omit artwork and header/category strips. Titles, descriptions, progress, and existing challenge actions remain. The timed Day Game omits its decorative icon/header and places its status alongside reward/action details. Pending rewards remain explicit in the card caption and challenge details.

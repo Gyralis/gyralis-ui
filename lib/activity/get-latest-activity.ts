@@ -3,21 +3,17 @@ import "server-only"
 import { loopDashboardMeta } from "@/data/loop-dashboard-meta"
 import { LoopCardsData } from "@/data/loops-data"
 import { env } from "@/env.mjs"
-import {
-  createPublicClient,
-  formatUnits,
-  http,
-  isAddress,
-  parseAbi,
-} from "viem"
+import { formatUnits, isAddress } from "viem"
 import { base, gnosis } from "viem/chains"
 
-import type { ClaimActivityItem, LatestActivityData } from "./types"
-
-const currentPeriodAbi = parseAbi([
-  "function getCurrentPeriod() view returns (uint256)",
-  "function getStreamingCurrentPeriod() view returns (uint256)",
-])
+import { activityTotals } from "./activity-data"
+import { getActivityPeriods } from "./get-activity-periods"
+import { activityScopeKey } from "./scope"
+import type {
+  ActivityLoopScope,
+  ClaimActivityItem,
+  LatestActivityData,
+} from "./types"
 
 interface ClaimEvent {
   id: string
@@ -25,12 +21,14 @@ interface ClaimEvent {
   payout: string
   timestamp: string
   txHash: string
+  blockNumber: string
   loop: { id: string }
 }
 
 /** One independent current/previous period window per active, indexed loop. */
 export async function getLatestActivity(
-  address: string
+  address: string,
+  scope?: readonly ActivityLoopScope[]
 ): Promise<LatestActivityData> {
   if (!isAddress(address, { strict: false }))
     throw new Error("Invalid wallet address")
@@ -46,7 +44,10 @@ export async function getLatestActivity(
       endpoint: env.GYRALIS_BASE_SUBGRAPH_URL,
       rpc: env.BASE_RPC_URL ?? env.NEXT_PUBLIC_BASE_RPC_URL,
     },
-  ]
+  ].filter(
+    (source) =>
+      !scope || scope.some((entry) => entry.chainId === source.chain.id)
+  )
   const results = await Promise.allSettled(
     sources.map(async (source) => {
       const loops = LoopCardsData.filter(
@@ -54,27 +55,31 @@ export async function getLatestActivity(
           loop.enabled &&
           loop.chainId === source.chain.id &&
           loop.historyLoopKey &&
-          loop.address
+          loop.address &&
+          (!scope ||
+            scope.some(
+              (entry) =>
+                activityScopeKey(entry) ===
+                activityScopeKey({
+                  chainId: loop.chainId,
+                  loopAddress: loop.address!,
+                })
+            ))
       )
-      if (!loops.length) return []
+      if (!loops.length) throw new Error("Unsupported activity scope")
       if (!source.endpoint) throw new Error("Activity source unavailable")
-      const client = createPublicClient({
-        chain: source.chain,
-        transport: http(source.rpc, { timeout: 5_000, retryCount: 0 }),
-      })
-      const periods = await client.multicall({
-        contracts: loops.map((loop) => ({
-          address: loop.address!,
-          abi: currentPeriodAbi,
-          functionName:
-            loop.contractType === "superLoop"
-              ? ("getStreamingCurrentPeriod" as const)
-              : ("getCurrentPeriod" as const),
-        })),
-        allowFailure: false,
-      })
-      const windows = loops.map((loop, index) => {
-        const current = periods[index]
+      const periods = await getActivityPeriods(source.chain.id, source.rpc)
+      const windows = loops.map((loop) => {
+        const period = periods.find(
+          (entry) => entry.loopAddress === loop.address!.toLowerCase()
+        )
+        if (!period) throw new Error("Activity period unavailable")
+        const current = BigInt(period.currentPeriod)
+        const confirmedPeriod = scope?.find(
+          (entry) =>
+            entry.chainId === loop.chainId &&
+            entry.loopAddress.toLowerCase() === loop.address!.toLowerCase()
+        )?.period
         return {
           loop,
           // Base subgraph IDs are contract addresses, independently of UI/scoring IDs.
@@ -83,10 +88,15 @@ export async function getLatestActivity(
               ? String(loop.id)
               : loop.address!.toLowerCase(),
           current,
-          periods:
-            current > 0n
-              ? [current.toString(), (current - 1n).toString()]
-              : ["0"],
+          confirmedPeriod,
+          periods: [
+            ...new Set([
+              ...(current > 0n
+                ? [current.toString(), (current - 1n).toString()]
+                : ["0"]),
+              ...(confirmedPeriod == null ? [] : [confirmedPeriod]),
+            ]),
+          ],
         }
       })
       const response = await fetch(source.endpoint, {
@@ -96,10 +106,10 @@ export async function getLatestActivity(
         signal: AbortSignal.timeout(10_000),
         body: JSON.stringify({
           query: `query LatestActivity($windows: [ClaimEvent_filter!]!) {
-          _meta { hasIndexingErrors }
+          _meta { block { number } hasIndexingErrors }
           claimEvents(first: 1000, orderBy: timestamp, orderDirection: desc,
             where: { or: $windows }) {
-            id periodNumber payout timestamp txHash loop { id }
+            id periodNumber payout timestamp txHash blockNumber loop { id }
           }
         }`,
           variables: {
@@ -114,7 +124,7 @@ export async function getLatestActivity(
       if (!response.ok) throw new Error("Activity request failed")
       const payload = (await response.json()) as {
         data?: {
-          _meta: { hasIndexingErrors: boolean }
+          _meta: { block: { number: number }; hasIndexingErrors: boolean }
           claimEvents: ClaimEvent[]
         }
         errors?: unknown[]
@@ -123,19 +133,33 @@ export async function getLatestActivity(
         payload.errors?.length ||
         !payload.data ||
         payload.data._meta.hasIndexingErrors ||
-        payload.data.claimEvents.length >= 1000
+        payload.data.claimEvents.length >= 1000 ||
+        !Number.isSafeInteger(payload.data._meta.block?.number) ||
+        payload.data._meta.block.number < 0
       ) {
         throw new Error("Activity snapshot unavailable")
       }
       const events = payload.data.claimEvents
-      return windows.flatMap((window) => {
+      const claims = windows.flatMap((window) => {
         const loopEvents = events.filter(
           (event) => event.loop.id.toLowerCase() === window.id
         )
-        const hasCurrent = loopEvents.some(
-          (event) => event.periodNumber === window.current.toString()
-        )
-        const selected = hasCurrent ? window.current : window.current - 1n
+        const confirmedAhead =
+          window.confirmedPeriod != null &&
+          BigInt(window.confirmedPeriod) > window.current &&
+          loopEvents.some(
+            (event) => event.periodNumber === window.confirmedPeriod
+          )
+        const hasCurrent =
+          confirmedAhead ||
+          loopEvents.some(
+            (event) => event.periodNumber === window.current.toString()
+          )
+        const selected = confirmedAhead
+          ? BigInt(window.confirmedPeriod!)
+          : hasCurrent
+          ? window.current
+          : window.current - 1n
         const meta = loopDashboardMeta[window.loop.historyLoopKey!]
         // The four indexed active loops emit payouts in 18-decimal token units,
         // including USDCx (not the 6-decimal underlying USDC).
@@ -156,47 +180,55 @@ export async function getLatestActivity(
               tokenSymbol: meta.tokenSymbol,
               timestamp: Number(event.timestamp),
               transactionUrl: `${source.chain.blockExplorers.default.url}/tx/${event.txHash}`,
+              loopAddress: window.loop.address!.toLowerCase(),
+              transactionHash: event.txHash.toLowerCase(),
+              logIndex:
+                event.id
+                  .toLowerCase()
+                  .startsWith(`${event.txHash.toLowerCase()}-`) &&
+                /^\d+$/.test(event.id.split("-").at(-1) ?? "")
+                  ? Number(event.id.split("-").at(-1))
+                  : undefined,
+              blockNumber: Number(event.blockNumber),
+              tokenAddress: window.loop.token.toLowerCase(),
+              tokenDecimals: 18,
+              source: "indexed" as const,
             } satisfies ClaimActivityItem,
-            raw: BigInt(event.payout),
-            token: window.loop.token.toLowerCase(),
           }))
       })
+      return {
+        claims,
+        coverage: windows.map((window) => ({
+          chainId: source.chain.id,
+          loopAddress: window.loop.address!.toLowerCase(),
+          currentPeriod: window.current.toString(),
+          indexedBlock: payload.data!._meta.block.number,
+        })),
+      }
     })
   )
   if (results.every((result) => result.status === "rejected"))
     throw new Error("Activity unavailable")
   const claims = results.flatMap((result) =>
-    result.status === "fulfilled" ? result.value : []
+    result.status === "fulfilled" ? result.value.claims : []
   )
   const unique = [
     ...new Map(claims.map((claim) => [claim.item.id, claim])).values(),
   ]
-  const totals = new Map<
-    string,
-    { chainId: number; tokenSymbol: string; raw: bigint }
-  >()
-  for (const claim of unique) {
-    const key = `${claim.item.chainId}:${claim.token}`
-    const total = totals.get(key) ?? {
-      chainId: claim.item.chainId,
-      tokenSymbol: claim.item.tokenSymbol,
-      raw: 0n,
-    }
-    total.raw += claim.raw
-    totals.set(key, total)
-  }
+  const items = unique.map((claim) => claim.item)
   return {
     address: wallet,
-    items: unique
-      .map((claim) => claim.item)
-      .sort((a, b) => b.timestamp - a.timestamp || a.id.localeCompare(b.id)),
-    totals: [...totals.values()].map(({ raw, ...total }) => ({
-      ...total,
-      amount: formatUnits(raw, 18),
-    })),
+    items: items.sort(
+      (a, b) => b.timestamp - a.timestamp || a.id.localeCompare(b.id)
+    ),
+    totals: activityTotals(items),
     unavailableChains: sources
       .filter((_, index) => results[index].status === "rejected")
       .map((source) => source.chain.name),
     fetchedAt: new Date().toISOString(),
+    fullSnapshot: scope == null,
+    coverage: results.flatMap((result) =>
+      result.status === "fulfilled" ? result.value.coverage : []
+    ),
   }
 }

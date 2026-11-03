@@ -6,10 +6,7 @@ import Link from "next/link"
 import { LoopCardsData } from "@/data/loops-data"
 import { LuArrowRight } from "react-icons/lu"
 
-import {
-  seasonGameProgress,
-  seasonGames,
-} from "@/lib/participation/season-games"
+import { gameView, seasonGames } from "@/lib/participation/season-games"
 import MagicBento from "@/components/ui/magic-bento"
 
 import { LoopOpportunityCard } from "./loop-directory"
@@ -173,30 +170,47 @@ function DiscoverContent() {
             subtitle="Complete challenges. Earn extra SP."
           />
           <MagicBento className="p-featured-grid">
-            {games.slice(0, tab === "Games" ? 4 : 2).map((game) => (
-              <Link
-                className="p-featured-card p-surface"
-                data-magic-bento-card=""
-                key={game.id}
-                href={`/games?game=${game.id}`}
-              >
-                <div>
-                  <h3>{game.title}</h3>
-                  <p>{game.description}</p>
-                  <span className="p-caption">
-                    {Math.min(game.target, seasonGameProgress(game.id, state))}{" "}
-                    / {game.target} {game.unit}
-                  </span>
-                  <ProgressBar
-                    value={
-                      (seasonGameProgress(game.id, state) / game.target) * 100
-                    }
-                    label={`${game.title} progress`}
+            {games.slice(0, tab === "Games" ? games.length : 2).map((game) => {
+              const view = gameView(game, state)
+              return (
+                <Link
+                  className="p-featured-card p-surface"
+                  data-magic-bento-card=""
+                  key={game.id}
+                  href={`/games?game=${game.id}`}
+                >
+                  <Image
+                    className="s-featured-game-art"
+                    src={game.art}
+                    width={1254}
+                    height={1254}
+                    sizes="150px"
+                    alt=""
                   />
-                </div>
-                <LuArrowRight />
-              </Link>
-            ))}
+                  <div>
+                    <h3>{game.title}</h3>
+                    <p>{game.description}</p>
+                    <span className="p-caption">
+                      +{game.bonus}{" "}
+                      {game.id === "race"
+                        ? "SP reserved · On hold"
+                        : game.id === "weekend"
+                        ? "bonus SP per Sunday claim"
+                        : "bonus SP once"}
+                    </span>
+                    {view.target > 0 && game.id !== "race" ? (
+                      <ProgressBar
+                        value={(view.progress / view.target) * 100}
+                        label={`${game.title} progress`}
+                      />
+                    ) : (
+                      <small className="p-caption">{view.status}</small>
+                    )}
+                  </div>
+                  <LuArrowRight />
+                </Link>
+              )
+            })}
           </MagicBento>
         </section>
       )}

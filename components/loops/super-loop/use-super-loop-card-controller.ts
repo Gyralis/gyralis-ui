@@ -7,6 +7,7 @@ import { useAccount } from "wagmi"
 
 import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
+import { useRefreshLatestActivityAfterClaim } from "@/lib/hooks/app/use-refresh-latest-activity-after-claim"
 import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
 import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
 import { useSuperLoopClaim } from "@/lib/hooks/loops/super/use-super-loop-claim"
@@ -77,6 +78,9 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     chainId: loop.chainId,
     enabled: validAddress,
   })
+  const refreshLatestActivityAfterClaim = useRefreshLatestActivityAfterClaim(
+    balance.data?.decimals
+  )
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch
   const refetchSettings = settings.refetch
@@ -119,11 +123,16 @@ export function useSuperLoopCardController(loop: LoopCardData) {
   const handleClaimConfirmed = useCallback(
     async (confirmation: LoopActionConfirmation) => {
       await Promise.allSettled([
+        refreshLatestActivityAfterClaim(confirmation),
         refreshTotalClaimsAfterClaim(confirmation),
         syncProfileAfterClaim(confirmation),
       ])
     },
-    [refreshTotalClaimsAfterClaim, syncProfileAfterClaim]
+    [
+      refreshLatestActivityAfterClaim,
+      refreshTotalClaimsAfterClaim,
+      syncProfileAfterClaim,
+    ]
   )
   const claim = useSuperLoopClaim({
     address,

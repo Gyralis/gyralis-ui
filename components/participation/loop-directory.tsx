@@ -358,8 +358,8 @@ function LoopDirectoryContent() {
         <>
           <div className="p-section-title">
             <h2>
-              {filtered.length} {filtered.length === 1 ? "Loop" : "Loops"} to
-              explore
+              {filtered.length} Active{" "}
+              {filtered.length === 1 ? "Loop" : "Loops"} · Claim every day
             </h2>
           </div>
           {filtered.length ? (

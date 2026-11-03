@@ -67,7 +67,7 @@ describe("profile sync after a claim", () => {
         "0x1111111111111111111111111111111111111111",
       ],
     })
-    expect(mocks.invalidateQueries).toHaveBeenCalledWith({
+    expect(mocks.invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: [
         "latest-activity",
         "0x1111111111111111111111111111111111111111",

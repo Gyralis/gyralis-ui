@@ -1,4 +1,6 @@
 // Frontend-only fixtures. Never use this model to authorize payments or claims.
+import { completionBonuses, weekendSchedule, weekendView } from "./season-games"
+
 export const seasonMilestones = [
   { streak: 3, points: 2 },
   { streak: 7, points: 5 },
@@ -57,7 +59,11 @@ export interface PreviewState {
   registered: boolean
   earlyBird: boolean
   loops: PreviewLoop[]
-  dayClaimed: boolean
+  period: number
+  participationPeriods: number[]
+  requiredLoopIds: number[] | null
+  weekendTime: string
+  weekends: { id: number; registered: boolean; claimed: boolean }[]
   prizeClaimed: boolean
   message: string
 }
@@ -88,7 +94,30 @@ export function createSeasonPreview(phase: SeasonPhase = "live"): PreviewState {
       claimedToday: false,
       lastAward: 0,
     })),
-    dayClaimed: false,
+    period: seasonPhases[phase].day,
+    participationPeriods: Array.from(
+      {
+        length:
+          phase === "registration"
+            ? 0
+            : phase === "late"
+            ? 1
+            : phase === "prizes"
+            ? 30
+            : phase === "review"
+            ? 28
+            : 11,
+      },
+      (_, i) => i + 1
+    ),
+    // Publish the required roster before this game can award points.
+    requiredLoopIds: null,
+    weekendTime: seasonPhases[phase].date,
+    weekends: weekendSchedule.map(({ id }) => ({
+      id,
+      registered: phase === "prizes",
+      claimed: phase === "prizes",
+    })),
     prizeClaimed: false,
     message: "",
   }
@@ -114,7 +143,7 @@ export function previewNextClaimPoints(
 export function previewScore(state: PreviewState) {
   const claims =
     state.loops.reduce((sum, loop) => sum + loop.claims, 0) +
-    Number(state.dayClaimed)
+    state.weekends.filter((weekend) => weekend.claimed).length
   const streaks = state.loops.reduce(
     (sum, loop) =>
       sum +
@@ -123,7 +152,12 @@ export function previewScore(state: PreviewState) {
         .reduce((total, m) => total + m.points, 0),
     0
   )
-  const games = state.dayClaimed ? 3 : 0
+  const awards = completionBonuses(state)
+  const games =
+    awards.sprint +
+    awards.marathon +
+    awards.explorer +
+    state.weekends.filter((weekend) => weekend.claimed).length * 3
   return { claims, streaks, games, total: claims + streaks + games }
 }
 export type PreviewAction =
@@ -132,7 +166,9 @@ export type PreviewAction =
   | { type: "viewer"; registered: boolean }
   | { type: "placement"; winning: boolean }
   | { type: "claim"; id: number }
-  | { type: "day-claim" }
+  | { type: "weekend-register"; id: number }
+  | { type: "weekend-claim"; id: number }
+  | { type: "weekend-clock"; time: string }
   | { type: "prize" }
   | { type: "message"; message: string }
 export function seasonPreviewReducer(
@@ -148,6 +184,9 @@ export function seasonPreviewReducer(
       return {
         ...state,
         loops: fixture.loops,
+        period: fixture.period,
+        participationPeriods: fixture.participationPeriods,
+        weekends: fixture.weekends,
         prizeClaimed: false,
         message: "",
       }
@@ -162,6 +201,9 @@ export function seasonPreviewReducer(
       }
     case "message":
       return { ...state, message: action.message }
+    case "weekend-clock":
+      if (!Number.isFinite(Date.parse(action.time))) return state
+      return { ...state, weekendTime: action.time, message: "" }
     case "registration": {
       if (
         action.registered
@@ -191,7 +233,7 @@ export function seasonPreviewReducer(
         (m) => nextStreak >= m.streak && !loop.earned.includes(m.streak)
       )
       const bonus = newMilestones.reduce((sum, m) => sum + m.points, 0)
-      return {
+      const next: PreviewState = {
         ...state,
         loops: state.loops.map((item) =>
           item.id === action.id
@@ -205,20 +247,60 @@ export function seasonPreviewReducer(
               }
             : item
         ),
-        message: `${loop.name}: +${1 + bonus} SP · +1 claim${
-          bonus ? ` + ${bonus} streak bonus` : ""
+        participationPeriods: state.participationPeriods.includes(state.period)
+          ? state.participationPeriods
+          : [...state.participationPeriods, state.period],
+      }
+      const gameBonus = previewScore(next).games - previewScore(state).games
+      const total = 1 + bonus + gameBonus
+      return {
+        ...next,
+        loops: next.loops.map((item) =>
+          item.id === action.id ? { ...item, lastAward: total } : item
+        ),
+        message: `${loop.name}: +${total} SP · +1 claim${
+          bonus ? ` +${bonus} streak bonus` : ""
+        }${
+          gameBonus ? ` +${gameBonus} game bonus` : ""
         }. Claim preview only; no tokens moved.`,
       }
     }
-    case "day-claim":
-      if (!state.registered || state.phase !== "live" || state.dayClaimed)
+    case "weekend-register": {
+      const view = weekendView(state)
+      if (
+        !state.registered ||
+        !canScore(state.phase) ||
+        view.stage !== "registration" ||
+        view.weekend?.id !== action.id
+      )
         return state
       return {
         ...state,
-        dayClaimed: true,
+        weekends: state.weekends.map((weekend) =>
+          weekend.id === action.id ? { ...weekend, registered: true } : weekend
+        ),
         message:
-          "Day Game: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only.",
+          "Weekend registration preview confirmed. Return Sunday to claim. No funds moved.",
       }
+    }
+    case "weekend-claim": {
+      const view = weekendView(state)
+      if (
+        !state.registered ||
+        !canScore(state.phase) ||
+        view.stage !== "claim" ||
+        view.weekend?.id !== action.id
+      )
+        return state
+      return {
+        ...state,
+        weekends: state.weekends.map((weekend) =>
+          weekend.id === action.id ? { ...weekend, claimed: true } : weekend
+        ),
+        message:
+          "Weekend Loop: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only; no tokens moved.",
+      }
+    }
     case "prize":
       if (
         !state.registered ||

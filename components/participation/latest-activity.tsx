@@ -7,7 +7,7 @@ import { LuCheck, LuRefreshCw } from "react-icons/lu"
 import { isAddress } from "viem"
 import { useAccount } from "wagmi"
 
-import type { LatestActivityData } from "@/lib/activity/types"
+import { latestActivityQueryOptions } from "@/lib/activity/latest-activity-query"
 import {
   formatTokenAmount,
   TOKEN_AMOUNT_FORMATS,
@@ -24,22 +24,7 @@ export function LatestActivity() {
       ? profileAddress
       : address
   )?.toLowerCase()
-  const activity = useQuery({
-    queryKey: ["latest-activity", wallet],
-    enabled: Boolean(wallet),
-    queryFn: async ({ signal }): Promise<LatestActivityData> => {
-      if (!wallet) throw new Error("Connect a wallet to load activity")
-      const response = await fetch(`/api/users/${wallet}/activity`, {
-        signal,
-        cache: "no-store",
-      })
-      if (!response.ok) throw new Error("Unable to load activity")
-      return response.json() as Promise<LatestActivityData>
-    },
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-    retry: 1,
-  })
+  const activity = useQuery(latestActivityQueryOptions(wallet))
   // Personal activity belongs to a connected wallet or an explicitly viewed profile.
   if (!wallet) return null
   return (
@@ -64,6 +49,13 @@ export function LatestActivity() {
         )}
       </div>
       <>
+        {activity.data?.indexingStatus && (
+          <p className="p-activity-message" role="status">
+            {activity.data.indexingStatus === "syncing"
+              ? "Claim confirmed. Updating history…"
+              : "Your claim is confirmed. History update delayed; refresh to check again."}
+          </p>
+        )}
         {activity.isPending && (
           <p className="p-activity-message" role="status">
             Loading your claims…

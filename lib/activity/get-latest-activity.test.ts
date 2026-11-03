@@ -4,6 +4,7 @@ import { getLatestActivity } from "./get-latest-activity"
 
 const { multicall } = vi.hoisted(() => ({ multicall: vi.fn() }))
 vi.mock("server-only", () => ({}))
+vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }))
 vi.mock("@/env.mjs", () => ({
   env: {
     GYRALIS_SUBGRAPH_URL: "https://example.com/gnosis",
@@ -31,6 +32,7 @@ function event(
     payout: amount,
     timestamp: String(timestamp),
     txHash: `0x${"a".repeat(64)}`,
+    blockNumber: "100",
   }
 }
 let events: ReturnType<typeof event>[]
@@ -79,11 +81,14 @@ beforeEach(() => {
         variables.windows.every((window) => window.account === wallet)
       ).toBe(true)
       expect(
-        variables.windows.every((window) => window.periodNumber_in.length <= 2)
+        variables.windows.every((window) => window.periodNumber_in.length <= 3)
       ).toBe(true)
       return Response.json({
         data: {
-          _meta: { hasIndexingErrors: indexingErrors.includes(chain) },
+          _meta: {
+            block: { number: 100 },
+            hasIndexingErrors: indexingErrors.includes(chain),
+          },
           claimEvents: events.filter((item) =>
             variables.windows.some(
               (window) =>
@@ -103,6 +108,48 @@ afterEach(() => {
 })
 
 describe("latest activity periods", () => {
+  it("can acknowledge a receipt in a new period while the shared schedule is still cached", async () => {
+    events = [event("3", 12, "1000000000000000000", 200)]
+    const result = await getLatestActivity(wallet, [
+      {
+        chainId: 100,
+        loopAddress: "0x8995641fb3e452bc1359e79a738a6de556015696",
+        period: "12",
+      },
+    ])
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]).toMatchObject({
+      period: "12",
+      periodKind: "current",
+    })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+  it("queries only the affected chain and Loop for scoped reconciliation", async () => {
+    const result = await getLatestActivity(wallet, [
+      { chainId: 8453, loopAddress: rwagmi },
+    ])
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith(
+      "https://example.com/base",
+      expect.any(Object)
+    )
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string)
+    expect(body.variables.windows).toEqual([
+      { account: wallet, loop: rwagmi, periodNumber_in: ["21", "20"] },
+    ])
+    expect(result.items).toHaveLength(1)
+    expect(result.coverage).toEqual([
+      {
+        chainId: 8453,
+        loopAddress: rwagmi,
+        currentPeriod: "21",
+        indexedBlock: 100,
+      },
+    ])
+    // One public schedule batch; no second-chain reads.
+    expect(multicall).toHaveBeenCalledTimes(1)
+  })
+
   it("selects current claims per loop, otherwise previous, and sums only the selected payouts", async () => {
     const result = await getLatestActivity(
       wallet.toUpperCase().replace("0X", "0x")
