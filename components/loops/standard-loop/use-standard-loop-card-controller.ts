@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
-import { formatUnits, isAddress } from "viem"
+import { isAddress } from "viem"
 
 import { useRefreshTotalClaimsAfterClaim } from "@/lib/hooks/app/use-refresh-total-claims-after-claim"
 import { useSyncProfileAfterClaim } from "@/lib/hooks/app/use-sync-profile-after-claim"
@@ -21,7 +21,10 @@ import {
   getStandardLoopActionTooltip,
   getStandardLoopTimerTitle,
 } from "@/lib/loops/standard-loop-state"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 import { createLoopSectionState } from "@/components/loops/sections/create-loop-section-state"
 import type { LoopBalanceViewData } from "@/components/loops/sections/loop-balance-section"
 import type {
@@ -32,23 +35,6 @@ import type {
   SectionState,
 } from "@/components/loops/sections/loop-section-types"
 import type { LoopersViewData } from "@/components/loops/sections/loopers-section"
-
-function formatTokenAmount(
-  amount: bigint,
-  token:
-    | {
-        decimals: number
-        symbol: string
-      }
-    | undefined,
-  decimals = 3
-) {
-  if (!token || amount <= 0n) return undefined
-
-  return `${Number(formatUnits(amount, token.decimals)).toFixed(decimals)} ${
-    token.symbol
-  }`
-}
 
 export function useStandardLoopCardController(loop: LoopCardData) {
   const refreshTotalClaimsAfterClaim = useRefreshTotalClaimsAfterClaim()
@@ -136,10 +122,10 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     const data =
       settings.data && balance.data
         ? {
-            formattedBalance: trimFormattedBalance(
-              formatUnits(balance.data.value, balance.data.decimals),
-              1
-            ),
+            formattedBalance: formatTokenAmount(balance.data.value, {
+              decimals: balance.data.decimals,
+              ...TOKEN_AMOUNT_FORMATS.balance,
+            }),
             symbol: balance.data.symbol,
           }
         : undefined
@@ -173,17 +159,18 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     if (settings.data && balance.data && participation.data) {
       const percent = Number(settings.data.percentPerPeriod)
       const distributionRate = percent === 0 ? "Infinite" : `${percent}%`
-      const distributedAmountValue = trimFormattedBalance(
-        formatUnits(
-          participation.data.totalPeriodPayout,
-          balance.data.decimals
-        ),
-        2
+      const distributedAmountValue = formatTokenAmount(
+        participation.data.totalPeriodPayout,
+        {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.distribution,
+        }
       )
-      const balanceDetail = `${trimFormattedBalance(
-        formatUnits(balance.data.value, balance.data.decimals),
-        2
-      )} ${balance.data.symbol}`
+      const balanceDetail = formatTokenAmount(balance.data.value, {
+        decimals: balance.data.decimals,
+        ...TOKEN_AMOUNT_FORMATS.distribution,
+        symbol: balance.data.symbol,
+      })
 
       data = {
         balanceDetail,
@@ -286,7 +273,14 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     claim.status === "claimed"
       ? claim.lastClaimedAmount ?? claim.claimableAmount
       : claim.claimableAmount
-  const amountLabel = formatTokenAmount(currentAmount, balance.data)
+  const amountLabel =
+    balance.data && currentAmount > 0n
+      ? formatTokenAmount(currentAmount, {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.claim,
+          symbol: balance.data.symbol,
+        })
+      : undefined
   const actionStatus: LoopActionStatus = fundingUnavailable
     ? "unavailable"
     : claim.isPending
@@ -360,7 +354,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       settings.data && balance.data && participation.data
         ? {
             value: formatDailyRewardAmount({
-              periodPayout: participation.data.periodIndividualPayout,
+              totalPeriodPayout: participation.data.totalPeriodPayout,
               periodLength: settings.data.periodLength,
               decimals: balance.data.decimals,
             }),

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { motion, useIsPresent } from "framer-motion"
-import { LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu"
+import { LuFlame, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu"
 
 import { useCardMotion } from "./card-motion-preview"
 import { LatestActivity } from "./latest-activity"
@@ -51,7 +51,7 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
       id="participation-right-side"
       className="p-rail p-right-side"
       aria-hidden={!isPresent}
-      aria-label="Right side: Season 01 and latest activity"
+      aria-label="Right side: Season 01 and latest claims"
       initial={
         motionEnabled
           ? {
@@ -83,6 +83,13 @@ export function RightSide({ stacked = false }: { stacked?: boolean }) {
       }}
     >
       <SeasonPoints compact />
+      <section
+        className="p-daily-return"
+        aria-label="Daily participation reminder"
+      >
+        <LuFlame aria-hidden="true" />
+        <p>Show up every day. Build your streak &amp; make every claim count.</p>
+      </section>
       <LatestActivity />
     </motion.aside>
   )

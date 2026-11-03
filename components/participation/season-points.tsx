@@ -5,28 +5,91 @@ import {
   LuArrowRight,
   LuCheckCircle2,
   LuFlame,
-  LuGamepad2,
   LuSparkles,
-  LuTrophy,
+  LuWallet,
 } from "react-icons/lu"
+import { MdOutlineGames } from "react-icons/md"
+import { useAccount } from "wagmi"
 
-import { canEnter } from "@/lib/participation/season-preview"
+import { canEnter, seasonPhases } from "@/lib/participation/season-preview"
 
 import { useSeason } from "./season-context"
+import { SeasonEntryButton } from "./season-panels"
+
+function PublicSeasonInformation() {
+  const { state, entries } = useSeason()
+  return (
+    <div className="p-sp-public-season">
+      <div className="p-sp-header">
+        <h3>Season 01</h3>
+        <span
+          className="p-sp-preview"
+          title="Season information uses the selected preview stage."
+        >
+          Preview
+        </span>
+      </div>
+      <p>{seasonPhases[state.phase].label}</p>
+      <p>Dec 1–30, 2026 · UTC</p>
+      <dl>
+        <div>
+          <dt>Guaranteed prize pool</dt>
+          <dd>$250</dd>
+        </div>
+        <div>
+          <dt>Entries in preview</dt>
+          <dd>{entries.toLocaleString("en-US")}</dd>
+        </div>
+      </dl>
+      <Link className="p-text-link" href="/leaderboard?view=season">
+        Season leaderboard <LuArrowRight aria-hidden="true" />
+      </Link>
+    </div>
+  )
+}
 
 export function SeasonPoints({ compact = false }: { compact?: boolean }) {
   const { state, score, rank, entries } = useSeason()
+  const { isConnected } = useAccount()
+  if (!isConnected || !state.registered) {
+    return (
+      <section
+        className={`p-season-points p-surface${compact ? " is-compact" : ""}`}
+        aria-label={
+          isConnected
+            ? "Your Season and public information"
+            : "Connect to your Season"
+        }
+      >
+        <div className="p-sp-welcome">
+          {isConnected && <LuWallet aria-hidden="true" />}
+          <h2>{isConnected ? "Join the Season" : "Your Season starts here"}</h2>
+          <p>
+            {isConnected
+              ? canEnter(state.phase)
+                ? "Enter Season 01 to compete for a place on the leaderboard."
+                : "You haven’t entered Season 01. Registration is closed; follow the standings below."
+              : "Connect your wallet to see how your claims and streaks add up this Season."}
+          </p>
+          {isConnected && canEnter(state.phase) && (
+            <>
+              <SeasonEntryButton />
+              <small>
+                {state.phase === "late"
+                  ? "Entry closes Dec 4, 00:00 UTC. Eligible activity since Dec 1 is included."
+                  : "Season starts Dec 1. Entry-fee refunds are available before the start."}
+              </small>
+            </>
+          )}
+        </div>
+        {isConnected && <PublicSeasonInformation />}
+      </section>
+    )
+  }
   const hasRank =
     state.registered && state.phase !== "registration" && rank != null
-  const rankDescription = hasRank
-    ? `of ${entries.toLocaleString("en-US")} entries`
-    : state.registered
-    ? state.phase === "registration"
-      ? "Starts Dec 1"
-      : "Not ranked yet"
-    : canEnter(state.phase)
-    ? "Enter to rank"
-    : "Not entered"
+  const rankDescription =
+    state.phase === "registration" ? "Starts Dec 1" : "Not ranked yet"
   const sources = [
     {
       label: "Claims",
@@ -47,7 +110,7 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
       value: score.games,
       description: "Season challenge bonuses",
       href: "/games?view=bonus",
-      Icon: LuGamepad2,
+      Icon: MdOutlineGames,
     },
   ]
 
@@ -72,27 +135,27 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
       </header>
 
       <div className="p-sp-overview">
+        <p className="p-eyebrow p-sp-season-label">Season 1</p>
+        <span className="p-sp-rank-label">Rank</span>
         <div className="p-sp-total">
-          <p>Season 1</p>
           <strong>
             {score.total.toLocaleString("en-US")} <span>SP</span>
           </strong>
-          <small>
-            {state.registered
-              ? "Earned this Season"
-              : canEnter(state.phase)
-              ? "Not added until you enter"
-              : "Not entered in this Season"}
-          </small>
         </div>
         <Link className="p-sp-rank" href="/leaderboard?view=season">
-          <span>
-            <LuTrophy aria-hidden="true" /> Season rank
-          </span>
-          <strong>{hasRank ? `#${rank.toLocaleString("en-US")}` : "—"}</strong>
-          <small>{rankDescription}</small>
+          <div className="p-sp-rank-value">
+            <strong>{hasRank ? rank.toLocaleString("en-US") : "—"}</strong>
+            {hasRank && <small>/{entries.toLocaleString("en-US")}</small>}
+          </div>
+          {!hasRank && <small>{rankDescription}</small>}
         </Link>
       </div>
+
+      {hasRank && rank <= Math.ceil(entries * 0.15) && (
+        <p className="p-sp-placement">
+          Currently in a paid position · Provisional
+        </p>
+      )}
 
       <nav className="p-sp-sources" aria-label="Ways to earn Season Points">
         {sources.map(({ label, value, description, href, Icon }) => (
@@ -116,10 +179,6 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
       </nav>
 
       <footer className="p-sp-footer">
-        <p>
-          Season only. SP resets each Season and stays separate from all-time
-          GP.
-        </p>
         <Link href="/leaderboard?view=season">
           Season leaderboard <LuArrowRight aria-hidden="true" />
         </Link>

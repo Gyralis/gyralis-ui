@@ -22,6 +22,10 @@ import { useAccount } from "wagmi"
 
 import { seasonMilestones } from "@/lib/participation/season-preview"
 import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -100,9 +104,10 @@ export function LoopOpportunityCard({
       ).toUTCString()}. Rewards can change. ${reward.note ?? ""}`
     : "No current reward example is available."
   const rewardAmount = reward
-    ? `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 6 }).format(
-        Number(reward.dailyAmount)
-      )} ${reward.symbol}`
+    ? formatTokenAmount(reward.dailyAmount, {
+        ...TOKEN_AMOUNT_FORMATS.dailyReward,
+        symbol: reward.symbol,
+      })
     : `— ${rewardToken}`
 
   if (compact || large) {
@@ -136,7 +141,7 @@ export function LoopOpportunityCard({
             <h3>{loop.title}</h3>
             {!large && (
               <div className="p-mini-loop-reward" title={rewardDescription}>
-                <span>Daily rewards</span>
+                <span>Daily example / wallet</span>
                 <strong>{rewardAmount}</strong>
               </div>
             )}
@@ -210,7 +215,7 @@ export function LoopOpportunityCard({
         )}
         <div className="p-loop-card-bottom">
           <span className="p-loop-reward" title={rewardDescription}>
-            <span className="p-loop-reward-label">Daily rewards</span>
+            <span className="p-loop-reward-label">Daily example / wallet</span>
             <strong>
               <LuCoins aria-hidden="true" />
               {rewardAmount}
@@ -324,8 +329,10 @@ function LoopDirectoryContent() {
       <div className="p-directory-intro p-surface">
         <LuLayers />
         <div>
-          <h2>Find your rhythm. Stay in the Loop.</h2>
-          <p>Join a community, check eligibility, and return each period.</p>
+          <h2>Make participation a habit.</h2>
+          <p>
+            Your daily routine starts here. Be eligible and stay in the Loop.
+          </p>
         </div>
         <Link className="p-text-link" href="/eligibilities">
           Check eligibilities <LuArrowRight />

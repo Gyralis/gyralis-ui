@@ -1,13 +1,16 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { formatUnits } from "viem"
 
 import { calculateSuperLoopAnimatedReward } from "@/lib/loops/super-loop-rewards"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 import type { PeriodRewardAnimationViewModel } from "./loop-section-types"
 
-const DISPLAY_DECIMALS = 7
+const DISPLAY_DECIMALS = TOKEN_AMOUNT_FORMATS.estimate.maximumFractionDigits
 
 export function usePeriodRewardCountUp(
   animation?: PeriodRewardAnimationViewModel
@@ -64,11 +67,10 @@ export function usePeriodRewardCountUp(
 
 export function formatAnimatedReward(amount: bigint, tokenDecimals: number) {
   const visibleDecimals = Math.min(DISPLAY_DECIMALS, tokenDecimals)
-  const [whole, fraction = ""] = formatUnits(amount, tokenDecimals).split(".")
-
-  if (visibleDecimals === 0) return whole
-
-  return `${whole}.${fraction
-    .padEnd(visibleDecimals, "0")
-    .slice(0, visibleDecimals)}`
+  return formatTokenAmount(amount, {
+    decimals: tokenDecimals,
+    maximumFractionDigits: visibleDecimals,
+    minimumFractionDigits: visibleDecimals,
+    showSmallValues: false,
+  })
 }

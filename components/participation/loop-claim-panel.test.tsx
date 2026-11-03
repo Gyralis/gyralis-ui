@@ -73,7 +73,7 @@ afterEach(() => {
 })
 
 describe("live Loop claim panel", () => {
-  it("keeps the daily estimate separate from the actual claimable payout", () => {
+  it("identifies the daily estimate as the Loop total and the claim as individual", () => {
     const html = renderToStaticMarkup(
       <ClaimPanelView loop={standardLoop} {...controller} />
     )
@@ -81,6 +81,10 @@ describe("live Loop claim panel", () => {
     expect(html).toContain("Claim 0.01 HNY")
     expect(html).toContain("Loopers")
     expect(html).toContain("75")
+    expect(html).toContain(
+      "Estimated total rewards for this Loop over 24 hours"
+    )
+    expect(html).toContain("your individual claimable payout")
     expect(html).not.toContain("example")
   })
 

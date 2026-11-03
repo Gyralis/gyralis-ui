@@ -1,28 +1,44 @@
-import { formatUnits } from "viem"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 export interface DailyRewardEstimate {
   value: string
   symbol: string
 }
 
-/** A per-wallet 24-hour estimate, distinct from the wallet's claimable payout. */
-export function formatDailyRewardAmount({
-  periodPayout,
-  periodLength,
-  decimals,
-}: {
-  periodPayout?: bigint
-  periodLength: bigint
-  decimals: number
-}): string {
+type LoopDailyRewardInput = { decimals: number } & (
+  | { totalPeriodPayout?: bigint; periodLength: bigint }
+  | { flowRatePerSecond: bigint | undefined }
+)
+
+/** Total Loop rewards over 24 hours, before division between participants. */
+export function formatDailyRewardAmount(input: LoopDailyRewardInput): string {
+  const { decimals } = input
+  const periodPayout =
+    "flowRatePerSecond" in input
+      ? input.flowRatePerSecond
+      : input.totalPeriodPayout
+  const periodLength = "flowRatePerSecond" in input ? 1n : input.periodLength
   if (periodPayout == null || periodLength <= 0n || periodPayout < 0n)
     return "—"
-  if (periodPayout === 0n) return "0"
+  if (periodPayout === 0n)
+    return formatTokenAmount(0n, {
+      decimals,
+      ...TOKEN_AMOUNT_FORMATS.dailyReward,
+    })
 
-  const dailyRaw = (periodPayout * 86_400n) / periodLength
-  const amount = Number(formatUnits(dailyRaw, decimals))
-  if (amount < 0.000001) return "<0.000001"
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 6 }).format(
-    amount
+  // Retain one digit beyond display precision, including for low-decimal tokens.
+  const extraDecimals = Math.max(
+    0,
+    TOKEN_AMOUNT_FORMATS.dailyReward.maximumFractionDigits + 1 - decimals
   )
+  const dailyRaw =
+    (periodPayout * 86_400n * 10n ** BigInt(extraDecimals)) / periodLength
+  return formatTokenAmount(dailyRaw || 1n, {
+    // A positive sub-unit estimate still belongs below the display threshold.
+    decimals: decimals + extraDecimals,
+    ...TOKEN_AMOUNT_FORMATS.dailyReward,
+  })
 }

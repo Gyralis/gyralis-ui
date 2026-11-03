@@ -1,5 +1,9 @@
 import { env } from "@/env.mjs"
 
+import { formatTokenAmount, TOKEN_AMOUNT_FORMATS } from "./token-amount"
+
+export { formatTokenAmount, TOKEN_AMOUNT_FORMATS } from "./token-amount"
+
 /* ──────────────── cn (clsx + twMerge simplificado) ──────────────── */
 /**
  * Combina clases condicionales en un solo string.
@@ -49,14 +53,18 @@ export function absoluteUrl(path: string) {
 }
 
 /* ──────────────── trimFormattedBalance ──────────────── */
+/** @deprecated Use formatTokenAmount from lib/utils/token-amount for new views. */
 export function trimFormattedBalance(
   balance: string | undefined,
-  decimals = 4
+  decimals = TOKEN_AMOUNT_FORMATS.details.maximumFractionDigits
 ): string {
-  if (!balance) return "0"
-  const [integer, decimal] = balance.split(".")
-  if (!decimal) return integer
-  return `${integer}.${decimal.slice(0, decimals)}`
+  // Compatibility adapter for older views; new token displays use the formatter.
+  return formatTokenAmount(balance, {
+    maximumFractionDigits: decimals,
+    trimTrailingZeros: false,
+    showSmallValues: false,
+    missingValue: "0",
+  })
 }
 
 /* ──────────────── truncateEthAddress ──────────────── */

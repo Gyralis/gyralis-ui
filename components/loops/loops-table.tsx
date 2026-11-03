@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import { LoopCardData } from "@/data/loops-data"
-import { formatUnits } from "viem"
 
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 import { LoopClaim } from "@/components/loops/loop-claim"
 import { LoopersModal } from "@/components/loops/loopers-modal"
 
@@ -72,10 +74,10 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
   const balanceLabel = useMemo(() => {
     if (!loopBalance || loopBalance.value == null) return "--"
 
-    return `${trimFormattedBalance(
-      formatUnits(loopBalance.value, loopBalance.decimals),
-      2
-    )} ${loopBalance.symbol}`
+    return `${formatTokenAmount(loopBalance.value, {
+      decimals: loopBalance.decimals,
+      ...TOKEN_AMOUNT_FORMATS.distribution,
+    })} ${loopBalance.symbol}`
   }, [loopBalance])
 
   const distributionLabel = useMemo(() => {
@@ -91,10 +93,10 @@ function LoopTableRow({ loop }: { loop: LoopCardData }) {
 
     const distributedValue =
       (loopBalance.value * settings.percentPerPeriod) / 100n
-    const distributedAmount = trimFormattedBalance(
-      formatUnits(distributedValue, loopBalance.decimals),
-      2
-    )
+    const distributedAmount = formatTokenAmount(distributedValue, {
+      decimals: loopBalance.decimals,
+      ...TOKEN_AMOUNT_FORMATS.distribution,
+    })
 
     return `${percent} - ${distributedAmount} ${loopBalance.symbol}`
   }, [isLoading, loopBalance, settings])

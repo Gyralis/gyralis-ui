@@ -118,7 +118,6 @@ function DiscoverContent() {
         <section>
           <SectionTitle
             title={showForYou ? "Your active Loops" : "Explore Loops"}
-            href="/loops"
           />
           <MagicBento className="p-loop-grid">
             {(showForYou ? activeLoops.slice(0, 3) : activeLoops).map(
@@ -172,7 +171,6 @@ function DiscoverContent() {
           <SectionTitle
             title="Go further this Season"
             subtitle="Complete challenges. Earn extra SP."
-            href="/games?view=bonus"
           />
           <MagicBento className="p-featured-grid">
             {games.slice(0, tab === "Games" ? 4 : 2).map((game) => (

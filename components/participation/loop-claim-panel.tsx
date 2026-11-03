@@ -75,12 +75,16 @@ export function ClaimPanelView({
   return (
     <div className="p-loop-claim-panel">
       <dl className="p-loop-claim-metrics">
-        <div title="Estimated rewards per eligible wallet over 24 hours. The claim button shows your actual claimable payout.">
+        <div title="Estimated total rewards for this Loop over 24 hours, shared across its participants. The claim button shows your individual claimable payout.">
           <dt>Daily rewards</dt>
           <dd aria-busy={dailyRewards.status === "loading"}>
             {reward ? (
               <>
-                {reward.value !== "0" && reward.value !== "—" ? "≈ " : ""}
+                {reward.value !== "0" &&
+                reward.value !== "0.00" &&
+                reward.value !== "—"
+                  ? "≈ "
+                  : ""}
                 {reward.value} <span>{reward.symbol}</span>
               </>
             ) : (

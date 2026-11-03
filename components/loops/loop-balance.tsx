@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect } from "react"
-import { Address, formatUnits } from "viem"
+import { Address } from "viem"
 
 import {
   DEFAULT_LOOP_CONTRACT_TYPE,
@@ -13,7 +13,10 @@ import {
   useFlowingBalance,
 } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 import {
   LoopBalanceSection,
@@ -80,7 +83,10 @@ export const LoopBalance: React.FC<LoopBalanceProps> = ({
 
   const formattedBalance = isSuperLoop
     ? formatFlowingDisplayValue(flowingBalance.formatted, 7)
-    : trimFormattedBalance(formatUnits(data.value ?? 0n, data.decimals), 1)
+    : formatTokenAmount(data.value, {
+        decimals: data.decimals,
+        ...TOKEN_AMOUNT_FORMATS.balance,
+      })
 
   const monthlyIncoming = formatMonthlyIncoming({
     flowRatePerSecond: data.flowRatePerSecond,

@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { formatUnits } from "viem"
 
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
+
 export const SEC_TO_MONTH = 60 * 60 * 24 * 30
 
 export function useFlowingBalance({
@@ -76,20 +81,19 @@ export function useFlowingBalance({
 
 export function formatFlowingDisplayValue(
   value: string | undefined,
-  decimals = 7
+  decimals = TOKEN_AMOUNT_FORMATS.estimate.maximumFractionDigits
 ) {
-  if (!value) return "0"
-
-  const [whole, fraction = ""] = value.split(".")
-  const trimmedFraction = fraction.slice(0, decimals).replace(/0+$/, "")
-
-  return trimmedFraction ? `${whole}.${trimmedFraction}` : whole
+  return formatTokenAmount(value, {
+    maximumFractionDigits: decimals,
+    showSmallValues: false,
+    missingValue: "0",
+  })
 }
 
 export function formatMonthlyIncoming({
   flowRatePerSecond,
   decimals,
-  maximumFractionDigits = 4,
+  maximumFractionDigits = TOKEN_AMOUNT_FORMATS.details.maximumFractionDigits,
   symbol,
 }: {
   flowRatePerSecond?: bigint
@@ -99,12 +103,11 @@ export function formatMonthlyIncoming({
 }) {
   if (flowRatePerSecond == null) return "--"
 
-  const monthly =
-    Number(formatUnits(flowRatePerSecond, decimals)) * SEC_TO_MONTH
-
-  if (!Number.isFinite(monthly)) return "--"
-
-  return `${monthly.toLocaleString(undefined, {
+  return `${formatTokenAmount(flowRatePerSecond * BigInt(SEC_TO_MONTH), {
+    decimals,
     maximumFractionDigits,
-  })} ${symbol} / mo`
+    rounding: "round",
+    useGrouping: true,
+    symbol,
+  })} / mo`
 }

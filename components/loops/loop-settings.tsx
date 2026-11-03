@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
 import { LuInfo } from "react-icons/lu"
-import { Address, formatUnits } from "viem"
+import { Address } from "viem"
 import { useAccount } from "wagmi"
 
 import {
@@ -13,7 +13,10 @@ import {
 import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
 import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { useLoopSettings } from "@/lib/hooks/app/use-next-period-start"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -176,13 +179,13 @@ export function useLoopSettingsDetails({
 
     const distributedValue =
       (loopBalance.value * settings.percentPerPeriod) / 100n
-    const distributedAmount = formatUnits(
-      distributedValue,
-      loopBalance.decimals
-    )
+    const distributedAmount = formatTokenAmount(distributedValue, {
+      decimals: loopBalance.decimals,
+      ...TOKEN_AMOUNT_FORMATS.details,
+    })
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
-    return `${trimFormattedBalance(distributedAmount, 4)}${symbol}`
+    return `${distributedAmount}${symbol}`
   }, [isLoading, settings, loopBalance])
 
   const distributionDetail = isSuperLoop
@@ -200,17 +203,18 @@ export function useLoopSettingsDetails({
         : formatMonthlyIncoming({
             flowRatePerSecond: loopBalance.flowRatePerSecond,
             decimals: loopBalance.decimals,
-            maximumFractionDigits: 2,
+            maximumFractionDigits:
+              TOKEN_AMOUNT_FORMATS.distribution.maximumFractionDigits,
             symbol: loopBalance.symbol,
           })
     }
 
     if (loopBalance.value == null) return undefined
 
-    const balance = trimFormattedBalance(
-      formatUnits(loopBalance.value, loopBalance.decimals),
-      2
-    )
+    const balance = formatTokenAmount(loopBalance.value, {
+      decimals: loopBalance.decimals,
+      ...TOKEN_AMOUNT_FORMATS.distribution,
+    })
     const symbol = loopBalance.symbol ? ` ${loopBalance.symbol}` : ""
 
     return `${balance}${symbol}`

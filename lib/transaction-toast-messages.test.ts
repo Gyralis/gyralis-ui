@@ -21,6 +21,12 @@ describe("transaction toast messages", () => {
     expect(getClaimedTokenTitle({ amount: 1n })).toBe("Rewards claimed")
   })
 
+  it("does not report a tiny successful payout as zero", () => {
+    expect(
+      getClaimedTokenTitle({ amount: 1n, decimals: 18, symbol: "HNY" })
+    ).toBe("Claimed <0.0001 HNY")
+  })
+
   it.each([
     ["claim", "Claim failed", "No rewards were claimed."],
     ["enter", "Entry failed", "Your entry was not confirmed."],

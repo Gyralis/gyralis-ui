@@ -1144,6 +1144,26 @@
 .p-rail-activity {
   padding: 4px 0;
 }
+.p-daily-return {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  border-top: 1px solid #ffffff0d;
+  border-bottom: 1px solid #ffffff0d;
+}
+.p-daily-return > svg {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  color: #1ce783;
+}
+.p-daily-return > p {
+  color: var(--p-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.7;
+}
 .p-latest-activity .p-section-title {
   margin-bottom: 8px;
 }
@@ -1175,26 +1195,6 @@
   font-size: 11px;
   line-height: 1.7;
 }
-.p-activity-totals {
-  display: grid;
-  gap: 6px;
-  padding: 14px;
-  margin-top: 16px;
-  border: 1px solid #1ce78326;
-  border-radius: 12px;
-  background: #1ce78308;
-}
-.p-activity-totals > span,
-.p-activity-totals strong span {
-  color: var(--p-text-muted);
-  font-size: 11px;
-  font-weight: 400;
-}
-.p-activity-totals strong {
-  color: #1ce783;
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
 .p-activity-list {
   padding: 0;
   margin: 0;
@@ -1203,8 +1203,8 @@
 .p-latest-activity-row {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
-  padding: 16px 0;
+  align-items: center;
+  padding: 12px 0;
   border-bottom: 1px solid #ffffff0d;
   border-radius: 4px;
 }
@@ -1239,41 +1239,30 @@
   display: grid;
   flex: 1;
   min-width: 0;
-  gap: 5px;
+  gap: 2px;
 }
 .p-activity-details strong {
   color: var(--p-text-primary);
   font-size: 12px;
   font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.p-activity-details > span,
 .p-activity-details time {
   color: var(--p-text-muted);
   font-size: 10px;
 }
-.p-activity-details em {
-  display: inline-block;
-  padding: 2px 5px;
-  margin-left: 3px;
-  border-radius: 4px;
-  background: #ffffff08;
-  font-size: 9px;
-  font-style: normal;
-}
-.p-activity-details b {
-  color: #1ce783;
-  font-size: 12px;
+.p-activity-amount {
+  flex: none;
+  max-width: 105px;
+  color: #bbd9ed;
+  font-size: 10px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-}
-.p-activity-external {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  color: var(--p-text-muted);
-}
-.p-activity-footer {
-  margin-top: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 .p-rail-activity .p-section-title h2 {
   font-size: 16px;
@@ -2310,6 +2299,7 @@
   border-radius: 24px;
   background: linear-gradient(110deg, #14191c 30%, #112a3b 100%);
   isolation: isolate;
+  overflow: hidden;
 }
 .s-season-header.is-prominent {
   min-height: 440px;
@@ -2373,10 +2363,10 @@
 }
 .s-season-art {
   position: absolute;
-  right: -36%;
+  right: -55%;
   top: 50%;
-  transform: translateY(-50%);
-  width: 145%;
+  transform: translateY(-50%) rotate(-14deg);
+  width: 190%;
   max-width: none;
   height: auto;
 }
@@ -2526,6 +2516,78 @@
   align-items: center;
   gap: 10px;
 }
+.p-sp-welcome {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+.p-sp-welcome:last-child {
+  padding-bottom: 0;
+}
+.p-sp-welcome > svg {
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border: 1px solid #315268;
+  border-radius: 12px;
+  background: #102432;
+  color: #bbd9ed;
+}
+.p-sp-welcome > h2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+}
+.p-sp-welcome > p,
+.p-sp-public-season > p {
+  color: var(--p-text-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.p-sp-welcome > small {
+  color: var(--p-text-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.p-sp-welcome > .p-button {
+  width: 100%;
+  white-space: normal;
+}
+.p-sp-public-season {
+  display: grid;
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #ffffff0d;
+}
+.p-sp-public-season h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.p-sp-public-season > dl {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.p-sp-public-season > dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.p-sp-public-season dt {
+  color: var(--p-text-muted);
+}
+.p-sp-public-season dd {
+  color: #bbd9ed;
+  font-weight: 600;
+}
+.p-sp-placement {
+  margin-bottom: 16px;
+  color: #bbd9ed;
+  font-size: 11px;
+  line-height: 1.6;
+}
 .p-sp-header {
   justify-content: space-between;
 }
@@ -2553,10 +2615,10 @@
   font-weight: 500;
 }
 .p-sp-overview {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px 20px;
   padding: 26px 0;
 }
 .p-sp-total {
@@ -2564,8 +2626,10 @@
   gap: 4px;
   min-width: 0;
 }
-.p-sp-total > p,
+.p-sp-season-label,
+.p-sp-rank-label,
 .p-sp-total > small,
+.p-sp-rank-value > small,
 .p-sp-rank > small {
   color: var(--p-text-muted);
   font-size: 11px;
@@ -2591,26 +2655,23 @@
   gap: 5px;
   text-align: right;
 }
-.p-sp-rank > span {
+.p-sp-rank-label {
+  text-align: right;
+}
+.p-sp-rank-value {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--p-text-muted);
-  font-size: 11px;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
 }
-.p-sp-rank svg {
-  width: 14px;
-  height: 14px;
-  color: #1ce783;
-}
-.p-sp-rank > strong {
+.p-sp-rank-value > strong {
   color: var(--p-text-primary);
   font-size: 28px;
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.04em;
 }
-.p-sp-rank:hover > strong {
+.p-sp-rank:hover .p-sp-rank-value > strong {
   color: #1ce783;
 }
 .p-sp-sources {
@@ -2717,13 +2778,13 @@
   font-size: 12px;
 }
 .p-season-points.is-compact .p-sp-overview {
-  gap: 12px;
+  column-gap: 12px;
   padding: 24px 0 20px;
 }
 .p-season-points.is-compact .p-sp-total > strong {
   font-size: 40px;
 }
-.p-season-points.is-compact .p-sp-rank > strong {
+.p-season-points.is-compact .p-sp-rank-value > strong {
   font-size: 23px;
 }
 .p-season-points.is-compact .p-sp-sources {
@@ -3260,17 +3321,16 @@
   }
   .s-season-visual {
     position: absolute;
-    top: -18px;
-    right: -24px;
-    width: 180px;
-    height: 142px;
-    overflow: hidden;
+    top: -34px;
+    right: -46px;
+    width: 220px;
+    height: 170px;
   }
   .s-season-art {
-    top: 0;
-    right: 0;
-    width: 180px;
-    transform: none;
+    top: -10px;
+    right: -10px;
+    width: 260px;
+    transform: rotate(-14deg);
   }
   .s-hero-metrics {
     gap: 16px 24px;

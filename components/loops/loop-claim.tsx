@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { LoopEligibilityProvider } from "@/data/loops-data"
-import { Address, formatUnits, parseAbiItem } from "viem"
+import { Address, parseAbiItem } from "viem"
 import {
   useAccount,
   useChainId,
@@ -31,7 +31,10 @@ import {
   getConfirmationDelayedToast,
   getRevertedTransactionToast,
 } from "@/lib/transaction-toast-messages"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 import { useToast } from "../ui/use-toast"
 import { LoopClaimAction } from "./sections/loop-claim-action"
@@ -269,18 +272,18 @@ export const LoopClaim: React.FC<LoopClaimProps> = ({
   const isValidLoopAddress = /^0x[a-fA-F0-9]{40}$/.test(address)
   const wrongNetwork = currentChainId !== chainId
   const claimAmountLabel = loopBalance
-    ? `${trimFormattedBalance(
-        formatUnits(claimableAmount, loopBalance.decimals),
-        4
-      )} ${loopBalance.symbol}`
+    ? `${formatTokenAmount(claimableAmount, {
+        decimals: loopBalance.decimals,
+        ...TOKEN_AMOUNT_FORMATS.details,
+      })} ${loopBalance.symbol}`
     : undefined
   const claimedAmount = lastClaimedAmount ?? claimableAmount
   const claimedAmountLabel =
     loopBalance && claimedAmount > 0n
-      ? `${trimFormattedBalance(
-          formatUnits(claimedAmount, loopBalance.decimals),
-          4
-        )} ${loopBalance.symbol}`
+      ? `${formatTokenAmount(claimedAmount, {
+          decimals: loopBalance.decimals,
+          ...TOKEN_AMOUNT_FORMATS.details,
+        })} ${loopBalance.symbol}`
       : undefined
   const claimStatus: LoopClaimStatus = hasClaimed
     ? "claimed"

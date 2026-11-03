@@ -62,13 +62,16 @@ afterEach(() => {
 })
 
 describe("latest activity panel", () => {
-  it("shows actual token amounts, period labels, totals and explorer links", () => {
+  it("shows compact claims with actual amounts and transaction links", () => {
     const html = renderToStaticMarkup(<LatestActivity />)
-    expect(html).toContain("Latest activity")
-    expect(html).toContain("601.034632")
+    expect(html).toContain("Latest Claims")
+    expect(html).toContain("+601.035 RWAGMI</span>")
     expect(html).toContain("RWAGMI Token Launcher")
-    expect(html).toContain("Current")
-    expect(html).toContain("Claimed in shown periods")
+    expect(html).not.toContain("Current period, or previous if unclaimed")
+    expect(html).not.toContain("Claimed in shown periods")
+    expect(html).not.toContain("p-activity-totals")
+    expect(html).not.toContain("<em>Current</em>")
+    expect(html).not.toContain("Gnosis &amp; Base · Updated")
     expect(html).toContain('href="https://basescan.org/tx/0x123"')
     expect(mocks.useQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -90,7 +93,7 @@ describe("latest activity panel", () => {
   it("does not fetch or show cached wallet data when disconnected", () => {
     mocks.address = undefined
     const html = renderToStaticMarkup(<LatestActivity />)
-    expect(html).toContain("Connect your wallet")
+    expect(html).toBe("")
     expect(html).not.toContain("601.034632")
     expect(mocks.useQuery).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: false })

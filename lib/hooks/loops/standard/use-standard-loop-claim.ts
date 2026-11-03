@@ -120,7 +120,9 @@ export function useStandardLoopClaim({
     functionName: loopContractMethods.loop.getClaimerStatus,
     args: [connectedAccount ?? zeroAddress],
     chainId,
-    scopeKey: usesUserPhase ? currentPeriod?.toString() : undefined,
+    // The getter has no period argument, but its result changes each period.
+    // Share it across cards for this period without reusing last period's flags.
+    scopeKey: currentPeriod?.toString(),
     query: {
       enabled: validAddress && Boolean(connectedAccount) && hasClaimPeriod,
       staleTime: 10_000,

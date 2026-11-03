@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import Image from "next/image"
 import { LuCheck, LuChevronLeft, LuChevronRight, LuCopy } from "react-icons/lu"
-import { formatUnits, type Address } from "viem"
+import { type Address } from "viem"
 import { usePublicClient, useReadContract } from "wagmi"
 
 import {
@@ -17,6 +17,10 @@ import { useLoopTokenBalance } from "@/lib/hooks/app/use-loop-token-balance"
 import { usePeriodLogBlockRange } from "@/lib/hooks/app/use-period-log-block-range"
 import { useRegisteredUsers } from "@/lib/hooks/app/use-registered-users"
 import { cn } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 import {
   Dialog,
   DialogContent,
@@ -50,18 +54,6 @@ const formatAddress = (address: Address) =>
   `${address.slice(0, 6)}...${address.slice(-4)}`
 
 const ENS_LOOKUP_BATCH_SIZE = 10
-
-const formatClaimPayout = (
-  payout: bigint,
-  decimals: number,
-  maxDecimals = 4
-) => {
-  const formatted = formatUnits(payout, decimals)
-  const [whole, fraction = ""] = formatted.split(".")
-  const trimmedFraction = fraction.slice(0, maxDecimals).replace(/0+$/, "")
-
-  return trimmedFraction ? `${whole}.${trimmedFraction}` : whole
-}
 
 const formatPeriodLabel = (
   selectedPeriod: bigint | undefined,
@@ -129,6 +121,8 @@ export function LoopersModal({
   refreshKey = 0,
 }: LoopersModalProps) {
   const [periodOffset, setPeriodOffset] = useState(0)
+  const [retryKey, setRetryKey] = useState(0)
+  const requestRefreshKey = refreshKey + retryKey
   const [ensNamesByAddress, setEnsNamesByAddress] = useState<
     Record<string, string>
   >({})
@@ -175,6 +169,7 @@ export function LoopersModal({
     enabled: periodRangesReady,
     firstPeriodStart,
     periodLength,
+    refreshKey: requestRefreshKey,
     windowPeriod: registerWindowPeriod,
   })
   const claimRange = usePeriodLogBlockRange({
@@ -182,6 +177,7 @@ export function LoopersModal({
     enabled: periodRangesReady && !isSelectedFuturePeriod,
     firstPeriodStart,
     periodLength,
+    refreshKey: requestRefreshKey,
     windowPeriod: selectedPeriod,
   })
   const registrationBlockRange =
@@ -210,24 +206,28 @@ export function LoopersModal({
     !isSelectedFuturePeriod &&
     (!isSuperLoop || claimBlockRange != null)
 
-  const { users: registeredUsers, loading: loadingRegisteredUsers } =
-    useRegisteredUsers(
-      loopAddress,
-      chainId,
-      selectedPeriod,
-      refreshKey,
-      registeredUsersEnabled,
-      registrationBlockRange
-    )
+  const {
+    users: registeredUsers,
+    loading: loadingRegisteredUsers,
+    error: registeredUsersError,
+  } = useRegisteredUsers(
+    loopAddress,
+    chainId,
+    selectedPeriod,
+    requestRefreshKey,
+    registeredUsersEnabled,
+    registrationBlockRange
+  )
   const {
     users: claimedUsers,
     payouts: claimedPayouts,
     loading: loadingClaimedUsers,
+    error: claimedUsersError,
   } = useClaimedUsers(
     loopAddress,
     chainId,
     selectedPeriod,
-    refreshKey,
+    requestRefreshKey,
     claimedUsersEnabled,
     claimBlockRange
   )
@@ -235,7 +235,7 @@ export function LoopersModal({
     address: loopAddress,
     chainId,
     contractType: loopContractType,
-    enabled: Boolean(loopAddress && loopToken),
+    enabled: isOpen && Boolean(loopAddress && loopToken),
     token: loopToken,
   })
   const { data: selectedPeriodPayout } = useReadContract({
@@ -245,7 +245,7 @@ export function LoopersModal({
     args: [selectedPeriod ?? 0n],
     chainId,
     query: {
-      enabled: selectedPeriod != null,
+      enabled: isOpen && selectedPeriod != null,
     },
   })
 
@@ -259,8 +259,7 @@ export function LoopersModal({
       registeredUsers.map((address) => ({
         address,
         claimed: claimedUsersSet.has(address.toLowerCase()),
-        payout:
-          claimedPayouts[address.toLowerCase()] ?? selectedPeriodPayout ?? 0n,
+        payout: claimedPayouts[address.toLowerCase()] ?? selectedPeriodPayout,
       })),
     [claimedPayouts, claimedUsersSet, registeredUsers, selectedPeriodPayout]
   )
@@ -336,24 +335,34 @@ export function LoopersModal({
 
   const claimedCount = rows.filter((row) => row.claimed).length
   const registeredCount = rows.length
+  const participationError =
+    registrationRange.error ??
+    claimRange.error ??
+    registeredUsersError ??
+    claimedUsersError
   const claimRate =
     registeredCount > 0 ? Math.round((claimedCount / registeredCount) * 100) : 0
   const claimRateWidth = Math.max(0, Math.min(claimRate, 100))
   const selectedPeriodPayoutAmount =
     typeof selectedPeriodPayout === "bigint" ? selectedPeriodPayout : null
-  const amountToDistributeThisPeriod =
-    loopBalance && selectedPeriodPayoutAmount != null
-      ? `${formatClaimPayout(
-          selectedPeriodPayoutAmount * BigInt(registeredCount),
-          loopBalance.decimals,
-          2
-        )} ${loopBalance.symbol}`
-      : "--"
   const isLoading =
+    (isOpen && currentPeriod == null) ||
     registrationRange.loading ||
     claimRange.loading ||
     loadingRegisteredUsers ||
     loadingClaimedUsers
+  const metricsUnavailable = Boolean(participationError) || isLoading
+  const amountToDistributeThisPeriod =
+    !metricsUnavailable && loopBalance && selectedPeriodPayoutAmount != null
+      ? formatTokenAmount(
+          selectedPeriodPayoutAmount * BigInt(registeredCount),
+          {
+            decimals: loopBalance.decimals,
+            ...TOKEN_AMOUNT_FORMATS.distribution,
+            symbol: loopBalance.symbol,
+          }
+        )
+      : "--"
   const canGoBack =
     currentPeriod != null && currentPeriod + BigInt(periodOffset - 1) >= 0n
   const canGoForward =
@@ -406,9 +415,12 @@ export function LoopersModal({
             <div className="grid gap-3 sm:grid-cols-3">
               <MetricCard
                 label="Registered"
-                value={registeredCount.toString()}
+                value={metricsUnavailable ? "—" : registeredCount.toString()}
               />
-              <MetricCard label="Claimed" value={claimedCount.toString()} />
+              <MetricCard
+                label="Claimed"
+                value={metricsUnavailable ? "—" : claimedCount.toString()}
+              />
               <MetricCard
                 label="To Claim This Period"
                 value={amountToDistributeThisPeriod}
@@ -437,12 +449,16 @@ export function LoopersModal({
               <div className="min-w-60 space-y-2">
                 <div className="flex items-center justify-between gap-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   <span>Claim Rate</span>
-                  <span className="text-card-foreground">{claimRate}%</span>
+                  <span className="text-card-foreground">
+                    {metricsUnavailable ? "—" : `${claimRate}%`}
+                  </span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-muted">
                   <div
                     className="h-full rounded-full bg-[linear-gradient(135deg,#1ce783_0%,#4ade80_100%)]"
-                    style={{ width: `${claimRateWidth}%` }}
+                    style={{
+                      width: `${metricsUnavailable ? 0 : claimRateWidth}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -451,7 +467,20 @@ export function LoopersModal({
 
           <div className="relative z-10 max-h-[26rem] overflow-auto md:max-h-[34rem] xl:max-h-[38rem]">
             <div>
-              {isLoading ? (
+              {participationError ? (
+                <div className="px-6 py-12 text-center sm:px-8" role="status">
+                  <p className="text-sm text-muted-foreground">
+                    We couldn’t load participation for this period.
+                  </p>
+                  <button
+                    type="button"
+                    className="mt-4 rounded-full border border-border px-4 py-2 text-sm"
+                    onClick={() => setRetryKey((key) => key + 1)}
+                  >
+                    Retry participation
+                  </button>
+                </div>
+              ) : isLoading ? (
                 <LoopersLoadingState />
               ) : rows.length === 0 ? (
                 <div className="px-6 py-12 sm:px-8">
@@ -490,11 +519,11 @@ export function LoopersModal({
                           row.claimed ? "text-primary" : "text-muted-foreground"
                         )}
                       >
-                        {loopBalance
-                          ? `${formatClaimPayout(
-                              row.payout,
-                              loopBalance.decimals
-                            )} ${loopBalance.symbol}`
+                        {loopBalance && row.payout != null
+                          ? formatTokenAmount(row.payout, {
+                              decimals: loopBalance.decimals,
+                              symbol: loopBalance.symbol,
+                            })
                           : "--"}
                       </span>
                       <span

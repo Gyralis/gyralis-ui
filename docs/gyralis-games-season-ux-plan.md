@@ -78,6 +78,7 @@ Treat scoring and event windows as start-inclusive and end-exclusive.
 **SP (Season Points)** is the Season-only score. SP does not accumulate into all-time GP or change the all-time leaderboard. Each Season starts with fresh SP and streak progression.
 
 - Use a confirmed roster of daily Loops on Base.
+- Working Season 01 scoring-budget estimate: five regular Loops. Exact identities and eligible period counts remain to be confirmed.
 - A regular eligible claim earns **1 Season point**.
 - Every regular Loop has its own independent Season streak.
 - Season streaks start fresh and remain separate from existing all-time Loop streaks.
@@ -102,16 +103,20 @@ All-time scoring remains unchanged. The Season's 28-claim milestone does not rep
 - A qualifying action can advance multiple games.
 - Each completed game awards its configured reward once, subject to its published qualification rules.
 - Game bonus points contribute to the Season only; they do not alter all-time GP.
-- Exact objectives and point amounts will be balanced and approved separately.
+- Completion bonuses selected for planning: Sprint +15 SP, Explorer +15 SP and Long Game +30 SP. A +20-SP race allocation remains reserved while its design is on hold for the user's later suggestions. Explorer qualification and publication readiness remain to be finalized.
+- Sprint requires 20 participating Loop periods, with gaps allowed. Long Game requires at least one qualifying regular Loop claim in every Season period. Both attendance bonuses stack, awarding 45 SP in total when both objectives are completed.
+- Race qualifying activity is regular Season Loop claims only, including claims from different regular Loops in one period. Day Game claims do not advance the race. Remaining race mechanics are on hold at the user's request.
+- All regular Season Loops share one daily period schedule. Attendance games count shared Loop periods rather than assuming UTC calendar days, with at most one attendance unit per shared period across regular Loops. Publish actual period boundaries before launch.
+- Unlimited completion bonuses are credited after confirmed completion, with standings provisional until final review.
 
 The current concepts are templates, not final approved game definitions:
 
 | Concept | Intended player behavior |
 | --- | --- |
-| 30-Day Sprint | Return consistently across the Season |
-| First 50 to 20 claims | Reach a claim target before other players |
-| Find your next Loop | Participate across different Loops |
-| The long game | Maintain participation across many active days |
+| 20-Day Sprint | Make at least one qualifying claim from any regular Season Loop in at least 20 shared daily periods during the Season; periods need not be consecutive. Bonus: +15 SP. |
+| First 50 to 20 claims | On hold for later suggestions. Regular Season Loop claims are the confirmed qualifying activity; the previous 20-claim/50-winner concept and +20-SP allocation remain provisional. |
+| Find your next Loop | Make at least three qualifying claims in every required Season Loop during the Season. Bonus: +15 SP once. Required roster is fixed and published before the Season; actual roster and weekend inclusion remain unresolved. |
+| The long game | Make at least one qualifying claim from any regular Season Loop in every shared daily Season period. Bonus: +30 SP. |
 
 Do not publish a game as active until its objective, reward, dates, and qualification rules are approved. Limited-place games need provisional qualification while late registration can introduce backdated activity. Final qualification also depends on the approved tie policy.
 
@@ -125,6 +130,8 @@ A Day Game is a timed challenge within Season Games. It uses a designated standa
 - Day Game Loops do not award regular Season streak bonuses.
 - Ordinary Season Loops continue earning 1 point per eligible claim.
 - Day Game availability is scheduled, rather than permanently active.
+- Planning budget: four eligible Day Game claim opportunities per player across the Season, worth 16 total SP (4 claim SP + 12 game-bonus SP). Exact event Loops and windows remain to be specified.
+- The user confirmed that Day Game becomes a dedicated Weekend Loop with Saturday registration and Sunday claiming every Season weekend. Only claims from that Loop count for its event reward; arbitrary claims from other Loops do not substitute. The December 2026 Season contains four such weekends: December 5–6, 12–13, 19–20 and 26–27. Weekly registration mechanics, eligibility and exact period boundaries are the current planning focus. Exploration inclusion is deferred.
 - Underlying Loop rewards and claim availability remain distinct from the event's Season scoring window.
 
 Show Scheduled, Active, and Ended states. Active cards explain the eligible Loop, exact window, countdown, and 4-point reward. After the event ends, retain its result and point history without implying that further claims earn event points.
@@ -132,6 +139,7 @@ Show Scheduled, Active, and Ended states. Active cards explain the eligible Loop
 ### Prize pool and paid positions
 
 - Guaranteed prize pool: **$250**.
+- Planning estimate: **250 entrants**, with registration remaining uncapped.
 - Pool value equals the larger of **$250 or total retained entry fees**.
 - Examples: 180 entries produces a $250 pool; 320 entries produces a $320 pool.
 - Paid positions equal **15% of final entries, rounded up**.

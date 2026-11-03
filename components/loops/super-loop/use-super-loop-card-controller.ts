@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react"
 import type { LoopCardData } from "@/data/loops-data"
-import { formatUnits, isAddress } from "viem"
+import { isAddress } from "viem"
 import { useAccount } from "wagmi"
 
 import { formatMonthlyIncoming } from "@/lib/hooks/app/use-flowing-balance"
@@ -33,7 +33,10 @@ import {
   getSuperLoopTimerTitle,
   reconcileSuperLoopConfirmedStatus,
 } from "@/lib/loops/super-loop-status"
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 import { createLoopSectionState } from "@/components/loops/sections/create-loop-section-state"
 import type {
   LoopActionStatus,
@@ -175,14 +178,18 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       !statusReads.isError)
   const estimatedPeriodPayoutLabel =
     balance.data && estimatedPeriodPayout != null && estimatedPeriodPayout > 0n
-      ? `${trimFormattedBalance(
-          formatUnits(estimatedPeriodPayout, balance.data.decimals),
-          7
-        )} ${balance.data.payoutSymbol}`
+      ? formatTokenAmount(estimatedPeriodPayout, {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.estimate,
+          symbol: balance.data.payoutSymbol,
+        })
       : undefined
   const claimableRewardValue =
     balance.data && claimableAmount > 0n
-      ? Number(formatUnits(claimableAmount, balance.data.decimals)).toFixed(3)
+      ? formatTokenAmount(claimableAmount, {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.claim,
+        })
       : undefined
   const claimableRewardLabel =
     balance.data && claimableRewardValue
@@ -196,9 +203,10 @@ export function useSuperLoopCardController(loop: LoopCardData) {
       : undefined
   const claimedRewardValue =
     balance.data && claimedRewardAmount != null
-      ? Number(formatUnits(claimedRewardAmount, balance.data.decimals)).toFixed(
-          3
-        )
+      ? formatTokenAmount(claimedRewardAmount, {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.claim,
+        })
       : undefined
   const rewardsTooltip = getSuperLoopRewardTooltip({
     claimableRewardLabel,
@@ -210,9 +218,11 @@ export function useSuperLoopCardController(loop: LoopCardData) {
     status === "claimed" ? claimedRewardAmount ?? 0n : claimableAmount
   const amountLabel =
     balance.data && displayedAmount > 0n
-      ? `${Number(formatUnits(displayedAmount, balance.data.decimals)).toFixed(
-          3
-        )} ${balance.data.payoutSymbol}`
+      ? formatTokenAmount(displayedAmount, {
+          decimals: balance.data.decimals,
+          ...TOKEN_AMOUNT_FORMATS.claim,
+          symbol: balance.data.payoutSymbol,
+        })
       : undefined
   const actionStatus: LoopActionStatus = fundingUnavailable
     ? "unavailable"
@@ -391,25 +401,19 @@ export function useSuperLoopCardController(loop: LoopCardData) {
 
   const dailyRewards = createLoopSectionState<DailyRewardEstimate>({
     data:
-      settings.data && balance.data && participation.data
+      balance.data && balance.data.flowRatePerSecond != null
         ? {
             value: formatDailyRewardAmount({
-              periodPayout:
-                balance.data.flowRatePerSecond === 0n
-                  ? 0n
-                  : calculatedPeriodPayout,
-              periodLength: settings.data.periodLength,
+              flowRatePerSecond: balance.data.flowRatePerSecond,
               decimals: balance.data.decimals,
             }),
             symbol: balance.data.payoutSymbol,
           }
         : undefined,
-    error:
-      configError ?? settings.error ?? balance.error ?? participation.error,
+    error: configError ?? balance.error,
     errorMessage: "Daily rewards could not be loaded",
-    isFetching:
-      settings.isFetching || balance.isFetching || participation.isFetching,
-    retry: refreshCardData,
+    isFetching: balance.isFetching,
+    retry: refetchBalance,
   })
 
   return {

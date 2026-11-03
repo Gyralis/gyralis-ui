@@ -16,7 +16,6 @@ import {
   LuBarChart2,
   LuBookOpen,
   LuCompass,
-  LuGamepad2,
   LuInfo,
   LuLayers,
   LuLayoutDashboard,
@@ -26,6 +25,7 @@ import {
   LuUser,
   LuX,
 } from "react-icons/lu"
+import { MdOutlineGames } from "react-icons/md"
 
 import { WalletConnect } from "@/components/blockchain/wallet-connect"
 
@@ -38,7 +38,7 @@ export const useParticipationSearch = () => useContext(SearchContext)
 const links = [
   { href: "/discover", label: "Explore", icon: LuCompass },
   { href: "/loops", label: "Loops", icon: LuLayers },
-  { href: "/games", label: "Games", icon: LuGamepad2 },
+  { href: "/games", label: "Games", icon: MdOutlineGames },
   { href: "/milestones", label: "Milestones", icon: LuTrophy },
   { href: "/leaderboard", label: "Leaderboard", icon: LuBarChart2 },
   { href: "/profile", label: "Profile", icon: LuUser },

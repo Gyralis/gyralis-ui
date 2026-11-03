@@ -422,10 +422,10 @@ export function SeasonHeader({
       <div className="s-season-visual" aria-hidden="true">
         <Image
           className="s-season-art"
-          src="/images/img_2.png"
-          width={560}
-          height={560}
-          sizes="(max-width: 640px) 180px, (max-width: 1200px) 40vw, 560px"
+          src="/images/gyralis-games-header-v3.png"
+          width={1254}
+          height={1254}
+          sizes="(max-width: 640px) 260px, (max-width: 1200px) 65vw, 760px"
           alt=""
           priority
         />

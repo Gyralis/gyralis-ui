@@ -1,6 +1,7 @@
-import { formatUnits } from "viem"
-
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 export type TransactionAction = "claim" | "enter" | "remain"
 
@@ -17,9 +18,11 @@ export function getClaimedTokenTitle({
 }: ClaimedTokenTitleParams) {
   if (decimals == null || !symbol) return "Rewards claimed"
 
-  const value = trimFormattedBalance(formatUnits(amount, decimals), 4)
-
-  return `Claimed ${value} ${symbol}`
+  return `Claimed ${formatTokenAmount(amount, {
+    decimals,
+    symbol,
+    ...TOKEN_AMOUNT_FORMATS.details,
+  })}`
 }
 
 export function getRevertedTransactionToast(action: TransactionAction) {

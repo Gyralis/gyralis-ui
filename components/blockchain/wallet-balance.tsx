@@ -1,7 +1,10 @@
 import { HTMLAttributes } from "react"
 import { useAccount, useBalance } from "wagmi"
 
-import { trimFormattedBalance } from "@/lib/utils"
+import {
+  formatTokenAmount,
+  TOKEN_AMOUNT_FORMATS,
+} from "@/lib/utils/token-amount"
 
 interface WalletBalanceProps
   extends Omit<HTMLAttributes<HTMLSpanElement>, "children"> {
@@ -10,7 +13,7 @@ interface WalletBalanceProps
 
 export const WalletBalance = ({
   className,
-  decimals = 4,
+  decimals = TOKEN_AMOUNT_FORMATS.details.maximumFractionDigits,
   ...props
 }: WalletBalanceProps) => {
   const { address } = useAccount()
@@ -22,7 +25,10 @@ export const WalletBalance = ({
 
   return (
     <span className={className} {...props}>
-      {trimFormattedBalance(balance.formatted, decimals)}
+      {formatTokenAmount(balance.value, {
+        decimals: balance.decimals,
+        maximumFractionDigits: decimals,
+      })}
     </span>
   )
 }
