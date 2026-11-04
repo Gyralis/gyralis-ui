@@ -498,14 +498,15 @@ export function SeasonRules() {
           <li>
             <strong>Complete Season Games challenges</strong>
             <span>
-              Sprint +15 SP, Long Game +30 SP and exploration +15 SP add to the
-              same game-bonus total. Sprint and Long Game stack. The race is on
-              hold and awards no points until its rules are finalized.
+              20 Days In +15 SP, All Season Long +30 SP and Complete the Circuit
+              +15 SP add to the same game-bonus total. 20 Days In and All Season
+              Long stack. Claim Rush is on hold and awards no points until its
+              rules are finalized.
             </span>
           </li>
         </ol>
         <p className="p-caption">
-          Weekend Loop: register each Saturday and claim Sunday for 4 total SP
+          Weekend Ritual: register each Saturday and claim Sunday for 4 total SP
           (1 claim +3 game bonus). Four opportunities, up to 16 SP. No regular
           streak bonus. Only this dedicated Loop counts for its weekend reward.
         </p>

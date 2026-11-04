@@ -5,7 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { LoopActionViewModel } from "@/components/loops/sections/loop-section-types"
 
-import { ClaimPanelView, LoopClaimPanel } from "./loop-claim-panel"
+import {
+  claimCountdown,
+  ClaimedLoopAction,
+  ClaimPanelView,
+  LoopClaimPanel,
+} from "./loop-claim-panel"
 
 const mocks = vi.hoisted(() => ({
   isConnected: true,
@@ -125,7 +130,6 @@ describe("live Loop claim panel", () => {
     ["enter", "Register", false, false],
     ["entered", "Registered", true, false],
     ["claiming", "Confirming claim...", true, true],
-    ["claimed", "Claimed 0.01 HNY", true, false],
   ] as const)(
     "preserves %s action availability",
     (status, label, disabled, isPending) => {
@@ -142,6 +146,39 @@ describe("live Loop claim panel", () => {
     }
   )
 
+  it("replaces a confirmed claim action with a non-clickable status without repeating the amount", () => {
+    const html = renderToStaticMarkup(
+      <ClaimPanelView
+        loop={standardLoop}
+        {...controller}
+        action={{ ...action, status: "claimed", label: "Claimed 0.01 HNY" }}
+      />
+    )
+    expect(html).toContain("Claim confirmed.")
+    expect(html).toContain(">Claimed<")
+    expect(html).not.toContain("0.01 HNY")
+    expect(html.split('class="p-loop-claim-action"')[1]).not.toContain("<button")
+    expect(html).not.toContain("p-loop-claim-timing")
+  })
+
+  it("keeps claim-ready actions available instead of displaying a countdown", () => {
+    const html = renderToStaticMarkup(
+      <ClaimPanelView
+        loop={standardLoop}
+        {...controller}
+        period={{
+          status: "ready",
+          data: {
+            nextPeriodStart: 2000000000n,
+            timerTitle: "Claim period ends in",
+          },
+        }}
+      />
+    )
+    expect(html).toContain("Claim 0.01 HNY")
+    expect(html).not.toContain("p-loop-claim-complete")
+  })
+
   it("uses the contract-specific controller for each card", () => {
     renderToStaticMarkup(<LoopClaimPanel loop={standardLoop} />)
     expect(mocks.standard).toHaveBeenCalledWith(standardLoop)
@@ -150,5 +187,54 @@ describe("live Loop claim panel", () => {
     renderToStaticMarkup(<LoopClaimPanel loop={streamingLoop} />)
     expect(mocks.streaming).toHaveBeenCalledWith(streamingLoop)
     expect(mocks.standard).not.toHaveBeenCalled()
+  })
+})
+
+describe("claimed Loop countdown", () => {
+  it("briefly shows confirmation before the countdown", () => {
+    const html = renderToStaticMarkup(
+      <ClaimedLoopAction timing="06:24:18" justClaimed />
+    )
+    expect(html).toContain(">Claimed<")
+    expect(html).not.toContain("06:24:18")
+  })
+
+  it("shows a quiet non-clickable timer in the action area", () => {
+    const html = renderToStaticMarkup(
+      <ClaimedLoopAction timing="06:24:18" justClaimed={false} />
+    )
+    expect(html).toContain("Next claim in")
+    expect(html).toContain('role="timer" aria-live="off">06:24:18')
+    expect(html).not.toContain("<button")
+  })
+
+  it("does not call a streaming accumulation boundary a claim opening", () => {
+    const html = renderToStaticMarkup(
+      <ClaimedLoopAction timing="06:24:18" justClaimed={false} nextPeriod />
+    )
+    expect(html).toContain("Next period in")
+    expect(html).not.toContain("Next claim in")
+  })
+
+  it("waits for authoritative status refresh at the boundary", () => {
+    const html = renderToStaticMarkup(
+      <ClaimedLoopAction timing="00:00:00" justClaimed={false} />
+    )
+    expect(html).toContain("Updating Loop…")
+    expect(html).not.toContain("Next claim in")
+    expect(html).not.toContain("<button")
+  })
+
+  it("counts down to the actual configured boundary, including a non-midnight reset", () => {
+    const now = Date.parse("2026-11-04T10:00:00Z")
+    const boundary = BigInt(Date.parse("2026-11-04T16:24:18Z") / 1000)
+    expect(claimCountdown(boundary, now)).toBe("06:24:18")
+    expect(claimCountdown(boundary, now + 1000)).toBe("06:24:17")
+    expect(claimCountdown(boundary, Number(boundary) * 1000)).toBe("00:00:00")
+    expect(claimCountdown(boundary, Number(boundary) * 1000 + 1000)).toBe(
+      "00:00:00"
+    )
+    expect(claimCountdown(undefined, now)).toBeUndefined()
+    expect(claimCountdown(boundary, 0)).toBeUndefined()
   })
 })

@@ -977,6 +977,31 @@
   border-radius: 12px;
   box-shadow: none;
 }
+.p-loop-claim-complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #ffffff09;
+  border-radius: 12px;
+  background: #ffffff06;
+  color: var(--p-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.p-loop-claim-complete > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.p-loop-claim-complete [role="timer"] {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .p-loop-claim-timing {
   color: var(--p-text-muted);
   font-size: 11px;
@@ -3501,28 +3526,11 @@
 .s-game-card-content {
   display: flex;
   flex-direction: column;
-  min-height: 410px;
-  padding: 26px;
-}
-.s-game-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-.s-game-card-top .p-eyebrow {
-  color: var(--p-text-muted);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-}
-.s-game-card-top .s-pill {
-  background: #101a14bb;
+  padding: 22px;
 }
 .s-game-card h2 {
   max-width: 78%;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-size: 28px;
   font-weight: 650;
   line-height: 1.15;
@@ -3530,17 +3538,16 @@
 }
 .s-game-description {
   max-width: 36ch;
-  min-height: 44px;
   color: var(--p-text-muted);
   font-size: 12px;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 .s-game-reward-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin: 24px 0;
+  margin: 16px 0;
 }
 .s-game-reward {
   display: flex;
@@ -3574,7 +3581,6 @@
   font-size: 10px;
 }
 .s-game-card-progress {
-  margin-top: auto;
   min-height: 44px;
   color: var(--p-text-muted);
   font-size: 11px;
@@ -3585,7 +3591,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 5px 12px;
-  margin-bottom: 9px;
+  margin-bottom: 6px;
 }
 .s-game-card-progress .p-progress {
   height: 5px;
@@ -3601,19 +3607,16 @@
 }
 .s-game-card-progress > small {
   display: block;
-  margin-top: 9px;
+  margin-top: 6px;
   font-size: 10px;
 }
 .s-game-card-content > .p-button {
-  margin-top: 20px;
+  margin-top: 12px;
   justify-content: space-between;
   min-height: 42px;
 }
 .s-game-card.is-held {
   grid-column: 1 / -1;
-}
-.s-game-card.is-held .s-game-card-content {
-  min-height: 300px;
 }
 .s-game-card.is-held .s-game-description {
   max-width: 56ch;
@@ -3829,8 +3832,7 @@
     max-width: 11ch;
   }
   .s-game-card-content {
-    min-height: 400px;
-    padding: 22px;
+    padding: 20px;
   }
   .s-game-card h2 {
     font-size: 26px;

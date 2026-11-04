@@ -3,7 +3,7 @@ import type { PreviewState } from "./season-preview"
 export const seasonGames = [
   {
     id: "sprint",
-    title: "20-Day Sprint",
+    title: "20 Days In",
     type: "Participation",
     description:
       "Make a qualifying claim in 20 different Season periods. Gaps are allowed.",
@@ -16,12 +16,12 @@ export const seasonGames = [
     rules: [
       "Regular Season Loops only; Weekend Loop claims do not count.",
       "Switching Loops between periods is allowed. Each Loop keeps its own independent streak.",
-      "Earn +15 bonus SP once after confirmed completion. This stacks with Long Game’s +30 SP.",
+      "Earn +15 bonus SP once after confirmed completion. This stacks with All Season Long’s +30 SP.",
     ],
   },
   {
     id: "marathon",
-    title: "The long game",
+    title: "All Season Long",
     type: "Full-Season participation",
     description:
       "Make at least one qualifying claim in every daily period of the Season.",
@@ -33,13 +33,13 @@ export const seasonGames = [
     win: "Cover every daily period in the Season’s configured schedule.",
     rules: [
       "Regular Season Loops only; Weekend Loop claims do not replace a regular claim.",
-      "Missing a closed period makes this objective unattainable. Your other points and Sprint progress stay yours.",
-      "Earn +30 bonus SP once. Together with Sprint, full participation earns +45 bonus SP.",
+      "Missing a closed period makes this objective unattainable. Your other points and 20 Days In progress stay yours.",
+      "Earn +30 bonus SP once. Together with 20 Days In, full participation earns +45 bonus SP.",
     ],
   },
   {
     id: "explorer",
-    title: "Find your next Loop",
+    title: "Complete the Circuit",
     type: "Exploration",
     description:
       "Claim at least three times in every Loop on the required Season list.",
@@ -57,7 +57,7 @@ export const seasonGames = [
   },
   {
     id: "weekend",
-    title: "Weekend Loop",
+    title: "Weekend Ritual",
     type: "Weekend participation",
     description:
       "Register Saturday. Claim Sunday. A dedicated Loop, every Season weekend.",
@@ -76,7 +76,7 @@ export const seasonGames = [
   },
   {
     id: "race",
-    title: "First 50 to 20 claims",
+    title: "Claim Rush",
     type: "Race · on hold",
     description:
       "The claim race is on hold while its final format and qualification rules are defined.",

@@ -8,11 +8,11 @@ All five illustrations were generated with built-in image generation, visually i
 
 | Game | Saved asset | Exact generation prompt |
 | --- | --- | --- |
-| 20-Day Sprint | [sprint.png](../public/games/sprint.png) | [Sprint prompt](game-art-sprint-prompt.md) |
-| The long game | [long-game.png](../public/games/long-game.png) | [Long Game prompt](game-art-long-game-prompt.md) |
-| Find your next Loop | [explorer.png](../public/games/explorer.png) | [Explorer prompt](game-art-explorer-prompt.md) |
-| Weekend Loop | [weekend.png](../public/games/weekend.png) | [Weekend prompt](game-art-weekend-prompt.md) |
-| First 50 to 20 claims | [race.png](../public/games/race.png) | [Race prompt](game-art-race-prompt.md) |
+| 20 Days In | [sprint.png](../public/games/sprint.png) | [Sprint prompt](game-art-sprint-prompt.md) |
+| All Season Long | [long-game.png](../public/games/long-game.png) | [Long Game prompt](game-art-long-game-prompt.md) |
+| Complete the Circuit | [explorer.png](../public/games/explorer.png) | [Explorer prompt](game-art-explorer-prompt.md) |
+| Weekend Ritual | [weekend.png](../public/games/weekend.png) | [Weekend prompt](game-art-weekend-prompt.md) |
+| Claim Rush | [race.png](../public/games/race.png) | [Race prompt](game-art-race-prompt.md) |
 
 ## Implemented frontend behavior
 

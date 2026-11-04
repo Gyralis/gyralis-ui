@@ -26,7 +26,6 @@ export function SeasonGameCard({
   const { state } = useSeason()
   const view = gameView(game, state)
   const held = game.id === "race"
-  const earned = state.registered ? view.earned : 0
   return (
     <article
       className={`s-game-card p-surface ${held ? "is-held" : ""}`}
@@ -42,18 +41,6 @@ export function SeasonGameCard({
         />
       </div>
       <div className="s-game-card-content">
-        <div className="s-game-card-top">
-          <span className="p-eyebrow">{game.type}</span>
-          <span
-            className={`s-pill ${
-              view.status === "Completed" || view.status === "Ready to claim"
-                ? "is-green"
-                : ""
-            }`}
-          >
-            {view.status}
-          </span>
-        </div>
         <h2>{game.title}</h2>
         <p className="s-game-description">{game.description}</p>
         <div className="s-game-reward-row">
@@ -67,12 +54,6 @@ export function SeasonGameCard({
                 : "bonus SP once"}
             </span>
           </div>
-          {!held && (
-            <div className="s-game-earned">
-              <strong>{earned} SP</strong>
-              <span>Bonus earned</span>
-            </div>
-          )}
         </div>
         <div className="s-game-card-progress">
           {held ? (
@@ -224,7 +205,7 @@ function WeekendParticipation() {
   return (
     <section
       className="s-weekend-participation"
-      aria-label="Weekend Loop participation"
+      aria-label="Weekend Ritual participation"
     >
       <div className="s-weekend-next">
         <strong>

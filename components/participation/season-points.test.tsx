@@ -102,7 +102,7 @@ describe("Season Points summaries", () => {
   it("shows a minimal connection prompt instead of cached personal stats", () => {
     mocks.isConnected = false
     const html = renderToStaticMarkup(<SeasonPoints compact />)
-    expect(html).toContain("Your Season starts here")
+    expect(html).toContain("Your Season stats here")
     expect(html).not.toContain("<button")
     expect(html).toContain(
       "Connect your wallet to see how your claims and streaks add up this Season."

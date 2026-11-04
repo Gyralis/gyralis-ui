@@ -63,7 +63,7 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
       >
         <div className="p-sp-welcome">
           {isConnected && <LuWallet aria-hidden="true" />}
-          <h2>{isConnected ? "Join the Season" : "Your Season starts here"}</h2>
+          <h2>{isConnected ? "Join the Season" : "Your Season stats here"}</h2>
           <p>
             {isConnected
               ? canEnter(state.phase)

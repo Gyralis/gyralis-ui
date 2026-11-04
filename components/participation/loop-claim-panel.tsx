@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
 import { useConnectModal } from "@rainbow-me/rainbowkit"
-import { LuWallet } from "react-icons/lu"
+import { LuCheck, LuClock3, LuWallet } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
 import type { DailyRewardEstimate } from "@/lib/loops/daily-reward"
@@ -60,6 +60,7 @@ export function ClaimPanelView({
   const participation = sectionData(loopers)
   const periodData = sectionData(period)
   const timing = useClaimPeriod(periodData, refresh)
+  const justClaimed = useClaimConfirmation(action.status)
   const model = {
     ...action,
     label:
@@ -70,7 +71,7 @@ export function ClaimPanelView({
         : action.label,
   }
   const showTiming =
-    isConnected && ["entered", "active", "claimed"].includes(action.status)
+    isConnected && ["entered", "active"].includes(action.status)
 
   return (
     <div className="p-loop-claim-panel">
@@ -106,11 +107,7 @@ export function ClaimPanelView({
           <RwagmiTokenEligibility compact />
         </div>
       )}
-      <div
-        className="p-loop-claim-action"
-        aria-live="polite"
-        aria-atomic="true"
-      >
+      <div className="p-loop-claim-action">
         {!isConnected ? (
           <button
             type="button"
@@ -120,10 +117,18 @@ export function ClaimPanelView({
           >
             <LuWallet aria-hidden="true" /> Connect wallet
           </button>
+        ) : action.status === "claimed" ? (
+          <ClaimedLoopAction
+            timing={timing}
+            justClaimed={justClaimed}
+            nextPeriod={periodData?.timerTitle === "Accumulation starts in"}
+          />
         ) : (
-          <TooltipProvider delayDuration={150}>
-            <LoopClaimAction chainId={loop.chainId} model={model} />
-          </TooltipProvider>
+          <div aria-live="polite" aria-atomic="true">
+            <TooltipProvider delayDuration={150}>
+              <LoopClaimAction chainId={loop.chainId} model={model} />
+            </TooltipProvider>
+          </div>
         )}
       </div>
       {showTiming && timing && (
@@ -133,6 +138,62 @@ export function ClaimPanelView({
       )}
     </div>
   )
+}
+
+export function ClaimedLoopAction({
+  timing,
+  justClaimed,
+  nextPeriod = false,
+}: {
+  timing?: string
+  justClaimed: boolean
+  nextPeriod?: boolean
+}) {
+  const showConfirmation = justClaimed || !timing
+  const label = showConfirmation
+    ? "Claimed"
+    : timing === "00:00:00"
+    ? "Updating Loop…"
+    : nextPeriod
+    ? "Next period in"
+    : "Next claim in"
+
+  return (
+    <div className="p-loop-claim-complete">
+      <span className="sr-only" role="status">
+        Claim confirmed.
+      </span>
+      {showConfirmation ? (
+        <LuCheck aria-hidden="true" />
+      ) : (
+        <LuClock3 aria-hidden="true" />
+      )}
+      <span>{label}</span>
+      {!showConfirmation && timing !== "00:00:00" && (
+        <span role="timer" aria-live="off">
+          {timing}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function useClaimConfirmation(status: LoopActionViewModel["status"]) {
+  const previousStatus = useRef(status)
+  const [justClaimed, setJustClaimed] = useState(false)
+
+  useEffect(() => {
+    const confirmedNow =
+      status === "claimed" &&
+      ["claimable", "claiming"].includes(previousStatus.current)
+    previousStatus.current = status
+    setJustClaimed(confirmedNow)
+    if (!confirmedNow) return
+    const timer = setTimeout(() => setJustClaimed(false), 2400)
+    return () => clearTimeout(timer)
+  }, [status])
+
+  return justClaimed
 }
 
 function sectionData<T>(state: SectionState<T>): T | undefined {
@@ -189,9 +250,18 @@ function useClaimPeriod(
     return () => clearInterval(timer)
   }, [nextPeriodStart, onBoundary])
 
+  return claimCountdown(nextPeriodStart, now)
+}
+
+export function claimCountdown(
+  nextPeriodStart: bigint | undefined,
+  now: number
+) {
   if (!now || nextPeriodStart == null) return undefined
   const seconds = Math.max(0, Number(nextPeriodStart) - Math.floor(now / 1000))
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
-  return `${hours}h ${minutes}m ${seconds % 60}s`
+  return [hours, minutes, seconds % 60]
+    .map((value) => String(value).padStart(2, "0"))
+    .join(":")
 }

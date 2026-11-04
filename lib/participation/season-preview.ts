@@ -298,7 +298,7 @@ export function seasonPreviewReducer(
           weekend.id === action.id ? { ...weekend, claimed: true } : weekend
         ),
         message:
-          "Weekend Loop: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only; no tokens moved.",
+          "Weekend Ritual: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only; no tokens moved.",
       }
     }
     case "prize":

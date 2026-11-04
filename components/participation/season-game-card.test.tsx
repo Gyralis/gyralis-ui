@@ -65,7 +65,7 @@ describe("illustrated Season Games", () => {
         onOpen={() => {}}
       />
     )
-    expect(html).toContain("On hold")
+    expect(html).toContain("Game format and qualification rules are on hold.")
     expect(html).toContain("SP reserved")
     expect(html).not.toContain("Bonus earned")
   })

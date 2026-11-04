@@ -27,7 +27,7 @@ import { SeasonControls, SeasonHeader, SeasonRules } from "./season-panels"
 function GamesContent() {
   const router = useRouter()
   const params = useSearchParams()
-  const { state, dispatch, score } = useSeason()
+  const { state, dispatch } = useSeason()
   const tab =
     !params.get("game") && params.get("view") === "prizes"
       ? "Prizes & Rules"
@@ -89,20 +89,7 @@ function GamesContent() {
                 Season Games
               </p>
               <h2>Take your claims further.</h2>
-              <p>
-                Complete objectives for extra Season points. Your progress
-                updates automatically.
-              </p>
-            </div>
-            <div
-              className="s-games-earned"
-              title="Sample progress. Bonuses are separate from base claim points."
-            >
-              <span>Game bonuses earned</span>
-              <strong>
-                {state.registered ? score.games : 0} <small>SP</small>
-              </strong>
-              <small>Progress preview</small>
+              <p>Complete objectives for extra Season points.</p>
             </div>
           </div>
           {!state.registered && (
