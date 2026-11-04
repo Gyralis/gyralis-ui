@@ -72,6 +72,20 @@ export function ClaimPanelView({
   }
   const showTiming =
     isConnected && ["entered", "active"].includes(action.status)
+  const claimAction =
+    action.status === "claimed" ? (
+      <ClaimedLoopAction
+        timing={timing}
+        justClaimed={justClaimed}
+        nextPeriod={periodData?.timerTitle === "Accumulation starts in"}
+      />
+    ) : (
+      <div aria-live="polite" aria-atomic="true">
+        <TooltipProvider delayDuration={150}>
+          <LoopClaimAction chainId={loop.chainId} model={model} />
+        </TooltipProvider>
+      </div>
+    )
 
   return (
     <div className="p-loop-claim-panel">
@@ -102,11 +116,6 @@ export function ClaimPanelView({
           <MetricRetry state={loopers} label="Loopers" />
         </div>
       </dl>
-      {loop.eligibilityProvider === "rwagmi" && isConnected && (
-        <div className="p-loop-claim-setup">
-          <RwagmiTokenEligibility compact />
-        </div>
-      )}
       <div className="p-loop-claim-action">
         {!isConnected ? (
           <button
@@ -117,18 +126,22 @@ export function ClaimPanelView({
           >
             <LuWallet aria-hidden="true" /> Connect wallet
           </button>
-        ) : action.status === "claimed" ? (
-          <ClaimedLoopAction
-            timing={timing}
-            justClaimed={justClaimed}
-            nextPeriod={periodData?.timerTitle === "Accumulation starts in"}
-          />
+        ) : loop.eligibilityProvider === "rwagmi" ? (
+          <RwagmiTokenEligibility
+            compact
+            variant="action"
+            actionPending={action.isPending}
+            preserveAction={[
+              "claimed",
+              "entered",
+              "active",
+              "unavailable",
+            ].includes(action.status)}
+          >
+            {claimAction}
+          </RwagmiTokenEligibility>
         ) : (
-          <div aria-live="polite" aria-atomic="true">
-            <TooltipProvider delayDuration={150}>
-              <LoopClaimAction chainId={loop.chainId} model={model} />
-            </TooltipProvider>
-          </div>
+          claimAction
         )}
       </div>
       {showTiming && timing && (

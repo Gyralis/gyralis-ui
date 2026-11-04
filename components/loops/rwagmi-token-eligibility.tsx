@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type ReactNode,
 } from "react"
 import Link from "next/link"
 import { useConnectModal } from "@rainbow-me/rainbowkit"
@@ -17,7 +18,7 @@ import {
   uncheckedRwagmiChecks,
   type RwagmiChecks,
 } from "@/lib/loops/rwagmi-eligibility"
-import { createRwagmiTokenStore } from "@/lib/loops/rwagmi-token-store"
+import { getRwagmiTokenStore } from "@/lib/loops/rwagmi-token-store"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -28,6 +29,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+
+import { RwagmiSetupAction } from "./rwagmi-setup-action"
+
+interface RwagmiTokenEligibilityProps {
+  compact?: boolean
+  variant?: "inline" | "action"
+  actionPending?: boolean
+  preserveAction?: boolean
+  children?: ReactNode
+}
 
 const shorten = (address: string) =>
   `${address.slice(0, 6)}…${address.slice(-4)}`
@@ -40,9 +51,11 @@ const statusLabels: Record<RwagmiChecks["passport"], string> = {
 
 export function RwagmiTokenEligibility({
   compact = false,
-}: {
-  compact?: boolean
-}) {
+  variant = "inline",
+  actionPending,
+  preserveAction,
+  children,
+}: RwagmiTokenEligibilityProps) {
   const { address, isConnected } = useAccount()
   const wallet = isConnected ? address?.toLowerCase() : undefined
   return (
@@ -50,23 +63,28 @@ export function RwagmiTokenEligibility({
       key={wallet ?? "disconnected"}
       wallet={wallet}
       compact={compact}
-    />
+      variant={variant}
+      actionPending={actionPending}
+      preserveAction={preserveAction}
+    >
+      {children}
+    </WalletTokenEligibility>
   )
 }
 
 function WalletTokenEligibility({
   wallet,
   compact,
-}: {
+  variant,
+  actionPending,
+  preserveAction,
+  children,
+}: RwagmiTokenEligibilityProps & {
   wallet?: string
   compact: boolean
 }) {
   const { openConnectModal } = useConnectModal()
-  const store = useMemo(
-    () =>
-      createRwagmiTokenStore(wallet, { storage: () => window.localStorage }),
-    [wallet]
-  )
+  const store = useMemo(() => getRwagmiTokenStore(wallet), [wallet])
   const state = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
@@ -80,7 +98,7 @@ function WalletTokenEligibility({
   const id = useId()
   useEffect(() => {
     store.hydrate()
-    return () => store.dispose()
+    // Other cards/dialogs can still be observing this shared wallet store.
   }, [store])
   useEffect(() => {
     if (state.retryAt <= Date.now()) return
@@ -166,76 +184,103 @@ function WalletTokenEligibility({
   return (
     <div
       aria-label="RWAGMI token eligibility"
-      className={compact ? "flex shrink-0 items-center gap-2" : "space-y-3"}
+      className={
+        variant === "action"
+          ? "p-loop-token-control"
+          : compact
+          ? "flex shrink-0 items-center gap-2"
+          : "space-y-3"
+      }
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {!compact && (
-          <div className="min-w-0">
-            {state.token ? (
-              <a
-                href={`https://rwagmi.com/token/${state.token}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={state.token}
-                aria-label={`View token ${state.token} on RWAGMI`}
-                className="font-mono text-sm underline underline-offset-4"
-              >
-                {shorten(state.token)}
-              </a>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Add the token you created on RWAGMI.
-              </p>
+      {variant === "action" ? (
+        <RwagmiSetupAction
+          state={state}
+          wallet={wallet}
+          retrySeconds={retrySeconds}
+          actionPending={actionPending}
+          preserveAction={preserveAction}
+          triggerRef={trigger}
+          onSetup={() => (wallet ? setDialogOpen(true) : openConnectModal?.())}
+          onRetry={() => void store.check()}
+        >
+          {children}
+        </RwagmiSetupAction>
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {!compact && (
+              <div className="min-w-0">
+                {state.token ? (
+                  <a
+                    href={`https://rwagmi.com/token/${state.token}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={state.token}
+                    aria-label={`View token ${state.token} on RWAGMI`}
+                    className="font-mono text-sm underline underline-offset-4"
+                  >
+                    {shorten(state.token)}
+                  </a>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Add the token you created on RWAGMI.
+                  </p>
+                )}
+              </div>
             )}
+            <Button
+              ref={trigger}
+              requireWallet={false}
+              variant="secondary"
+              className={
+                compact
+                  ? "!h-6 !min-h-0 whitespace-nowrap !rounded-full !px-2 !py-0 text-[11px] leading-4"
+                  : "min-h-10 rounded-full px-4 text-sm"
+              }
+              title={state.token}
+              onClick={() =>
+                wallet ? setDialogOpen(true) : openConnectModal?.()
+              }
+            >
+              {!wallet
+                ? "Connect wallet"
+                : state.token
+                ? "Change token"
+                : "Add token"}
+            </Button>
           </div>
-        )}
-        <Button
-          ref={trigger}
-          requireWallet={false}
-          variant="secondary"
-          className={
-            compact
-              ? "!h-6 !min-h-0 whitespace-nowrap !rounded-full !px-2 !py-0 text-[11px] leading-4"
-              : "min-h-10 rounded-full px-4 text-sm"
-          }
-          title={state.token}
-          onClick={() => (wallet ? setDialogOpen(true) : openConnectModal?.())}
-        >
-          {!wallet
-            ? "Connect wallet"
-            : state.token
-            ? "Change token"
-            : "Add token"}
-        </Button>
-      </div>
-      {compact && (state.checking || state.result) ? (
-        <span role="status" className="text-xs text-muted-foreground">
-          {state.checking
-            ? "Checking…"
-            : state.result?.success
-            ? "Eligible"
-            : "Check needed"}
-        </span>
-      ) : null}
-      {!compact && state.token && !open ? feedback : null}
-      {!compact && state.token && !open ? (
-        <Button
-          disabled={busy}
-          isLoading={state.checking}
-          className="min-h-10 rounded-full px-4 text-sm"
-          onClick={() => void store.check()}
-        >
-          {state.checking ? "Checking eligibility…" : retryLabel}
-        </Button>
-      ) : null}
-      {!compact && state.token ? (
-        <p className="text-xs text-muted-foreground">Launch data from RWAGMI</p>
-      ) : null}
-      {!compact && !state.token && state.storageError ? (
-        <p role="status" className="text-sm text-muted-foreground">
-          {state.storageError}
-        </p>
-      ) : null}
+          {compact && (state.checking || state.result) ? (
+            <span role="status" className="text-xs text-muted-foreground">
+              {state.checking
+                ? "Checking…"
+                : state.result?.success
+                ? "Eligible"
+                : "Check needed"}
+            </span>
+          ) : null}
+          {!compact && state.token && !open ? feedback : null}
+          {!compact && state.token && !open ? (
+            <Button
+              disabled={busy}
+              isLoading={state.checking}
+              className="min-h-10 rounded-full px-4 text-sm"
+              onClick={() => void store.check()}
+            >
+              {state.checking ? "Checking eligibility…" : retryLabel}
+            </Button>
+          ) : null}
+          {!compact && state.token ? (
+            <p className="text-xs text-muted-foreground">
+              Launch data from RWAGMI
+            </p>
+          ) : null}
+          {!compact && !state.token && state.storageError ? (
+            <p role="status" className="text-sm text-muted-foreground">
+              {state.storageError}
+            </p>
+          ) : null}
+        </>
+      )}
       <Dialog open={open} onOpenChange={setDialogOpen}>
         <DialogContent
           className="max-h-[calc(100dvh_-_2rem)] w-[calc(100%_-_2rem)] max-w-lg overflow-y-auto rounded-2xl"

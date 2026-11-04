@@ -18,6 +18,7 @@ import {
   getLoopContractAbi,
   loopContractMethods,
 } from "@/lib/contracts/loop-contracts"
+import { isWalletRejection } from "@/lib/loops/claim-errors"
 import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmation"
 import type {
   SuperLoopConfirmedAction,
@@ -111,7 +112,7 @@ export function useSuperLoopClaim({
     chainId,
     query: { enabled: Boolean(txHash) },
   })
-  const isConfirming = receipt.isLoading
+  const isConfirming = Boolean(txHash)
   const isPending = submissionStage !== "idle" || isConfirming
   const wrongNetwork = currentChainId !== chainId
   const transactionUrl = getBlockscoutTransactionUrl(chainId, txHash)
@@ -229,6 +230,7 @@ export function useSuperLoopClaim({
   }, [receipt.isError, toast, transactionUrl, txHash])
 
   const execute = async () => {
+    if (isPending) return
     if (eligibilityProvider === "rwagmi") {
       toast({
         title: "Registration unavailable",
@@ -335,9 +337,16 @@ export function useSuperLoopClaim({
         chainId,
       })
       setTxHash(hash)
-    } catch {
+    } catch (error) {
+      const cancelled = isWalletRejection(error)
       toast({
-        title: action === "claim" ? "Claim failed" : "Entry failed",
+        title: cancelled
+          ? action === "claim"
+            ? "Claim cancelled"
+            : "Entry cancelled"
+          : action === "claim"
+          ? "Claim failed"
+          : "Entry failed",
         description:
           action === "claim"
             ? "No rewards were claimed. Try again."

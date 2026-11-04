@@ -342,6 +342,15 @@ export function useStandardLoopCardController(loop: LoopCardData) {
                 !isAddress(address) ||
                 ["checking", "entered", "claimed"].includes(claim.status))),
           isPending: claim.isPending,
+          progress: claim.isPending
+            ? {
+                stage:
+                  claim.submissionStage !== "idle"
+                    ? claim.submissionStage
+                    : "confirming",
+                transactionUrl: claim.transactionUrl,
+              }
+            : undefined,
           presentation: fundingUnavailable
             ? "neutral"
             : getStandardLoopActionPresentation({

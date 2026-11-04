@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
+import { LoopLoadingIcon } from "./loop-loading-icon"
 import type {
   LoopActionTooltip,
   LoopActionViewModel,
@@ -28,6 +29,7 @@ export function LoopClaimAction({
 }: LoopClaimActionProps) {
   const { isConnected } = useAccount()
   const isChecking = isConnected && model.status === "checking"
+  const progress = isConnected && model.isPending ? model.progress : undefined
   const label = isConnected ? model.label : "Connect wallet to enter"
   const icon = !isConnected ? (
     <LuWallet className="size-4 shrink-0" />
@@ -115,15 +117,27 @@ export function LoopClaimAction({
       disabled={model.disabled}
       icon={icon}
       isLoading={model.isPending || isChecking}
-      className={buttonClassName}
+      loadingIcon={<LoopLoadingIcon />}
+      requireWallet={!model.isPending}
+      className={`${buttonClassName} loop-claim-button ${
+        progress ? "is-looping" : ""
+      }`}
     >
-      {label}
+      {progress
+        ? progress.stage === "checkingEligibility"
+          ? "Checking eligibility…"
+          : progress.stage === "awaitingWallet"
+          ? "Confirm in wallet"
+          : model.status === "entering"
+          ? "Confirming registration…"
+          : "Confirming onchain…"
+        : label}
     </Button>
   )
 
   return (
     <div className={compact ? "inline-flex" : "w-full"}>
-      {model.tooltip ? (
+      {model.tooltip && !progress ? (
         <Tooltip>
           <TooltipTrigger asChild>
             <div className={compact ? "inline-flex" : "w-full"}>{button}</div>

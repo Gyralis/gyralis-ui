@@ -977,6 +977,77 @@
   border-radius: 12px;
   box-shadow: none;
 }
+.p-loop-token-control,
+.p-loop-token-setup {
+  width: 100%;
+}
+.p-loop-token-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.p-loop-token-intro p,
+.p-loop-token-storage {
+  margin: 0;
+  color: var(--p-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.p-loop-token-step {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--p-text-primary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.p-loop-token-storage {
+  font-size: 10px;
+  text-align: center;
+}
+.p-loop-token-saved {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--p-text-muted);
+  font-size: 11px;
+}
+.p-loop-token-saved > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.p-loop-token-saved svg {
+  width: 13px;
+  height: 13px;
+  color: var(--p-accent, #1ce783);
+}
+.p-loop-claim-action .p-loop-token-change {
+  min-height: 32px;
+  padding: 4px 0 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--p-text-muted);
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.p-loop-token-change:hover,
+.p-loop-token-change:focus-visible {
+  color: var(--p-text-primary);
+}
+.p-loop-token-change:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.p-loop-token-setup > .p-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 .p-loop-claim-complete {
   display: flex;
   align-items: center;
@@ -1006,6 +1077,58 @@
   color: var(--p-text-muted);
   font-size: 11px;
   text-align: center;
+}
+
+/* Shared transaction feedback: real stages, with no simulated progress. */
+.loop-loading-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+.loop-loading-icon[data-animated] {
+  animation: loop-claim-turn 1.8s linear infinite;
+}
+.loop-claim-button.is-looping:disabled {
+  cursor: progress;
+  opacity: 1;
+}
+.p-loop-claim-action .loop-claim-button.is-looping {
+  border-color: #1ce78335;
+  background: #153126;
+  color: #9bf4c6;
+}
+[data-claim-motion] .p-activity-new-claim {
+  animation: loop-claim-arrive 0.3s ease-out both,
+    loop-claim-highlight 5s ease-out both;
+}
+@keyframes loop-claim-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loop-claim-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes loop-claim-highlight {
+  from {
+    background-color: #1ce78318;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loop-loading-icon[data-animated],
+  [data-claim-motion] .p-activity-new-claim {
+    animation: none;
+  }
 }
 .p-loop-metric-retry {
   margin-top: 4px;

@@ -32,7 +32,9 @@ vi.mock("@/components/loops/super-loop/use-super-loop-card-controller", () => ({
   useSuperLoopCardController: mocks.streaming,
 }))
 vi.mock("@/components/loops/rwagmi-token-eligibility", () => ({
-  RwagmiTokenEligibility: () => <button>Add token</button>,
+  RwagmiTokenEligibility: ({ children }: { children?: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }))
 vi.mock("@/components/loops/sections/loop-claim-action", () => ({
   LoopClaimAction: ({ model }: { model: LoopActionViewModel }) => (
@@ -157,7 +159,9 @@ describe("live Loop claim panel", () => {
     expect(html).toContain("Claim confirmed.")
     expect(html).toContain(">Claimed<")
     expect(html).not.toContain("0.01 HNY")
-    expect(html.split('class="p-loop-claim-action"')[1]).not.toContain("<button")
+    expect(html.split('class="p-loop-claim-action"')[1]).not.toContain(
+      "<button"
+    )
     expect(html).not.toContain("p-loop-claim-timing")
   })
 

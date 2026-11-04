@@ -117,8 +117,22 @@ describe("latest activity panel", () => {
       isError: true,
     })
     const html = renderToStaticMarkup(<LatestActivity />)
-    expect(html).toContain("Your claim is confirmed. History update delayed")
+    expect(html).not.toContain("History update delayed")
     expect(html).toContain("+601.035 RWAGMI")
     expect(html).toContain("Showing the last update.")
+  })
+
+  it("highlights one receipt-proven claim without extra pending or sync text", () => {
+    mocks.useQuery.mockReturnValue({
+      data: {
+        ...snapshot,
+        items: [{ ...snapshot.items[0], source: "receipt" }],
+      },
+    })
+    const html = renderToStaticMarkup(<LatestActivity />)
+    expect(html).not.toContain("p-claim-feedback-row")
+    expect(html).toContain("p-activity-new-claim")
+    expect(html).toContain("Claim confirmed for RWAGMI Token Launcher")
+    expect(html.match(/p-latest-activity-row/g)).toHaveLength(1)
   })
 })

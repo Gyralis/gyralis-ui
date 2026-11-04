@@ -27,6 +27,10 @@ export interface LoopActionViewModel {
   amountLabel?: string
   disabled: boolean
   isPending: boolean
+  progress?: {
+    stage: "checkingEligibility" | "awaitingWallet" | "confirming"
+    transactionUrl?: string
+  }
   presentation?: "button" | "neutral" | "success"
   tooltip?: LoopActionTooltip
   execute: () => void | Promise<void>

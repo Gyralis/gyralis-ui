@@ -13,6 +13,8 @@ import {
   TOKEN_AMOUNT_FORMATS,
 } from "@/lib/utils/token-amount"
 
+import { useCardMotion } from "./card-motion-preview"
+
 export function LatestActivity() {
   const { address } = useAccount()
   const pathname = usePathname()
@@ -25,13 +27,17 @@ export function LatestActivity() {
       : address
   )?.toLowerCase()
   const activity = useQuery(latestActivityQueryOptions(wallet))
+  const motion = useCardMotion()
   // Personal activity belongs to a connected wallet or an explicitly viewed profile.
   if (!wallet) return null
   return (
     <section
       className="p-rail-activity p-latest-activity"
       aria-labelledby="latest-activity-title"
-      aria-busy={activity.isFetching}
+      aria-busy={activity.isPending}
+      data-claim-motion={
+        motion.mode !== "off" && !motion.reducedMotion ? "" : undefined
+      }
     >
       <div className="p-section-title">
         <h2 id="latest-activity-title">Latest Claims</h2>
@@ -49,13 +55,6 @@ export function LatestActivity() {
         )}
       </div>
       <>
-        {activity.data?.indexingStatus && (
-          <p className="p-activity-message" role="status">
-            {activity.data.indexingStatus === "syncing"
-              ? "Claim confirmed. Updating history…"
-              : "Your claim is confirmed. History update delayed; refresh to check again."}
-          </p>
-        )}
         {activity.isPending && (
           <p className="p-activity-message" role="status">
             Loading your claims…
@@ -85,7 +84,24 @@ export function LatestActivity() {
               <>
                 <ul className="p-activity-list">
                   {activity.data.items.map((item) => (
-                    <li key={item.id}>
+                    <li
+                      key={item.id}
+                      className={
+                        item.source === "receipt"
+                          ? "p-activity-new-claim"
+                          : undefined
+                      }
+                    >
+                      {item.source === "receipt" && (
+                        <span className="sr-only" role="status">
+                          Claim confirmed for {item.loopName}.{" "}
+                          {formatTokenAmount(
+                            item.amount,
+                            TOKEN_AMOUNT_FORMATS.claim
+                          )}{" "}
+                          {item.tokenSymbol} received.
+                        </span>
+                      )}
                       <a
                         className="p-latest-activity-row"
                         href={item.transactionUrl}

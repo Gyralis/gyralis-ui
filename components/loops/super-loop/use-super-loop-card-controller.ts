@@ -259,6 +259,15 @@ export function useSuperLoopCardController(loop: LoopCardData) {
           !validAddress ||
           ["checking", "entered", "active", "claimed"].includes(status))),
     isPending: claim.isPending,
+    progress: claim.isPending
+      ? {
+          stage:
+            claim.submissionStage !== "idle"
+              ? claim.submissionStage
+              : "confirming",
+          transactionUrl: claim.transactionUrl,
+        }
+      : undefined,
     presentation: fundingUnavailable
       ? "neutral"
       : getSuperLoopActionPresentation({

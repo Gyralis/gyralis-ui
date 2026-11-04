@@ -6,6 +6,7 @@ import {
 } from "./rwagmi-eligibility"
 
 export interface RwagmiTokenState {
+  hydrated: boolean
   token?: string
   checking: boolean
   result?: RwagmiResult
@@ -46,7 +47,7 @@ export function createRwagmiTokenStore(
   const memory = options.memory ?? sessionTokens
   const fetcher = options.fetcher ?? fetch
   const now = options.now ?? Date.now
-  let state: RwagmiTokenState = { checking: false, retryAt: 0 }
+  let state: RwagmiTokenState = { hydrated: false, checking: false, retryAt: 0 }
   const initialState = state
   let generation = 0
   let controller: AbortController | undefined
@@ -126,17 +127,25 @@ export function createRwagmiTokenStore(
     getSnapshot: () => state,
     getServerSnapshot: () => initialState,
     hydrate() {
-      if (!key) return
+      if (state.hydrated) return
+      if (!key) {
+        update({ hydrated: true })
+        return
+      }
       try {
         const stored = options.storage().getItem(key)
         const token = rwagmiAddressSchema.safeParse(
           memory.has(key) ? memory.get(key) : stored
         )
-        update({ token: token.success ? token.data : undefined })
+        update({
+          token: token.success ? token.data : undefined,
+          hydrated: true,
+        })
       } catch {
         const token = rwagmiAddressSchema.safeParse(memory.get(key))
         update({
           token: token.success ? token.data : undefined,
+          hydrated: true,
           storageError:
             "Browser storage is unavailable. Your token will be kept for this session.",
         })
@@ -162,4 +171,22 @@ export function createRwagmiTokenStore(
       invalidate()
     },
   }
+}
+
+const sharedStores = new Map<
+  string,
+  ReturnType<typeof createRwagmiTokenStore>
+>()
+
+/** Share saved-token/check state between the Loop card and its detail dialog. */
+export function getRwagmiTokenStore(wallet?: string) {
+  const key = wallet?.toLowerCase() ?? "disconnected"
+  let store = sharedStores.get(key)
+  if (!store) {
+    store = createRwagmiTokenStore(wallet?.toLowerCase(), {
+      storage: () => window.localStorage,
+    })
+    sharedStores.set(key, store)
+  }
+  return store
 }

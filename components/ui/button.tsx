@@ -21,6 +21,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   disabled?: boolean
   children?: React.ReactNode
   isLoading?: boolean
+  loadingIcon?: React.ReactNode
   icon?: React.ReactNode
   style?: React.CSSProperties
   chainId?: number
@@ -36,6 +37,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       variant = "primary",
       isLoading = false,
+      loadingIcon,
       icon,
       type = "button",
       style,
@@ -107,6 +109,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           disabled={isDisabled}
           style={style}
           aria-disabled={ariaDisabled}
+          aria-busy={isLoading || undefined}
           aria-label={
             ariaLabel ??
             (typeof effectiveButtonLabel === "string"
@@ -114,9 +117,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               : undefined)
           }
         >
-          {isLoading && (
-            <span className="loading loading-spinner loading-sm text-inherit" />
-          )}
+          {isLoading &&
+            (loadingIcon ?? (
+              <span className="loading loading-spinner loading-sm text-inherit" />
+            ))}
           {chainIconSrc && !isLoading ? (
             <Image
               src={chainIconSrc}
