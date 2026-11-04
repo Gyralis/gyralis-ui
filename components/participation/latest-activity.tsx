@@ -12,6 +12,7 @@ import {
   formatTokenAmount,
   TOKEN_AMOUNT_FORMATS,
 } from "@/lib/utils/token-amount"
+import { InfoNotice } from "@/components/ui/info-notice"
 
 import { useCardMotion } from "./card-motion-preview"
 
@@ -75,11 +76,11 @@ export function LatestActivity() {
               </p>
             )}
             {activity.data.items.length === 0 ? (
-              <p className="p-activity-message">
+              <InfoNotice>
                 {activity.data.unavailableChains.length
                   ? "No recent claims found on the available chain."
                   : "No claims in the current or previous period. Your next claim will appear here."}
-              </p>
+              </InfoNotice>
             ) : (
               <>
                 <ul className="p-activity-list">

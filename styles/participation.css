@@ -652,8 +652,8 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 16px;
-  padding: 18px 8px 8px;
+  gap: 12px;
+  padding: 14px 8px 8px;
 }
 .p-loop-title {
   display: flex;
@@ -691,7 +691,7 @@
   justify-content: space-between;
   gap: 10px;
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid #ffffff09;
   font-size: 11px;
   color: var(--p-text-muted);
@@ -836,8 +836,8 @@
 }
 .p-mini-loop-reward {
   display: grid;
-  gap: 6px;
-  padding-top: 16px;
+  gap: 4px;
+  padding-top: 10px;
   margin-top: auto;
 }
 .p-mini-loop-reward > span {
@@ -878,7 +878,7 @@
   left: 52px;
 }
 .p-loop-card-large .p-mini-loop-body {
-  padding: 0 12px 14px;
+  padding: 0 12px 8px;
   text-align: left;
 }
 .p-loop-card-large .p-mini-loop-body h3 {
@@ -911,15 +911,15 @@
 .p-loop-claim-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 4px 12px 10px;
+  gap: 10px;
+  padding: 0 12px 8px;
   margin-top: auto;
 }
 .p-loop-claim-metrics {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  padding-top: 16px;
+  gap: 12px;
+  padding-top: 10px;
   margin: 0;
   border-top: 1px solid #ffffff09;
 }
@@ -931,7 +931,7 @@
   font-size: 11px;
 }
 .p-loop-claim-metrics dd {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   color: var(--p-text-primary);
   font-size: 16px;
   font-weight: 600;
@@ -1323,6 +1323,29 @@
   opacity: 0.5;
   cursor: wait;
 }
+.gyralis-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #82baff1c;
+  border-radius: 12px;
+  background: #4187ba16;
+  color: #bdd2e0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.gyralis-info > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: #8cc8eb;
+}
+.gyralis-info-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .p-activity-message {
   display: grid;
   justify-items: start;
@@ -1552,7 +1575,7 @@
   height: 165px;
 }
 .directory .p-loop-card-body {
-  padding: 22px 12px 12px;
+  padding: 16px 12px 10px;
 }
 .directory .p-loop-title h3 {
   font-size: 17px;
@@ -2316,7 +2339,7 @@
     height: 160px;
   }
   .p-loop-card-body {
-    padding: 18px;
+    padding: 14px;
   }
   .p-loop-title h3 {
     font-size: 16px;
@@ -4359,5 +4382,117 @@
   }
   .s-streaks-shortcut > span:last-child {
     margin-left: 36px;
+  }
+}
+
+/* Explore: Season explanation and actionable discovery. */
+.p-explore-season {
+  padding: 24px;
+}
+.p-explore-season-heading,
+.p-explore-season-entry,
+.p-explore-loop-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.p-explore-season-heading h2 {
+  margin: 6px 0 8px;
+  font-size: clamp(20px, 2.5vw, 28px);
+}
+.p-explore-season-heading p:not(.p-eyebrow),
+.p-explore-sources p,
+.p-explore-season-entry p {
+  color: var(--p-text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.p-explore-season-heading > a {
+  flex-shrink: 0;
+}
+.p-explore-season .p-explore-equation {
+  margin: 22px 0;
+  padding: 16px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  background: hsl(var(--background));
+  font-size: clamp(14px, 1.6vw, 18px);
+  font-weight: 650;
+  line-height: 1.8;
+}
+.p-explore-equation span {
+  color: hsl(var(--primary));
+  display: inline-block;
+}
+.p-explore-sources {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.p-explore-sources > a {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+}
+.p-explore-sources > a > svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: hsl(var(--primary));
+}
+.p-explore-sources h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+.p-explore-sources h3 svg {
+  width: 14px;
+  height: 14px;
+}
+.p-explore-season-entry {
+  margin: 20px 0 10px;
+  padding-top: 18px;
+  border-top: 1px solid hsl(var(--border));
+}
+.p-explore-loop-heading {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.p-explore-loop-heading .p-section-title {
+  margin: 0;
+}
+.p-explore-loop-heading > button {
+  flex-shrink: 0;
+}
+.p-explore-game-status,
+.p-explore-game-progress {
+  display: block;
+  font-size: 11px;
+  color: var(--p-text-muted);
+  margin-top: 8px;
+}
+.p-featured-card .p-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+@media (max-width: 700px) {
+  .p-explore-season {
+    padding: 18px;
+  }
+  .p-explore-season-heading,
+  .p-explore-season-entry,
+  .p-explore-loop-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .p-explore-sources {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
