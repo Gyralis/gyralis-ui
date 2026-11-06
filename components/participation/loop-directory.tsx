@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect } from "react"
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -25,20 +25,12 @@ import {
   formatTokenAmount,
   TOKEN_AMOUNT_FORMATS,
 } from "@/lib/utils/token-amount"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import MagicBento from "@/components/ui/magic-bento"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import LoopCard from "@/components/loops/loop-card"
 
 import { LoopClaimPanel } from "./loop-claim-panel"
 import { LoopStreaks } from "./loop-streaks"
@@ -111,42 +103,50 @@ export function LoopOpportunityCard({
     : `— ${rewardToken}`
 
   if (compact || large) {
+    const heading = (
+      <>
+        <div className="p-loop-art p-mini-loop-art">
+          <Image
+            src={loopArtwork(loop)}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 90vw, 320px"
+            className={loopArtwork(loop).includes("images/") ? "is-orbit" : ""}
+          />
+        </div>
+        <span className="p-mini-loop-logo">
+          <Image src={loopLogo(loop)} alt="" width={36} height={36} />
+        </span>
+        <div className="p-mini-loop-body">
+          <h3>{loop.title}</h3>
+          {!large && (
+            <div className="p-mini-loop-reward" title={rewardDescription}>
+              <span>Daily example / wallet</span>
+              <strong>{rewardAmount}</strong>
+            </div>
+          )}
+        </div>
+      </>
+    )
     return (
       <article
+        id={large ? `loop-card-${loop.id}` : undefined}
         className={`p-loop-card ${
           large ? "p-loop-card-large" : "p-loop-card-compact"
         } p-surface`}
         data-magic-bento-card=""
       >
-        <Link
-          href={`/loops?loop=${loop.id}`}
-          className="p-mini-loop-link"
-          aria-label={`View ${loop.title}`}
-        >
-          <div className="p-loop-art p-mini-loop-art">
-            <Image
-              src={loopArtwork(loop)}
-              alt=""
-              fill
-              sizes="(max-width: 640px) 90vw, 320px"
-              className={
-                loopArtwork(loop).includes("images/") ? "is-orbit" : ""
-              }
-            />
-          </div>
-          <span className="p-mini-loop-logo">
-            <Image src={loopLogo(loop)} alt="" width={36} height={36} />
-          </span>
-          <div className="p-mini-loop-body">
-            <h3>{loop.title}</h3>
-            {!large && (
-              <div className="p-mini-loop-reward" title={rewardDescription}>
-                <span>Daily example / wallet</span>
-                <strong>{rewardAmount}</strong>
-              </div>
-            )}
-          </div>
-        </Link>
+        {large ? (
+          <div className="p-mini-loop-link">{heading}</div>
+        ) : (
+          <Link
+            href={`/loops#loop-card-${loop.id}`}
+            className="p-mini-loop-link"
+            aria-label={`View ${loop.title}`}
+          >
+            {heading}
+          </Link>
+        )}
         {large && <LoopClaimPanel loop={loop} />}
         <LoopAccessHelp loop={loop} />
       </article>
@@ -156,7 +156,7 @@ export function LoopOpportunityCard({
   return (
     <article className="p-loop-card p-surface" data-magic-bento-card="">
       <Link
-        href={`/loops?loop=${loop.id}`}
+        href={`/loops#loop-card-${loop.id}`}
         className="p-loop-art"
         aria-label={`View ${loop.title}`}
       >
@@ -228,7 +228,7 @@ export function LoopOpportunityCard({
           </span>
           <Link
             className="p-button small p-loop-cta"
-            href={`/loops?loop=${loop.id}`}
+            href={`/loops#loop-card-${loop.id}`}
             aria-label={`View ${loop.title}`}
           >
             View Loop <LuArrowRight />
@@ -266,8 +266,8 @@ function LoopAccessHelp({ loop }: { loop: LoopCardData }) {
           <p>Human Passport score: {loop.passportMinScore}+.</p>
         )}
         <p>
-          Connect your wallet on {loop.chainName}, then open the Loop to check
-          your eligibility.
+          Connect your wallet on {loop.chainName}, then use the card’s Register
+          or Claim button to check your eligibility.
         </p>
         {loop.eligibilityUrl && (
           <a
@@ -280,7 +280,7 @@ function LoopAccessHelp({ loop }: { loop: LoopCardData }) {
           </a>
         )}
         <Link
-          href={`/loops?loop=${loop.id}`}
+          href="/eligibilities"
           className="p-button small p-loop-access-check"
         >
           Check eligibility <LuArrowRight aria-hidden="true" />
@@ -297,10 +297,6 @@ function LoopDirectoryContent() {
   const search = useParticipationSearch().toLowerCase()
   const tab = params.get("view") === "streaks" ? "Season streaks" : "Claim"
   const cards = chainId === 1868 ? SoneiumLoopCardsData : LoopCardsData
-  const selectedId = params.get("loop")
-  const selectedLoop = [...LoopCardsData, ...SoneiumLoopCardsData].find(
-    (loop) => String(loop.id) === selectedId
-  )
   const filtered = cards.filter(
     (loop) =>
       !search ||
@@ -308,18 +304,6 @@ function LoopDirectoryContent() {
         .toLowerCase()
         .includes(search)
   )
-  useEffect(() => {
-    const id = window.location.hash.replace("#loop-card-", "")
-    if (/^\d+$/.test(id) && !selectedId)
-      router.replace(`/loops?loop=${id}`, { scroll: false })
-  }, [router, selectedId])
-  function closeLoop() {
-    const next = new URLSearchParams(params.toString())
-    next.delete("loop")
-    router.replace(`/loops${next.size ? `?${next.toString()}` : ""}`, {
-      scroll: false,
-    })
-  }
   return (
     <>
       <PageIntro
@@ -376,45 +360,6 @@ function LoopDirectoryContent() {
           )}
         </>
       )}
-
-      <Dialog
-        open={Boolean(selectedLoop)}
-        onOpenChange={(open) => {
-          if (!open) closeLoop()
-        }}
-      >
-        <DialogContent className="participation-theme participation-dialog p-live-loop-dialog dark">
-          <DialogHeader>
-            <p className="p-eyebrow">
-              <LuShieldCheck /> Live Loop
-            </p>
-            <DialogTitle>{selectedLoop?.title}</DialogTitle>
-            <DialogDescription>
-              Eligibility, amounts, registration, and claims come from the
-              existing live Loop experience.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedLoop && (
-            <LoopCard loop={selectedLoop} onBalanceUpdate={() => {}} />
-          )}
-          {selectedLoop?.address && (
-            <a
-              className="p-text-link"
-              href={`${
-                selectedLoop.chainId === 100
-                  ? "https://gnosisscan.io"
-                  : selectedLoop.chainId === 1868
-                  ? "https://soneium.blockscout.com"
-                  : "https://basescan.org"
-              }/address/${selectedLoop.address}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              View contract <LuExternalLink />
-            </a>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

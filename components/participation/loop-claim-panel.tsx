@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { LoopCardData } from "@/data/loops-data"
 import { useConnectModal } from "@rainbow-me/rainbowkit"
-import { LuCheck, LuClock3, LuWallet } from "react-icons/lu"
+import { LuCheck, LuWallet } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
 import type { DailyRewardEstimate } from "@/lib/loops/daily-reward"
@@ -70,14 +70,19 @@ export function ClaimPanelView({
         ? "Registered"
         : action.label,
   }
-  const showTiming =
-    isConnected && ["entered", "active"].includes(action.status)
+  const waitingForPeriod =
+    !action.isPending && ["entered", "active"].includes(action.status)
   const claimAction =
     action.status === "claimed" ? (
       <ClaimedLoopAction
         timing={timing}
         justClaimed={justClaimed}
         nextPeriod={periodData?.timerTitle === "Accumulation starts in"}
+      />
+    ) : waitingForPeriod ? (
+      <LoopCountdownAction
+        timing={timing}
+        label={periodData?.timerTitle ?? "Claim opens in"}
       />
     ) : (
       <div aria-live="polite" aria-atomic="true">
@@ -144,11 +149,34 @@ export function ClaimPanelView({
           claimAction
         )}
       </div>
-      {showTiming && timing && (
-        <p className="p-loop-claim-timing">
-          {periodData?.timerTitle} {timing}
-        </p>
-      )}
+    </div>
+  )
+}
+
+export function LoopCountdownAction({
+  timing,
+  label,
+}: {
+  timing?: string
+  label: string
+}) {
+  const updating = timing === "00:00:00"
+  return (
+    <div className="p-loop-claim-complete p-loop-claim-waiting">
+      <span className="p-loop-claim-waiting-detail">
+        {updating ? (
+          "Updating Loop…"
+        ) : !timing ? (
+          "Checking time…"
+        ) : (
+          <>
+            {label === "Accumulation starts in" ? "Starts in:" : "Claim in:"}{" "}
+            <span role="timer" aria-live="off">
+              {timing}
+            </span>
+          </>
+        )}
+      </span>
     </div>
   )
 }
@@ -168,19 +196,15 @@ export function ClaimedLoopAction({
     : timing === "00:00:00"
     ? "Updating Loop…"
     : nextPeriod
-    ? "Next period in"
-    : "Next claim in"
+    ? "Next period in:"
+    : "Next claim in:"
 
   return (
     <div className="p-loop-claim-complete">
       <span className="sr-only" role="status">
         Claim confirmed.
       </span>
-      {showConfirmation ? (
-        <LuCheck aria-hidden="true" />
-      ) : (
-        <LuClock3 aria-hidden="true" />
-      )}
+      {showConfirmation && <LuCheck aria-hidden="true" />}
       <span>{label}</span>
       {!showConfirmation && timing !== "00:00:00" && (
         <span role="timer" aria-live="off">

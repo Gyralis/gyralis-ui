@@ -42,7 +42,11 @@ vi.mock("wagmi", () => ({
 vi.mock(
   "@/lib/hooks/loops/standard/use-standard-loop-wallet-registration",
   () => ({
-    useStandardLoopWalletRegistration: () => ({ refetch: mock.refetch }),
+    useStandardLoopWalletRegistration: () => ({
+      refetch: mock.refetch,
+      registeredForNextPeriod: false,
+      isLoading: false,
+    }),
   })
 )
 vi.mock("@/components/ui/use-toast", () => ({
@@ -50,11 +54,13 @@ vi.mock("@/components/ui/use-toast", () => ({
 }))
 
 const onClaimConfirmed = vi.fn()
+const onActionConfirmed = vi.fn()
 
 const transactionHash = `0x${"a".repeat(64)}`
 
 beforeEach(() => {
   onClaimConfirmed.mockClear()
+  onActionConfirmed.mockClear()
   mock.effects = []
   mock.receipt.isSuccess = true
   mock.receipt.data.status = "success"
@@ -74,6 +80,7 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
       currentPeriod: 5n,
       onConfirmed,
       onClaimConfirmed,
+      onActionConfirmed,
     }
     if (kind === "standard") runStandardClaimHook(params)
     else
@@ -95,6 +102,13 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
     "preserves the confirmed %s action and transaction identity",
     async (action) => {
       const onConfirmed = await confirm(action)
+      expect(onActionConfirmed).toHaveBeenCalledWith({
+        action,
+        chainId: 100,
+        transactionHash,
+        blockNumber: 12345n,
+        logs: mock.receipt.data.logs,
+      })
       expect(onClaimConfirmed).toHaveBeenCalledTimes(action === "claim" ? 1 : 0)
       if (action === "claim") {
         expect(onClaimConfirmed).toHaveBeenCalledWith({
@@ -119,11 +133,13 @@ describe.each(["standard", "super"])("%s claim confirmations", (kind) => {
     mock.receipt.data.status = "reverted"
     expect(await confirm("claim")).not.toHaveBeenCalled()
     expect(onClaimConfirmed).not.toHaveBeenCalled()
+    expect(onActionConfirmed).not.toHaveBeenCalled()
   })
 
   it("does not notify before receipt confirmation", async () => {
     mock.receipt.isSuccess = false
     expect(await confirm("claim")).not.toHaveBeenCalled()
     expect(onClaimConfirmed).not.toHaveBeenCalled()
+    expect(onActionConfirmed).not.toHaveBeenCalled()
   })
 })

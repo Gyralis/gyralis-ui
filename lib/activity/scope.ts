@@ -12,14 +12,22 @@ export function normalizeActivityScope(scope: readonly ActivityLoopScope[]) {
           ...(entry.period == null ? {} : { period: entry.period }),
         }
         return [
-          `${normalized.chainId}:${normalized.loopAddress}`,
+          `${normalized.chainId}:${normalized.loopAddress}:${
+            normalized.period ?? ""
+          }`,
           normalized,
         ] as const
       })
     ).values(),
   ].sort(
     (a, b) =>
-      a.chainId - b.chainId || a.loopAddress.localeCompare(b.loopAddress)
+      a.chainId - b.chainId ||
+      a.loopAddress.localeCompare(b.loopAddress) ||
+      (BigInt(a.period ?? "0") < BigInt(b.period ?? "0")
+        ? -1
+        : BigInt(a.period ?? "0") > BigInt(b.period ?? "0")
+        ? 1
+        : 0)
   )
 }
 
@@ -32,7 +40,7 @@ export function parseActivityScope(
 ): ActivityLoopScope[] | undefined {
   if (value == null) return undefined
   const parts = value.split(",")
-  if (!value || parts.length > LoopCardsData.length)
+  if (!value || parts.length > LoopCardsData.length * 3)
     throw new Error("Invalid activity scope")
   return normalizeActivityScope(
     parts.map((part) => {

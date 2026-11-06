@@ -13,6 +13,7 @@ import type {
   ActivityLoopScope,
   ClaimActivityItem,
   LatestActivityData,
+  RegistrationActivityItem,
 } from "./types"
 
 interface ClaimEvent {
@@ -75,11 +76,20 @@ export async function getLatestActivity(
         )
         if (!period) throw new Error("Activity period unavailable")
         const current = BigInt(period.currentPeriod)
-        const confirmedPeriod = scope?.find(
-          (entry) =>
-            entry.chainId === loop.chainId &&
-            entry.loopAddress.toLowerCase() === loop.address!.toLowerCase()
-        )?.period
+        const confirmedPeriods =
+          scope
+            ?.filter(
+              (entry) =>
+                entry.chainId === loop.chainId &&
+                entry.loopAddress.toLowerCase() === loop.address!.toLowerCase()
+            )
+            .flatMap((entry) => (entry.period == null ? [] : [entry.period])) ??
+          []
+        const confirmedPeriod = confirmedPeriods.reduce<string | undefined>(
+          (latest, period) =>
+            latest == null || BigInt(period) > BigInt(latest) ? period : latest,
+          undefined
+        )
         return {
           loop,
           // Base subgraph IDs are contract addresses, independently of UI/scoring IDs.
@@ -89,6 +99,13 @@ export async function getLatestActivity(
               : loop.address!.toLowerCase(),
           current,
           confirmedPeriod,
+          registrationPeriods: [
+            ...new Set([
+              current.toString(),
+              (current + 1n).toString(),
+              ...confirmedPeriods.filter((period) => BigInt(period) >= current),
+            ]),
+          ],
           periods: [
             ...new Set([
               ...(current > 0n
@@ -105,14 +122,23 @@ export async function getLatestActivity(
         cache: "no-store",
         signal: AbortSignal.timeout(10_000),
         body: JSON.stringify({
-          query: `query LatestActivity($windows: [ClaimEvent_filter!]!) {
+          query: `query LatestActivity($windows: [ClaimEvent_filter!]!, $registrationWindows: [RegisterEvent_filter!]!) {
           _meta { block { number } hasIndexingErrors }
           claimEvents(first: 1000, orderBy: timestamp, orderDirection: desc,
             where: { or: $windows }) {
             id periodNumber payout timestamp txHash blockNumber loop { id }
           }
+          registerEvents(first: 1000, orderBy: timestamp, orderDirection: desc,
+            where: { or: $registrationWindows }) {
+            id periodNumber timestamp txHash blockNumber loop { id }
+          }
         }`,
           variables: {
+            registrationWindows: windows.map((window) => ({
+              account: wallet,
+              loop: window.id,
+              periodNumber_in: window.registrationPeriods,
+            })),
             windows: windows.map((window) => ({
               account: wallet,
               loop: window.id,
@@ -126,6 +152,7 @@ export async function getLatestActivity(
         data?: {
           _meta: { block: { number: number }; hasIndexingErrors: boolean }
           claimEvents: ClaimEvent[]
+          registerEvents?: Omit<ClaimEvent, "payout">[]
         }
         errors?: unknown[]
       }
@@ -134,6 +161,7 @@ export async function getLatestActivity(
         !payload.data ||
         payload.data._meta.hasIndexingErrors ||
         payload.data.claimEvents.length >= 1000 ||
+        (payload.data.registerEvents?.length ?? 0) >= 1000 ||
         !Number.isSafeInteger(payload.data._meta.block?.number) ||
         payload.data._meta.block.number < 0
       ) {
@@ -196,8 +224,45 @@ export async function getLatestActivity(
             } satisfies ClaimActivityItem,
           }))
       })
+      const registrations = windows.flatMap((window) => {
+        const meta = loopDashboardMeta[window.loop.historyLoopKey!]
+        return (payload.data!.registerEvents ?? [])
+          .filter(
+            (event) =>
+              event.loop.id.toLowerCase() === window.id &&
+              window.registrationPeriods.includes(event.periodNumber)
+          )
+          .map((event) => ({
+            item: {
+              kind: "registration",
+              id: `${source.chain.id}:${event.id}`,
+              chainId: source.chain.id,
+              chainName: source.chain.name,
+              loopName: meta.title,
+              logoSrc: meta.logoSrc,
+              period: event.periodNumber,
+              periodKind:
+                BigInt(event.periodNumber) > window.current
+                  ? "next"
+                  : "current",
+              timestamp: Number(event.timestamp),
+              transactionUrl: `${source.chain.blockExplorers.default.url}/tx/${event.txHash}`,
+              loopAddress: window.loop.address!.toLowerCase(),
+              transactionHash: event.txHash.toLowerCase(),
+              logIndex:
+                event.id
+                  .toLowerCase()
+                  .startsWith(`${event.txHash.toLowerCase()}-`) &&
+                /^\d+$/.test(event.id.split("-").at(-1) ?? "")
+                  ? Number(event.id.split("-").at(-1))
+                  : undefined,
+              blockNumber: Number(event.blockNumber),
+              source: "indexed",
+            } satisfies RegistrationActivityItem,
+          }))
+      })
       return {
-        claims,
+        claims: [...claims, ...registrations],
         coverage: windows.map((window) => ({
           chainId: source.chain.id,
           loopAddress: window.loop.address!.toLowerCase(),

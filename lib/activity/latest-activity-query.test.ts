@@ -6,14 +6,20 @@ import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmatio
 
 import { mergeActivitySnapshot } from "./activity-data"
 import { confirmedClaimActivity } from "./confirmed-claims"
+import { confirmedRegistrationActivity } from "./confirmed-registrations"
 import {
   fetchLatestActivity,
   latestActivityKey,
   latestActivityQueryOptions,
+  refreshLatestActivityAfterAction,
   refreshLatestActivityAfterClaim,
 } from "./latest-activity-query"
 import { parseActivityScope } from "./scope"
-import type { ClaimActivityItem, LatestActivityData } from "./types"
+import type {
+  ActivityItem,
+  ClaimActivityItem,
+  LatestActivityData,
+} from "./types"
 
 const wallet = "0xe9dc34b67006db0910a9761cb031d4bde67dce23"
 const otherWallet = "0x1111111111111111111111111111111111111111"
@@ -52,6 +58,30 @@ function receipt(
   }
 }
 
+function registrationReceipt(withClaim = false): LoopActionConfirmation {
+  const claim = receipt()
+  const registerEvent = parseAbiItem(
+    "event Register(address indexed sender,uint256 indexed periodNumber)"
+  )
+  return {
+    ...claim,
+    action: withClaim ? "claim" : "enter",
+    logs: [
+      ...(withClaim ? claim.logs! : []),
+      {
+        address: hive,
+        logIndex: 4,
+        topics: encodeEventTopics({
+          abi: [registerEvent],
+          eventName: "Register",
+          args: { sender: wallet as `0x${string}`, periodNumber: 12n },
+        }) as `0x${string}`[],
+        data: "0x",
+      },
+    ],
+  }
+}
+
 function indexed(confirmation = receipt()): ClaimActivityItem {
   return {
     ...confirmedClaimActivity(confirmation)[0].item,
@@ -60,10 +90,7 @@ function indexed(confirmation = receipt()): ClaimActivityItem {
   }
 }
 
-function snapshot(
-  items: ClaimActivityItem[] = [],
-  block = 100
-): LatestActivityData {
+function snapshot(items: ActivityItem[] = [], block = 100): LatestActivityData {
   return {
     address: wallet,
     items,
@@ -98,6 +125,91 @@ afterEach(() => {
 })
 
 describe("event-driven latest activity", () => {
+  it.each([false, true])(
+    "reconciles registration receipts withClaim=%s without losing claim rows",
+    async (withClaim) => {
+      const confirmation = registrationReceipt(withClaim)
+      const registered = confirmedRegistrationActivity(confirmation)[0].item
+      const indexedItems: ActivityItem[] = [
+        { ...registered, source: "indexed" },
+        ...(withClaim
+          ? [{ ...indexed(confirmation), kind: "claim" as const }]
+          : []),
+      ]
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(Response.json(snapshot(indexedItems, 200)))
+      )
+      const work = refreshLatestActivityAfterAction(client, confirmation)
+      const immediate = client.getQueryData<LatestActivityData>(
+        latestActivityKey(wallet)
+      )!
+      expect(
+        immediate.items.find((item) => item.kind === "registration")
+      ).toMatchObject({ period: "12", source: "receipt" })
+      expect(immediate.items).toHaveLength(withClaim ? 2 : 1)
+      expect(immediate.totals).toHaveLength(withClaim ? 1 : 0)
+      await vi.advanceTimersByTimeAsync(250)
+      await work
+      expect(fetch).toHaveBeenCalledTimes(1)
+      const url = new URL(
+        vi.mocked(fetch).mock.calls[0][0] as string,
+        "https://app.test"
+      )
+      const scope = parseActivityScope(url.searchParams.get("scope"))!
+      expect(scope.map((entry) => entry.period)).toEqual(
+        withClaim ? ["11", "12"] : ["12"]
+      )
+      const result = client.getQueryData<LatestActivityData>(
+        latestActivityKey(wallet)
+      )!
+      expect(result.items).toHaveLength(withClaim ? 2 : 1)
+      expect(result.items.every((item) => item.source === "indexed")).toBe(true)
+      expect(result.indexingStatus).toBeUndefined()
+      await vi.advanceTimersByTimeAsync(120_000)
+      expect(fetch).toHaveBeenCalledTimes(1)
+    }
+  )
+
+  it("decodes the token-indexed registration version and ignores unrelated contracts", () => {
+    const event = parseAbiItem(
+      "event Register(address indexed sender,address indexed token,uint256 indexed periodNumber)"
+    )
+    const confirmation: LoopActionConfirmation = {
+      ...registrationReceipt(),
+      chainId: 8453,
+      logs: [
+        {
+          address: rwagmi,
+          logIndex: 2,
+          data: "0x",
+          topics: encodeEventTopics({
+            abi: [event],
+            eventName: "Register",
+            args: { sender: wallet, token: otherWallet, periodNumber: 22n },
+          }) as `0x${string}`[],
+        },
+      ],
+    }
+    expect(confirmedRegistrationActivity(confirmation)).toMatchObject([
+      {
+        wallet,
+        item: {
+          kind: "registration",
+          period: "22",
+          loopAddress: rwagmi,
+          chainId: 8453,
+        },
+      },
+    ])
+    expect(
+      confirmedRegistrationActivity({
+        ...confirmation,
+        logs: [{ ...confirmation.logs![0], address: otherWallet }],
+      })
+    ).toEqual([])
+  })
+
   it("adds a receipt immediately, fetches its scope once and stops after indexing", async () => {
     vi.stubGlobal(
       "fetch",
@@ -246,7 +358,7 @@ describe("event-driven latest activity", () => {
     await work
   })
 
-  it("does not fetch or add activity for entries or unrelated receipt logs", async () => {
+  it("does not invent registrations from entries without registration logs", async () => {
     vi.stubGlobal("fetch", vi.fn())
     await refreshLatestActivityAfterClaim(client, {
       ...receipt(),

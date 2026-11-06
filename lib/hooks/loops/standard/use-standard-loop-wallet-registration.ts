@@ -19,32 +19,35 @@ export function useStandardLoopWalletRegistration({
   enabled = true,
   user,
 }: UseStandardLoopWalletRegistrationParams) {
-  const fetchRegistrationStatus = useCallback(async () => {
-    if (!user || currentPeriod == null) {
-      throw new Error("Wallet registration is not ready")
-    }
+  const fetchRegistrationStatus = useCallback(
+    async ({ signal }: { signal: AbortSignal }) => {
+      if (!user || currentPeriod == null) {
+        throw new Error("Wallet registration is not ready")
+      }
 
-    const params = new URLSearchParams({
-      chainId: chainId.toString(),
-      loopAddress: address,
-      periodNumber: (currentPeriod + 1n).toString(),
-      userAddress: user,
-    })
-    const response = await fetch(
-      `/api/loops/registration-status?${params.toString()}`,
-      { cache: "no-store" }
-    )
-    const payload = (await response.json()) as {
-      error?: string
-      result?: { registered?: boolean }
-      success?: boolean
-    }
-    if (!response.ok || !payload.success || !payload.result) {
-      throw new Error(payload.error ?? "Registration status lookup failed")
-    }
+      const params = new URLSearchParams({
+        chainId: chainId.toString(),
+        loopAddress: address,
+        periodNumber: (currentPeriod + 1n).toString(),
+        userAddress: user,
+      })
+      const response = await fetch(
+        `/api/loops/registration-status?${params.toString()}`,
+        { cache: "no-store", signal }
+      )
+      const payload = (await response.json()) as {
+        error?: string
+        result?: { registered?: boolean }
+        success?: boolean
+      }
+      if (!response.ok || !payload.success || !payload.result) {
+        throw new Error(payload.error ?? "Registration status lookup failed")
+      }
 
-    return Boolean(payload.result.registered)
-  }, [address, chainId, currentPeriod, user])
+      return Boolean(payload.result.registered)
+    },
+    [address, chainId, currentPeriod, user]
+  )
   const query = useQuery({
     queryKey: [
       "standard-loop",
@@ -61,8 +64,9 @@ export function useStandardLoopWalletRegistration({
       Boolean(user) &&
       currentPeriod != null &&
       currentPeriod > 0n,
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
+    // A proven registration cannot become false within this wallet/Loop/period.
+    staleTime: (query) => (query.state.data === true ? Infinity : 10_000),
+    refetchOnWindowFocus: true,
     retry: 1,
   })
 

@@ -1073,6 +1073,18 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.p-loop-claim-complete.p-loop-claim-waiting {
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+}
+.p-loop-claim-waiting-detail {
+  max-width: 100%;
+  color: var(--p-text-muted);
+  font-size: inherit;
+  line-height: 1.4;
+}
 .p-loop-claim-timing {
   color: var(--p-text-muted);
   font-size: 11px;
@@ -1097,9 +1109,14 @@
   background: #153126;
   color: #9bf4c6;
 }
-[data-claim-motion] .p-activity-new-claim {
-  animation: loop-claim-arrive 0.3s ease-out both,
-    loop-claim-highlight 5s ease-out both;
+[data-claim-motion] .p-activity-list > li {
+  animation: loop-claim-arrive 0.32s cubic-bezier(0.22, 1, 0.36, 1)
+    var(--activity-delay, 0ms) both;
+}
+[data-claim-motion] .p-activity-list > .p-activity-new-claim {
+  animation: loop-claim-arrive 0.32s cubic-bezier(0.22, 1, 0.36, 1)
+      var(--activity-delay, 0ms) both,
+    loop-claim-highlight 5s ease-out var(--activity-delay, 0ms) both;
 }
 @keyframes loop-claim-turn {
   to {
@@ -1126,7 +1143,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .loop-loading-icon[data-animated],
-  [data-claim-motion] .p-activity-new-claim {
+  [data-claim-motion] .p-activity-list > li,
+  [data-claim-motion] .p-activity-list > .p-activity-new-claim {
     animation: none;
   }
 }
@@ -1424,16 +1442,31 @@
   color: var(--p-text-muted);
   font-size: 10px;
 }
-.p-activity-amount {
+.p-activity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
-  max-width: 105px;
-  color: #bbd9ed;
+  max-width: 150px;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: 22px;
   font-size: 10px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   line-height: 1.5;
   overflow-wrap: anywhere;
-  text-align: right;
+  text-align: center;
+}
+.p-activity-registration {
+  border-color: #8cc8eb33;
+  background: #4187ba16;
+  color: #8cc8eb;
+}
+.p-activity-amount {
+  border-color: #1ce78333;
+  background: #1ce78312;
+  color: #1ce783;
 }
 .p-rail-activity .p-section-title h2 {
   font-size: 16px;

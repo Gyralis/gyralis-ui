@@ -2,28 +2,38 @@ import { formatUnits, parseUnits } from "viem"
 import { z } from "zod"
 
 import { activityScopeKey } from "./scope"
-import type { ClaimActivityItem, LatestActivityData } from "./types"
+import type { ActivityItem, LatestActivityData } from "./types"
 
-const itemSchema = z.object({
+const itemBaseSchema = z.object({
   id: z.string(),
   chainId: z.number().int(),
   chainName: z.string(),
   loopName: z.string(),
   logoSrc: z.string(),
   period: z.string().regex(/^\d+$/),
-  periodKind: z.enum(["current", "previous"]),
-  amount: z.string().regex(/^\d+(\.\d+)?$/),
-  tokenSymbol: z.string(),
   timestamp: z.number().nonnegative(),
   transactionUrl: z.string(),
   loopAddress: z.string().optional(),
   transactionHash: z.string().optional(),
   logIndex: z.number().int().nonnegative().optional(),
   blockNumber: z.number().int().nonnegative().safe().optional(),
-  tokenAddress: z.string().optional(),
-  tokenDecimals: z.number().int().min(0).max(255).optional(),
   source: z.enum(["receipt", "indexed"]).optional(),
 })
+
+const itemSchema = z.union([
+  itemBaseSchema.extend({
+    kind: z.literal("claim").optional(),
+    periodKind: z.enum(["current", "previous"]),
+    amount: z.string().regex(/^\d+(\.\d+)?$/),
+    tokenSymbol: z.string(),
+    tokenAddress: z.string().optional(),
+    tokenDecimals: z.number().int().min(0).max(255).optional(),
+  }),
+  itemBaseSchema.extend({
+    kind: z.literal("registration"),
+    periodKind: z.enum(["current", "next"]),
+  }),
+])
 
 export const latestActivitySchema = z.object({
   address: z.string(),
@@ -50,24 +60,49 @@ export const latestActivitySchema = z.object({
     .optional(),
 })
 
-export function activityEventKey(item: ClaimActivityItem) {
+export function activityEventKey(item: ActivityItem) {
   return item.transactionHash && item.logIndex != null
     ? `${item.chainId}:${item.transactionHash.toLowerCase()}-${item.logIndex}`
     : item.id.toLowerCase()
 }
 
-function itemScope(item: ClaimActivityItem) {
+/** Claim-and-register is one visible action; retain the underlying events. */
+export function visibleActivityItems(items: readonly ActivityItem[]) {
+  const actionKey = (item: ActivityItem) => {
+    const hash =
+      item.transactionHash?.toLowerCase() ??
+      item.transactionUrl.match(/\/tx\/(0x[a-f0-9]+)/i)?.[1].toLowerCase()
+    return hash
+      ? `${item.chainId}:${
+          item.loopAddress?.toLowerCase() ?? item.loopName
+        }:${hash}`
+      : undefined
+  }
+  const claims = new Set(
+    items
+      .filter((item) => item.kind !== "registration")
+      .map(actionKey)
+      .filter((key) => key != null)
+  )
+  return items.filter((item) => {
+    const key = actionKey(item)
+    return item.kind !== "registration" || key == null || !claims.has(key)
+  })
+}
+
+function itemScope(item: ActivityItem) {
   return item.loopAddress
     ? activityScopeKey({ chainId: item.chainId, loopAddress: item.loopAddress })
     : undefined
 }
 
-export function activityTotals(items: ClaimActivityItem[]) {
+export function activityTotals(items: ActivityItem[]) {
   const groups = new Map<
     string,
     { chainId: number; tokenSymbol: string; decimals: number; raw: bigint }
   >()
   for (const item of items) {
+    if (item.kind === "registration") continue
     const decimals = item.tokenDecimals ?? 18
     const key = `${item.chainId}:${
       item.tokenAddress ?? item.tokenSymbol
@@ -120,7 +155,8 @@ export function mergeActivitySnapshot(
       !snapshot ||
       item.blockNumber == null ||
       snapshot.indexedBlock < item.blockNumber ||
-      BigInt(snapshot.currentPeriod) <= BigInt(item.period) + 1n
+      BigInt(snapshot.currentPeriod) <=
+        BigInt(item.period) + (item.kind === "registration" ? 0n : 1n)
     )
   })
   const byEvent = new Map(
@@ -146,6 +182,7 @@ export function mergeActivitySnapshot(
   }
   const latestPeriod = new Map<string, bigint>()
   for (const item of byEvent.values()) {
+    if (item.kind === "registration") continue
     const key = itemScope(item)
     if (key)
       latestPeriod.set(
@@ -158,6 +195,7 @@ export function mergeActivitySnapshot(
   const items = [...byEvent.values()]
     .filter(
       (item) =>
+        item.kind === "registration" ||
         !itemScope(item) ||
         BigInt(item.period) === latestPeriod.get(itemScope(item)!)
     )

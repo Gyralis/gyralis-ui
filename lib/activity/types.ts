@@ -1,23 +1,38 @@
-export interface ClaimActivityItem {
+interface ActivityItemBase {
   id: string
   chainId: number
   chainName: string
   loopName: string
   logoSrc: string
   period: string
-  periodKind: "current" | "previous"
-  amount: string
-  tokenSymbol: string
   timestamp: number
   transactionUrl: string
   loopAddress?: string
   transactionHash?: string
   logIndex?: number
   blockNumber?: number
-  tokenAddress?: string
-  tokenDecimals?: number
   source?: "receipt" | "indexed"
 }
+
+export interface ClaimActivityItem extends ActivityItemBase {
+  kind?: "claim"
+  periodKind: "current" | "previous"
+  amount: string
+  tokenSymbol: string
+  tokenAddress?: string
+  tokenDecimals?: number
+}
+
+export interface RegistrationActivityItem extends ActivityItemBase {
+  kind: "registration"
+  periodKind: "current" | "next"
+  amount?: never
+  tokenSymbol?: never
+  tokenAddress?: never
+  tokenDecimals?: never
+}
+
+export type ActivityItem = ClaimActivityItem | RegistrationActivityItem
 
 export interface ActivityLoopScope {
   chainId: number
@@ -33,7 +48,7 @@ export interface ActivityCoverage extends ActivityLoopScope {
 
 export interface LatestActivityData {
   address: string
-  items: ClaimActivityItem[]
+  items: ActivityItem[]
   totals: { chainId: number; tokenSymbol: string; amount: string }[]
   unavailableChains: string[]
   fetchedAt: string

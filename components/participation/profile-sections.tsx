@@ -168,7 +168,7 @@ export function ProfileSections({
               { id: 4, title: "Blockscout Merits", streak: "5-claim streak" },
               { id: 6, title: "True Loopers", streak: "3-claim streak" },
             ].map((loop) => (
-              <Link key={loop.id} href={`/loops?loop=${loop.id}`}>
+              <Link key={loop.id} href={`/loops#loop-card-${loop.id}`}>
                 <span>
                   <strong>{loop.title}</strong>
                   <small>{loop.streak}</small>

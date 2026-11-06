@@ -4,6 +4,7 @@ import type { LoopActionConfirmation } from "@/lib/loops/loop-action-confirmatio
 
 import { latestActivitySchema, mergeActivitySnapshot } from "./activity-data"
 import { confirmedClaimActivity } from "./confirmed-claims"
+import { confirmedRegistrationActivity } from "./confirmed-registrations"
 import { activityScopeKey, normalizeActivityScope } from "./scope"
 import type { ActivityLoopScope, LatestActivityData } from "./types"
 
@@ -171,12 +172,15 @@ export function reconcileLatestActivity(
   return work
 }
 
-export function refreshLatestActivityAfterClaim(
+export async function refreshLatestActivityAfterAction(
   client: QueryClient,
   confirmation: LoopActionConfirmation,
   decimals?: number
 ) {
-  const claims = confirmedClaimActivity(confirmation, decimals)
+  const claims = [
+    ...confirmedClaimActivity(confirmation, decimals),
+    ...confirmedRegistrationActivity(confirmation),
+  ]
   const wallets = new Set<string>()
   for (const { wallet, item } of claims) {
     wallets.add(wallet)
@@ -198,7 +202,9 @@ export function refreshLatestActivityAfterClaim(
       previous ? undefined : { updatedAt: 0 }
     )
   }
-  return Promise.all(
+  await Promise.all(
     [...wallets].map((wallet) => reconcileLatestActivity(client, wallet))
   )
 }
+
+export const refreshLatestActivityAfterClaim = refreshLatestActivityAfterAction

@@ -10,6 +10,7 @@ import {
   ClaimedLoopAction,
   ClaimPanelView,
   LoopClaimPanel,
+  LoopCountdownAction,
 } from "./loop-claim-panel"
 
 const mocks = vi.hoisted(() => ({
@@ -130,7 +131,6 @@ describe("live Loop claim panel", () => {
 
   it.each([
     ["enter", "Register", false, false],
-    ["entered", "Registered", true, false],
     ["claiming", "Confirming claim...", true, true],
   ] as const)(
     "preserves %s action availability",
@@ -195,6 +195,38 @@ describe("live Loop claim panel", () => {
 })
 
 describe("claimed Loop countdown", () => {
+  it("embeds registered countdowns in the same action surface as claimed countdowns", () => {
+    const html = renderToStaticMarkup(
+      <LoopCountdownAction timing="06:24:18" label="Claim opens in" />
+    )
+    expect(html).toContain("p-loop-claim-waiting")
+    expect(html).not.toContain("You’re in the Loop")
+    expect(html).toContain("Claim in:")
+    expect(html).not.toContain("Claim opens in")
+    expect(html).toContain('role="timer" aria-live="off">06:24:18')
+    expect(html).not.toContain("Claim confirmed")
+    expect(html).not.toContain("<button")
+  })
+
+  it("keeps the registered state non-clickable even while timing loads", () => {
+    const html = renderToStaticMarkup(
+      <ClaimPanelView
+        loop={standardLoop}
+        {...controller}
+        action={{
+          ...action,
+          status: "entered",
+          label: "Registered",
+          disabled: true,
+        }}
+      />
+    )
+    expect(html).toContain("Checking time…")
+    expect(html).toContain("p-loop-claim-waiting")
+    expect(html).not.toContain("p-loop-claim-timing")
+    expect(html).not.toContain("<button")
+  })
+
   it("briefly shows confirmation before the countdown", () => {
     const html = renderToStaticMarkup(
       <ClaimedLoopAction timing="06:24:18" justClaimed />
@@ -207,7 +239,7 @@ describe("claimed Loop countdown", () => {
     const html = renderToStaticMarkup(
       <ClaimedLoopAction timing="06:24:18" justClaimed={false} />
     )
-    expect(html).toContain("Next claim in")
+    expect(html).toContain("Next claim in:")
     expect(html).toContain('role="timer" aria-live="off">06:24:18')
     expect(html).not.toContain("<button")
   })
@@ -216,7 +248,7 @@ describe("claimed Loop countdown", () => {
     const html = renderToStaticMarkup(
       <ClaimedLoopAction timing="06:24:18" justClaimed={false} nextPeriod />
     )
-    expect(html).toContain("Next period in")
+    expect(html).toContain("Next period in:")
     expect(html).not.toContain("Next claim in")
   })
 

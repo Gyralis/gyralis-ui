@@ -64,8 +64,8 @@ afterEach(() => {
 describe("latest activity panel", () => {
   it("shows compact claims with actual amounts and transaction links", () => {
     const html = renderToStaticMarkup(<LatestActivity />)
-    expect(html).toContain("Latest Claims")
-    expect(html).toContain("+601.035 RWAGMI</span>")
+    expect(html).toContain("Latest Activity")
+    expect(html).toContain("Claimed: 601.035 RWAGMI</span>")
     expect(html).toContain("RWAGMI Token Launcher")
     expect(html).not.toContain("Current period, or previous if unclaimed")
     expect(html).not.toContain("Claimed in shown periods")
@@ -81,6 +81,93 @@ describe("latest activity panel", () => {
         refetchOnWindowFocus: true,
       })
     )
+  })
+
+  it("shows registrations beside claims without a reward amount", () => {
+    const {
+      amount: _amount,
+      tokenSymbol: _symbol,
+      ...base
+    } = snapshot.items[0] as import("@/lib/activity/types").ClaimActivityItem
+    mocks.useQuery.mockReturnValue({
+      data: {
+        ...snapshot,
+        items: [
+          ...snapshot.items,
+          {
+            ...base,
+            id: "registration-1",
+            transactionUrl: "https://basescan.org/tx/0x456",
+            kind: "registration",
+            period: "21",
+            periodKind: "next",
+            source: "receipt",
+          },
+        ],
+      },
+    })
+    const html = renderToStaticMarkup(<LatestActivity />)
+    expect(html).toContain("Latest Activity")
+    expect(html).toContain('p-activity-registration">Registered</span>')
+    expect(html).not.toContain("Period 21")
+    expect(html).toContain("registered. View transaction")
+    expect(html).toContain("Registration confirmed for RWAGMI Token Launcher")
+    expect(html.match(/Claimed: 601.035 RWAGMI/g)).toHaveLength(1)
+    expect(html.match(/p-latest-activity-row/g)).toHaveLength(2)
+  })
+
+  it("shows only the claim when the same transaction registers the next period", () => {
+    const {
+      amount: _amount,
+      tokenSymbol: _symbol,
+      ...base
+    } = snapshot.items[0] as import("@/lib/activity/types").ClaimActivityItem
+    mocks.useQuery.mockReturnValue({
+      data: {
+        ...snapshot,
+        items: [
+          ...snapshot.items,
+          {
+            ...base,
+            id: "registration-combined",
+            kind: "registration",
+            period: "21",
+            periodKind: "next",
+          },
+        ],
+      },
+    })
+    const html = renderToStaticMarkup(<LatestActivity />)
+    expect(html.match(/p-latest-activity-row/g)).toHaveLength(1)
+    expect(html).toContain("Claimed: 601.035 RWAGMI")
+    expect(html).not.toContain("p-activity-registration")
+  })
+
+  it("does not hide another Loop's registration in the same transaction", () => {
+    const {
+      amount: _amount,
+      tokenSymbol: _symbol,
+      ...base
+    } = snapshot.items[0] as import("@/lib/activity/types").ClaimActivityItem
+    mocks.useQuery.mockReturnValue({
+      data: {
+        ...snapshot,
+        items: [
+          ...snapshot.items,
+          {
+            ...base,
+            loopName: "Another Loop",
+            id: "registration-other",
+            kind: "registration",
+            period: "21",
+            periodKind: "next",
+          },
+        ],
+      },
+    })
+    const html = renderToStaticMarkup(<LatestActivity />)
+    expect(html.match(/p-latest-activity-row/g)).toHaveLength(2)
+    expect(html).toContain('p-activity-registration">Registered</span>')
   })
 
   it("uses the viewed profile instead of the connected wallet", () => {
@@ -108,7 +195,7 @@ describe("latest activity panel", () => {
     })
     const html = renderToStaticMarkup(<LatestActivity />)
     expect(html).toContain("Base activity is temporarily unavailable")
-    expect(html).toContain("No recent claims found on the available chain")
+    expect(html).toContain("No recent activity found on the available chain")
   })
 
   it("keeps confirmed rows visible while indexing is delayed", () => {
@@ -118,7 +205,7 @@ describe("latest activity panel", () => {
     })
     const html = renderToStaticMarkup(<LatestActivity />)
     expect(html).not.toContain("History update delayed")
-    expect(html).toContain("+601.035 RWAGMI")
+    expect(html).toContain("Claimed: 601.035 RWAGMI")
     expect(html).toContain("Showing the last update.")
   })
 

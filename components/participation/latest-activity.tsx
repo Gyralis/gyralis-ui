@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
@@ -7,6 +8,7 @@ import { LuCheck, LuRefreshCw } from "react-icons/lu"
 import { isAddress } from "viem"
 import { useAccount } from "wagmi"
 
+import { visibleActivityItems } from "@/lib/activity/activity-data"
 import { latestActivityQueryOptions } from "@/lib/activity/latest-activity-query"
 import {
   formatTokenAmount,
@@ -29,6 +31,7 @@ export function LatestActivity() {
   )?.toLowerCase()
   const activity = useQuery(latestActivityQueryOptions(wallet))
   const motion = useCardMotion()
+  const items = visibleActivityItems(activity.data?.items ?? [])
   // Personal activity belongs to a connected wallet or an explicitly viewed profile.
   if (!wallet) return null
   return (
@@ -41,13 +44,13 @@ export function LatestActivity() {
       }
     >
       <div className="p-section-title">
-        <h2 id="latest-activity-title">Latest Claims</h2>
+        <h2 id="latest-activity-title">Latest Activity</h2>
         {wallet && (
           <button
             type="button"
             className="p-icon-button"
-            aria-label="Refresh latest claims"
-            title="Refresh claims"
+            aria-label="Refresh latest activity"
+            title="Refresh activity"
             disabled={activity.isFetching}
             onClick={() => void activity.refetch()}
           >
@@ -58,12 +61,12 @@ export function LatestActivity() {
       <>
         {activity.isPending && (
           <p className="p-activity-message" role="status">
-            Loading your claims…
+            Loading your activity…
           </p>
         )}
         {activity.isError && (
           <p className="p-activity-warning" role="status">
-            Couldn’t refresh claims.{" "}
+            Couldn’t refresh activity.{" "}
             {activity.data ? "Showing the last update." : "Try refreshing."}
           </p>
         )}
@@ -75,18 +78,23 @@ export function LatestActivity() {
                 temporarily unavailable.
               </p>
             )}
-            {activity.data.items.length === 0 ? (
+            {items.length === 0 ? (
               <InfoNotice>
                 {activity.data.unavailableChains.length
-                  ? "No recent claims found on the available chain."
-                  : "No claims in the current or previous period. Your next claim will appear here."}
+                  ? "No recent activity found on the available chain."
+                  : "No recent activity. Your registrations and claims will appear here."}
               </InfoNotice>
             ) : (
               <>
                 <ul className="p-activity-list">
-                  {activity.data.items.map((item) => (
+                  {items.map((item, index) => (
                     <li
                       key={item.id}
+                      style={
+                        {
+                          "--activity-delay": `${Math.min(index, 6) * 45}ms`,
+                        } as CSSProperties
+                      }
                       className={
                         item.source === "receipt"
                           ? "p-activity-new-claim"
@@ -95,12 +103,18 @@ export function LatestActivity() {
                     >
                       {item.source === "receipt" && (
                         <span className="sr-only" role="status">
-                          Claim confirmed for {item.loopName}.{" "}
-                          {formatTokenAmount(
-                            item.amount,
-                            TOKEN_AMOUNT_FORMATS.claim
-                          )}{" "}
-                          {item.tokenSymbol} received.
+                          {item.kind === "registration" ? (
+                            `Registration confirmed for ${item.loopName}.`
+                          ) : (
+                            <>
+                              Claim confirmed for {item.loopName}.{" "}
+                              {formatTokenAmount(
+                                item.amount,
+                                TOKEN_AMOUNT_FORMATS.claim
+                              )}{" "}
+                              {item.tokenSymbol} received.
+                            </>
+                          )}
                         </span>
                       )}
                       <a
@@ -108,7 +122,11 @@ export function LatestActivity() {
                         href={item.transactionUrl}
                         target="_blank"
                         rel="noreferrer"
-                        aria-label={`${item.loopName}: claimed ${item.amount} ${item.tokenSymbol}, period ${item.period}. View transaction`}
+                        aria-label={
+                          item.kind === "registration"
+                            ? `${item.loopName}: registered. View transaction`
+                            : `${item.loopName}: claimed ${item.amount} ${item.tokenSymbol}. View transaction`
+                        }
                       >
                         <span className="p-activity-logo">
                           <Image
@@ -137,16 +155,22 @@ export function LatestActivity() {
                             )}
                           </time>
                         </span>
-                        <span
-                          className="p-activity-amount"
-                          title={`${item.amount} ${item.tokenSymbol}`}
-                        >
-                          +
-                          {formatTokenAmount(item.amount, {
-                            ...TOKEN_AMOUNT_FORMATS.claim,
-                          })}{" "}
-                          {item.tokenSymbol}
-                        </span>
+                        {item.kind === "registration" ? (
+                          <span className="p-activity-badge p-activity-registration">
+                            Registered
+                          </span>
+                        ) : (
+                          <span
+                            className="p-activity-badge p-activity-amount"
+                            title={`${item.amount} ${item.tokenSymbol}`}
+                          >
+                            Claimed:{" "}
+                            {formatTokenAmount(item.amount, {
+                              ...TOKEN_AMOUNT_FORMATS.claim,
+                            })}{" "}
+                            {item.tokenSymbol}
+                          </span>
+                        )}
                       </a>
                     </li>
                   ))}

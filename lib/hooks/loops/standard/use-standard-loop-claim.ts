@@ -35,6 +35,8 @@ import {
 } from "@/lib/transaction-toast-messages"
 import { useToast } from "@/components/ui/use-toast"
 
+import { useStandardLoopWalletRegistration } from "./use-standard-loop-wallet-registration"
+
 const ELIGIBILITY_ENDPOINTS: Record<LoopEligibilityProvider, string> = {
   gardens: "/api/gardens",
   blockscout: "/api/blockscout",
@@ -58,6 +60,9 @@ interface UseStandardLoopClaimParams {
   eligibilityProvider: LoopEligibilityProvider
   onConfirmed?: (confirmation: LoopActionConfirmation) => void | Promise<void>
   onClaimConfirmed?: (
+    confirmation: LoopActionConfirmation
+  ) => void | Promise<void>
+  onActionConfirmed?: (
     confirmation: LoopActionConfirmation
   ) => void | Promise<void>
   tokenDecimals?: number
@@ -92,6 +97,7 @@ export function useStandardLoopClaim({
   eligibilityProvider,
   onConfirmed,
   onClaimConfirmed,
+  onActionConfirmed,
   tokenDecimals,
   tokenSymbol,
 }: UseStandardLoopClaimParams) {
@@ -168,6 +174,22 @@ export function useStandardLoopClaim({
           Boolean(claimerStatus?.[1])) ||
         userPhase === StandardLoopPhase.Claimed
       : normalizedStatus.hasClaimed)
+  // Legacy status getters only describe the current period. Look ahead only
+  // when that read cannot establish a claim or a completed claim.
+  const needsRegistrationLookup =
+    !usesUserPhase &&
+    claimerStatus != null &&
+    !claimerStatusQuery.error &&
+    !isRegistered &&
+    !hasClaimed &&
+    !hasEnteredNextPeriod
+  const registration = useStandardLoopWalletRegistration({
+    address,
+    chainId,
+    currentPeriod,
+    user: connectedAccount,
+    enabled: needsRegistrationLookup,
+  })
   const payoutQuery = useReadContract({
     address,
     abi,
@@ -194,6 +216,7 @@ export function useStandardLoopClaim({
   const refetchClaimerStatus = claimerStatusQuery.refetch
   const refetchUserPhase = userPhaseQuery.refetch
   const refetchPayout = payoutQuery.refetch
+  const refetchRegistration = registration.refetch
   const refreshAccountState = useCallback(async () => {
     if (!hasClaimPeriod) return
     if (usesUserPhase) {
@@ -218,11 +241,19 @@ export function useStandardLoopClaim({
     const freshStatus = result.data as readonly [boolean, boolean] | undefined
     if (!result.isError && freshStatus?.[0] && !freshStatus[1]) {
       await refetchPayout()
+    } else if (
+      !result.isError &&
+      freshStatus &&
+      !freshStatus[0] &&
+      !freshStatus[1]
+    ) {
+      await refetchRegistration()
     }
   }, [
     hasClaimPeriod,
     refetchClaimerStatus,
     refetchPayout,
+    refetchRegistration,
     refetchUserPhase,
     usesUserPhase,
   ])
@@ -234,6 +265,7 @@ export function useStandardLoopClaim({
     : isRegistered && !hasClaimed && claimableAmount > 0n
   const registeredForNextPeriod =
     hasEnteredNextPeriod ||
+    (!usesUserPhase && registration.registeredForNextPeriod) ||
     (usesUserPhase && userPhase === StandardLoopPhase.Cooldown)
   const isEntered =
     (registeredForNextPeriod && (!usesUserPhase || claimerStatus != null)) ||
@@ -242,13 +274,15 @@ export function useStandardLoopClaim({
     connectedAccount &&
       (currentPeriod == null ||
         claimerStatusQuery.isLoading ||
+        (needsRegistrationLookup && registration.isLoading) ||
         (usesUserPhase && !hasClaimed && userPhaseQuery.isLoading) ||
         (isRegistered && !hasClaimed && payoutQuery.isLoading))
   )
   const error =
     claimerStatusQuery.error ??
     (usesUserPhase && !hasClaimed ? userPhaseQuery.error : undefined) ??
-    (isRegistered && !hasClaimed ? payoutQuery.error : undefined)
+    (isRegistered && !hasClaimed ? payoutQuery.error : undefined) ??
+    (needsRegistrationLookup ? registration.error : undefined)
   const status = deriveStandardLoopClaimStatus({
     hasClaimed,
     hasError: Boolean(error) && !hasConfirmedClaim,
@@ -299,6 +333,13 @@ export function useStandardLoopClaim({
       return
     }
 
+    void onActionConfirmed?.({
+      action: confirmedAction,
+      chainId,
+      transactionHash: txHash,
+      blockNumber: receiptBlockNumber,
+      logs: receiptLogs,
+    })
     if (confirmedAction === "claim") {
       void onClaimConfirmed?.({
         action: confirmedAction,
@@ -347,6 +388,7 @@ export function useStandardLoopClaim({
     claimableAmount,
     onConfirmed,
     onClaimConfirmed,
+    onActionConfirmed,
     pendingAction,
     refreshAccountState,
     receipt.isSuccess,
@@ -411,6 +453,8 @@ export function useStandardLoopClaim({
       })
       return
     }
+
+    if (!isClaimable && (registeredForNextPeriod || isLoading || error)) return
 
     const action: PendingAction = isClaimable ? "claim" : "enter"
     setPendingAction(action)

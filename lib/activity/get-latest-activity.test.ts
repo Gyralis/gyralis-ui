@@ -36,6 +36,7 @@ function event(
   }
 }
 let events: ReturnType<typeof event>[]
+let registrations: Omit<ReturnType<typeof event>, "payout">[]
 let failedChains: string[]
 let indexingErrors: string[]
 
@@ -49,6 +50,7 @@ beforeEach(() => {
     event(rwagmi, 20, "601034632179558007466", 105),
   ]
   failedChains = []
+  registrations = []
   indexingErrors = []
   multicall.mockImplementation(
     ({ contracts }: { contracts: { address: string }[] }) =>
@@ -75,6 +77,11 @@ beforeEach(() => {
             loop: string
             periodNumber_in: string[]
           }[]
+          registrationWindows: {
+            account: string
+            loop: string
+            periodNumber_in: string[]
+          }[]
         }
       }
       expect(
@@ -96,6 +103,14 @@ beforeEach(() => {
                 window.periodNumber_in.includes(item.periodNumber)
             )
           ),
+          registerEvents: registrations.filter((item) =>
+            variables.registrationWindows.some(
+              (window) =>
+                window.account === wallet &&
+                window.loop === item.loop.id &&
+                window.periodNumber_in.includes(item.periodNumber)
+            )
+          ),
         },
       })
     })
@@ -108,6 +123,40 @@ afterEach(() => {
 })
 
 describe("latest activity periods", () => {
+  it("shows current and next registrations beside claims without counting them as rewards", async () => {
+    events = [event("3", 11, "1000000000000000000", 100)]
+    registrations = [11, 12, 10].map((period) => {
+      const { payout: _payout, ...item } = event(
+        "3",
+        period,
+        "0",
+        period === 12 ? 102 : 99
+      )
+      return { ...item, id: `registration-${period}` }
+    })
+    const result = await getLatestActivity(wallet)
+    expect(
+      result.items.map((item) => [
+        item.kind ?? "claim",
+        item.period,
+        item.periodKind,
+      ])
+    ).toEqual([
+      ["registration", "12", "next"],
+      ["claim", "11", "current"],
+      ["registration", "11", "current"],
+    ])
+    expect(
+      result.items
+        .filter((item) => item.kind === "registration")
+        .every((item) => item.amount == null)
+    ).toBe(true)
+    expect(result.totals).toEqual([
+      { chainId: 100, tokenSymbol: "HNY", amount: "1" },
+    ])
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
   it("can acknowledge a receipt in a new period while the shared schedule is still cached", async () => {
     events = [event("3", 12, "1000000000000000000", 200)]
     const result = await getLatestActivity(wallet, [
