@@ -2,11 +2,13 @@ import {
   getSeasonScoringState,
   getSeasonUserGlobalStats,
   getSeasonUserLoopStatsForUser,
+  getSeasonUserStreaks,
 } from "@/lib/db/clients/season-scoring.client"
 
 import { normalizeAddress } from "./rules"
 import {
   activeSeasons,
+  getCurrentSeason,
   getSeasonById,
   pointsFromHundredths,
   publicSeason,
@@ -140,5 +142,20 @@ export async function getSeasonUserData(seasonId: string, address: string) {
     userAddress,
     stats: global ? publicSeasonGlobalStats(global) : null,
     loops: loops.map(publicSeasonLoopStats),
+  }
+}
+
+/** One readiness check and one indexed wallet read; no global score aggregation. */
+export async function getCurrentSeasonStreaks(address: string) {
+  const current = getCurrentSeason()
+  if (!current) return { season: null, loopStats: [] }
+  const season = await assertSeasonScoringReady(current.id)
+  const rows = await getSeasonUserStreaks(season.id, address)
+  return {
+    season: publicSeason(season),
+    loopStats: rows.map((row) => ({
+      ...row,
+      earnedStreakBonuses: publicEarnedBonuses(row.earnedStreakBonuses),
+    })),
   }
 }

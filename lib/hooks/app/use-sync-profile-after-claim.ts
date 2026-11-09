@@ -57,7 +57,10 @@ export function useSyncProfileAfterClaim({
 
       const wallet = connectedAccount.toLowerCase()
       const transactionHash = confirmation.transactionHash.toLowerCase()
-      const existing = syncRequests.get(transactionHash)
+      const syncKey = `${
+        confirmation.chainId
+      }:${transactionHash}:${wallet}:${contractAddress.toLowerCase()}:${loopId}`
+      const existing = syncRequests.get(syncKey)
       if (existing) return existing
 
       const request = (async () => {
@@ -71,18 +74,22 @@ export function useSyncProfileAfterClaim({
             wallet: connectedAccount,
           })
 
-          await queryClient.invalidateQueries({
-            queryKey: ["profile-summary", wallet],
-          })
-          await queryClient.invalidateQueries({
-            queryKey: ["season-streaks", wallet],
-          })
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: ["profile-summary", wallet],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: ["season-streaks", wallet],
+            }),
+          ])
         } catch (error) {
           console.error("[profile-claim-sync] failed", error)
+        } finally {
+          syncRequests.delete(syncKey)
         }
       })()
 
-      syncRequests.set(transactionHash, request)
+      syncRequests.set(syncKey, request)
       await request
     },
     [connectedAccount, contractAddress, loopId, periodNumber, queryClient]

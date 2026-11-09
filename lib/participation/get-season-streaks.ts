@@ -14,14 +14,10 @@ const seasonSchema = z.object({
   ),
 })
 
-const currentSeasonSchema = z.object({
+const seasonStreaksSchema = z.object({
   success: z.literal(true),
   season: seasonSchema.nullable(),
-})
-const seasonUserSchema = z.object({
-  success: z.literal(true),
-  season: seasonSchema,
-  loops: z.array(
+  loopStats: z.array(
     profileStreaksSchema.shape.loopStats.element.extend({
       earnedStreakBonuses: z.array(
         z.object({
@@ -35,20 +31,21 @@ const seasonUserSchema = z.object({
 
 /** Season projections only: never substitute all-time profile GP or streaks. */
 export async function getSeasonStreaks(wallet: string, signal?: AbortSignal) {
-  const currentResponse = await fetch("/api/seasons/current", {
-    signal,
-    cache: "no-store",
-  })
-  if (!currentResponse.ok) throw new Error("Unable to load current Season")
-  const { season } = currentSeasonSchema.parse(await currentResponse.json())
-  if (!season) return { season: null, loopStats: [] }
-
   const response = await fetch(
-    `/api/seasons/${encodeURIComponent(season.id)}/users/${wallet}`,
+    `/api/seasons/current/users/${wallet.toLowerCase()}/streaks`,
     { signal, cache: "no-store" }
   )
-  if (!response.ok) throw new Error("Unable to load Season streaks")
-  const data = seasonUserSchema.parse(await response.json())
-  if (data.season.id !== season.id) throw new Error("Season snapshot mismatch")
-  return { season: data.season, loopStats: data.loops }
+  if (!response.ok) {
+    const error = await response.json().catch(() => null)
+    if (
+      response.status === 503 &&
+      error?.error === "Season scoring rebuild required"
+    ) {
+      throw new Error("Season scoring rebuild required")
+    }
+    throw new Error("Unable to load Season streaks")
+  }
+  const { season, loopStats } = seasonStreaksSchema.parse(await response.json())
+  if (!season && loopStats.length) throw new Error("Season snapshot mismatch")
+  return { season, loopStats }
 }

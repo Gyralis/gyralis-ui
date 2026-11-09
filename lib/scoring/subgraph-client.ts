@@ -44,6 +44,9 @@ export const BASE_TRUE_LOOPERS_SCORING_LOOP_ID = 6
 export const BASE_TRUE_LOOPERS_FACTORY_LOOP_ID = 24
 export const BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID =
   "0xb7902fae80eb57abac621dc68eb30ffff42f76f0"
+export const BASE_RWAGMI_SCORING_LOOP_ID = 9
+export const BASE_RWAGMI_SUBGRAPH_LOOP_ID =
+  "0xe714bc7f58726490a15d2197bcded598223f5319"
 
 export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
   if (!env.GYRALIS_SUBGRAPH_URL) {
@@ -64,6 +67,7 @@ export function getScoringSubgraphSources(): ScoringSubgraphSource[] {
       loopIdsBySubgraphId: {
         [BASE_MARKEE_SUBGRAPH_LOOP_ID]: BASE_MARKEE_SCORING_LOOP_ID,
         [BASE_TRUE_LOOPERS_SUBGRAPH_LOOP_ID]: BASE_TRUE_LOOPERS_SCORING_LOOP_ID,
+        [BASE_RWAGMI_SUBGRAPH_LOOP_ID]: BASE_RWAGMI_SCORING_LOOP_ID,
       },
     })
   }

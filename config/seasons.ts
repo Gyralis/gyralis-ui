@@ -24,6 +24,18 @@ export const seasons: readonly SeasonConfig[] = [
       { chainId: 8453, loopId: 6 },
     ],
   },
+  {
+    id: "test-2026-11-01-nov-06",
+    name: "November 1 - November 6 Test Season",
+    startsAt: "2026-11-01T00:00:00.000Z",
+    // Exclusive end includes all of November 6 (UTC).
+    endsAt: "2026-11-07T00:00:00.000Z",
+    loops: [
+      { chainId: 100, loopId: 3 },
+      { chainId: 100, loopId: 4 },
+      { chainId: 8453, loopId: 9 },
+    ],
+  },
 ]
 
 // Season 1 example (commented out intentionally; it does not activate a season):

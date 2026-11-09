@@ -116,6 +116,21 @@ export function getSeasonUserLoopStatsForUser(
   })
 }
 
+/** Indexed Season/wallet lookup containing only the streak tab's fields. */
+export function getSeasonUserStreaks(seasonId: string, userAddress: string) {
+  return prisma.seasonUserLoopStats.findMany({
+    where: { seasonId, userAddress: normalizeAddress(userAddress) },
+    select: {
+      chainId: true,
+      loopId: true,
+      totalClaims: true,
+      currentStreak: true,
+      longestStreak: true,
+      earnedStreakBonuses: true,
+    },
+  })
+}
+
 export async function upsertSeasonUserGlobalStats(
   stats: SeasonUserGlobalScoringStats
 ) {

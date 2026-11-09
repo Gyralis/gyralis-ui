@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { LoopCardsData, type LoopCardData } from "@/data/loops-data"
 import { useConnectModal } from "@rainbow-me/rainbowkit"
 import { useQuery } from "@tanstack/react-query"
@@ -54,7 +55,7 @@ const sampleSeason = {
 }
 
 export function LoopStreaks({
-  initialPreview = true,
+  initialPreview = false,
 }: { initialPreview?: boolean } = {}) {
   const [preview, setPreview] = useState(initialPreview)
   const { address } = useAccount()
@@ -69,10 +70,15 @@ export function LoopStreaks({
       return getSeasonStreaks(wallet, signal)
     },
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    refetchInterval: false,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     retry: 1,
   })
   const display = preview ? sampleSeason : profile.data
+  const rebuildRequired =
+    profile.error instanceof Error &&
+    profile.error.message === "Season scoring rebuild required"
   const loops = activeLoops
     .filter(
       (loop) => display?.season && findProfileStreak(loop, display.season.loops)
@@ -163,11 +169,25 @@ export function LoopStreaks({
           {!preview && profile.isError && (
             <div className="p-streaks-message p-surface" role="status">
               <h3>
-                {profile.data
+                {rebuildRequired
+                  ? "This Season needs a scoring rebuild."
+                  : profile.data
                   ? "Showing your last saved Season streaks."
                   : "Your Season streaks couldn’t be loaded."}
               </h3>
-              <p>Refresh to check this Season again.</p>
+              <p>
+                {rebuildRequired
+                  ? "The current Season isn’t ready yet. Saved records from earlier seasons are separate."
+                  : "Refresh to check this Season again."}
+              </p>
+              {process.env.NODE_ENV === "development" && wallet && (
+                <Link
+                  className="p-button secondary small"
+                  href={`/season-test?address=${wallet}&seasonId=test-2026-08-10-oct-10`}
+                >
+                  Test saved August–October streaks
+                </Link>
+              )}
               <button
                 type="button"
                 className="p-button secondary small"
@@ -195,7 +215,7 @@ export function LoopStreaks({
                       loop={loop}
                       stats={stats}
                       multiplier={
-                        findProfileStreak(loop, display.season.loops)
+                        findProfileStreak(loop, display.season?.loops ?? [])
                           ?.multiplier ?? 1
                       }
                     />
@@ -310,7 +330,10 @@ export function StreakCard({
         aria-label={`${loop.title} milestone status`}
       >
         {milestones.map((milestone) => {
-          const reward = Math.round(milestone.points * multiplier * 100) / 100
+          const reward =
+            stats?.earnedStreakBonuses.find(
+              (bonus) => bonus.streak === milestone.streak
+            )?.points ?? Math.round(milestone.points * multiplier * 100) / 100
           const label =
             milestone.status === "completed"
               ? "Completed"
