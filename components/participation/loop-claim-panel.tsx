@@ -20,6 +20,18 @@ import { useStandardLoopCardController } from "@/components/loops/standard-loop/
 import { useSuperLoopCardController } from "@/components/loops/super-loop/use-super-loop-card-controller"
 
 export function LoopClaimPanel({ loop }: { loop: LoopCardData }) {
+  if (!loop.enabled) {
+    return (
+      <div className="p-loop-claim-panel">
+        <div className="p-loop-claim-action">
+          <button type="button" className="p-button secondary" disabled>
+            {loop.statusLabel ?? "Inactive"}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return loop.contractType === "superLoop" || loop.super ? (
     <StreamingClaimPanel loop={loop} />
   ) : (

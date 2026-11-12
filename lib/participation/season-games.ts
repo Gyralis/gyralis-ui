@@ -1,18 +1,20 @@
 import type { PreviewState } from "./season-preview"
 
+export const seasonDayCount = 31
+
 export const seasonGames = [
   {
     id: "sprint",
-    title: "20 Days In",
+    title: "Half Season In",
     type: "Participation",
     description:
-      "Make a qualifying claim in 20 different Season periods. Gaps are allowed.",
-    target: 20,
-    unit: "periods",
+      "Claim at least once on 15 different days this Season. Gaps are allowed.",
+    target: 15,
+    unit: "days",
     bonus: 15,
     art: "/games/sprint.png",
-    how: "Claim from any regular Season Loop in 20 shared daily periods. Several Loops in the same period count as one participating period. The periods do not need to be consecutive.",
-    win: "Reach 20 participating periods before the Season ends.",
+    how: "Claim from any regular Season Loop in 15 shared daily periods. Several Loops in the same period count as one participating period. The periods do not need to be consecutive.",
+    win: "Reach 15 participating periods before the Season ends.",
     rules: [
       "Regular Season Loops only; Weekend Loop claims do not count.",
       "Switching Loops between periods is allowed. Each Loop keeps its own independent streak.",
@@ -23,26 +25,25 @@ export const seasonGames = [
     id: "marathon",
     title: "All Season Long",
     type: "Full-Season participation",
-    description:
-      "Make at least one qualifying claim in every daily period of the Season.",
-    target: 30,
-    unit: "periods",
+    description: "Claim at least once every day this Season. Don’t miss a day.",
+    target: seasonDayCount,
+    unit: "days",
     bonus: 30,
-    art: "/games/long-game.png",
+    art: "/games/long-game-calendar.png",
     how: "Claim from at least one regular Season Loop in every shared daily period. You can switch Loops, but you cannot miss a period.",
     win: "Cover every daily period in the Season’s configured schedule.",
     rules: [
       "Regular Season Loops only; Weekend Loop claims do not replace a regular claim.",
-      "Missing a closed period makes this objective unattainable. Your other points and 20 Days In progress stay yours.",
-      "Earn +30 bonus SP once. Together with 20 Days In, full participation earns +45 bonus SP.",
+      "Missing a closed period makes this objective unattainable. Your other points and Half Season In progress stay yours.",
+      "Earn +30 bonus SP once. Together with Half Season In, full participation earns +45 bonus SP.",
     ],
   },
   {
     id: "explorer",
-    title: "Complete the Circuit",
+    title: "The Rule of 3",
     type: "Exploration",
     description:
-      "Claim at least three times in every Loop on the required Season list.",
+      "Claim at least 3 times from each Season Loop. No streak required.",
     target: 5,
     unit: "Loops completed",
     bonus: 15,
@@ -131,7 +132,7 @@ export function participatingPeriods(state: PreviewState) {
         (period) =>
           Number.isInteger(period) &&
           period >= 1 &&
-          period <= 30 &&
+          period <= seasonDayCount &&
           period <= state.period
       )
     ),
@@ -154,8 +155,8 @@ export function completionBonuses(state: PreviewState) {
   const periods = participatingPeriods(state)
   const roster = state.requiredLoopIds
   return {
-    sprint: state.registered && periods.length >= 20 ? 15 : 0,
-    marathon: state.registered && periods.length === 30 ? 30 : 0,
+    sprint: state.registered && periods.length >= 15 ? 15 : 0,
+    marathon: state.registered && periods.length === seasonDayCount ? 30 : 0,
     explorer:
       state.registered &&
       roster != null &&
@@ -208,21 +209,25 @@ export function gameView(game: SeasonGame, state: PreviewState) {
       : awards[game.id]
   const closedPeriods =
     state.phase === "review" || state.phase === "prizes"
-      ? 30
+      ? seasonDayCount
       : Math.max(0, state.period - 1)
   const missed =
     game.id === "marathon" &&
     Array.from({ length: closedPeriods }, (_, i) => i + 1).some(
       (period) => !state.participationPeriods.includes(period)
     )
-  const remaining = Math.max(
-    0,
-    30 -
-      state.period +
-      Number(
-        state.period > 0 && !state.participationPeriods.includes(state.period)
-      )
-  )
+  const remaining =
+    state.phase === "review" || state.phase === "prizes"
+      ? 0
+      : Math.max(
+          0,
+          seasonDayCount -
+            state.period +
+            Number(
+              state.period > 0 &&
+                !state.participationPeriods.includes(state.period)
+            )
+        )
   let status = "In progress"
   if (game.id === "race") status = "On hold"
   else if (game.id === "explorer" && !state.requiredLoopIds?.length)
@@ -240,7 +245,7 @@ export function gameView(game: SeasonGame, state: PreviewState) {
       ended: "Ended",
     }[weekendView(state).stage]
   else if (earned > 0) status = "Completed"
-  else if (missed || (game.id === "sprint" && progress + remaining < 20))
+  else if (missed || (game.id === "sprint" && progress + remaining < target))
     status = "No longer achievable"
   else if (state.phase === "review" || state.phase === "prizes")
     status = "Ended"

@@ -120,9 +120,18 @@ export function LoopOpportunityCard({
         <div className="p-mini-loop-body">
           <h3>{loop.title}</h3>
           {!large && (
-            <div className="p-mini-loop-reward" title={rewardDescription}>
-              <span>Daily example / wallet</span>
-              <strong>{rewardAmount}</strong>
+            <div
+              className="p-mini-loop-reward"
+              title={loop.enabled ? rewardDescription : undefined}
+            >
+              {loop.enabled ? (
+                <>
+                  <span>Daily example / wallet</span>
+                  <strong>{rewardAmount}</strong>
+                </>
+              ) : (
+                <span>{loop.statusLabel ?? "Inactive"}</span>
+              )}
             </div>
           )}
         </div>
@@ -183,7 +192,7 @@ export function LoopOpportunityCard({
             {loop.super ? "SuperLoop" : "Loop"}
           </span>
         </div>
-        {demoStatus && (
+        {loop.enabled && demoStatus && (
           <span
             className={`p-status p-loop-preview-status ${
               demoStatus === "Ready to claim" ? "ready" : ""
@@ -205,7 +214,7 @@ export function LoopOpportunityCard({
           <LuShieldCheck aria-hidden="true" />
           <span>{loop.eligibility}</span>
         </p>
-        {seasonLoop && (
+        {loop.enabled && seasonLoop && (
           <p className="s-loop-season-note">
             Season preview · {seasonLoop.streak}-claim streak
             {nextBonus
@@ -266,8 +275,9 @@ function LoopAccessHelp({ loop }: { loop: LoopCardData }) {
           <p>Human Passport score: {loop.passportMinScore}+.</p>
         )}
         <p>
-          Connect your wallet on {loop.chainName}, then use the card’s Register
-          or Claim button to check your eligibility.
+          {loop.enabled
+            ? `Connect your wallet on ${loop.chainName}, then use the card’s Register or Claim button to check your eligibility.`
+            : "This Loop is inactive. Registration and claiming are currently unavailable."}
         </p>
         {loop.eligibilityUrl && (
           <a
@@ -299,11 +309,13 @@ function LoopDirectoryContent() {
   const cards = chainId === 1868 ? SoneiumLoopCardsData : LoopCardsData
   const filtered = cards.filter(
     (loop) =>
-      !search ||
-      `${loop.title} ${loop.by} ${loop.chainName} ${loop.description}`
-        .toLowerCase()
-        .includes(search)
+      loop.enabled &&
+      (!search ||
+        `${loop.title} ${loop.by} ${loop.chainName} ${loop.description}`
+          .toLowerCase()
+          .includes(search))
   )
+  const activeCount = filtered.length
   return (
     <>
       <PageIntro
@@ -342,8 +354,7 @@ function LoopDirectoryContent() {
         <>
           <div className="p-section-title">
             <h2>
-              {filtered.length} Active{" "}
-              {filtered.length === 1 ? "Loop" : "Loops"}
+              {activeCount} Active {activeCount === 1 ? "Loop" : "Loops"}
             </h2>
           </div>
           {filtered.length ? (

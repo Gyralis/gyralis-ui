@@ -157,18 +157,22 @@ export function LatestActivity() {
                         </span>
                         {item.kind === "registration" ? (
                           <span className="p-activity-badge p-activity-registration">
-                            Registered
+                            <span className="p-activity-badge-text">
+                              Registered
+                            </span>
                           </span>
                         ) : (
                           <span
                             className="p-activity-badge p-activity-amount"
                             title={`${item.amount} ${item.tokenSymbol}`}
                           >
-                            Claimed:{" "}
-                            {formatTokenAmount(item.amount, {
-                              ...TOKEN_AMOUNT_FORMATS.claim,
-                            })}{" "}
-                            {item.tokenSymbol}
+                            <span className="p-activity-badge-text">
+                              Claimed:{" "}
+                              {formatTokenAmount(item.amount, {
+                                ...TOKEN_AMOUNT_FORMATS.claim,
+                              })}{" "}
+                              {item.tokenSymbol}
+                            </span>
                           </span>
                         )}
                       </a>

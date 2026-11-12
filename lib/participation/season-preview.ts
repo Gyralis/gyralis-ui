@@ -1,5 +1,10 @@
 // Frontend-only fixtures. Never use this model to authorize payments or claims.
-import { completionBonuses, weekendSchedule, weekendView } from "./season-games"
+import {
+  completionBonuses,
+  seasonDayCount,
+  weekendSchedule,
+  weekendView,
+} from "./season-games"
 
 export const seasonMilestones = [
   { streak: 3, points: 2 },
@@ -28,20 +33,20 @@ export const seasonPhases: Record<
   live: {
     label: "Season live",
     date: "2026-12-12T12:00:00Z",
-    timing: "Day 12 of 30 · 18 days left",
+    timing: `Day 12 of ${seasonDayCount} · ${seasonDayCount - 12} days left`,
     day: 12,
   },
   review: {
     label: "Results under review",
-    date: "2026-12-31T12:00:00Z",
-    timing: "Scoring ended Dec 31 · 00:00 UTC",
-    day: 30,
+    date: "2027-01-01T12:00:00Z",
+    timing: "Scoring ended Jan 1 · 00:00 UTC",
+    day: seasonDayCount,
   },
   prizes: {
     label: "Prize experience",
     date: "2027-01-04T12:00:00Z",
     timing: "Post-Season · payout setup pending",
-    day: 30,
+    day: seasonDayCount,
   },
 }
 export interface PreviewLoop {
@@ -103,7 +108,7 @@ export function createSeasonPreview(phase: SeasonPhase = "live"): PreviewState {
             : phase === "late"
             ? 1
             : phase === "prizes"
-            ? 30
+            ? seasonDayCount
             : phase === "review"
             ? 28
             : 11,

@@ -43,7 +43,9 @@ interface LoopCardInactiveProps {
 export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
   const isSuperLoop = loop.contractType === "superLoop" || Boolean(loop.super)
   const isPaused = isSuperLoop && loop.statusLabel === "Paused"
-  const hasOverlay = Boolean(loop.unlockAtCommunityClaims) || isPaused
+  const isInactive = loop.statusLabel === "Inactive"
+  const hasOverlay =
+    Boolean(loop.unlockAtCommunityClaims) || isPaused || isInactive
   const eligibilityLabel = loop.eligibility.replace(/\s+required$/i, "")
   const statusLabel =
     loop.statusLabel === "Preparing" ? "Preparing" : "Announced"
@@ -63,7 +65,7 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
           <div className="flex min-w-0 items-center gap-1.5">
             {hasOverlay ? (
               <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-slate-950 p-2.5">
-                {isPaused ? (
+                {isPaused || isInactive ? (
                   <LuPause className="size-7 text-white" aria-hidden="true" />
                 ) : (
                   <LuLock className="size-7 text-white" aria-hidden="true" />
@@ -184,7 +186,16 @@ export const LoopCardInactive: React.FC<LoopCardInactiveProps> = ({ loop }) => {
               </Link>
             )}
           </div>
-          {isPaused ? (
+          {isInactive ? (
+            <LoopInactiveOverlay>
+              <p className="font-baloo text-lg font-semibold leading-snug">
+                Loop inactive
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Registration and claiming are currently unavailable.
+              </p>
+            </LoopInactiveOverlay>
+          ) : isPaused ? (
             <LoopInactiveOverlay>
               <p className="font-baloo text-lg font-semibold leading-snug">
                 SuperLoop paused

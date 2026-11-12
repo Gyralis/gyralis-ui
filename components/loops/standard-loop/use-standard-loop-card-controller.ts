@@ -81,6 +81,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
   const refetchBalance = balance.refetch
   const refetchParticipation = participation.refetch
   const refetchSettings = settings.refetch
+  const refetchCurrentPeriod = settings.refetchCurrentPeriod
   const retrySettings = useCallback(() => {
     void refetchSettings()
   }, [refetchSettings])
@@ -105,6 +106,14 @@ export function useStandardLoopCardController(loop: LoopCardData) {
       refetchParticipation(),
     ])
   }, [refetchBalance, refetchParticipation, refetchSettings])
+  const refreshAfterAction = useCallback(async () => {
+    setModalRefreshKey((key) => key + 1)
+    await Promise.allSettled([
+      refetchCurrentPeriod(),
+      refetchBalance(),
+      refetchParticipation(),
+    ])
+  }, [refetchBalance, refetchCurrentPeriod, refetchParticipation])
   const claim = useStandardLoopClaim({
     address: address ?? "0x",
     chainId: loop.chainId,
@@ -112,7 +121,7 @@ export function useStandardLoopCardController(loop: LoopCardData) {
     eligibilityProvider: loop.eligibilityProvider,
     onClaimConfirmed: handleClaimConfirmed,
     onActionConfirmed: refreshLatestActivityAfterAction,
-    onConfirmed: refreshCardData,
+    onConfirmed: refreshAfterAction,
     tokenDecimals: balance.data?.decimals,
     tokenSymbol: balance.data?.symbol,
   })

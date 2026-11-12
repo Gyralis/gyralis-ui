@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -27,6 +27,7 @@ import { SeasonControls, SeasonHeader, SeasonRules } from "./season-panels"
 function GamesContent() {
   const router = useRouter()
   const params = useSearchParams()
+  const gameTrigger = useRef<HTMLButtonElement | null>(null)
   const { state, dispatch } = useSeason()
   const tab =
     !params.get("game") && params.get("view") === "prizes"
@@ -40,7 +41,8 @@ function GamesContent() {
     next.set("view", value === "Prizes & Rules" ? "prizes" : "bonus")
     router.replace(`/games?${next.toString()}`, { scroll: false })
   }
-  function openGame(id: string | null) {
+  function openGame(id: string | null, trigger?: HTMLButtonElement) {
+    if (trigger) gameTrigger.current = trigger
     const next = new URLSearchParams(params.toString())
     next.set("view", "bonus")
     if (id) next.set("game", id)
@@ -88,8 +90,10 @@ function GamesContent() {
                 <MdOutlineGames aria-hidden="true" />
                 Season Games
               </p>
-              <h2>Take your claims further.</h2>
-              <p>Complete objectives for extra Season points.</p>
+              <div className="s-games-intro-copy">
+                <h2>Take your claims further.</h2>
+                <p>Complete Season Games to earn extra Season points.</p>
+              </div>
             </div>
           </div>
           {!state.registered && (
@@ -97,8 +101,8 @@ function GamesContent() {
               <LuInfo aria-hidden="true" />
               <p>
                 {canEnter(state.phase)
-                  ? "Enter the Season to earn game bonuses. Eligible activity since the Season starts counts when you enter; there is no separate join step for each game."
-                  : "Season registration is closed. You can explore game rules and continue earning available rewards in live Loops."}
+                  ? "Enter the Season to earn bonuses from Season Games. Eligible activity since the Season starts counts when you enter; there is no separate join step for each game."
+                  : "Season registration is closed. You can explore the rules for Season Games and continue earning available rewards in live Loops."}
               </p>
             </div>
           )}
@@ -122,14 +126,14 @@ function GamesContent() {
               <SeasonGameCard
                 key={game.id}
                 game={game}
-                onOpen={() => openGame(game.id)}
+                onOpen={(trigger) => openGame(game.id, trigger)}
               />
             ))}
           </MagicBento>
           {!games.length && (
             <EmptyState
               title="No matching Season Games"
-              description="Try another game name, objective or participation type."
+              description="Try another Season Game name, objective or participation type."
             />
           )}
           <Link
@@ -161,7 +165,15 @@ function GamesContent() {
           if (!open) openGame(null)
         }}
       >
-        <DialogContent className="participation-theme participation-dialog s-game-dialog dark">
+        <DialogContent
+          className="participation-theme participation-dialog s-game-dialog dark"
+          onCloseAutoFocus={(event) => {
+            if (gameTrigger.current?.isConnected) {
+              event.preventDefault()
+              gameTrigger.current.focus({ preventScroll: true })
+            }
+          }}
+        >
           {selected && (
             <>
               <DialogHeader className="s-game-dialog-header">

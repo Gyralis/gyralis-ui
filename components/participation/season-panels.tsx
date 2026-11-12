@@ -188,7 +188,7 @@ export function SeasonEntryButton() {
                   : "You're in the Loop."
                 : isRefund
                 ? "Manage your Season entry"
-                : "Enter Gyralis Games"}
+                : "Enter Season Games"}
             </DialogTitle>
             <DialogDescription>
               {success
@@ -208,7 +208,7 @@ export function SeasonEntryButton() {
                 {isRefund
                   ? "You can enter again before registration closes. Network fees are not refunded."
                   : state.phase === "late"
-                  ? "Your eligible claims and streaks since December 1 are included. Bonus games progress automatically."
+                  ? "Your eligible claims and streaks since December 1 are included. Progress in Season Games updates automatically."
                   : "Your Early Bird badge is ready. Come back December 1 to start your daily routine."}
               </p>
               <button className="p-button" onClick={() => setDialog(null)}>
@@ -225,7 +225,7 @@ export function SeasonEntryButton() {
                 <strong>1 USDC</strong>
               </div>
               <ul className="s-entry-terms">
-                <li>Season: December 1–30, 2026 · UTC</li>
+                <li>Season: December 1–31, 2026 · UTC</li>
                 <li>Full entry-fee refund before December 1, 00:00 UTC</li>
                 <li>No withdrawal or refund after the Season begins</li>
                 <li>$250 guaranteed · top 15% paid, rounded up</li>
@@ -330,10 +330,16 @@ export function SeasonHeader({
   home = false,
   pageHeader = false,
   compact = false,
+  title = "Season Games",
+  seasonLabel = "Season 1",
+  variant = "default",
 }: {
   home?: boolean
   pageHeader?: boolean
   compact?: boolean
+  title?: string
+  seasonLabel?: string
+  variant?: "default" | "explore"
 }) {
   const { state, entries } = useSeason()
   const Heading = pageHeader ? "h1" : "h2"
@@ -348,12 +354,12 @@ export function SeasonHeader({
           <Image src="/gyralis-logo.svg" width={38} height={38} alt="" />
         </div>
         <div className="s-header-eyebrow">
-          <span className="p-eyebrow">Season 1</span>
+          <span className="p-eyebrow">{seasonLabel}</span>
           <span className="s-pill is-green">Season Announced</span>
         </div>
         <Heading>
           {pageHeader ? (
-            "Gyralis Games"
+            title
           ) : state.phase === "registration" ? (
             <>
               Your next month.
@@ -383,16 +389,18 @@ export function SeasonHeader({
         <p>
           {pageHeader
             ? "One participation layer. Many ways to earn."
-            : "December 1–30, 2026 · Daily claims. Real streaks. One Season."}
+            : "December 1–31, 2026 · Daily claims. Real streaks. One Season."}
         </p>
         <div className="s-hero-metrics">
-          <div className="s-hero-metric">
-            <LuUser className="s-hero-metric-icon" aria-hidden="true" />
-            <span>
-              <strong>{entries}</strong>
-              <small>Entries</small>
-            </span>
-          </div>
+          {variant !== "explore" && (
+            <div className="s-hero-metric">
+              <LuUser className="s-hero-metric-icon" aria-hidden="true" />
+              <span>
+                <strong>{entries}</strong>
+                <small>Entries</small>
+              </span>
+            </div>
+          )}
           <div
             className="s-hero-metric"
             aria-label="$250 guaranteed prize pool"
@@ -400,7 +408,7 @@ export function SeasonHeader({
             <LuDollarSign className="s-hero-metric-icon" aria-hidden="true" />
             <span>
               <strong>$250</strong>
-              <small>GTD</small>
+              <small>{variant === "explore" ? "GTD Prize Pool" : "GTD"}</small>
             </span>
           </div>
           <div className="s-hero-metric">
@@ -409,7 +417,7 @@ export function SeasonHeader({
               <strong>
                 <time dateTime="2026-12-01T00:00:00Z">Dec 1, 2026</time>
               </strong>
-              <small>Starts · UTC</small>
+              <small>{variant === "explore" ? "Starts" : "Starts · UTC"}</small>
             </span>
           </div>
         </div>
@@ -496,12 +504,12 @@ export function SeasonRules() {
             </span>
           </li>
           <li>
-            <strong>Complete Season Games challenges</strong>
+            <strong>Complete Season Games</strong>
             <span>
-              20 Days In +15 SP, All Season Long +30 SP and Complete the Circuit
-              +15 SP add to the same game-bonus total. 20 Days In and All Season
-              Long stack. Claim Rush is on hold and awards no points until its
-              rules are finalized.
+              Half Season In +15 SP, All Season Long +30 SP and The Rule of 3
+              +15 SP add to the same game-bonus total. Half Season In and All
+              Season Long stack. Claim Rush is on hold and awards no points
+              until its rules are finalized.
             </span>
           </li>
         </ol>
@@ -532,9 +540,9 @@ export function SeasonRules() {
               "Final entries, pool and payout structure can be published.",
             ],
             [
-              "Dec 31 · 00:00",
+              "Jan 1 · 00:00",
               "Scoring ends",
-              "Includes all of December 30. Results enter review.",
+              "Includes all of December 31. Results enter review.",
             ],
             [
               "After review",

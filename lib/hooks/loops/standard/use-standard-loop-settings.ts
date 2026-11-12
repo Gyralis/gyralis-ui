@@ -1,6 +1,6 @@
-import { useMemo } from "react"
-import { isAddress, type Address } from "viem"
-import { useReadContracts } from "wagmi"
+import { useCallback, useMemo } from "react"
+import { isAddress, zeroAddress, type Address } from "viem"
+import { useReadContract } from "wagmi"
 
 import {
   getLoopContractAbi,
@@ -28,32 +28,32 @@ export function useStandardLoopSettings({
 }: UseStandardLoopSettingsParams) {
   const abi = useMemo(() => getLoopContractAbi(chainId, "loop"), [chainId])
   const validAddress = Boolean(address && isAddress(address))
-  const query = useReadContracts({
-    allowFailure: false,
-    contracts: [
-      {
-        address: address as Address,
-        abi,
-        functionName: loopContractMethods.loop.getDetails,
-        chainId,
-      },
-      {
-        address: address as Address,
-        abi,
-        functionName: loopContractMethods.loop.getCurrentPeriod,
-        chainId,
-      },
-    ],
+  const detailsQuery = useReadContract({
+    address: address ?? zeroAddress,
+    abi,
+    functionName: loopContractMethods.loop.getDetails,
+    chainId,
+    query: {
+      enabled: enabled && validAddress,
+    },
+  })
+  const periodQuery = useReadContract({
+    address: address ?? zeroAddress,
+    abi,
+    functionName: loopContractMethods.loop.getCurrentPeriod,
+    chainId,
     query: {
       enabled: enabled && validAddress,
     },
   })
 
   const data = useMemo<StandardLoopSettingsData | undefined>(() => {
-    if (!query.data) return undefined
+    if (!detailsQuery.data || periodQuery.data == null) return undefined
 
-    const [settings, currentPeriod] = query.data as readonly [
-      readonly [Address, bigint, bigint, bigint],
+    const settings = detailsQuery.data as readonly [
+      Address,
+      bigint,
+      bigint,
       bigint
     ]
 
@@ -62,16 +62,25 @@ export function useStandardLoopSettings({
       periodLength: settings[1],
       percentPerPeriod: settings[2],
       firstPeriodStart: settings[3],
-      currentPeriod,
+      currentPeriod: periodQuery.data as bigint,
     }
-  }, [query.data])
+  }, [detailsQuery.data, periodQuery.data])
+
+  const refetchDetails = detailsQuery.refetch
+  const refetchCurrentPeriod = periodQuery.refetch
+  // Explicit refresh/retry still reloads both parts, including owner configuration.
+  const refetch = useCallback(
+    () => Promise.all([refetchDetails(), refetchCurrentPeriod()]),
+    [refetchDetails, refetchCurrentPeriod]
+  )
 
   return {
     data,
-    error: query.error,
-    isError: query.isError,
-    isFetching: query.isFetching,
-    isLoading: query.isLoading,
-    refetch: query.refetch,
+    error: detailsQuery.error ?? periodQuery.error,
+    isError: detailsQuery.isError || periodQuery.isError,
+    isFetching: detailsQuery.isFetching || periodQuery.isFetching,
+    isLoading: detailsQuery.isLoading || periodQuery.isLoading,
+    refetch,
+    refetchCurrentPeriod,
   }
 }

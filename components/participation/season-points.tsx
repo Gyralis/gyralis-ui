@@ -106,9 +106,9 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
       Icon: LuFlame,
     },
     {
-      label: "Games",
+      label: "Season Games",
       value: score.games,
-      description: "Season challenge bonuses",
+      description: "Bonuses from Season Games",
       href: "/games?view=bonus",
       Icon: MdOutlineGames,
     },

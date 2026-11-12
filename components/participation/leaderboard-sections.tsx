@@ -175,7 +175,7 @@ function SeasonStandings() {
                         <summary>Point breakdown</summary>
                         <p>
                           {row.claims} claims + {row.streaks} streak +{" "}
-                          {row.games} games
+                          {row.games} from Season Games
                         </p>
                       </details>
                     </td>

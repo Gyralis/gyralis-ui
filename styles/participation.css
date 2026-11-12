@@ -1447,6 +1447,7 @@
   align-items: center;
   justify-content: center;
   flex: none;
+  min-width: 0;
   max-width: 150px;
   padding: 5px 8px;
   border: 1px solid transparent;
@@ -1455,8 +1456,14 @@
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   line-height: 1.5;
-  overflow-wrap: anywhere;
   text-align: center;
+  overflow: hidden;
+}
+.p-activity-badge-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .p-activity-registration {
   border-color: #8cc8eb33;
@@ -3640,13 +3647,21 @@
   justify-content: space-between;
   gap: 24px;
 }
-.s-games-intro h2 {
+.s-games-intro-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
   margin: 10px 0 8px;
+}
+.s-games-intro h2 {
+  margin: 0;
   font-size: 28px;
   font-weight: 650;
   letter-spacing: -0.04em;
 }
-.s-games-intro > div > p:last-child {
+.s-games-intro-copy > p {
+  margin: 0;
   max-width: 58ch;
   color: var(--p-text-muted);
   font-size: 13px;
@@ -3745,6 +3760,36 @@
   color: var(--p-text-muted);
   font-size: 11px;
 }
+.s-game-reward-prize {
+  display: grid;
+  grid-template-columns: 40px auto;
+  align-items: center;
+  gap: 3px 12px;
+  padding: 12px 16px;
+  border: 1px solid #1ce78330;
+  border-radius: 16px;
+  background: #1ce7830a;
+}
+.s-game-reward-prize > .s-game-reward-icon {
+  display: grid;
+  grid-row: 1 / 3;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #1ce78316;
+  color: #75edac;
+  font-size: 23px;
+}
+.s-game-reward-prize > strong {
+  grid-column: 2;
+  font-size: 32px;
+}
+.s-game-reward-prize > span:last-child {
+  grid-column: 2;
+  color: #bbd7c8;
+  font-size: 12px;
+}
 .s-game-earned {
   display: grid;
   gap: 4px;
@@ -3775,6 +3820,54 @@
 .s-game-card-progress .p-progress {
   height: 5px;
 }
+.s-game-day-pills {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  height: 25px;
+  margin-top: 9px;
+}
+.s-game-day-pills > button {
+  min-width: 0;
+  padding: 0;
+  border: 1px solid #ffffff0b;
+  border-radius: 999px;
+  background: #2b3733;
+  cursor: pointer;
+}
+.s-game-day-pills > button:hover,
+.s-game-day-pills > button:focus-visible {
+  outline: 2px solid #8cc8eb;
+  outline-offset: 2px;
+}
+.s-game-day-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-color: #2d4539;
+  background: #101b17;
+  color: #f2f5f7;
+}
+.s-game-day-tooltip strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.s-game-day-tooltip > svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: #1ce783;
+}
+.s-game-day-pills > .is-filled {
+  border-color: #1ce78355;
+  background: #1ce783;
+}
+.s-game-day-pills > .is-missed {
+  border: 1px dashed #e7b28b;
+  background: #e7b28b25;
+}
 .s-game-card-progress > p {
   display: flex;
   align-items: flex-start;
@@ -3789,10 +3882,73 @@
   margin-top: 6px;
   font-size: 10px;
 }
-.s-game-card-content > .p-button {
-  margin-top: 12px;
-  justify-content: space-between;
-  min-height: 42px;
+.s-game-open {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: #8cc8eb;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+/* One native button covers the card and its visible text link. */
+.s-game-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 22px;
+}
+.s-game-open-label {
+  position: relative;
+  z-index: 2;
+}
+.s-game-open:hover .s-game-open-label,
+.s-game-open:focus-visible .s-game-open-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.s-game-open:focus-visible {
+  outline: none;
+}
+.s-game-open:focus-visible::after {
+  outline: 2px solid #8cc8eb;
+  outline-offset: -2px;
+}
+.s-game-open-arrow {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #1ce783;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+.s-game-open-arrow svg {
+  width: 22px;
+  height: 22px;
+  transform: rotate(-45deg);
+}
+.s-game-card:hover .s-game-open-arrow,
+.s-game-card:focus-within .s-game-open-arrow {
+  opacity: 1;
+}
+.magic-bento:not([data-motion]) .s-game-open-arrow {
+  transition: none;
+}
+@media (hover: none), (pointer: coarse), (max-width: 640px) {
+  .s-game-open-arrow {
+    opacity: 1;
+  }
 }
 .s-game-card.is-held {
   grid-column: 1 / -1;
@@ -3810,10 +3966,6 @@
   width: 340px;
   right: 5%;
   opacity: 0.5;
-}
-.s-game-card.is-held .s-game-card-content > .p-button {
-  align-self: flex-start;
-  gap: 24px;
 }
 .s-game-dialog {
   max-width: min(680px, calc(100vw - 28px));
@@ -4153,224 +4305,388 @@
 .p-streaks-tools button:disabled {
   opacity: 0.4;
 }
-.p-streak-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-.p-streak-card {
+.p-season-streak-table-wrap {
   min-width: 0;
-  padding: 24px;
-  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   border: 1px solid #ffffff0d;
-  border-radius: 24px;
+  border-radius: 16px;
   background: linear-gradient(145deg, #141f1e 0%, #101516 72%);
-  box-shadow: inset 0 1px 0 #ffffff04;
+  scrollbar-color: #52665d #111917;
+  scrollbar-width: thin;
 }
-.p-streak-card.is-complete {
-  border-color: #1ce78326;
-  background: linear-gradient(145deg, #142820 0%, #101716 72%);
+.p-season-streak-table-wrap:focus-visible {
+  outline: 2px solid #8cc8eb;
+  outline-offset: 3px;
 }
-.p-streak-card-top {
-  display: flex;
+.p-season-streak-table {
+  width: 100%;
+  min-width: 840px;
+}
+.p-season-streak-table-head,
+.p-season-streak-row {
+  display: grid;
+  grid-template-columns: 210px minmax(350px, 1fr) 140px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 32px;
 }
-.p-streak-label {
+.p-season-streak-table-head {
+  min-height: 48px;
+  padding: 0 18px;
+  border-bottom: 1px solid #ffffff12;
+  background: #ffffff04;
   color: var(--p-text-muted);
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.p-season-streak-progress-column-heading {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.p-season-streak-table-head-note {
+  color: #8cc8eb;
+  font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.04em;
 }
-.p-streak-loop-logo {
+.p-season-streak-points-heading {
+  grid-column: 3;
+  text-align: right;
+}
+.p-season-streak-loop-heading {
+  grid-column: 1;
+}
+.p-season-streak-rowgroup > .p-season-streak-row {
+  min-height: 100px;
+  padding: 18px;
+  border-bottom: 1px solid #ffffff0c;
+  transition: background-color 160ms ease;
+}
+.p-season-streak-rowgroup > .p-season-streak-row:last-child {
+  border-bottom: 0;
+}
+.p-season-streak-rowgroup > .p-season-streak-row:hover {
+  background: #ffffff04;
+}
+.p-season-streak-loop {
+  grid-column: 1;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+.p-season-streak-logo {
   display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   flex: none;
-  padding: 8px;
+  place-items: center;
+  overflow: hidden;
+  padding: 5px;
   border: 1px solid #ffffff16;
-  border-radius: 50%;
+  border-radius: 12px;
   background: #0b1110;
-  cursor: help;
 }
-.p-streak-loop-logo img {
+.p-season-streak-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 50%;
 }
-.p-streak-loop-logo:hover {
-  border-color: #1ce78375;
+.p-season-streak-loop-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
 }
-.p-streak-value {
+.p-season-streak-loop-copy strong {
+  overflow: hidden;
+  color: var(--p-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.p-season-streak-loop-copy > span {
+  overflow: hidden;
+  color: var(--p-text-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.p-season-streak-progress {
+  grid-column: 2;
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  max-width: 440px;
+  justify-self: start;
+  gap: 10px;
+  text-align: left;
+}
+.p-season-streak-progress-heading {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin: 7px 0 30px;
-}
-.p-streak-value strong {
-  color: var(--p-text-primary);
-  font-size: 52px;
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: -0.06em;
-  font-variant-numeric: tabular-nums;
-}
-.p-streak-value > span:last-child {
-  margin-left: 2px;
+  justify-content: flex-start;
+  gap: 12px;
   color: var(--p-text-muted);
   font-size: 12px;
 }
-.p-streak-flame {
-  align-self: center;
-  margin-right: 4px;
-}
-.p-streak-flame svg {
-  width: 26px;
-  height: 30px;
-}
-.p-streak-milestone-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: var(--p-text-muted);
-  font-size: 11px;
-}
-.p-streak-milestone-heading strong {
+.p-season-streak-progress-heading strong {
   color: var(--p-text-primary);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.p-season-streak-progress-heading strong > span {
+  color: var(--p-text-muted);
+  font-size: 13px;
   font-weight: 500;
 }
-.p-streak-pill-bar {
+.p-season-streak-bar-frame {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  align-items: center;
   gap: 4px;
+}
+.p-season-streak-window-control {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid #8cc8eb35;
+  border-radius: 50%;
+  background: #16221f;
+  color: #9bd2f0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, background-color 150ms ease,
+    border-color 150ms ease;
+}
+.p-season-streak-window-control svg {
+  width: 14px;
+  height: 14px;
+}
+.p-season-streak-bar-frame:hover .p-season-streak-window-control:not(:disabled),
+.p-season-streak-bar-frame:focus-within
+  .p-season-streak-window-control:not(:disabled) {
+  opacity: 1;
+  pointer-events: auto;
+}
+.p-season-streak-window-control:not(:disabled):hover {
+  border-color: #8cc8eb;
+  background: #1e302d;
+}
+.p-season-streak-window-control:focus-visible {
+  opacity: 1;
+  outline: 2px solid #8cc8eb;
+  outline-offset: 2px;
+  pointer-events: auto;
+}
+.p-season-streak-window-control:disabled {
+  visibility: hidden;
+}
+.p-season-streak-day-bar {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
   height: 25px;
 }
-.p-streak-pill-bar > span {
+.p-season-streak-day-bar > span {
+  width: 100%;
+  max-width: 14px;
   min-width: 0;
-  border: 1px solid #ffffff08;
-  border-radius: 999px;
-  background: #29332f;
-}
-.p-streak-pill-bar > .is-filled {
-  border-color: #1ce78350;
-  background: #1ce783;
-  box-shadow: 0 0 9px #1ce78312;
-}
-.p-streak-pill-bar > .is-filled.is-milestone {
-  background: #8af6bf;
-}
-.p-streak-pill-bar > .is-next {
-  border-color: #b49aff;
-  background: #8c4bff42;
-  box-shadow: 0 0 8px #8c4bff30;
-}
-.p-streak-milestones {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-  margin-top: 16px;
-}
-.p-streak-milestone {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  min-height: 36px;
-  padding: 7px 4px;
+  justify-self: center;
   border: 1px solid #ffffff0b;
   border-radius: 999px;
-  background: #ffffff03;
+  background: #2b3733;
+}
+.p-season-streak-day-bar > .is-filled {
+  border-color: #1ce78355;
+  background: #1ce783;
+  box-shadow: 0 0 8px #1ce78316;
+}
+.p-season-streak-day-bar > .is-filled.is-milestone {
+  background: #a3f6c7;
+}
+.p-season-streak-day-bar > .is-filled.is-earned-milestone {
+  border-color: #d6ffe5;
+  box-shadow: 0 0 7px #1ce78355;
+}
+.p-season-streak-day-bar > .is-filled.is-pending-milestone {
+  border-color: #8cc8eb;
+  background: #8cc8eb;
+}
+.p-season-streak-day-bar > .is-next {
+  border-color: #8cc8eb;
+  background: #4187ba55;
+  box-shadow: 0 0 8px #8cc8eb28;
+}
+.p-season-streak-day-bar > .is-milestone:not(.is-filled):not(.is-next) {
+  border-color: #8cc8eb70;
+  background: #4187ba24;
+}
+.p-season-streak-points {
+  grid-column: 3;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.p-season-streak-earned-total {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  align-content: start;
+  gap: 6px;
+  min-height: 62px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: right;
+}
+.p-season-streak-earned-total > span {
   color: var(--p-text-muted);
   font-size: 12px;
-  font-weight: 500;
-  cursor: help;
-}
-.p-streak-milestone > svg {
-  width: 13px;
-  height: 15px;
-  flex: none;
-}
-.p-streak-milestone > .p-streak-milestone-state {
-  width: 10px;
-  height: 10px;
-}
-.p-streak-milestone.is-completed {
-  border-color: #1ce78330;
-  color: #75edac;
-  background: #1ce7830c;
-}
-.p-streak-milestone.is-in-progress,
-.p-streak-milestone.is-uncredited {
-  border-color: #a98df85c;
-  color: #c7b5ff;
-  background: #8c4bff12;
-}
-.p-streak-milestone.is-in-progress > svg,
-.p-streak-milestone.is-uncredited > svg {
-  color: #b49aff;
-}
-.p-streak-milestone-dot {
-  width: 4px;
-  height: 4px;
-  flex: none;
-  border-radius: 50%;
-  background: currentColor;
-}
-.p-streak-loop-logo:focus-visible,
-.p-streak-milestone:focus-visible {
-  outline: 2px solid #1ce783;
-  outline-offset: 4px;
-}
-.p-streak-card-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 17px;
-  margin-top: 20px;
-  border-top: 1px solid #ffffff09;
-}
-.p-streak-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
-  border: 1px solid #a98df830;
-  border-radius: 999px;
-  background: #8c4bff0d;
-  color: #c4b5f4;
-  font-size: 10px;
   line-height: 1.5;
 }
-.p-streak-status.is-complete {
-  border-color: #1ce78330;
-  background: #1ce7830a;
+.p-season-streak-earned-total strong {
   color: #75edac;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.p-streak-status.is-empty {
-  border-color: #ffffff0c;
-  background: #ffffff03;
+.p-season-streak-earned-total:hover strong {
+  color: #a3f6c7;
+}
+.p-season-streak-earned-total:focus-visible {
+  border-radius: 5px;
+  outline: 2px solid #8cc8eb;
+  outline-offset: 4px;
+}
+.p-season-streak-earned-total small {
   color: var(--p-text-muted);
+  font-size: 13px;
+  font-weight: 600;
 }
-.p-streak-status svg {
-  width: 12px;
-  height: 12px;
+.p-season-streak-popover {
+  --p-text-primary: #f2f5f7;
+  --p-text-muted: #a3b0b8;
+  width: 340px;
+  max-width: min(340px, calc(100vw - 2rem));
+  padding: 16px;
+  border-color: #ffffff1a;
+  border-radius: 14px;
+  background: #151d1c;
+  color: var(--p-text-primary);
+  box-shadow: 0 20px 55px #0009;
 }
-.p-streak-next-goal {
-  color: var(--p-text-muted);
+.p-season-streak-popover-content {
+  display: grid;
+  gap: 12px;
+}
+.p-season-streak-popover-content > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+.p-season-streak-popover-content .p-eyebrow {
+  color: #8cc8eb;
   font-size: 11px;
+}
+.p-season-streak-popover-content strong {
+  color: var(--p-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+.p-season-streak-popover-reward {
+  color: #75edac;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.p-season-streak-popover-milestones {
+  display: grid;
+  gap: 8px;
+}
+.p-season-streak-popover-milestone {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid #ffffff0d;
+  border-radius: 10px;
+  background: #ffffff03;
+}
+.p-season-streak-popover-milestone.is-completed {
+  border-color: #1ce78326;
+  background: #1ce78309;
+}
+.p-season-streak-popover-milestone.is-in-progress,
+.p-season-streak-popover-milestone.is-uncredited {
+  border-color: #8cc8eb35;
+  background: #4187ba0d;
+}
+.p-season-streak-popover-badge {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid #ffffff12;
+  border-radius: 999px;
+  background: #ffffff05;
+  color: var(--p-text-muted);
+  font-size: 12px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.p-streak-next-goal strong {
+.p-season-streak-popover-badge svg {
+  width: 12px;
+  height: 13px;
+}
+.p-season-streak-popover-milestone.is-completed .p-season-streak-popover-badge {
+  border-color: #1ce78335;
+  background: #1ce78310;
+  color: #75edac;
+}
+.p-season-streak-popover-milestone-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.p-season-streak-popover-milestone-copy strong {
   color: var(--p-text-primary);
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.p-season-streak-popover-milestone-copy small {
+  color: var(--p-text-muted);
+  font-size: 11px;
+}
+.p-season-streak-popover-content > p:last-child {
+  padding-top: 9px;
+  border-top: 1px solid #ffffff12;
+  color: var(--p-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.p-season-streak-row.is-loading .p-season-streak-loop,
+.p-season-streak-row.is-loading .p-season-streak-progress,
+.p-season-streak-row.is-loading .p-season-streak-points {
+  min-height: 38px;
 }
 .p-streaks-message {
   display: grid;
@@ -4394,19 +4710,22 @@
   line-height: 1.7;
 }
 @media (max-width: 640px) {
-  .p-streak-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+  .p-streaks-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
-  .p-streak-card {
-    padding: 22px;
-    border-radius: 22px;
+  .p-streaks-tools {
+    width: 100%;
+    justify-content: flex-start;
   }
   .p-streaks-heading h2 {
     font-size: 21px;
   }
-  .p-streak-pill-bar {
-    gap: 3px;
+}
+@media (hover: none) {
+  .p-season-streak-window-control:not(:disabled) {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 @media (max-width: 640px) {

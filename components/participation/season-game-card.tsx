@@ -1,17 +1,26 @@
 "use client"
 
+import { useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { LuArrowRight, LuCheck, LuInfo } from "react-icons/lu"
+import { LuArrowRight, LuCheck, LuGift } from "react-icons/lu"
 
 import {
   gameView,
+  participatingPeriods,
+  seasonDayCount,
   seasonGames,
   weekendSchedule,
   weekendView,
   type SeasonGame,
 } from "@/lib/participation/season-games"
 import { canScore } from "@/lib/participation/season-preview"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
@@ -21,11 +30,23 @@ export function SeasonGameCard({
   onOpen,
 }: {
   game: SeasonGame
-  onOpen: () => void
+  onOpen: (trigger: HTMLButtonElement) => void
 }) {
   const { state } = useSeason()
   const view = gameView(game, state)
   const held = game.id === "race"
+  const isFullSeason = game.id === "marathon"
+  const hasDayProgress = game.id === "sprint" || isFullSeason
+  const countedDays = hasDayProgress ? participatingPeriods(state) : []
+  const closedDays =
+    state.phase === "review" || state.phase === "prizes"
+      ? seasonDayCount
+      : Math.max(0, state.period - 1)
+  const missedDays = isFullSeason
+    ? Array.from({ length: closedDays }, (_, i) => i + 1).filter(
+        (day) => !countedDays.includes(day)
+      )
+    : []
   return (
     <article
       className={`s-game-card p-surface ${held ? "is-held" : ""}`}
@@ -44,56 +65,183 @@ export function SeasonGameCard({
         <h2>{game.title}</h2>
         <p className="s-game-description">{game.description}</p>
         <div className="s-game-reward-row">
-          <div className="s-game-reward">
+          <div className="s-game-reward s-game-reward-prize">
+            <span className="s-game-reward-icon" aria-hidden="true">
+              <LuGift />
+            </span>
             <strong>+{game.bonus}</strong>
             <span>
               {held
-                ? "SP reserved"
+                ? "Season Points · reserved"
                 : game.id === "weekend"
-                ? "bonus SP / claim"
-                : "bonus SP once"}
+                ? "Season Points per claim"
+                : "Season Points"}
             </span>
           </div>
         </div>
-        <div className="s-game-card-progress">
-          {held ? (
-            <p>Game format and qualification rules are on hold.</p>
-          ) : view.target === 0 ? (
-            <p>
-              <LuInfo aria-hidden="true" /> Required Loop list published before
-              the Season.
-            </p>
-          ) : (
-            <>
-              <div>
-                <span>
-                  {Math.min(view.progress, view.target)} / {view.target}{" "}
-                  {game.unit}
-                </span>
-                <span>
-                  {game.id === "weekend"
-                    ? "Up to 16 total SP"
-                    : view.status === "Completed"
-                    ? "Bonus credited in preview"
-                    : `${Math.max(0, view.target - view.progress)} remaining`}
-                </span>
-              </div>
-              <ProgressBar
-                value={(view.progress / view.target) * 100}
-                label={`${game.title} progress`}
-              />
-            </>
-          )}
-          {game.id === "weekend" && (
-            <small>Each Sunday claim: 1 claim SP + 3 bonus SP.</small>
-          )}
-        </div>
-        <button className="p-button secondary" onClick={onOpen}>
-          {held ? "See planning details" : "View game"}
-          <LuArrowRight aria-hidden="true" />
+        {(held || view.target > 0) && (
+          <div className="s-game-card-progress">
+            {held ? (
+              <p>Game format and qualification rules are on hold.</p>
+            ) : (
+              <>
+                <div>
+                  <span>
+                    {Math.min(view.progress, view.target)} / {view.target}{" "}
+                    {game.unit}
+                  </span>
+                  <span>
+                    {game.id === "weekend"
+                      ? "Up to 16 total SP"
+                      : view.status === "Completed"
+                      ? "Bonus credited in preview"
+                      : isFullSeason && view.status === "No longer achievable"
+                      ? "Day missed · cannot complete"
+                      : `${Math.max(0, view.target - view.progress)} remaining`}
+                  </span>
+                </div>
+                {hasDayProgress ? (
+                  <SeasonDayPills
+                    title={game.title}
+                    dayCount={seasonDayCount}
+                    countedDays={countedDays}
+                    missedDays={missedDays}
+                    closedDays={closedDays}
+                    currentDay={state.period}
+                    onOpen={onOpen}
+                  />
+                ) : (
+                  <ProgressBar
+                    value={(view.progress / view.target) * 100}
+                    label={`${game.title} progress`}
+                  />
+                )}
+              </>
+            )}
+            {game.id === "weekend" && (
+              <small>Each Sunday claim: 1 claim SP + 3 bonus SP.</small>
+            )}
+            {isFullSeason && view.status === "No longer achievable" && (
+              <small>
+                Every Season day is required. Your other points stay yours.
+              </small>
+            )}
+          </div>
+        )}
+        <button
+          className="s-game-open"
+          type="button"
+          onClick={(event) => onOpen(event.currentTarget)}
+          aria-haspopup="dialog"
+          aria-label={
+            held
+              ? `View ${game.title} planning details`
+              : `How ${game.title} works`
+          }
+        >
+          <span className="s-game-open-label">How it works</span>
+          <span className="s-game-open-arrow" aria-hidden="true">
+            <LuArrowRight />
+          </span>
         </button>
       </div>
     </article>
+  )
+}
+
+function SeasonDayPills({
+  title,
+  dayCount,
+  countedDays,
+  missedDays,
+  closedDays,
+  currentDay,
+  onOpen,
+}: {
+  title: string
+  dayCount: number
+  countedDays: number[]
+  missedDays: number[]
+  closedDays: number
+  currentDay: number
+  onOpen: (trigger: HTMLButtonElement) => void
+}) {
+  const [activeDay, setActiveDay] = useState(
+    Math.max(1, Math.min(currentDay, dayCount))
+  )
+  const dayButtons = useRef<(HTMLButtonElement | null)[]>([])
+
+  return (
+    <TooltipProvider delayDuration={150}>
+      <div
+        className="s-game-day-pills"
+        style={{
+          gridTemplateColumns: `repeat(${dayCount}, minmax(0, 1fr))`,
+          maxWidth: dayCount * 18 - 4,
+        }}
+        role="group"
+        aria-label={`${title}: ${countedDays.length} Season days counted. Use left and right arrow keys to explore dates.`}
+      >
+        {Array.from({ length: dayCount }, (_, index) => {
+          const day = index + 1
+          const filled = countedDays.includes(day)
+          const missed = missedDays.includes(day)
+          const date = `Dec. ${day}`
+          const status = filled
+            ? "Claimed"
+            : missed
+            ? "Missed day"
+            : day <= closedDays
+            ? "No claim"
+            : day === currentDay
+            ? "Not claimed yet"
+            : "Upcoming"
+          return (
+            <Tooltip key={day}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className={filled ? "is-filled" : missed ? "is-missed" : ""}
+                  aria-label={`${date} · ${status}`}
+                  aria-haspopup="dialog"
+                  tabIndex={activeDay === day ? 0 : -1}
+                  ref={(button) => {
+                    dayButtons.current[index] = button
+                  }}
+                  onFocus={() => setActiveDay(day)}
+                  onClick={(event) => onOpen(event.currentTarget)}
+                  onKeyDown={(event) => {
+                    if (event.altKey || event.ctrlKey || event.metaKey) return
+                    const nextDay =
+                      event.key === "ArrowRight"
+                        ? Math.min(dayCount, day + 1)
+                        : event.key === "ArrowLeft"
+                        ? Math.max(1, day - 1)
+                        : event.key === "Home"
+                        ? 1
+                        : event.key === "End"
+                        ? dayCount
+                        : null
+                    if (nextDay == null) return
+                    event.preventDefault()
+                    dayButtons.current[nextDay - 1]?.focus()
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={8}
+                className="s-game-day-tooltip"
+              >
+                <strong>{date}</strong>
+                {filled && <LuCheck aria-hidden="true" />}
+                <span className="sr-only">{status}</span>
+              </TooltipContent>
+            </Tooltip>
+          )
+        })}
+      </div>
+    </TooltipProvider>
   )
 }
 
@@ -182,7 +330,7 @@ export function SeasonGameDetails({ game }: { game: SeasonGame }) {
       )}
       <p className="p-caption">
         Progress and interactions use sample data. Live Loop links open the
-        existing app. Game bonuses affect Season points only.
+        existing app. Bonuses from Season Games affect Season points only.
       </p>
     </div>
   )

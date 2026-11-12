@@ -66,6 +66,7 @@ function DiscoverContent() {
     !search || text.toLowerCase().includes(search)
   const loops = LoopCardsData.filter(
     (loop) =>
+      loop.enabled &&
       matches(
         `${loop.title} ${loop.by} ${loop.chainName} ${loop.description}`
       ) &&
@@ -81,7 +82,7 @@ function DiscoverContent() {
   const eco = ecosystems.filter((item) => matches(`${item.name} ${item.type}`))
   const showForYou = tab === "For You" && !search && !ecosystem
   const showLoops = ["For You", "Loops"].includes(tab)
-  const showGames = ["For You", "Games"].includes(tab)
+  const showGames = ["For You", "Season Games"].includes(tab)
   const showEcosystems = ["For You", "Ecosystems"].includes(tab) && !ecosystem
   const noResults =
     !(showLoops && activeLoops.length) &&
@@ -89,9 +90,14 @@ function DiscoverContent() {
     !(showEcosystems && eco.length)
   return (
     <>
-      <SeasonPreview pageHeader />
+      <SeasonPreview
+        pageHeader
+        title="Gyralis Season"
+        seasonLabel="SEASON 1: BETA EDITION"
+        variant="explore"
+      />
       <FilterTabs
-        items={["For You", "Loops", "Games", "Ecosystems"]}
+        items={["For You", "Loops", "Season Games", "Ecosystems"]}
         value={tab}
         onChange={(value) => {
           setTab(value)
@@ -167,57 +173,59 @@ function DiscoverContent() {
         <section>
           <SectionTitle
             title="Go further this Season"
-            subtitle="Complete challenges. Earn extra SP."
+            subtitle="Complete Season Games. Earn extra SP."
           />
           <MagicBento className="p-featured-grid">
-            {games.slice(0, tab === "Games" ? games.length : 2).map((game) => {
-              const view = gameView(game, state)
-              return (
-                <Link
-                  className="p-featured-card p-surface"
-                  data-magic-bento-card=""
-                  key={game.id}
-                  href={`/games?game=${game.id}`}
-                >
-                  <Image
-                    className="s-featured-game-art"
-                    src={game.art}
-                    width={1254}
-                    height={1254}
-                    sizes="150px"
-                    alt=""
-                  />
-                  <div>
-                    <h3>{game.title}</h3>
-                    <p>{game.description}</p>
-                    <span className="p-caption">
-                      +{game.bonus}{" "}
-                      {game.id === "race"
-                        ? "SP reserved · On hold"
-                        : game.id === "weekend"
-                        ? "bonus SP per Sunday claim"
-                        : "bonus SP once"}
-                    </span>
-                    {view.target > 0 && game.id !== "race" ? (
-                      <ProgressBar
-                        value={(view.progress / view.target) * 100}
-                        label={`${game.title} progress`}
-                      />
-                    ) : (
-                      <small className="p-caption">{view.status}</small>
-                    )}
-                  </div>
-                  <LuArrowRight />
-                </Link>
-              )
-            })}
+            {games
+              .slice(0, tab === "Season Games" ? games.length : 2)
+              .map((game) => {
+                const view = gameView(game, state)
+                return (
+                  <Link
+                    className="p-featured-card p-surface"
+                    data-magic-bento-card=""
+                    key={game.id}
+                    href={`/games?game=${game.id}`}
+                  >
+                    <Image
+                      className="s-featured-game-art"
+                      src={game.art}
+                      width={1254}
+                      height={1254}
+                      sizes="150px"
+                      alt=""
+                    />
+                    <div>
+                      <h3>{game.title}</h3>
+                      <p>{game.description}</p>
+                      <span className="p-caption">
+                        +{game.bonus}{" "}
+                        {game.id === "race"
+                          ? "SP reserved · On hold"
+                          : game.id === "weekend"
+                          ? "bonus SP per Sunday claim"
+                          : "bonus SP once"}
+                      </span>
+                      {view.target > 0 && game.id !== "race" ? (
+                        <ProgressBar
+                          value={(view.progress / view.target) * 100}
+                          label={`${game.title} progress`}
+                        />
+                      ) : (
+                        <small className="p-caption">{view.status}</small>
+                      )}
+                    </div>
+                    <LuArrowRight />
+                  </Link>
+                )
+              })}
           </MagicBento>
         </section>
       )}
       {noResults && (
         <EmptyState
           title="Nothing in this orbit yet"
-          description="Try a different category or search for a Loop, game, or ecosystem."
+          description="Try a different category or search for a Loop, Season Game, or ecosystem."
           onReset={() => {
             setTab("For You")
             setEcosystem(null)

@@ -38,7 +38,12 @@ export const useParticipationSearch = () => useContext(SearchContext)
 const links = [
   { href: "/discover", label: "Explore", icon: LuCompass },
   { href: "/loops", label: "Loops", icon: LuLayers },
-  { href: "/games", label: "Games", icon: MdOutlineGames },
+  {
+    href: "/games",
+    label: "Season Games",
+    sidebarLabel: "Games",
+    icon: MdOutlineGames,
+  },
   { href: "/milestones", label: "Milestones", icon: LuTrophy },
   { href: "/leaderboard", label: "Leaderboard", icon: LuBarChart2 },
   { href: "/profile", label: "Profile", icon: LuUser },
@@ -127,16 +132,16 @@ export function ParticipationShell({ children }: { children: ReactNode }) {
             <span>GYRALIS</span>
           </Link>
           <nav aria-label="Main navigation">
-            {links.map(({ href, label, icon: Icon }) => (
+            {links.map(({ href, label, sidebarLabel = label, icon: Icon }) => (
               <Link
                 href={href}
                 key={href}
-                aria-label={label}
+                aria-label={sidebarLabel}
                 onClick={() => setSearch("")}
                 aria-current={pathname.startsWith(href) ? "page" : undefined}
               >
                 <Icon aria-hidden="true" />
-                <span>{label}</span>
+                <span>{sidebarLabel}</span>
               </Link>
             ))}
           </nav>
@@ -183,8 +188,8 @@ export function ParticipationShell({ children }: { children: ReactNode }) {
               <LuSearch aria-hidden="true" />
               <input
                 ref={input}
-                aria-label="Search Loops, games, ecosystems"
-                placeholder="Search Loops, games, ecosystems..."
+                aria-label="Search Loops, Season Games, ecosystems"
+                placeholder="Search Loops, Season Games, ecosystems..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
