@@ -20,6 +20,7 @@ import {
 } from "react-icons/lu"
 import { useAccount } from "wagmi"
 
+import { loopArtwork, loopLogo } from "@/lib/participation/loop-artwork"
 import { seasonMilestones } from "@/lib/participation/season-preview"
 import {
   formatTokenAmount,
@@ -37,17 +38,6 @@ import { LoopStreaks } from "./loop-streaks"
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs, PageIntro } from "./participation-ui"
 import { useSeason } from "./season-context"
-
-export const loopArtwork = (loop: LoopCardData) =>
-  loop.eligibilityProvider === "blockscout"
-    ? "/discover/merits.png"
-    : loop.gardensCommunity === "1hive"
-    ? "/discover/gardens.png"
-    : loop.eligibilityProvider === "rwagmi"
-    ? "/rwagmi-cover.png"
-    : "/images/img_2.png"
-export const loopLogo = (loop: LoopCardData) =>
-  loop.communityLogoUrl ?? loop.eligibilityLogoUrl ?? "/gyralis-logo.svg"
 
 const chainIcons: Record<number, string> = {
   100: "/icons/NetworkGnosis.svg",

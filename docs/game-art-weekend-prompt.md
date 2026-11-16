@@ -1,11 +1,22 @@
-# Weekend Loop artwork prompt
+# Weekend Ritual claiming artwork
 
-Tool: built-in image generation, with transparent background.
+Updated: 2026-11-16.
 
-Style reference: `public/images/gyralis-games-header-v3.png`
+Tool: built-in image generation with transparent background.
 
-Output: `public/games/weekend.png`
+Edit target: `public/games/weekend.png` (original retained).
+Supporting material/style reference: `public/games/sprint.png`.
+Current output: `public/games/weekend-claim.png`.
+
+The revised artwork makes the Saturday registration and Sunday claim sequence explicit. It is used by the shared game definition for the Games card, game details, and Explore teaser.
 
 ## Final prompt
 
-Use case: stylized-concept. Asset type: transparent 3D illustration for the Gyralis Weekend Loop game card, not a whole UI card. Input image is a material and lighting style reference only; create a new subject. Subject: a premium pair of chunky dark beveled calendar panels linked by one simple emerald circular loop arrow. One panel has a small raised mint-green check mark representing registration, the other has a small dark reward token with a subtle emerald rim representing the next day's claim. No text, letters, weekday names, dates, numbers, logos, central symbols or extra objects. Smooth satin charcoal and deep forest-green materials, crisp very thin emerald/mint edge accents. Restrained studio highlights and minimal glow, no atmospheric bloom or halo. Slight three-quarter product-render perspective; object fully visible, centered in a square with about 12 percent clear margin. Genuine transparent background and alpha; no backdrop or floor. No blue or cyan anywhere, no particles. Match the supplied style reference's dark premium sculpted material and restrained green edges. Image will be used as decorative upper-right artwork about 230px wide in a dark 500x400 card; keep the silhouette readable at small size.
+Use case: precise-object-edit.
+Asset type: transparent 3D decorative background artwork for Gyralis's Weekend Ritual game card.
+Input image 1 is the current Weekend Ritual artwork to redesign. Input image 2 is a material and calendar style reference.
+Primary request: make the subject immediately communicate weekend claiming: register Saturday, collect a reward Sunday.
+Replace the existing anonymous two-calendar circular-arrow composition with ONE compact chunky ring-bound weekend calendar, divided into two broad adjacent day panels. The left panel is engraved with exactly "SAT" and has a raised mint check mark for completed registration. The right panel is engraved with exactly "SUN" and presents a small open reward tray with two thick unbranded dark emerald-rimmed reward tokens rising just above it, visibly ready to collect. Sunday is the visual focus, slightly larger or closer to the viewer. Keep the two day names large and legible at thumbnail scale. No date numbers or additional text.
+Preserve the established satin charcoal / deep forest-green beveled 3D material and thin crisp emerald edges, restrained mint studio highlights, slight three-quarter perspective, and calm premium sculptural look of the reference images. Avoid the large surrounding arrows from the original.
+Composition: centered cohesive isolated object, square canvas, fully visible with 12 percent transparent margin, simple strong silhouette readable at 230px. Intended for upper-right decorative card artwork; put the Sunday claim tokens toward the upper-right of the object, not along the bottom edge.
+Genuinely transparent background with alpha. No floor, backdrop, atmospheric shadow, haze, smoke, bloom, halo, large glow, blue or cyan, confetti, sparkles, logos, currency signs, characters, interface card frame, or watermark. Object-surface shadows only. Deliver the artwork asset alone.

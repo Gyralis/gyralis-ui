@@ -2,6 +2,14 @@ import type { PreviewState } from "./season-preview"
 
 export const seasonDayCount = 31
 
+// The Gardens directory ID is a preview reference, not the new Base deployment.
+export const claimRace = {
+  name: "Gardens Race",
+  loopId: 3,
+  target: 10,
+  winners: 10,
+} as const
+
 export const seasonGames = [
   {
     id: "sprint",
@@ -46,14 +54,14 @@ export const seasonGames = [
       "Claim at least 3 times from each Season Loop. No streak required.",
     target: 5,
     unit: "Loops completed",
-    bonus: 15,
+    bonus: 9,
     art: "/games/explorer.png",
     how: "Make three qualifying claims in each required Loop during the Season. They do not need to be consecutive. Extra claims in one Loop cannot replace claims in another.",
     win: "Every required Loop reaches at least 3 / 3 qualifying claims.",
     rules: [
       "The required Loop list is fixed and published before the Season starts.",
       "The final list is not published in this preview. Weekend Loop inclusion remains undecided.",
-      "Earn +15 bonus SP once after confirmed completion.",
+      "Earn +9 bonus SP once after confirmed completion.",
     ],
   },
   {
@@ -65,32 +73,32 @@ export const seasonGames = [
     target: 4,
     unit: "weekend claims",
     bonus: 3,
-    art: "/games/weekend.png",
+    art: "/games/weekend-claim.png",
     how: "Register in the dedicated Weekend Loop each Saturday, then claim from that Loop on Sunday. Register again for every weekend you want to join.",
-    win: "Each eligible Sunday claim earns 4 total SP: 1 claim point + 3 game-bonus points.",
+    win: "Each eligible Sunday claim earns 3 extra Season points.",
     rules: [
       "Every Season entrant is eligible, with no additional requirements.",
       "Register Saturday 00:00–Sunday 00:00 UTC. Claim Sunday 00:00–Monday 00:00 UTC. Reference fixtures only: deployed Loop periods drive live windows.",
-      "Four opportunities: up to 16 total SP, including 12 bonus SP. No regular streak bonus or extra completion award.",
+      "Four opportunities: up to 12 extra Season points. No regular streak bonus or extra completion award.",
       "Miss Saturday registration and you cannot claim that Sunday. Missing one weekend does not block later weekends or remove earlier points.",
     ],
   },
   {
     id: "race",
-    title: "Claim Rush",
-    type: "Race · on hold",
+    title: "Claim Race",
+    type: claimRace.name,
     description:
-      "The claim race is on hold while its final format and qualification rules are defined.",
-    target: 20,
+      "Be one of the first 10 to reach 10 claims in the Gardens Loop. No streak required.",
+    target: claimRace.target,
     unit: "claims",
-    bonus: 20,
-    art: "/games/race.png",
-    how: "The previous concept rewards the first 50 players to reach 20 eligible regular Loop claims. Claims in different regular Loops in the same period each count once.",
-    win: "Qualification, ordering and tie-breaking are on hold. Reaching 20 claims is not a confirmed win.",
+    bonus: 10,
+    art: "/games/race-finish.png",
+    how: "The first event is Gardens Race. Make 10 qualifying claims in the designated Gardens Loop during the Season. No streak required; gaps are allowed. Each eligible Loop period counts once; claims from other Loops do not advance this race.",
+    win: "Be among the first 10 Season entrants to reach 10 qualifying Gardens claims. Reaching the target alone does not confirm a winning place.",
     rules: [
-      "Regular Season Loop claims only. Weekend Loop claims do not count.",
-      "20 bonus SP is reserved in the planning budget. No race points are awarded in this preview.",
-      "The final objective, winner selection, late-entry treatment and award timing will follow the completed rules.",
+      "Only the designated Gardens Loop counts. Other regular Loops, Weekend Loop claims and streak bonuses do not add race claims.",
+      "Each confirmed winner earns 10 additional Season points. No race points are awarded in this preview while winner confirmation rules remain pending.",
+      "Winner ordering, ties, late-entry treatment and reward confirmation timing still need to be finalized. Progress is not a confirmed race position.",
     ],
   },
 ] as const
@@ -141,7 +149,7 @@ export function participatingPeriods(state: PreviewState) {
 
 export function seasonGameProgress(id: string, state: PreviewState) {
   if (id === "race")
-    return state.loops.reduce((sum, loop) => sum + loop.claims, 0)
+    return state.loops.find((loop) => loop.id === claimRace.loopId)?.claims ?? 0
   if (id === "weekend")
     return state.weekends.filter((weekend) => weekend.claimed).length
   if (id === "explorer")
@@ -164,7 +172,7 @@ export function completionBonuses(state: PreviewState) {
       roster.every((id) =>
         state.loops.some((loop) => loop.id === id && loop.claims >= 3)
       )
-        ? 15
+        ? 9
         : 0,
   }
 }
@@ -193,6 +201,63 @@ export function weekendView(state: PreviewState) {
       ? ("claim" as const)
       : ("missed" as const),
     weekend: current,
+  }
+}
+
+export function weekendTimeline(state: PreviewState) {
+  const start = Date.parse(weekendSchedule[0].registerAt)
+  const end = Date.parse(weekendSchedule[weekendSchedule.length - 1].closeAt)
+  const referenceTime = Date.parse(state.weekendTime)
+  const ended = state.phase === "review" || state.phase === "prizes"
+  const now = ended ? end : referenceTime
+  const position = (time: number) =>
+    Math.max(0, Math.min(100, ((time - start) / (end - start)) * 100))
+
+  return {
+    // Calendar progress is independent of earned rewards and claim completion.
+    progress: Number.isFinite(now) ? position(now) : 0,
+    stops: weekendSchedule.map((weekend) => {
+      const record = state.weekends.find((item) => item.id === weekend.id)
+      const registerAt = Date.parse(weekend.registerAt)
+      const claimAt = Date.parse(weekend.claimAt)
+      const closeAt = Date.parse(weekend.closeAt)
+      const status = record?.claimed
+        ? "claimed"
+        : !Number.isFinite(now) || !record
+        ? "unavailable"
+        : now >= closeAt
+        ? "missed"
+        : now < registerAt
+        ? "upcoming"
+        : !state.registered
+        ? "entry-required"
+        : now < claimAt
+        ? record.registered
+          ? "registered"
+          : "registration"
+        : record.registered
+        ? "claim"
+        : "missed"
+      const label = {
+        claimed: "Claimed · +3 extra Season points",
+        unavailable: "Claim status unavailable",
+        missed: "Not claimed",
+        upcoming: "Upcoming",
+        "entry-required": "Season entry required",
+        registered: "Registered · claim Sunday",
+        registration: "Saturday registration open",
+        claim: "Ready to claim",
+      }[status]
+
+      return {
+        ...weekend,
+        position: position(claimAt),
+        status,
+        label,
+        closed: Number.isFinite(now) && now >= closeAt,
+        current: Number.isFinite(now) && now >= registerAt && now < closeAt,
+      }
+    }),
   }
 }
 
@@ -229,11 +294,17 @@ export function gameView(game: SeasonGame, state: PreviewState) {
             )
         )
   let status = "In progress"
-  if (game.id === "race") status = "On hold"
-  else if (game.id === "explorer" && !state.requiredLoopIds?.length)
+  if (game.id === "explorer" && !state.requiredLoopIds?.length)
     status = "Loop list pending"
   else if (state.phase === "registration") status = "Scheduled"
   else if (!state.registered) status = "Season entry required"
+  else if (game.id === "race")
+    status =
+      progress >= target
+        ? "Qualification pending"
+        : state.phase === "review" || state.phase === "prizes"
+        ? "Ended"
+        : "In progress"
   else if (game.id === "weekend")
     status = {
       scheduled: "Scheduled",

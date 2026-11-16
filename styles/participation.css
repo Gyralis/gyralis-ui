@@ -1417,12 +1417,15 @@
   position: absolute;
   right: -3px;
   bottom: -3px;
-  width: 13px;
-  height: 13px;
-  padding: 2px;
+  width: 16px;
+  height: 16px;
+  padding: 1px;
   border-radius: 50%;
-  color: #12251c;
-  background: #1ce783;
+  color: #1ce783;
+  background: #090f13;
+}
+.p-activity-logo[data-activity-kind="registration"] > svg {
+  color: #8cc8eb;
 }
 .p-activity-details {
   display: grid;
@@ -3688,6 +3691,8 @@
   font-size: 13px;
 }
 .s-game-card {
+  --s-game-pill-height: 25px;
+  --s-game-pill-gap: 4px;
   position: relative;
   border-radius: 22px;
   border-color: #ffffff0e;
@@ -3718,6 +3723,7 @@
     linear-gradient(0deg, #101516 30%, #10151600 85%);
 }
 .s-game-card-content {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   padding: 22px;
@@ -3735,6 +3741,45 @@
   color: var(--p-text-muted);
   font-size: 12px;
   line-height: 1.6;
+}
+.s-race-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.s-race-title > svg {
+  width: 0.85em;
+  height: 0.85em;
+  flex: none;
+  color: #1ce783;
+}
+.s-race-loop-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 8px 3px 4px;
+  border: 1px solid #8cc8eb30;
+  border-radius: 999px;
+  background: #8cc8eb0c;
+  color: var(--p-text-primary);
+  font-size: inherit;
+  font-weight: 600;
+  line-height: 18px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.s-race-loop-badge > img {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: contain;
+}
+.s-race-loop-badge > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .s-game-reward-row {
   display: flex;
@@ -3810,7 +3855,7 @@
   font-size: 11px;
   line-height: 1.7;
 }
-.s-game-card-progress > div:first-child {
+.s-game-progress-summary {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -3820,21 +3865,174 @@
 .s-game-card-progress .p-progress {
   height: 5px;
 }
+.s-weekend-timeline {
+  position: relative;
+  z-index: 2;
+  height: 58px;
+  margin: 12px 22px 0;
+}
+.s-weekend-timeline-track {
+  position: absolute;
+  top: 17px;
+  right: 0;
+  left: 0;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #2b3733;
+}
+.s-weekend-timeline-track > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #1ce78399;
+  transform-origin: left center;
+  transition: transform 600ms ease;
+}
+.s-weekend-timeline > ol {
+  position: relative;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.s-weekend-timeline li {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+.s-weekend-timeline button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 44px;
+  min-height: 58px;
+  padding: 4px 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--p-text-muted);
+  cursor: pointer;
+}
+.s-weekend-timeline button:focus-visible {
+  outline: 2px solid #8cc8eb;
+  outline-offset: 2px;
+}
+.s-weekend-timeline-node {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 1px solid #415148;
+  border-radius: 50%;
+  background: #15201c;
+}
+.s-weekend-timeline-node > svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.5;
+}
+.s-weekend-timeline button[aria-current="step"] .s-weekend-timeline-node {
+  border-color: #8cc8eb;
+  color: #8cc8eb;
+}
+.s-weekend-timeline button[data-status="claimed"] .s-weekend-timeline-node {
+  border-color: #1ce783;
+  background: #1ce783;
+  color: #071b12;
+}
+.s-weekend-timeline button:hover time,
+.s-weekend-timeline button:focus-visible time,
+.s-weekend-timeline button[data-status="claimed"] time {
+  color: var(--p-text-primary);
+}
+.s-weekend-timeline time {
+  font-size: 11px;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.s-rule-loop-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.s-rule-loop-grid > li {
+  min-width: 0;
+}
+.s-rule-loop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  height: 100%;
+  min-width: 0;
+  padding: 10px 6px;
+  overflow: hidden;
+  border: 1px solid #ffffff0a;
+  border-radius: 6px;
+  background: #ffffff02;
+  text-align: left;
+}
+.s-rule-loop:hover {
+  border-color: #1ce78366;
+}
+.s-rule-loop > img {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.s-rule-loop-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--p-text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: var(--s-game-pill-height);
+}
+.s-rule-loop-pills {
+  display: grid;
+  flex: none;
+  /* Match one of the 31 attendance pills at the same card content width. */
+  grid-template-columns: repeat(
+    3,
+    clamp(4px, calc((100cqw - 30 * var(--s-game-pill-gap)) / 31), 14px)
+  );
+  gap: var(--s-game-pill-gap);
+  height: var(--s-game-pill-height);
+}
 .s-game-day-pills {
   position: relative;
   z-index: 2;
   display: grid;
-  gap: 4px;
+  gap: var(--s-game-pill-gap);
   width: 100%;
-  height: 25px;
+  height: var(--s-game-pill-height);
   margin-top: 9px;
 }
-.s-game-day-pills > button {
+.s-game-day-pills > button,
+.s-rule-loop-pills > span {
   min-width: 0;
   padding: 0;
   border: 1px solid #ffffff0b;
   border-radius: 999px;
   background: #2b3733;
+}
+.s-game-day-pills > button {
   cursor: pointer;
 }
 .s-game-day-pills > button:hover,
@@ -3860,7 +4058,8 @@
   flex: none;
   color: #1ce783;
 }
-.s-game-day-pills > .is-filled {
+.s-game-day-pills > .is-filled,
+.s-rule-loop-pills > .is-filled {
   border-color: #1ce78355;
   background: #1ce783;
 }
@@ -3883,39 +4082,17 @@
   font-size: 10px;
 }
 .s-game-open {
-  align-self: flex-start;
-  margin-top: 10px;
-  padding: 6px 0;
-  border: 0;
-  background: transparent;
-  color: #8cc8eb;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-  text-align: left;
-  cursor: pointer;
-}
-/* One native button covers the card and its visible text link. */
-.s-game-open::after {
-  content: "";
+  /* Keep the card-sized native button without reserving footer space. */
   position: absolute;
   inset: 0;
   z-index: 1;
+  padding: 0;
+  border: 0;
   border-radius: 22px;
-}
-.s-game-open-label {
-  position: relative;
-  z-index: 2;
-}
-.s-game-open:hover .s-game-open-label,
-.s-game-open:focus-visible .s-game-open-label {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  background: transparent;
+  cursor: pointer;
 }
 .s-game-open:focus-visible {
-  outline: none;
-}
-.s-game-open:focus-visible::after {
   outline: 2px solid #8cc8eb;
   outline-offset: -2px;
 }
@@ -3931,41 +4108,42 @@
   color: #1ce783;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms ease;
+  transition: opacity 0ms ease;
 }
 .s-game-open-arrow svg {
   width: 22px;
   height: 22px;
   transform: rotate(-45deg);
 }
-.s-game-card:hover .s-game-open-arrow,
-.s-game-card:focus-within .s-game-open-arrow {
+.s-game-open:focus-visible .s-game-open-arrow {
   opacity: 1;
 }
-.magic-bento:not([data-motion]) .s-game-open-arrow {
+@media (hover: hover) and (pointer: fine) {
+  .s-game-card:hover .s-game-open-arrow {
+    opacity: 1;
+    transition-duration: 120ms;
+  }
+}
+.magic-bento:not([data-motion]) .s-game-open-arrow,
+.magic-bento:not([data-motion]) .s-weekend-timeline-track > span {
   transition: none;
 }
-@media (hover: none), (pointer: coarse), (max-width: 640px) {
+@media (hover: none), (pointer: coarse) {
   .s-game-open-arrow {
     opacity: 1;
   }
 }
-.s-game-card.is-held {
+.s-game-card-race {
   grid-column: 1 / -1;
 }
-.s-game-card.is-held .s-game-description {
+.s-game-card-race .s-game-description {
   max-width: 56ch;
   min-height: 0;
 }
-.s-game-card.is-held .s-game-reward > strong {
-  color: var(--p-text-muted);
-  font-size: 30px;
-}
-.s-game-card.is-held .s-game-card-art img {
+.s-game-card-race .s-game-card-art img {
   max-width: 55%;
   width: 340px;
   right: 5%;
-  opacity: 0.5;
 }
 .s-game-dialog {
   max-width: min(680px, calc(100vw - 28px));

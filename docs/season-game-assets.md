@@ -11,17 +11,17 @@ All five illustrations were generated with built-in image generation, visually i
 | Half Season In  | [sprint.png](../public/games/sprint.png)                         | [Sprint prompt](game-art-sprint-prompt.md)                       |
 | All Season Long | [long-game-calendar.png](../public/games/long-game-calendar.png) | [Checked calendar prompt](game-art-long-game-calendar-prompt.md) |
 | The Rule of 3   | [explorer.png](../public/games/explorer.png)                     | [Explorer prompt](game-art-explorer-prompt.md)                   |
-| Weekend Ritual  | [weekend.png](../public/games/weekend.png)                       | [Weekend prompt](game-art-weekend-prompt.md)                     |
-| Claim Rush      | [race.png](../public/games/race.png)                             | [Race prompt](game-art-race-prompt.md)                           |
+| Weekend Ritual  | [weekend-claim.png](../public/games/weekend-claim.png)            | [Weekend prompt](game-art-weekend-prompt.md)                     |
+| Claim Race      | [race-finish.png](../public/games/race-finish.png)               | [Race prompt](game-art-race-prompt.md)                           |
 
 ## Implemented frontend behavior
 
 - Shared card hierarchy: type/status, title, subtitle, available bonus, bonus earned, progress and details action. Artwork is decorative, cropped within the card and faded behind readable text.
 - Half Season In shows +15 Season Points for 15 participating periods; gaps are allowed. All Season Long shows +30 Season Points for all 31 periods. Both calendars show December 1–31 with date/status tooltips. Both rewards stack, with separate per-Loop streaks preserved.
-- Explorer shows +15 SP and the three-claims-per-required-Loop rule. Its final required roster is not inferred from the existing preview Loops; the card and details explicitly show the pending list and award no completion bonus until a roster is configured.
-- Weekend shows +3 bonus SP per eligible Sunday claim, with the separate +1 claim point and 4-SP total explained. Saturday registration and Sunday claiming are separate preview actions, with fresh registration required for each weekend. Four claims contribute 4 claim SP +12 game-bonus SP.
+- Explorer shows +9 SP and the three-claims-per-required-Loop rule. Its final required roster is not inferred from the existing preview Loops; the card and details explicitly show the pending list and award no completion bonus until a roster is configured.
+- Weekend shows +3 extra Season Points per eligible Sunday claim, without the 1 + 3 breakdown or a repeated card footer. Four December Sunday stops replace its progress bar; the line follows reference time and only claimed dates show green checkmarks. Saturday registration and Sunday claiming are separate preview actions, with fresh registration required for each weekend. Internal scoring remains 4 claim SP +12 game-bonus SP across four claims.
 - Weekend details include confirmed/missed/ended states, per-weekend history and compact reference-clock controls for testing the flow without changing live contracts or making wallet transactions.
-- The race remains on hold. Its 20-SP allocation is displayed as reserved and contributes no awarded points.
+- Claim Race begins with Gardens Race: first 10 entrants to 10 Gardens claims. Only Gardens progress counts; no streak is required. Its 10-SP allocation remains reserved; target completion does not confirm a winner or award points.
 - Sample claim scoring and the shared Season summary reconcile the claim, streak and game components. Confirmed completion bonuses are derived once rather than repeatedly accumulated on refresh.
 - Explore uses the same game definitions, artwork and approved reward amounts, with no obsolete pending-reward or old Sprint/Long Game objectives.
 - Loops directory count reads dynamically as “4 Active Loops · Claim every day” for the current four-Loop roster.

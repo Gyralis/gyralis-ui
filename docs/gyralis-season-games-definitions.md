@@ -39,8 +39,8 @@ Retain the current December 2026 Season and weekend dates as reference fixtures 
 | Game | Current UI example, not a final approved objective | Bonus | Main decisions still open |
 | --- | --- | --- | --- |
 | 20-Day Sprint | Confirmed: participate in at least 20 shared daily Season periods; periods need not be consecutive | 15 SP, confirmed for planning; stacks with Long Game | Actual published roster and period calendar |
-| First 50 to 20 claims | On hold at the user's request; regular Season Loop claims are the agreed qualifying source | 20 SP reserved in the working budget; final game remains on hold | User's later suggestions; objective revisions, ordering, ties, late-entry reconciliation and award timing |
-| Find your next Loop | Confirmed revised goal: claim in every required Season Loop at least three times; required roster is fixed before the Season | 15 SP, agreed for planning | Publish the actual required Loop list; weekend inclusion is unresolved and deferred while focusing on Weekend Loop |
+| Claim Race — Gardens Race | First 10 Season entrants to reach 10 qualifying claims in the designated Gardens Loop | 10 SP reserved in the working budget | Winner ordering, ties, late-entry reconciliation, reward confirmation timing and deployed Loop configuration |
+| Find your next Loop | Confirmed revised goal: claim in every required Season Loop at least three times; required roster is fixed before the Season | 9 SP, approved 2026-11-16 | Publish the actual required Loop list; weekend inclusion is unresolved and deferred while focusing on Weekend Loop |
 | The long game | Confirmed: at least one qualifying regular Loop claim in every shared daily Season period | 30 SP, confirmed for planning; stacks with Sprint | Actual published roster and period calendar |
 | Weekend Loop (formerly Day Game) | Confirmed: each Saturday register for that Sunday's dedicated Loop claim, using full UTC-day windows. Every Season entrant is eligible without extra requirements. | 4 total SP per eligible Sunday claim: 1 claim SP + 3 game-bonus SP; four opportunities, maximum 16 SP | Publish actual Loop identity and verify its configured registration/claim boundaries before implementation |
 
@@ -58,7 +58,7 @@ Confirmed by the user:
 - All regular Loops use the same daily period schedule. Count one attendance unit per shared period, regardless of how many different regular Loops were claimed in that period. Raw period numbers from different contracts must be mapped to the shared Season schedule rather than assumed identical.
 - Credit the one-time bonus after confirmed completion; live standings remain provisional until final review.
 
-The user confirmed a 15-SP one-time Sprint bonus and a 30-SP Long Game bonus, with both bonuses stacking for a total of 45 SP. The 80-SP combined completion-game budget includes a 20-SP allocation reserved for the race, whose remaining design is now on hold.
+The user confirmed a 15-SP one-time Sprint bonus and a 30-SP Long Game bonus, with both bonuses stacking for a total of 45 SP. The 64-SP combined completion-game budget includes a 10-SP allocation reserved for the race, whose winner confirmation rules remain pending.
 
 The objective, counting policy, amount, overlap with Long Game and unlimited-game credit timing are agreed for planning. Publish the actual qualifying roster and aligned period calendar before launch. Extra claims within a counted participation period must not be confused with additional participation periods.
 
@@ -142,61 +142,61 @@ These totals exclude Weekend Loop claims and all completion bonuses. The $250 ca
 
 ### Completion-game budget selected for planning
 
-The user selected the following allocation for planning. With five regular Loops providing a 395-SP regular ceiling, an 80-SP maximum in completion bonuses makes those games about 16.8% of a 475-SP personal ceiling before Day Games. This keeps a larger share of the maximum score in regular claims and independent Loop streaks. Detailed qualification, overlapping rewards and final publication readiness are still unresolved:
+The user selected the following allocation for planning. With five regular Loops providing a 395-SP regular ceiling, a 64-SP maximum in completion bonuses makes those games about 13.9% of a 459-SP personal ceiling before Day Games. This keeps a larger share of the maximum score in regular claims and independent Loop streaks. Detailed qualification, overlapping rewards and final publication readiness are still unresolved:
 
 | Game | One-time bonus selected for planning | Intended behavior |
 | --- | --- | --- |
 | 20-Day Sprint | 15 SP | Participate in 20 different shared daily Season periods; gaps allowed |
-| First 50 to 20 claims | 20 SP reserved; game design on hold | Limited-place race concept awaiting the user's later suggestions |
-| Find your next Loop | 15 SP | Participation across the required distinct Loops |
+| Claim Race — Gardens Race | 10 SP reserved; winner confirmation rules pending | First 10 entrants to reach 10 claims in the designated Gardens Loop |
+| Find your next Loop | 9 SP | Participation across the required distinct Loops |
 | The long game | 30 SP | Participate in every shared daily Season period |
-| Maximum combined completion bonuses, including the reserved race allocation | 80 SP | Sprint and Long Game stack; the race and exploration qualification rules still need completing |
+| Maximum combined completion bonuses, including the reserved race allocation | 64 SP | Sprint and Long Game stack; the race and exploration qualification rules still need completing |
 
-The user selected four eligible Weekend Loop claim opportunities per player across the Season: Sunday December 6, 13, 20 and 27, with Saturday registration and full UTC-day windows. The actual deployed Loop identity and contract period mapping remain implementation work. Under the 4-SP event claim rule, these four opportunities add 16 SP. A player who can earn all four completion bonuses, including the on-hold race's reserved allocation, would have an illustrative maximum of **491 SP**.
+The user selected four eligible Weekend Loop claim opportunities per player across the Season: Sunday December 6, 13, 20 and 27, with Saturday registration and full UTC-day windows. The actual deployed Loop identity and contract period mapping remain implementation work. Under the 4-SP event claim rule, these four opportunities add 16 SP. A player who can earn all four completion bonuses, including the race's reserved allocation, would have an illustrative maximum of **475 SP**.
 
 | Point source | Maximum SP per player in the working scenario |
 | --- | --- |
 | Regular claims | 150 |
 | Day Game base claim points | 4 |
 | Independent regular Loop streak bonuses | 245 |
-| Completion-game bonuses | 80 |
+| Completion-game bonuses | 64 |
 | Day Game bonuses | 12 |
-| Total, conditional on all four completion bonuses being jointly achievable | 491 |
+| Total, conditional on all four completion bonuses being jointly achievable | 475 |
 
-The four Day Game base claim points belong to claims; the 12 event-bonus points belong to game bonuses. Total game bonuses in this scenario are 92 SP (80 + 12), about 18.7% of the 491-SP maximum. Do not count the event base points twice. Sprint and Long Game stack as confirmed by the user.
+The four Day Game base claim points belong to claims; the 12 event-bonus points belong to game bonuses. Total game bonuses in this scenario are 76 SP (64 + 12), about 16.0% of the 475-SP maximum. Do not count the event base points twice. Sprint and Long Game stack as confirmed by the user.
 
-The race is now on hold, so 491 SP is a planning ceiling that includes its reserved 20-SP bonus, not a finalized launch maximum. Excluding that race allocation, the other planned games give a 471-SP personal ceiling (395 regular + 45 attendance + 15 exploration + 16 Day Game). With the same perfect-participation assumptions, 250 entrants would receive at most 117,750 SP without the race. Explorer qualification and actual Loop/event calendars still need completing.
+Race rewards remain unconfirmed, so 475 SP is a planning ceiling that includes its reserved 10-SP bonus, not a finalized launch maximum. Excluding that race allocation, the other planned games give a 465-SP personal ceiling (395 regular + 45 attendance + 9 exploration + 16 Day Game). With the same perfect-participation assumptions, 250 entrants would receive at most 116,250 SP without the race. Explorer qualification and actual Loop/event calendars still need completing.
 
-At the 250-entrant estimate, if all entrants could complete the regular participation, unlimited completion games and four event claims, but only 50 could receive the selected 20-SP race reward, the aggregate upper bound would be 250 × (395 + 15 + 15 + 30 + 16) + 50 × 20 = 118,750 SP. This remains a conditional planning example, not predicted participation or an approved points issuance target.
+At the 250-entrant estimate, if all entrants could complete the regular participation, unlimited completion games and four event claims, but only 10 could receive the reserved 10-SP race reward, the aggregate upper bound would be 250 × (395 + 15 + 9 + 30 + 16) + 10 × 10 = 116,350 SP. This remains a conditional planning example, not predicted participation or an approved points issuance target.
 
-The working reward allocation and weekend schedule are now agreed. Remaining work is to publish the regular and required exploration rosters, verify actual eligible contract periods and return to the race only when the user resumes that discussion. Do not make an individual's bonus change with registrations unless that is an explicitly approved game mechanic.
+The working reward allocation and weekend schedule are now agreed. Remaining work is to publish the regular and required exploration rosters, verify actual eligible contract periods and finalize the remaining race winner confirmation rules. Do not make an individual's bonus change with registrations unless that is an explicitly approved game mechanic.
 
-## 2. First 50 to 20 claims: on hold
+## 2. Claim Race — first event: Gardens Race
 
-The user requested holding this game's planning because they have suggestions to discuss later. Do not finalize its ordering, tie-breaking, late-entry qualification or bonus-confirmation timing, and do not continue its interview until the user returns to it.
+Confirmed update, 2026-11-16: the first 10 Season entrants to reach 10 qualifying claims in one designated Loop. The first event is **Gardens Race**, counting only the Gardens Loop.
 
-The user confirmed that regular Season Loop claims alone count toward this race. Claims from multiple regular Loops within the same shared period can each add one eligible claim. Day Game claims and streak/game bonus points do not add race claims.
+No streak required; gaps are allowed. Each eligible Gardens period counts once. Other regular Loops, Weekend Loop claims, streak bonuses and game bonuses do not advance this race. The current directory's 1Hive Gardens ID is a frontend preview reference; configure the actual new Base Season deployment before making this live.
 
-The prior concept is first 50 entrants to 20 claims, with a 20-SP bonus reserved per winner. That target, winner count and reward remain a working allocation subject to the user's later revisions. Reaching 20 alone must not be represented as a confirmed winning place.
+The user approved 10 additional Season points per confirmed winner, replacing the earlier 20-SP allocation. The reward remains reserved pending winner confirmation rules. Reaching 10 claims is progress completion, not proof of a winning place, and the frontend does not award race points.
 
-### Questions for its discussion
+### Remaining decisions
 
-1. What changes does the user want to the target, winner count or other race mechanics?
-2. Are the first 50 determined by the qualifying claim's chain order, with late entrants reconciled under the approved backdating rule?
-3. When should the 20-SP reward become confirmed, given provisional late-entry qualification and unresolved ties?
+1. Confirm winner ordering and ties for the tenth qualifying Gardens claim.
+2. Define late-entry reconciliation and whether eligible backdated claims affect the first 10 places.
+3. Confirm when a provisional winning place becomes final and the approved 10-SP reward is credited.
 
 ### Worked examples
 
-- At 19 eligible claims, one additional qualifying claim reaches the claim target. Receiving a streak bonus on that claim does not turn it into multiple claims.
-- A Day Game claim does not advance this race under the confirmed regular-Loops-only scope, regardless of the event's 4-SP reward.
-- A player can have 20 claims without being among the first 50. Keep "Target reached" separate from "Winning place confirmed."
-- While late entries or ties can affect qualification, show an unconfirmed place as provisional and do not represent the game bonus as awarded.
+- Nine Gardens claims plus any number of claims in other Loops leaves one qualifying Gardens claim to reach the target.
+- Ten claims spread across several Loops do not satisfy ten Gardens claims.
+- A player can reach ten Gardens claims after the first ten players have already qualified. Keep target completion separate from a confirmed winning place.
+- At ten Gardens claims, show qualification pending and credit zero race points until authoritative winner confirmation exists.
 
 ## 3. Find your next Loop: next discussion
 
 Confirmed revised goal: claim in every required Season Loop at least three times during the Season. This replaces the earlier once-per-Loop discovery target. "Every Loop counts" means the completion check must cover each required Loop separately; excess claims in one Loop cannot fill another Loop's missing claims.
 
-The selected planning reward remains a one-time 15-SP completion bonus, credited after confirmed completion under the agreed unlimited-game policy. No requirement for consecutive claims has been added. A qualifying claim follows the existing Season counting rule: count each eligible Loop period once, rather than counting repeated attempts or additional within-period transactions as fresh participation.
+The selected planning reward remains a one-time 9-SP completion bonus, credited after confirmed completion under the agreed unlimited-game policy. No requirement for consecutive claims has been added. A qualifying claim follows the existing Season counting rule: count each eligible Loop period once, rather than counting repeated attempts or additional within-period transactions as fresh participation.
 
 The user confirmed that Day Game becomes a dedicated Weekend Loop, with Saturday registration and Sunday claiming. This does not make arbitrary claims from other Loops into weekend claims. The user requested focusing only on Weekend Loop questions for now. Exploration inclusion remains unresolved and should not be reopened until that discussion resumes.
 
@@ -211,7 +211,7 @@ The user confirmed that Day Game becomes a dedicated Weekend Loop, with Saturday
 - Goal: "Claim at least three times in every required Season Loop."
 - How: complete three qualifying claim periods in each required Loop during the Season. Claims do not need to be consecutive. Standard claim availability and eligibility still apply.
 - Win: every required Loop reaches at least 3 / 3 qualifying claims.
-- Reward: "+15 bonus SP", once, after confirmed completion.
+- Reward: "+9 Season Points", once, after confirmed completion.
 - Progress: show the number of Loops that have reached 3 / 3 and each Loop's remaining claims. A total claim count alone is insufficient.
 - Next action: open a required Loop that is still below three claims, prioritizing a known available claim. If the weekend Loop is required, expose its next registration and claim windows separately.
 
@@ -286,7 +286,7 @@ All listed Saturdays use the agreed reference 00:00–00:00 UTC registration win
 - Goal: "Register Saturday. Claim Sunday."
 - How: register in this dedicated Weekend Loop during Saturday's window, then make its eligible claim during Sunday's window. Repeat the registration step for each weekend you want to participate in.
 - Eligibility: "Open to all Season entrants."
-- Earn: "+4 SP per Sunday claim", explained as "+1 claim SP +3 game-bonus SP."
+- Earn: "+3 extra Season Points per Sunday claim". Present only the extra reward; keep the ordinary claim point separate in the internal scoring model.
 - Season progress: "2 / 4 weekend claims · 8 SP earned", based only on confirmed eligible claims.
 - Maximum: "Up to 16 SP this Season."
 - Timing: show the next relevant registration or claim deadline, explicitly in UTC. A local-time helper may be supplementary, not a replacement for the published window.
@@ -299,7 +299,7 @@ All listed Saturdays use the agreed reference 00:00–00:00 UTC registration win
 | Before Saturday | Exact next Saturday opening time | View the Weekend Loop and its upcoming registration window |
 | Saturday, not yet registered | Register for the following Sunday before Sunday 00:00 UTC | Register for Sunday |
 | Saturday, registration confirmed | Registration is complete for this weekend only; Sunday opening time | Show Registered and the claim-opening countdown |
-| Sunday, registration confirmed, not claimed | Eligible dedicated Loop claim is available until Monday 00:00 UTC | Claim +4 SP |
+| Sunday, registration confirmed, not claimed | Eligible dedicated Loop claim is available until Monday 00:00 UTC | Claim +3 extra SP |
 | Sunday, no qualifying Saturday registration | This weekend's registration window was missed | Show the next weekend's registration window; do not offer this Sunday's claim as eligible |
 | Sunday, claim confirmed | Credit +1 claim SP and +3 bonus SP once | Preserve the confirmation and show the next weekend window |
 | Claim transaction confirmed but scoring not refreshed | Token transaction success and Season scoring confirmation are distinct | Show Points updating; do not invent another credit or rank change |

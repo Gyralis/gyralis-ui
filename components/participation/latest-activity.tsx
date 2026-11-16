@@ -4,7 +4,7 @@ import type { CSSProperties } from "react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { LuCheck, LuRefreshCw } from "react-icons/lu"
+import { LuCheckCircle2, LuRefreshCw } from "react-icons/lu"
 import { isAddress } from "viem"
 import { useAccount } from "wagmi"
 
@@ -128,14 +128,17 @@ export function LatestActivity() {
                             : `${item.loopName}: claimed ${item.amount} ${item.tokenSymbol}. View transaction`
                         }
                       >
-                        <span className="p-activity-logo">
+                        <span
+                          className="p-activity-logo"
+                          data-activity-kind={item.kind}
+                        >
                           <Image
                             src={item.logoSrc}
                             alt=""
                             width={28}
                             height={28}
                           />
-                          <LuCheck aria-hidden="true" />
+                          <LuCheckCircle2 aria-hidden="true" />
                         </span>
                         <span className="p-activity-details">
                           <strong title={item.loopName}>{item.loopName}</strong>

@@ -105,9 +105,9 @@ All-time scoring remains unchanged. The Season's 28-claim milestone does not rep
 - A qualifying action can advance multiple games.
 - Each completed game awards its configured reward once, subject to its published qualification rules.
 - Game bonus points contribute to the Season only; they do not alter all-time GP.
-- Completion bonuses selected for planning: Sprint +15 SP, Explorer +15 SP and Long Game +30 SP. A +20-SP race allocation remains reserved while its design is on hold for the user's later suggestions. Explorer qualification and publication readiness remain to be finalized.
+- Completion bonuses selected for planning: Sprint +15 SP, Explorer +9 SP and Long Game +30 SP. A +10-SP race allocation remains reserved until winner confirmation rules are finalized. Explorer qualification and publication readiness remain to be finalized.
 - Sprint requires 20 participating Loop periods, with gaps allowed. Long Game requires at least one qualifying regular Loop claim in every Season period. Both attendance bonuses stack, awarding 45 SP in total when both objectives are completed.
-- Race qualifying activity is regular Season Loop claims only, including claims from different regular Loops in one period. Day Game claims do not advance the race. Remaining race mechanics are on hold at the user's request.
+- Claim Race starts with Gardens Race: the first 10 entrants to reach 10 qualifying claims in the designated Gardens Loop. No streak required; gaps are allowed. Other Loop claims do not count. Winner ordering, ties, late-entry treatment and reward confirmation remain pending.
 - All regular Season Loops share one daily period schedule. Attendance games count shared Loop periods rather than assuming UTC calendar days, with at most one attendance unit per shared period across regular Loops. Publish actual period boundaries before launch.
 - Unlimited completion bonuses are credited after confirmed completion, with standings provisional until final review.
 
@@ -116,8 +116,8 @@ The current concepts are templates, not final approved game definitions:
 | Concept | Intended player behavior |
 | --- | --- |
 | 20-Day Sprint | Make at least one qualifying claim from any regular Season Loop in at least 20 shared daily periods during the Season; periods need not be consecutive. Bonus: +15 SP. |
-| First 50 to 20 claims | On hold for later suggestions. Regular Season Loop claims are the confirmed qualifying activity; the previous 20-claim/50-winner concept and +20-SP allocation remain provisional. |
-| Find your next Loop | Make at least three qualifying claims in every required Season Loop during the Season. Bonus: +15 SP once. Required roster is fixed and published before the Season; actual roster and weekend inclusion remain unresolved. |
+| Claim Race — Gardens Race | First 10 entrants to reach 10 qualifying claims in the Gardens Loop. No streak required. The +10-SP allocation remains reserved until winner confirmation rules are finalized. |
+| Find your next Loop | Make at least three qualifying claims in every required Season Loop during the Season. Bonus: +9 SP once. Required roster is fixed and published before the Season; actual roster and weekend inclusion remain unresolved. |
 | The long game | Make at least one qualifying claim from any regular Season Loop in every shared daily Season period. Bonus: +30 SP. |
 
 Do not publish a game as active until its objective, reward, dates, and qualification rules are approved. Limited-place games need provisional qualification while late registration can introduce backdated activity. Final qualification also depends on the approved tie policy.

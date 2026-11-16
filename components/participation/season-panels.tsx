@@ -506,17 +506,19 @@ export function SeasonRules() {
           <li>
             <strong>Complete Season Games</strong>
             <span>
-              Half Season In +15 SP, All Season Long +30 SP and The Rule of 3
-              +15 SP add to the same game-bonus total. Half Season In and All
-              Season Long stack. Claim Rush is on hold and awards no points
-              until its rules are finalized.
+              Half Season In +15 SP, All Season Long +30 SP and The Rule of 3 +9
+              SP add to the same game-bonus total. Half Season In and All Season
+              Long stack. Claim Race starts with Gardens Race: the first 10 to
+              reach 10 Gardens claims. No streak required. Its +10 SP reward
+              remains reserved until winner confirmation rules are finalized.
             </span>
           </li>
         </ol>
         <p className="p-caption">
-          Weekend Ritual: register each Saturday and claim Sunday for 4 total SP
-          (1 claim +3 game bonus). Four opportunities, up to 16 SP. No regular
-          streak bonus. Only this dedicated Loop counts for its weekend reward.
+          Weekend Ritual: register each Saturday and claim Sunday for 3 extra
+          Season points. Four opportunities, up to 12 extra Season points. No
+          regular streak bonus. Only this dedicated Loop counts for its weekend
+          reward.
         </p>
       </section>
       <section className="p-surface s-panel">

@@ -22,6 +22,7 @@ import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs } from "./participation-ui"
 import { useSeason } from "./season-context"
 import { SeasonGameCard, SeasonGameDetails } from "./season-game-card"
+import { SeasonGameDescription, SeasonGameTitle } from "./season-game-labels"
 import { SeasonControls, SeasonHeader, SeasonRules } from "./season-panels"
 
 function GamesContent() {
@@ -186,8 +187,12 @@ function GamesContent() {
                   alt=""
                 />
                 <p className="p-eyebrow">{selected.type}</p>
-                <DialogTitle>{selected.title}</DialogTitle>
-                <DialogDescription>{selected.description}</DialogDescription>
+                <DialogTitle>
+                  <SeasonGameTitle game={selected} />
+                </DialogTitle>
+                <DialogDescription>
+                  <SeasonGameDescription game={selected} />
+                </DialogDescription>
               </DialogHeader>
               {state.message && (
                 <p className="s-status" role="status">

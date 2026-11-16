@@ -117,11 +117,13 @@ export function createSeasonPreview(phase: SeasonPhase = "live"): PreviewState {
     ),
     // Publish the required roster before this game can award points.
     requiredLoopIds: null,
-    weekendTime: seasonPhases[phase].date,
+    // The independent Weekend Ritual clock previews the Dec 13 success state.
+    weekendTime:
+      phase === "live" ? "2026-12-13T12:00:00Z" : seasonPhases[phase].date,
     weekends: weekendSchedule.map(({ id }) => ({
       id,
-      registered: phase === "prizes",
-      claimed: phase === "prizes",
+      registered: phase === "prizes" || (phase === "live" && id === 2),
+      claimed: phase === "prizes" || (phase === "live" && id === 2),
     })),
     prizeClaimed: false,
     message: "",
@@ -303,7 +305,7 @@ export function seasonPreviewReducer(
           weekend.id === action.id ? { ...weekend, claimed: true } : weekend
         ),
         message:
-          "Weekend Ritual: +4 SP · +1 claim +3 game bonus. No streak bonus. Claim preview only; no tokens moved.",
+          "Weekend Ritual: +3 extra Season points. Claim preview only; no tokens moved.",
       }
     }
     case "prize":

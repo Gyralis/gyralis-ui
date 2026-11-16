@@ -3,14 +3,18 @@
 import { useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { LuArrowRight, LuCheck, LuGift } from "react-icons/lu"
+import { LoopCardsData } from "@/data/loops-data"
+import { LuArrowRight, LuCheck, LuGift, LuMinus, LuX } from "react-icons/lu"
 
+import { loopLogo } from "@/lib/participation/loop-artwork"
 import {
+  claimRace,
   gameView,
   participatingPeriods,
   seasonDayCount,
   seasonGames,
   weekendSchedule,
+  weekendTimeline,
   weekendView,
   type SeasonGame,
 } from "@/lib/participation/season-games"
@@ -24,6 +28,7 @@ import {
 
 import { ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
+import { SeasonGameDescription, SeasonGameTitle } from "./season-game-labels"
 
 export function SeasonGameCard({
   game,
@@ -34,7 +39,7 @@ export function SeasonGameCard({
 }) {
   const { state } = useSeason()
   const view = gameView(game, state)
-  const held = game.id === "race"
+  const isRace = game.id === "race"
   const isFullSeason = game.id === "marathon"
   const hasDayProgress = game.id === "sprint" || isFullSeason
   const countedDays = hasDayProgress ? participatingPeriods(state) : []
@@ -49,7 +54,7 @@ export function SeasonGameCard({
     : []
   return (
     <article
-      className={`s-game-card p-surface ${held ? "is-held" : ""}`}
+      className={`s-game-card p-surface ${isRace ? "s-game-card-race" : ""}`}
       data-magic-bento-card=""
     >
       <div className="s-game-card-art" aria-hidden="true">
@@ -62,8 +67,12 @@ export function SeasonGameCard({
         />
       </div>
       <div className="s-game-card-content">
-        <h2>{game.title}</h2>
-        <p className="s-game-description">{game.description}</p>
+        <h2>
+          <SeasonGameTitle game={game} />
+        </h2>
+        <p className="s-game-description">
+          <SeasonGameDescription game={game} />
+        </p>
         <div className="s-game-reward-row">
           <div className="s-game-reward s-game-reward-prize">
             <span className="s-game-reward-icon" aria-hidden="true">
@@ -71,28 +80,31 @@ export function SeasonGameCard({
             </span>
             <strong>+{game.bonus}</strong>
             <span>
-              {held
+              {isRace
                 ? "Season Points · reserved"
                 : game.id === "weekend"
-                ? "Season Points per claim"
+                ? "extra Season Points per claim"
                 : "Season Points"}
             </span>
           </div>
         </div>
-        {(held || view.target > 0) && (
-          <div className="s-game-card-progress">
-            {held ? (
-              <p>Game format and qualification rules are on hold.</p>
-            ) : (
-              <>
-                <div>
+        {game.id === "explorer" ? (
+          <RuleOfThreeLoopCards />
+        ) : (
+          view.target > 0 && (
+            <div className="s-game-card-progress">
+              {game.id !== "weekend" && (
+                <div className="s-game-progress-summary">
                   <span>
+                    {isRace && `${claimRace.name} · `}
                     {Math.min(view.progress, view.target)} / {view.target}{" "}
                     {game.unit}
                   </span>
                   <span>
-                    {game.id === "weekend"
-                      ? "Up to 16 total SP"
+                    {isRace
+                      ? view.status === "Qualification pending"
+                        ? "Target reached · results pending"
+                        : `${claimRace.winners} winners`
                       : view.status === "Completed"
                       ? "Bonus credited in preview"
                       : isFullSeason && view.status === "No longer achievable"
@@ -100,52 +112,154 @@ export function SeasonGameCard({
                       : `${Math.max(0, view.target - view.progress)} remaining`}
                   </span>
                 </div>
-                {hasDayProgress ? (
-                  <SeasonDayPills
-                    title={game.title}
-                    dayCount={seasonDayCount}
-                    countedDays={countedDays}
-                    missedDays={missedDays}
-                    closedDays={closedDays}
-                    currentDay={state.period}
-                    onOpen={onOpen}
-                  />
-                ) : (
-                  <ProgressBar
-                    value={(view.progress / view.target) * 100}
-                    label={`${game.title} progress`}
-                  />
-                )}
-              </>
-            )}
-            {game.id === "weekend" && (
-              <small>Each Sunday claim: 1 claim SP + 3 bonus SP.</small>
-            )}
-            {isFullSeason && view.status === "No longer achievable" && (
-              <small>
-                Every Season day is required. Your other points stay yours.
-              </small>
-            )}
-          </div>
+              )}
+              {game.id === "weekend" ? (
+                <WeekendTimeline onOpen={onOpen} />
+              ) : hasDayProgress ? (
+                <SeasonDayPills
+                  title={game.title}
+                  dayCount={seasonDayCount}
+                  countedDays={countedDays}
+                  missedDays={missedDays}
+                  closedDays={closedDays}
+                  currentDay={state.period}
+                  onOpen={onOpen}
+                />
+              ) : (
+                <ProgressBar
+                  value={(view.progress / view.target) * 100}
+                  label={`${game.title} progress`}
+                />
+              )}
+              {isFullSeason && view.status === "No longer achievable" && (
+                <small>
+                  Every Season day is required. Your other points stay yours.
+                </small>
+              )}
+            </div>
+          )
         )}
         <button
           className="s-game-open"
           type="button"
           onClick={(event) => onOpen(event.currentTarget)}
           aria-haspopup="dialog"
-          aria-label={
-            held
-              ? `View ${game.title} planning details`
-              : `How ${game.title} works`
-          }
+          aria-label={`How ${game.title} works`}
         >
-          <span className="s-game-open-label">How it works</span>
           <span className="s-game-open-arrow" aria-hidden="true">
             <LuArrowRight />
           </span>
         </button>
       </div>
     </article>
+  )
+}
+
+function WeekendTimeline({
+  onOpen,
+}: {
+  onOpen: (trigger: HTMLButtonElement) => void
+}) {
+  const { state } = useSeason()
+  const timeline = weekendTimeline(state)
+
+  return (
+    <div className="s-weekend-timeline">
+      <span className="sr-only">
+        The line tracks time through December. Checkmarks show claimed weekends.
+      </span>
+      <div className="s-weekend-timeline-track" aria-hidden="true">
+        <span style={{ transform: `scaleX(${timeline.progress / 100})` }} />
+      </div>
+      <ol aria-label="December weekend claims">
+        {timeline.stops.map((weekend) => {
+          const date = new Date(weekend.claimAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            timeZone: "UTC",
+          })
+          return (
+            <li key={weekend.id} style={{ left: `${weekend.position}%` }}>
+              <button
+                type="button"
+                data-status={weekend.status}
+                aria-current={weekend.current ? "step" : undefined}
+                aria-label={`${date}: ${weekend.label}. View Weekend Ritual`}
+                aria-haspopup="dialog"
+                title={`${date} · ${weekend.label}`}
+                onClick={(event) => onOpen(event.currentTarget)}
+              >
+                <span className="s-weekend-timeline-node" aria-hidden="true">
+                  {weekend.status === "claimed" ? (
+                    <LuCheck />
+                  ) : weekend.closed && weekend.status === "missed" ? (
+                    <LuX />
+                  ) : (
+                    <LuMinus />
+                  )}
+                </span>
+                <time dateTime={weekend.claimAt}>{date}</time>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
+}
+
+function RuleOfThreeLoopCards() {
+  const { state } = useSeason()
+  // Layout examples only while the final required Season roster is unpublished.
+  // These boxes never set the roster or authorize a completion reward.
+  const loopIds = state.requiredLoopIds ?? [3, 4, 9]
+  const loops = loopIds.flatMap((id) => {
+    const loop = LoopCardsData.find((item) => item.id === id && item.enabled)
+    return loop ? [loop] : []
+  })
+
+  return (
+    <ul className="s-rule-loop-grid" aria-label="Loop claim progress">
+      {loops.map((loop) => {
+        const claims = Math.min(
+          3,
+          Math.max(
+            0,
+            state.loops.find((item) => item.id === loop.id)?.claims ?? 0
+          )
+        )
+        return (
+          <li key={loop.id}>
+            <Link
+              className="s-rule-loop"
+              href={`/loops#loop-card-${loop.id}`}
+              aria-label={`${loop.title}: ${claims} of 3 claims. View Loop`}
+              title={loop.title}
+            >
+              <Image src={loopLogo(loop)} alt="" width={20} height={20} />
+              <strong className="s-rule-loop-title">{loop.by}</strong>
+              <span
+                className="s-rule-loop-pills"
+                role="progressbar"
+                aria-label={`${loop.title} claims`}
+                aria-valuemin={0}
+                aria-valuemax={3}
+                aria-valuenow={claims}
+                aria-valuetext={`${claims} of 3 claims`}
+              >
+                {Array.from({ length: 3 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={index < claims ? "is-filled" : undefined}
+                    aria-hidden="true"
+                  />
+                ))}
+              </span>
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -253,13 +367,14 @@ export function SeasonGameDetails({ game }: { game: SeasonGame }) {
       <div className="s-game-detail-reward">
         <span>
           {game.id === "race"
-            ? "Reserved reward · on hold"
+            ? "Reserved reward per confirmed winner"
             : game.id === "weekend"
             ? "Extra points per eligible Sunday claim"
             : "Extra points after confirmed completion"}
         </span>
         <strong>
-          +{game.bonus} <small>bonus SP</small>
+          +{game.bonus}{" "}
+          <small>{game.id === "weekend" ? "Season Points" : "bonus SP"}</small>
         </strong>
       </div>
       <dl className="s-game-definition">
@@ -275,54 +390,64 @@ export function SeasonGameDetails({ game }: { game: SeasonGame }) {
       {game.id === "weekend" ? (
         <WeekendParticipation />
       ) : (
-        game.id !== "race" && (
-          <div className="s-game-detail-progress">
-            <strong>
-              {view.target === 0
-                ? "Required Loop list pending"
-                : `${Math.min(view.progress, view.target)} / ${view.target} ${
-                    game.unit
-                  }`}
-            </strong>
-            {view.target > 0 && (
-              <ProgressBar
-                value={(view.progress / view.target) * 100}
-                label={`${game.title} progress`}
-              />
-            )}
-            {game.id === "explorer" &&
-              state.requiredLoopIds?.map((id) => {
-                const loop = state.loops.find((item) => item.id === id)
-                return (
-                  <div className="s-game-loop-progress" key={id}>
-                    <span>{loop?.name ?? "Required Loop"}</span>
-                    <strong>{Math.min(3, loop?.claims ?? 0)} / 3 claims</strong>
-                  </div>
-                )
-              })}
-            <p>
-              {view.status === "No longer achievable"
-                ? "This objective can no longer be completed this Season. Points already earned stay yours."
-                : view.target === 0
-                ? "The required Loop list is fixed before the Season. No completion or award is assumed until that list is available."
-                : `${
-                    state.registered ? view.earned : 0
-                  } bonus SP earned in this preview. Progress updates from qualifying claims automatically.`}
-            </p>
-          </div>
-        )
+        <div className="s-game-detail-progress">
+          <strong>
+            {view.target === 0
+              ? "Required Loop list pending"
+              : `${Math.min(view.progress, view.target)} / ${view.target} ${
+                  game.unit
+                }`}
+          </strong>
+          {view.target > 0 && (
+            <ProgressBar
+              value={(view.progress / view.target) * 100}
+              label={`${game.title} progress`}
+            />
+          )}
+          {game.id === "explorer" &&
+            state.requiredLoopIds?.map((id) => {
+              const loop = state.loops.find((item) => item.id === id)
+              return (
+                <div className="s-game-loop-progress" key={id}>
+                  <span>{loop?.name ?? "Required Loop"}</span>
+                  <strong>{Math.min(3, loop?.claims ?? 0)} / 3 claims</strong>
+                </div>
+              )
+            })}
+          <p>
+            {game.id === "race"
+              ? view.status === "Qualification pending"
+                ? "Target reached. Your place among the first 10 still needs confirmation; no race points have been credited."
+                : "Only Gardens claims count. Reaching 10 claims does not automatically confirm a winning place."
+              : view.status === "No longer achievable"
+              ? "This objective can no longer be completed this Season. Points already earned stay yours."
+              : view.target === 0
+              ? "The required Loop list is fixed before the Season. No completion or award is assumed until that list is available."
+              : `${
+                  state.registered ? view.earned : 0
+                } bonus SP earned in this preview. Progress updates from qualifying claims automatically.`}
+          </p>
+        </div>
       )}
       <ul className="s-game-rules">
         {game.rules.map((rule) => (
           <li key={rule}>{rule}</li>
         ))}
       </ul>
-      {game.id !== "weekend" && game.id !== "race" && (
+      {game.id !== "weekend" && (
         <Link
           className="p-button"
-          href={game.id === "explorer" ? "/loops" : "/loops?view=streaks"}
+          href={
+            game.id === "race"
+              ? `/loops#loop-card-${claimRace.loopId}`
+              : game.id === "explorer"
+              ? "/loops"
+              : "/loops?view=streaks"
+          }
         >
-          {game.id === "explorer"
+          {game.id === "race"
+            ? "View Gardens Loop"
+            : game.id === "explorer"
             ? "Explore Loops"
             : "View your Loop participation"}
           <LuArrowRight aria-hidden="true" />
@@ -401,13 +526,13 @@ function WeekendParticipation() {
             dispatch({ type: "weekend-claim", id: view.weekend.id })
           }
         >
-          Preview Sunday claim · +4 SP
+          Preview Sunday claim · +3 extra SP
           <LuArrowRight aria-hidden="true" />
         </button>
       ) : (
         <p role="status">
           {record?.claimed
-            ? "Claim confirmed in preview. +1 claim SP +3 bonus SP = +4 total SP."
+            ? "Claim confirmed in preview. +3 extra Season points earned."
             : view.stage === "registered"
             ? "Registered for this Sunday. Return when the claim period opens."
             : view.stage === "missed"
@@ -429,7 +554,7 @@ function WeekendParticipation() {
               <strong>
                 {activity?.claimed ? (
                   <>
-                    <LuCheck aria-hidden="true" /> +4 SP
+                    <LuCheck aria-hidden="true" /> +3 extra SP
                   </>
                 ) : activity?.registered ? (
                   "Registered"

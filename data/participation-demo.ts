@@ -39,14 +39,15 @@ export const demoGames: DemoGame[] = [
   {
     id: "race",
     type: "Claim Race",
-    title: "First 50 to 20 claims",
-    description: "Show up early. Keep coming back. Reach 20 claims.",
-    status: "Live",
-    current: 14,
-    target: 20,
+    title: "Claim Race",
+    description:
+      "Gardens Race: be one of the first 10 to reach 10 claims in the Gardens Loop. No streak required.",
+    status: "Upcoming",
+    current: 2,
+    target: 10,
     unit: "claims",
     participants: 164,
-    art: "/images/super_loops_img.png",
+    art: "/games/race-finish.png",
   },
   {
     id: "explorer",
