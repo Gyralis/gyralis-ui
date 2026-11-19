@@ -8,6 +8,7 @@ import { LuArrowRight, LuInfo, LuTrophy } from "react-icons/lu"
 import { FilterTabs, PageIntro } from "./participation-ui"
 import { useSeason } from "./season-context"
 import { SeasonScore } from "./season-panels"
+import { SeasonPointsValue } from "./season-points-value"
 
 export function LeaderboardSections({ children }: { children: ReactNode }) {
   return (
@@ -128,12 +129,18 @@ function SeasonStandings() {
         <>
           {state.registered && (
             <p className="s-standing-status">
-              {rank && rank <= cutoff
-                ? "Currently in a paid position · subject to final standings and tie rules"
-                : `${Math.max(
-                    0,
-                    cutoffScore - score.total + 1
-                  )} more points to move above the current payout-cutoff score`}
+              {rank && rank <= cutoff ? (
+                "Currently in a paid position · subject to final standings and tie rules"
+              ) : (
+                <>
+                  <SeasonPointsValue
+                    as="span"
+                    value={Math.max(0, cutoffScore - score.total + 1)}
+                    size="sm"
+                  />{" "}
+                  more to move above the current payout-cutoff score
+                </>
+              )}
             </p>
           )}
           <div className="p-table-wrap p-surface">
@@ -170,12 +177,28 @@ function SeasonStandings() {
                       )}
                     </td>
                     <td>
-                      <strong>{row.total} SP</strong>
+                      <SeasonPointsValue value={row.total} size="sm" />
                       <details>
                         <summary>Point breakdown</summary>
                         <p>
-                          {row.claims} claims + {row.streaks} streak +{" "}
-                          {row.games} from Season Games
+                          <SeasonPointsValue
+                            as="span"
+                            value={row.claims}
+                            size="xs"
+                          />{" "}
+                          from claims +{" "}
+                          <SeasonPointsValue
+                            as="span"
+                            value={row.streaks}
+                            size="xs"
+                          />{" "}
+                          from streaks +{" "}
+                          <SeasonPointsValue
+                            as="span"
+                            value={row.games}
+                            size="xs"
+                          />{" "}
+                          from Season Games
                         </p>
                       </details>
                     </td>

@@ -1,6 +1,6 @@
 # Gyralis optimization tracker
 
-Last updated: 2026-11-16
+Last updated: 2026-11-19
 
 One shared working file for agents and contributors. Organize reviews and follow-up work by page; keep shared-component findings with their owning page and cross-reference affected pages.
 
@@ -25,6 +25,12 @@ Status: no separate page review completed in this pass.
 ## Loops — `/loops`
 
 Status: no separate page review completed in this pass.
+
+Season streak layout refinement, 2026-11-19: aligned the daily streak graph and its column heading to the right of their shared column. Extra row space now sits between the left Loop metadata and the graph, instead of after the graph. Loop metadata shows only the logo and title; community and chain text are removed. Streak points remain at the right edge. The existing graph width limit, 20-pill navigation and horizontally scrollable narrow-screen layout are preserved. Presentation-only changes; browser verification remains pending.
+
+Season streak row cleanup, 2026-11-19: removed the visible claim count and period-range text above each pill graph. The meter's accessible description still includes both; column headings and pill navigation remain available.
+
+Season streak visual states, 2026-11-19: removed the visible “Total earned” label while retaining the total SP value and hover breakdown. Pills use only muted gray for unfilled positions and primary green for completed streak claims; removed special milestone and next-claim colors from the graph. Milestone status remains in the points breakdown. Totals are vertically centered in each row; scoring and current-streak calculations are unchanged.
 
 - The mismatch between the active Loop roster and Games fixtures is covered by GAMES-007.
 - Live Loop claims versus Games preview progress is covered by GAMES-011.
@@ -59,6 +65,8 @@ Suggested order: correct misleading card states and the missing-record crash, ma
 Verified: a missed closed period makes the objective unattainable; 30 participating periods do not earn the 31-period reward; full completion earns +30 SP and stacks with Half Season In for +45 SP.
 
 ### The Rule of 3
+
+Artwork update, 2026-11-17: applied the selected **Triple-check Loop** concept—one charcoal/forest-green ring with exactly three large green checkmarks. Built-in image generation produced `public/games/rule-of-three.png` (1254 × 1254, alpha preserved). The shared game definition updates the Games card, modal hero and Explore preview. The original `explorer.png` is retained. Generated artwork inspected directly; no browser inspection. [Exact prompt](docs/game-art-rule-of-three-prompt.md).
 
 - [ ] **GAMES-003 — Supply the fixed required Loop roster for completion testing.**
   - Classification: configuration blocker, not an incorrect award calculation.
@@ -133,6 +141,18 @@ Approved update, 2026-11-16: renamed Claim Rush to **Claim Race**. The first eve
 Validation: TypeScript, targeted ESLint and whitespace checks passed. Eleven focused logic checks passed for Gardens-only progress, other regular/Weekend Loop exclusion, missing Gardens data, duplicate claims, the 9/10 boundary, pending qualification without automatic awards, and Season phase/entry states. Code-only verification; no browser inspection performed.
 
 ### Shared Games page and card behavior
+
+Progress pill refinement, 2026-11-17: unfilled attendance and Rule of 3 pills share an opaque muted gray background in cards and modals, preventing card artwork from tinting the empty state. Missed attendance days keep a subtle dashed border, with their status available in accessible labels; completed pills remain primary green. Hover and keyboard-focus outlines are preserved.
+
+Reward badge refinement, 2026-11-17: all game cards and modals show a trophy to the left of the prominent **+X** value, with smaller **Season Points** underneath. The icon, value and label use primary green; the trophy has no separate background and is no longer used as a watermark. Weekend's per-claim qualifier and the race's reserved status remain in hover titles and accessible text, with the rules also retaining those details.
+
+Modal refinement, 2026-11-17: all five game details now use their existing artwork as a full-width hero background with only the title visible. A short **Challenge** introduces the objective; **How to** holds the counting and eligibility details. Cards and modals share one reward badge and one progress renderer, including the 31 day pills, per-Loop Rule of 3 pills, four-stop weekend timeline and Gardens race bar. Modal date pills retain keyboard/date tooltips without reopening the dialog; the initial focus goes to the title. Removed the bottom Loop navigation buttons, repeated explanatory footer and duplicate weekend history grid. Weekend preview registration/claim controls remain available. Reward values, scoring and pending roster/race decisions are unchanged.
+
+Prizes & Rules refinement, 2026-11-17: each full-width section is independently collapsible, with its title and concise summary always visible. Calendar starts open; Prize Pool, How to Earn Season Points and Participation Rules start collapsed. Calendar milestones show dates only. Existing Radix accordion controls provide keyboard support and height animation; the app's reduced-motion rule disables animation. Post-Season prize status stays outside the collapsed sections.
+
+Validation for this pass: all 19 Season Games tests, TypeScript, targeted ESLint and whitespace checks passed. Code-only verification under the current review preference; browser layout and interaction inspection remain pending.
+
+Prizes & Rules layout update, 2026-11-16: all cards stack in one full-width column at every viewport size, within the shared content-width limit. Approved order: Season Calendar, Prize Pool, **How to Earn Season Points**, then Participation Rules. The DOM follows this order for reading and keyboard navigation. Rule content and scoring are unchanged.
 
 Approved UI update, 2026-11-16: removed the visible “How it works” footer and its spacing from every game card. The named native button now covers the card without affecting its height; the hover/focus arrow, keyboard opening, focus outline, and foreground Loop/date controls are preserved. Browser interaction verification remains pending.
 
@@ -238,5 +258,11 @@ Status: not reviewed in this pass. Add page-specific findings here.
 Status: not reviewed in this pass. Preserve this as the existing analytics destination.
 
 ## Shared shell and right side
+
+Season point typography, 2026-11-19: added the shared `SeasonPointsValue` component. Its default output is a paragraph with the formatted value in foreground text and an inline `SP` span in smaller muted text. It accepts `value`, `size` (`xs`, `sm`, `md`, `lg`, `xl`, `hero`) and optional `showPlus`. `as="span"` supports inline prose and buttons without invalid nested paragraphs. Number formatting uses en-US grouping and up to two fractional digits; unknown values display a dash, and negative values never get a double sign.
+
+Migrated the right-side Season total and three source values, expanded Season summary, streak totals and hover milestones, Season Games cards/modals, Explore rewards, Season leaderboard totals/breakdowns/cutoff, Loop preview bonuses, rules and Season-specific milestone help. Game badges now use the same foreground value and muted SP; contextual reserved/per-claim wording remains in accessible labels, hover titles or adjacent copy. All-time GP and token rewards retain their separate presentation. Shared CSS controls the size hierarchy; individual pages no longer override Season values with green text.
+
+Verification: TypeScript, targeted ESLint and formatting checks passed. Static React rendering verified number grouping, fractional values, optional plus, negative/zero/unknown values, all six sizes, paragraph/unit structure and inline contexts. Browser inspection remains pending under the current code-only preference.
 
 Status: not separately reviewed in this pass. Add navigation, right-side, search, and cross-page findings here when reviewed. Existing Games-related shared-header and tooltip issues remain owned by GAMES-006 and GAMES-010 to avoid duplicate tracking.

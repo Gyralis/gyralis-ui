@@ -22,13 +22,14 @@ import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs } from "./participation-ui"
 import { useSeason } from "./season-context"
 import { SeasonGameCard, SeasonGameDetails } from "./season-game-card"
-import { SeasonGameDescription, SeasonGameTitle } from "./season-game-labels"
+import { SeasonGameTitle } from "./season-game-labels"
 import { SeasonControls, SeasonHeader, SeasonRules } from "./season-panels"
 
 function GamesContent() {
   const router = useRouter()
   const params = useSearchParams()
   const gameTrigger = useRef<HTMLButtonElement | null>(null)
+  const gameTitle = useRef<HTMLHeadingElement | null>(null)
   const { state, dispatch } = useSeason()
   const tab =
     !params.get("game") && params.get("view") === "prizes"
@@ -168,6 +169,10 @@ function GamesContent() {
       >
         <DialogContent
           className="participation-theme participation-dialog s-game-dialog dark"
+          onOpenAutoFocus={(event) => {
+            event.preventDefault()
+            gameTitle.current?.focus({ preventScroll: true })
+          }}
           onCloseAutoFocus={(event) => {
             if (gameTrigger.current?.isConnected) {
               event.preventDefault()
@@ -178,22 +183,21 @@ function GamesContent() {
           {selected && (
             <>
               <DialogHeader className="s-game-dialog-header">
-                <Image
-                  className="s-game-dialog-art"
-                  src={selected.art}
-                  width={1254}
-                  height={1254}
-                  sizes="240px"
-                  alt=""
-                />
-                <p className="p-eyebrow">{selected.type}</p>
-                <DialogTitle>
+                <div className="s-game-dialog-art" aria-hidden="true">
+                  <Image
+                    src={selected.art}
+                    fill
+                    sizes="(max-width: 708px) calc(100vw - 28px), 680px"
+                    alt=""
+                  />
+                </div>
+                <DialogTitle ref={gameTitle} tabIndex={-1}>
                   <SeasonGameTitle game={selected} />
                 </DialogTitle>
-                <DialogDescription>
-                  <SeasonGameDescription game={selected} />
-                </DialogDescription>
               </DialogHeader>
+              <DialogDescription className="sr-only">
+                {selected.description}
+              </DialogDescription>
               {state.message && (
                 <p className="s-status" role="status">
                   {state.message}

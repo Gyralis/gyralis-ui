@@ -19,6 +19,7 @@ import {
 } from "./participation-ui"
 import { useSeason } from "./season-context"
 import { SeasonGameDescription, SeasonGameTitle } from "./season-game-labels"
+import { SeasonPointsValue } from "./season-points-value"
 import { SeasonPreview } from "./season-preview"
 
 const ecosystems = [
@@ -203,14 +204,20 @@ function DiscoverContent() {
                       <p>
                         <SeasonGameDescription game={game} />
                       </p>
-                      <span className="p-caption">
-                        +{game.bonus}{" "}
-                        {game.id === "race"
-                          ? "SP reserved · Gardens Race"
-                          : game.id === "weekend"
-                          ? "extra Season Points per Sunday claim"
-                          : "bonus SP once"}
-                      </span>
+                      <div className="p-featured-game-reward">
+                        <SeasonPointsValue
+                          value={game.bonus}
+                          size="sm"
+                          showPlus
+                        />
+                        <span className="p-caption">
+                          {game.id === "race"
+                            ? "reserved · Gardens Race"
+                            : game.id === "weekend"
+                            ? "extra per Sunday claim"
+                            : "bonus once"}
+                        </span>
+                      </div>
                       {view.target > 0 ? (
                         <ProgressBar
                           value={(view.progress / view.target) * 100}

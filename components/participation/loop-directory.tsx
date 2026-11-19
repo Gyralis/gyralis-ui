@@ -38,6 +38,7 @@ import { LoopStreaks } from "./loop-streaks"
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState, FilterTabs, PageIntro } from "./participation-ui"
 import { useSeason } from "./season-context"
+import { SeasonPointsValue } from "./season-points-value"
 
 const chainIcons: Record<number, string> = {
   100: "/icons/NetworkGnosis.svg",
@@ -207,9 +208,20 @@ export function LoopOpportunityCard({
         {loop.enabled && seasonLoop && (
           <p className="s-loop-season-note">
             Season preview · {seasonLoop.streak}-claim streak
-            {nextBonus
-              ? ` · +${nextBonus.points} SP at ${nextBonus.streak}`
-              : " · all bonuses earned"}
+            {nextBonus ? (
+              <>
+                {" · "}
+                <SeasonPointsValue
+                  as="span"
+                  value={nextBonus.points}
+                  size="xs"
+                  showPlus
+                />{" "}
+                at {nextBonus.streak}
+              </>
+            ) : (
+              " · all bonuses earned"
+            )}
           </p>
         )}
         <div className="p-loop-card-bottom">

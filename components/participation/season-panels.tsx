@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
@@ -22,6 +22,12 @@ import {
   type SeasonPhase,
 } from "@/lib/participation/season-preview"
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -31,6 +37,7 @@ import {
 
 import { ProgressBar } from "./participation-ui"
 import { useSeason } from "./season-context"
+import { SeasonPointsValue } from "./season-points-value"
 
 export function SeasonControls() {
   const { state, reset, failNext, setFailNext, pending, dispatch, rank } =
@@ -444,6 +451,32 @@ export function SeasonHeader({
 
 export { SeasonPoints as SeasonScore } from "./season-points"
 
+function SeasonRuleSection({
+  value,
+  title,
+  summary,
+  children,
+}: {
+  value: string
+  title: string
+  summary: string
+  children: ReactNode
+}) {
+  return (
+    <AccordionItem value={value} className="p-surface s-rule-section">
+      <AccordionTrigger className="s-rule-trigger">
+        <span>
+          <strong>{title}</strong>
+          <span>{summary}</span>
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="s-rule-content">
+        <div className="s-panel">{children}</div>
+      </AccordionContent>
+    </AccordionItem>
+  )
+}
+
 export function SeasonRules() {
   const { state, entries, pending, transact, rank } = useSeason()
   const [open, setOpen] = useState(false)
@@ -451,9 +484,60 @@ export function SeasonRules() {
     state.registered && (rank ?? Infinity) <= Math.ceil(entries * 0.15)
   const published = !["registration", "late"].includes(state.phase)
   return (
-    <div className="s-rules-grid">
-      <section className="p-surface s-panel">
-        <p className="p-eyebrow">The prize pool</p>
+    <Accordion
+      type="multiple"
+      defaultValue={["calendar"]}
+      className="s-rules-grid"
+    >
+      <SeasonRuleSection
+        value="calendar"
+        title="Season Calendar"
+        summary="Dec 1–31 · Registration opens Nov 24"
+      >
+        <div className="s-timeline">
+          {[
+            [
+              "Nov 24",
+              "Registration opens",
+              "1 USDC entry. Full entry-fee refunds before the start.",
+            ],
+            [
+              "Dec 1",
+              "Season starts",
+              "Entries lock. Late registration continues with backdated activity.",
+            ],
+            [
+              "Dec 4",
+              "Late entry closes",
+              "Final entries, pool and payout structure can be published.",
+            ],
+            [
+              "Jan 1",
+              "Scoring ends",
+              "Includes all of December 31. Results enter review.",
+            ],
+            [
+              "After review",
+              "Final results and prizes",
+              "No fixed prize-opening date. Claiming opens after approval.",
+            ],
+          ].map(([date, title, copy]) => (
+            <div key={title}>
+              <small>{date}</small>
+              <strong>{title}</strong>
+              <p>{copy}</p>
+            </div>
+          ))}
+        </div>
+      </SeasonRuleSection>
+      <SeasonRuleSection
+        value="prizes"
+        title="Prize Pool"
+        summary={`$${Math.max(
+          250,
+          entries
+        )} pool · $250 guaranteed · Top 15% paid`}
+      >
         <h2>
           ${Math.max(250, entries)} <small>USD value</small>
         </h2>
@@ -485,13 +569,18 @@ export function SeasonRules() {
           Points determine rank. They do not convert directly into a fixed cash
           value.
         </p>
-      </section>
-      <section className="p-surface s-panel">
-        <p className="p-eyebrow">Three ways to earn</p>
-        <h2>Every SP explained.</h2>
+      </SeasonRuleSection>
+      <SeasonRuleSection
+        value="points"
+        title="How to Earn Season Points"
+        summary="Claims + Loop streaks + Season Games"
+      >
         <ol className="s-rule-list">
           <li>
-            <strong>Claim daily · +1 SP</strong>
+            <strong>
+              Claim daily ·{" "}
+              <SeasonPointsValue as="span" value={1} size="sm" showPlus />
+            </strong>
             <span>
               One eligible claim per daily period in each regular Season Loop.
             </span>
@@ -499,70 +588,52 @@ export function SeasonRules() {
           <li>
             <strong>Build a streak in each Loop</strong>
             <span>
-              3 days +2 · 7 days +5 · 14 days +12 · 28 days +30. Each milestone
-              once per Loop per Season.
+              {seasonMilestones.map((milestone, index) => (
+                <span key={milestone.streak}>
+                  {index > 0 && " · "}
+                  {milestone.streak} days{" "}
+                  <SeasonPointsValue
+                    as="span"
+                    value={milestone.points}
+                    size="xs"
+                    showPlus
+                  />
+                </span>
+              ))}
+              . Each milestone once per Loop per Season.
             </span>
           </li>
           <li>
             <strong>Complete Season Games</strong>
             <span>
-              Half Season In +15 SP, All Season Long +30 SP and The Rule of 3 +9
-              SP add to the same game-bonus total. Half Season In and All Season
-              Long stack. Claim Race starts with Gardens Race: the first 10 to
-              reach 10 Gardens claims. No streak required. Its +10 SP reward
-              remains reserved until winner confirmation rules are finalized.
+              Half Season In{" "}
+              <SeasonPointsValue as="span" value={15} size="xs" showPlus />, All
+              Season Long{" "}
+              <SeasonPointsValue as="span" value={30} size="xs" showPlus /> and
+              The Rule of 3{" "}
+              <SeasonPointsValue as="span" value={9} size="xs" showPlus /> add
+              to the same game-bonus total. Half Season In and All Season Long
+              stack. Claim Race starts with Gardens Race: the first 10 to reach
+              10 Gardens claims. No streak required. Its{" "}
+              <SeasonPointsValue as="span" value={10} size="xs" showPlus />{" "}
+              reward remains reserved until winner confirmation rules are
+              finalized.
             </span>
           </li>
         </ol>
         <p className="p-caption">
-          Weekend Ritual: register each Saturday and claim Sunday for 3 extra
-          Season points. Four opportunities, up to 12 extra Season points. No
-          regular streak bonus. Only this dedicated Loop counts for its weekend
-          reward.
+          Weekend Ritual: register each Saturday and claim Sunday for{" "}
+          <SeasonPointsValue as="span" value={3} size="xs" showPlus /> extra.
+          Four opportunities, up to{" "}
+          <SeasonPointsValue as="span" value={12} size="xs" /> extra. No regular
+          streak bonus. Only this dedicated Loop counts for its weekend reward.
         </p>
-      </section>
-      <section className="p-surface s-panel">
-        <p className="p-eyebrow">Season calendar · UTC</p>
-        <h2>Know your windows.</h2>
-        <div className="s-timeline">
-          {[
-            [
-              "Nov 24 · 00:00",
-              "Registration opens",
-              "1 USDC entry. Full entry-fee refunds before the start.",
-            ],
-            [
-              "Dec 1 · 00:00",
-              "Season starts",
-              "Entries lock. Late registration continues with backdated activity.",
-            ],
-            [
-              "Dec 4 · 00:00",
-              "Late entry closes",
-              "Final entries, pool and payout structure can be published.",
-            ],
-            [
-              "Jan 1 · 00:00",
-              "Scoring ends",
-              "Includes all of December 31. Results enter review.",
-            ],
-            [
-              "After review",
-              "Final results and prizes",
-              "No fixed prize-opening date. Claiming opens after approval.",
-            ],
-          ].map(([date, title, copy]) => (
-            <div key={title}>
-              <small>{date}</small>
-              <strong>{title}</strong>
-              <p>{copy}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className="p-surface s-panel">
-        <p className="p-eyebrow">Fair play & rewards</p>
-        <h2>Know what stays yours.</h2>
+      </SeasonRuleSection>
+      <SeasonRuleSection
+        value="participation"
+        title="Participation Rules"
+        summary="Entry, missed periods and rewards"
+      >
         <div className="s-callout">
           <LuAward />
           <p>
@@ -587,7 +658,7 @@ export function SeasonRules() {
         <Link className="p-text-link" href="/loops">
           Check individual Loop requirements <LuArrowRight />
         </Link>
-      </section>
+      </SeasonRuleSection>
       {(state.phase === "review" || state.phase === "prizes") && (
         <section className="p-surface s-panel s-prize-state">
           <LuTrophy />
@@ -656,7 +727,7 @@ export function SeasonRules() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </Accordion>
   )
 }
 
@@ -675,9 +746,19 @@ export function StreakMilestones({
       <div className="s-streak-label">
         <strong>{streak}-day streak</strong>
         <span>
-          {next
-            ? `${next.streak - streak} more to +${next.points} SP`
-            : "All milestones earned"}
+          {next ? (
+            <>
+              {next.streak - streak} more to{" "}
+              <SeasonPointsValue
+                as="span"
+                value={next.points}
+                size="xs"
+                showPlus
+              />
+            </>
+          ) : (
+            "All milestones earned"
+          )}
         </span>
       </div>
       <div className="s-streak-markers">
@@ -691,7 +772,7 @@ export function StreakMilestones({
           >
             {earned.includes(m.streak) && <LuCheck />}
             {m.streak}
-            <small>+{m.points} SP</small>
+            <SeasonPointsValue as="span" value={m.points} size="xs" showPlus />
           </span>
         ))}
       </div>

@@ -28,6 +28,7 @@ import { StreakPointsInfo } from "@/components/profile/streak-points-info"
 
 import { useParticipationSearch } from "./participation-shell"
 import { EmptyState } from "./participation-ui"
+import { formatSeasonPoints, SeasonPointsValue } from "./season-points-value"
 
 const activeLoops = LoopCardsData.filter((loop) => loop.enabled)
 const sampleSeason = {
@@ -159,7 +160,10 @@ export function LoopStreaks({
             <div className="p-season-streak-table-head">
               <span className="p-season-streak-loop-heading">Loop</span>
               <span className="p-season-streak-progress-column-heading">
-                Daily claim streak
+                <span>Season claim streak:</span>
+                <span className="p-season-streak-table-head-note">
+                  {scoringConfig.streakBonuses.at(-1)?.streak ?? 30} days
+                </span>
               </span>
               <span className="p-season-streak-points-heading">
                 Streak points
@@ -285,10 +289,8 @@ export function SeasonStreakTable({
             role="columnheader"
             className="p-season-streak-progress-column-heading"
           >
-            <span>Daily claim streak</span>
-            <span className="p-season-streak-table-head-note">
-              {goal} periods
-            </span>
+            <span>Season claim streak:</span>
+            <span className="p-season-streak-table-head-note">{goal} days</span>
           </span>
           <span role="columnheader" className="p-season-streak-points-heading">
             Streak points
@@ -365,21 +367,9 @@ function SeasonStreakTableRowView({
         </span>
         <span className="p-season-streak-loop-copy">
           <strong>{loop.title}</strong>
-          <span>
-            {loop.by} · {loop.chainName}
-          </span>
         </span>
       </div>
       <div className="p-season-streak-progress" role="cell">
-        <div className="p-season-streak-progress-heading">
-          <strong>
-            {streak.toLocaleString()}{" "}
-            <span>{streak === 1 ? "claim" : "claims"}</span>
-          </strong>
-          <span>
-            Periods {windowStart + 1}–{windowStart + visibleCount}
-          </span>
-        </div>
         <div className="p-season-streak-bar-frame">
           <button
             type="button"
@@ -411,24 +401,11 @@ function SeasonStreakTableRowView({
           >
             {Array.from({ length: visibleCount }, (_, offset) => {
               const count = windowStart + offset + 1
-              const milestone = milestones.find((item) => item.streak === count)
               return (
                 <span
                   key={count}
                   aria-hidden="true"
-                  className={[
-                    count <= streak ? "is-filled" : "",
-                    count === streak + 1 && streak < goalLimit ? "is-next" : "",
-                    milestone ? "is-milestone" : "",
-                    milestone?.status === "completed"
-                      ? "is-earned-milestone"
-                      : "",
-                    milestone?.status === "uncredited"
-                      ? "is-pending-milestone"
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+                  className={count <= streak ? "is-filled" : undefined}
                 />
               )
             })}
@@ -451,22 +428,18 @@ function SeasonStreakTableRowView({
       </div>
       <div className="p-season-streak-points" role="cell">
         <ProfileDetails
-          label={`${loop.title}: total earned ${formatStreakPoints(
+          label={`${loop.title}: total earned ${formatSeasonPoints(
             earnedPoints
           )} Season Points; show streak bonus details`}
           align="end"
           className="p-season-streak-popover"
           trigger={
-            <button
-              type="button"
+            <div
               className="p-season-streak-earned-total"
               title="Show streak point details"
             >
-              <strong>
-                +{formatStreakPoints(earnedPoints)} <small>SP</small>
-              </strong>
-              <span>Total earned</span>
-            </button>
+              <SeasonPointsValue value={earnedPoints} showPlus />
+            </div>
           }
         >
           <div className="p-season-streak-popover-content">
@@ -498,9 +471,7 @@ function SeasonStreakTableRowView({
                       <strong>{status}</strong>
                       <small>{progress}</small>
                     </span>
-                    <span className="p-season-streak-popover-reward">
-                      +{formatStreakPoints(reward)} SP
-                    </span>
+                    <SeasonPointsValue value={reward} size="sm" showPlus />
                   </div>
                 )
               )}
@@ -523,10 +494,4 @@ function getMilestoneStatusLabel(status: string) {
     default:
       return "locked"
   }
-}
-
-function formatStreakPoints(value: number) {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(
-    value
-  )
 }

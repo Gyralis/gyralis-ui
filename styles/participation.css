@@ -29,6 +29,53 @@
   font-size: 14px;
   line-height: 1.5;
 }
+/* Shared Season point values: foreground number, subordinate muted unit. */
+.p-sp-value[data-size] {
+  --sp-value-size: 22px;
+  --sp-unit-size: 13px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  color: var(--p-text-primary, hsl(var(--foreground)));
+  font-size: var(--sp-value-size);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+.p-sp-value[data-size] > .p-sp-unit {
+  color: var(--p-text-muted, hsl(var(--muted-foreground)));
+  font-size: var(--sp-unit-size);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+.p-sp-value[data-size="xs"] {
+  --sp-value-size: 12px;
+  --sp-unit-size: 10px;
+}
+.p-sp-value[data-size="sm"] {
+  --sp-value-size: 14px;
+  --sp-unit-size: 11px;
+}
+.p-sp-value[data-size="lg"] {
+  --sp-value-size: 32px;
+  --sp-unit-size: 14px;
+}
+.p-sp-value[data-size="xl"] {
+  --sp-value-size: 40px;
+  --sp-unit-size: 16px;
+}
+.p-sp-value[data-size="hero"] {
+  --sp-value-size: clamp(40px, 4vw, 56px);
+  --sp-unit-size: 18px;
+}
+.p-button:not(.secondary) .p-sp-value {
+  --p-text-primary: hsl(var(--primary-foreground));
+  --p-text-muted: hsl(var(--primary-foreground) / 0.75);
+}
 .participation-theme :is(button, input, select, a):focus-visible {
   outline: 2px solid #1ce783;
   outline-offset: 4px;
@@ -1548,6 +1595,16 @@
   max-width: 160px;
   margin-top: 8px;
 }
+.p-featured-game-reward {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 16px;
+}
+.p-featured-game-reward > .p-caption {
+  margin-top: 0;
+}
 .p-featured-card > svg {
   margin: auto 0 0 auto;
   z-index: 1;
@@ -2858,20 +2915,6 @@
   font-size: 11px;
   line-height: 1.5;
 }
-.p-sp-total > strong {
-  color: var(--p-text-primary);
-  font-size: clamp(40px, 4vw, 56px);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.06em;
-  font-variant-numeric: tabular-nums;
-}
-.p-sp-total > strong > span {
-  color: #1ce783;
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
 .p-sp-rank {
   display: grid;
   justify-items: end;
@@ -2946,20 +2989,6 @@
 .p-sp-source:hover .p-sp-source-label {
   color: var(--p-text-primary);
 }
-.p-sp-source > strong {
-  color: var(--p-text-primary);
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.035em;
-  font-variant-numeric: tabular-nums;
-}
-.p-sp-source > strong > span {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: normal;
-  color: var(--p-text-muted);
-}
 .p-sp-source > small {
   font-size: 11px;
   line-height: 1.5;
@@ -3004,9 +3033,6 @@
   column-gap: 12px;
   padding: 24px 0 20px;
 }
-.p-season-points.is-compact .p-sp-total > strong {
-  font-size: 40px;
-}
 .p-season-points.is-compact .p-sp-rank-value > strong {
   font-size: 23px;
 }
@@ -3022,9 +3048,6 @@
   gap: 12px;
   padding: 0;
   border: 0;
-}
-.p-season-points.is-compact .p-sp-source > strong {
-  font-size: 15px;
 }
 .p-season-points.is-compact .p-sp-source-arrow {
   display: none;
@@ -3284,8 +3307,47 @@
 }
 .s-rules-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
+}
+.s-rule-section {
+  min-width: 0;
+}
+.s-rule-trigger {
+  gap: 20px;
+  padding: 22px 26px;
+  text-align: left;
+}
+.s-rule-trigger:hover {
+  background: #ffffff03;
+  text-decoration: none;
+}
+.s-rule-trigger:focus-visible {
+  outline: 2px solid #1ce783;
+  outline-offset: -4px;
+  border-radius: inherit;
+}
+.s-rule-trigger > span {
+  display: grid;
+  gap: 5px;
+}
+.s-rule-trigger strong {
+  color: var(--p-text-primary);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.s-rule-trigger > span > span {
+  color: var(--p-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.s-rule-content > div {
+  padding-bottom: 0;
+}
+.s-rule-content .s-panel {
+  padding: 0 26px 26px;
 }
 .s-panel {
   padding: 26px;
@@ -3338,7 +3400,7 @@
   font-size: 13px;
   font-weight: 600;
 }
-.s-rule-list span {
+.s-rule-list > li > span {
   display: block;
   color: var(--p-text-muted);
   font-size: 12px;
@@ -3577,11 +3639,10 @@
     padding: 0;
     border: 0;
   }
-  .p-sp-source > strong {
+  .p-sp-source > .p-sp-value {
     grid-column: 2;
     grid-row: 1 / 3;
     align-self: center;
-    font-size: 20px;
   }
   .p-sp-source-arrow {
     display: none;
@@ -3788,52 +3849,39 @@
   gap: 16px;
   margin: 16px 0;
 }
-.s-game-reward {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.s-game-reward > strong {
-  color: #1ce783;
-  font-size: 40px;
-  font-weight: 650;
-  line-height: 1;
-  letter-spacing: -0.05em;
-}
-.s-game-reward > span {
-  color: var(--p-text-muted);
-  font-size: 11px;
-}
 .s-game-reward-prize {
+  position: relative;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: 40px auto;
-  align-items: center;
-  gap: 3px 12px;
-  padding: 12px 16px;
+  grid-template-columns: auto auto;
+  place-items: center;
+  align-content: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 132px;
+  min-height: 76px;
+  max-width: 100%;
+  padding: 18px 20px;
   border: 1px solid #1ce78330;
   border-radius: 16px;
   background: #1ce7830a;
 }
 .s-game-reward-prize > .s-game-reward-icon {
-  display: grid;
-  grid-row: 1 / 3;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #1ce78316;
-  color: #75edac;
-  font-size: 23px;
+  grid-column: 1;
+  grid-row: 1;
+  width: 24px;
+  height: 24px;
+  color: #1ce783;
+  pointer-events: none;
 }
-.s-game-reward-prize > strong {
-  grid-column: 2;
-  font-size: 32px;
+.s-game-reward-icon > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.s-game-reward-prize > span:last-child {
+.s-game-reward-prize > .p-sp-value {
   grid-column: 2;
-  color: #bbd7c8;
-  font-size: 12px;
+  grid-row: 1;
 }
 .s-game-earned {
   display: grid;
@@ -3901,7 +3949,7 @@
   top: 0;
   transform: translateX(-50%);
 }
-.s-weekend-timeline button {
+.s-weekend-stop {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3913,6 +3961,8 @@
   border-radius: 6px;
   background: transparent;
   color: var(--p-text-muted);
+}
+.s-weekend-timeline button {
   cursor: pointer;
 }
 .s-weekend-timeline button:focus-visible {
@@ -3934,18 +3984,18 @@
   height: 15px;
   stroke-width: 2.5;
 }
-.s-weekend-timeline button[aria-current="step"] .s-weekend-timeline-node {
+.s-weekend-stop[aria-current="step"] .s-weekend-timeline-node {
   border-color: #8cc8eb;
   color: #8cc8eb;
 }
-.s-weekend-timeline button[data-status="claimed"] .s-weekend-timeline-node {
+.s-weekend-stop[data-status="claimed"] .s-weekend-timeline-node {
   border-color: #1ce783;
   background: #1ce783;
   color: #071b12;
 }
-.s-weekend-timeline button:hover time,
+.s-weekend-stop:hover time,
 .s-weekend-timeline button:focus-visible time,
-.s-weekend-timeline button[data-status="claimed"] time {
+.s-weekend-stop[data-status="claimed"] time {
   color: var(--p-text-primary);
 }
 .s-weekend-timeline time {
@@ -4028,9 +4078,9 @@
 .s-rule-loop-pills > span {
   min-width: 0;
   padding: 0;
-  border: 1px solid #ffffff0b;
+  border: 1px solid #2a2e30;
   border-radius: 999px;
-  background: #2b3733;
+  background: #202426;
 }
 .s-game-day-pills > button {
   cursor: pointer;
@@ -4064,8 +4114,8 @@
   background: #1ce783;
 }
 .s-game-day-pills > .is-missed {
-  border: 1px dashed #e7b28b;
-  background: #e7b28b25;
+  border-style: dashed;
+  border-color: #ffffff26;
 }
 .s-game-card-progress > p {
   display: flex;
@@ -4150,104 +4200,116 @@
   max-height: 90dvh;
   overflow-y: auto;
   border-radius: 24px;
+  padding: 0;
+  gap: 0;
+}
+.s-game-dialog > button:last-child {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ffffff26;
+  border-radius: 50%;
+  background: #101916e6;
+  color: #fff;
+  opacity: 1;
+}
+.s-game-dialog > .s-status {
+  margin: 20px 28px 0;
 }
 .s-game-dialog-header {
   position: relative;
-  padding: 14px 0 20px;
+  min-height: 220px;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 28px;
   border-bottom: 1px solid #ffffff0d;
+  background: #0d2118;
   overflow: hidden;
   isolation: isolate;
+  text-align: left;
+}
+.s-game-dialog-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, #0c1711d9, #0c17111a 85%),
+    linear-gradient(0deg, #0d1712f2, #0d171200 85%);
+  pointer-events: none;
 }
 .s-game-dialog-header > h2 {
-  max-width: 80%;
-  font-size: 30px;
+  max-width: 90%;
+  margin: 0;
+  font-size: 34px;
   letter-spacing: -0.04em;
-}
-.s-game-dialog-header > p {
-  max-width: 44ch;
-  line-height: 1.7;
+  outline: none;
 }
 .s-game-dialog-art {
   position: absolute;
   z-index: -1;
-  top: -65px;
-  right: -45px;
-  width: 230px;
-  height: auto;
-  opacity: 0.3;
+  inset: 0;
   pointer-events: none;
+}
+.s-game-dialog-art img {
+  object-fit: cover;
+  object-position: center 46%;
+  opacity: 0.85;
 }
 .s-game-details {
   display: grid;
-  gap: 24px;
+  gap: 22px;
   min-width: 0;
+  padding: 24px 28px 28px;
 }
-.s-game-detail-reward {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.s-game-detail-reward > span {
-  max-width: 28ch;
-  color: var(--p-text-muted);
-  font-size: 12px;
-  line-height: 1.6;
-}
-.s-game-detail-reward > strong {
-  color: #1ce783;
-  font-size: 30px;
-  font-weight: 650;
-}
-.s-game-detail-reward > strong > small {
-  font-size: 12px;
-  font-weight: 500;
-}
-.s-game-definition {
+.s-game-challenge {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 20px;
 }
-.s-game-definition dt {
-  margin-bottom: 6px;
+.s-game-details h3 {
+  margin-bottom: 8px;
   font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #1ce783;
 }
-.s-game-definition dd {
+.s-game-challenge p {
   color: var(--p-text-muted);
   font-size: 13px;
-  line-height: 1.8;
+  line-height: 1.7;
+}
+.s-game-challenge .s-game-reward-prize {
+  min-width: 120px;
+  min-height: 68px;
+  padding: 16px;
+  border-radius: 12px;
 }
 .s-game-detail-progress {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-  border: 1px solid #ffffff0d;
-  border-radius: 12px;
-  background: #ffffff03;
-  font-size: 12px;
+  --s-game-pill-height: 25px;
+  --s-game-pill-gap: 4px;
+  container-type: inline-size;
+  min-width: 0;
 }
-.s-game-detail-progress > p,
 .s-weekend-participation > p {
   color: var(--p-text-muted);
   font-size: 12px;
   line-height: 1.7;
 }
-.s-game-loop-progress {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
+.s-game-instructions {
+  padding-top: 20px;
+  border-top: 1px solid #ffffff0d;
 }
 .s-game-rules {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   padding-left: 17px;
   list-style: disc;
   color: var(--p-text-muted);
   font-size: 12px;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 .s-weekend-participation {
   display: grid;
@@ -4353,7 +4415,35 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .s-game-dialog-header > h2 {
-    font-size: 26px;
+    font-size: 28px;
+  }
+  .s-game-dialog-header {
+    min-height: 190px;
+    padding: 24px 20px;
+  }
+  .s-game-details {
+    padding: 20px;
+  }
+  .s-game-dialog > .s-status {
+    margin: 20px 20px 0;
+  }
+  .s-rule-trigger {
+    padding: 20px;
+  }
+  .s-rule-trigger strong {
+    font-size: 17px;
+  }
+  .s-rule-content .s-panel {
+    padding: 0 20px 20px;
+  }
+}
+@media (max-width: 440px) {
+  .s-game-challenge {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .s-game-challenge .s-game-reward-prize {
+    justify-self: start;
   }
 }
 
@@ -4524,15 +4614,22 @@
 .p-season-streak-progress-column-heading {
   grid-column: 2;
   display: flex;
+  width: 100%;
+  max-width: 440px;
+  justify-self: end;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 10px;
+  /* Align with the pills, excluding the 24px navigation button and 4px gap. */
+  padding-right: 28px;
+  text-align: right;
 }
 .p-season-streak-table-head-note {
-  color: #8cc8eb;
+  color: inherit;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.04em;
+  text-transform: none;
 }
 .p-season-streak-points-heading {
   grid-column: 3;
@@ -4590,42 +4687,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.p-season-streak-loop-copy > span {
-  overflow: hidden;
-  color: var(--p-text-muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .p-season-streak-progress {
   grid-column: 2;
   display: grid;
   min-width: 0;
   width: 100%;
   max-width: 440px;
-  justify-self: start;
+  justify-self: end;
   gap: 10px;
   text-align: left;
-}
-.p-season-streak-progress-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-start;
-  gap: 12px;
-  color: var(--p-text-muted);
-  font-size: 12px;
-}
-.p-season-streak-progress-heading strong {
-  color: var(--p-text-primary);
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums;
-}
-.p-season-streak-progress-heading strong > span {
-  color: var(--p-text-muted);
-  font-size: 13px;
-  font-weight: 500;
 }
 .p-season-streak-bar-frame {
   display: grid;
@@ -4681,34 +4751,14 @@
   max-width: 14px;
   min-width: 0;
   justify-self: center;
-  border: 1px solid #ffffff0b;
+  border: 1px solid #2a2e30;
   border-radius: 999px;
-  background: #2b3733;
+  background: #202426;
 }
 .p-season-streak-day-bar > .is-filled {
   border-color: #1ce78355;
   background: #1ce783;
   box-shadow: 0 0 8px #1ce78316;
-}
-.p-season-streak-day-bar > .is-filled.is-milestone {
-  background: #a3f6c7;
-}
-.p-season-streak-day-bar > .is-filled.is-earned-milestone {
-  border-color: #d6ffe5;
-  box-shadow: 0 0 7px #1ce78355;
-}
-.p-season-streak-day-bar > .is-filled.is-pending-milestone {
-  border-color: #8cc8eb;
-  background: #8cc8eb;
-}
-.p-season-streak-day-bar > .is-next {
-  border-color: #8cc8eb;
-  background: #4187ba55;
-  box-shadow: 0 0 8px #8cc8eb28;
-}
-.p-season-streak-day-bar > .is-milestone:not(.is-filled):not(.is-next) {
-  border-color: #8cc8eb70;
-  background: #4187ba24;
 }
 .p-season-streak-points {
   grid-column: 3;
@@ -4722,40 +4772,18 @@
   display: grid;
   flex: none;
   justify-items: end;
-  align-content: start;
-  gap: 6px;
-  min-height: 62px;
+  align-content: center;
+  min-height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
   text-align: right;
 }
-.p-season-streak-earned-total > span {
-  color: var(--p-text-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-.p-season-streak-earned-total strong {
-  color: #75edac;
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.p-season-streak-earned-total:hover strong {
-  color: #a3f6c7;
-}
 .p-season-streak-earned-total:focus-visible {
   border-radius: 5px;
   outline: 2px solid #8cc8eb;
   outline-offset: 4px;
-}
-.p-season-streak-earned-total small {
-  color: var(--p-text-muted);
-  font-size: 13px;
-  font-weight: 600;
 }
 .p-season-streak-popover {
   --p-text-primary: #f2f5f7;
@@ -4785,13 +4813,6 @@
   color: var(--p-text-primary);
   font-size: 14px;
   font-weight: 600;
-}
-.p-season-streak-popover-reward {
-  color: #75edac;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 .p-season-streak-popover-milestones {
   display: grid;

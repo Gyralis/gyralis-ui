@@ -2,6 +2,7 @@ import { FaInfoCircle } from "react-icons/fa"
 
 import { scoringConfig } from "@/lib/scoring/config"
 import { StreakMilestoneIcon } from "@/components/loops/streak-milestone-icon"
+import { SeasonPointsValue } from "@/components/participation/season-points-value"
 import { ProfileDetails } from "@/components/profile/profile-details"
 
 export function StreakPointsInfo({
@@ -53,9 +54,19 @@ export function StreakPointsInfo({
             <span className="text-foreground">
               {milestone.streak}-claim streak
             </span>
-            <span className="ml-auto font-medium text-primary tabular-nums">
-              +{milestone.points} {unit}
-            </span>
+            {scope === "season" ? (
+              <div className="ml-auto">
+                <SeasonPointsValue
+                  value={milestone.points}
+                  size="sm"
+                  showPlus
+                />
+              </div>
+            ) : (
+              <span className="ml-auto font-medium text-primary tabular-nums">
+                +{milestone.points} {unit}
+              </span>
+            )}
           </li>
         ))}
       </ul>

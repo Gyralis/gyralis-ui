@@ -15,6 +15,7 @@ import { canEnter, seasonPhases } from "@/lib/participation/season-preview"
 
 import { useSeason } from "./season-context"
 import { SeasonEntryButton } from "./season-panels"
+import { SeasonPointsValue } from "./season-points-value"
 
 function PublicSeasonInformation() {
   const { state, entries } = useSeason()
@@ -138,9 +139,10 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
         <p className="p-eyebrow p-sp-season-label">Season 1</p>
         <span className="p-sp-rank-label">Rank</span>
         <div className="p-sp-total">
-          <strong>
-            {score.total.toLocaleString("en-US")} <span>SP</span>
-          </strong>
+          <SeasonPointsValue
+            value={score.total}
+            size={compact ? "xl" : "hero"}
+          />
         </div>
         <Link className="p-sp-rank" href="/leaderboard?view=season">
           <div className="p-sp-rank-value">
@@ -170,9 +172,7 @@ export function SeasonPoints({ compact = false }: { compact?: boolean }) {
               {label}
               <LuArrowRight className="p-sp-source-arrow" aria-hidden="true" />
             </span>
-            <strong>
-              {value.toLocaleString("en-US")} <span>SP</span>
-            </strong>
+            <SeasonPointsValue value={value} size={compact ? "sm" : "md"} />
             {!compact && <small>{description}</small>}
           </Link>
         ))}
